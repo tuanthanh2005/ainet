@@ -1,3 +1,5 @@
+<?php
+
 class Setting extends Model {
     private static $dataFile = __DIR__ . '/../../storage/data/settings.json';
 

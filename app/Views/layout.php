@@ -66,9 +66,9 @@
         <?php 
             // Nội dung thay đổi sẽ được nhúng ở đây
             if (isset($view)) {
-                require_once $view; 
+                require_once $view . '.php'; 
             } else {
-                require_once 'views/home.php';
+                require_once 'home.php';
             }
         ?>
     </main>

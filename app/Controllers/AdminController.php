@@ -1,3 +1,5 @@
+<?php
+
 class AdminController extends Controller {
     public function adminDashboard() {
         $settings = Setting::getAll();
