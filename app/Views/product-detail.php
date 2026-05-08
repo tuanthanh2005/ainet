@@ -1,5 +1,5 @@
 <div class="py-lg-4 pb-5">
-    <a href="index.php" class="back-link mb-4 d-inline-block text-decoration-none text-dark fw-bold">
+    <a href="<?php echo url(); ?>" class="back-link mb-4 d-inline-block text-decoration-none text-dark fw-bold">
         <i class="fa-solid fa-arrow-left me-2"></i> Trở về danh sách
     </a>
 

@@ -35,7 +35,7 @@
                 style="animation-delay: <?= ($index + 1) * 0.1 ?>s;"
                 data-category="<?= htmlspecialchars($product['category_slug']) ?>">
                 <div class="card product-card position-relative h-100"
-                    onclick="window.location.href='index.php?action=productDetail&id=<?= htmlspecialchars($product['id']) ?>'" style="cursor: pointer;">
+                    onclick="window.location.href='<?php echo url('index.php?action=productDetail&id=' . htmlspecialchars($product['id'])); ?>'" style="cursor: pointer;">
                     <?php if (!empty($product['badge'])): ?>
                         <span class="badge-hot"><?= htmlspecialchars($product['badge']) ?></span>
                     <?php endif; ?>
@@ -82,8 +82,8 @@
                     <h3 class="blog-title">Tối Ưu Hóa Trải Nghiệm AI Trong Công Việc</h3>
                     <p class="blog-desc flex-grow-1">Bí quyết sử dụng các dòng lệnh (prompt) chuẩn mực để tiết kiệm 50%
                         thời gian làm việc mỗi ngày...</p>
-                    <a href="index.php?action=blogDetail" class="read-more">Xem chi tiết <i
-                            class="fa-solid fa-arrow-right ms-2"></i></a>
+                    <a href="<?php echo url('index.php?action=blogDetail'); ?>" class="read-more">Xem chi tiết <i
+                             class="fa-solid fa-arrow-right ms-2"></i></a>
                 </div>
             </div>
         </div>
@@ -97,8 +97,8 @@
                     <h3 class="blog-title">Xu Hướng Giải Trí Số Định Dạng 4K</h3>
                     <p class="blog-desc flex-grow-1">Đánh giá chất lượng hình ảnh từ các nền tảng streaming hàng đầu và
                         lý do bạn nên nâng cấp phần cứng...</p>
-                    <a href="index.php?action=blogDetail" class="read-more">Xem chi tiết <i
-                            class="fa-solid fa-arrow-right ms-2"></i></a>
+                    <a href="<?php echo url('index.php?action=blogDetail'); ?>" class="read-more">Xem chi tiết <i
+                             class="fa-solid fa-arrow-right ms-2"></i></a>
                 </div>
             </div>
         </div>

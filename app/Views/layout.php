@@ -10,7 +10,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
     <!-- Link to separated CSS -->
-    <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="stylesheet" href="<?php echo asset('css/style.css'); ?>">
 </head>
 <body>
 
@@ -22,7 +22,7 @@
         <div class="container">
             <div class="row align-items-center">
                 <div class="col-6 col-lg-3">
-                    <a href="index.php" class="text-decoration-none text-dark fs-3 fw-bold" style="letter-spacing: -1px;">
+                    <a href="<?php echo url(); ?>" class="text-decoration-none text-dark fs-3 fw-bold" style="letter-spacing: -1px;">
                         <i class="fa-solid fa-circle-nodes me-1"></i>AI<span class="text-muted fw-light">CỦA TÔI</span>
                     </a>
                 </div>
@@ -196,7 +196,7 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     
     <!-- Link to separated JS -->
-    <script src="assets/js/main.js"></script>
+    <script src="<?php echo asset('js/main.js'); ?>"></script>
 
 </body>
 </html>
