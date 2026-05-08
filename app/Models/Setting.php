@@ -1,5 +1,5 @@
 class Setting extends Model {
-    private static $dataFile = __DIR__ . '/../data/settings.json';
+    private static $dataFile = __DIR__ . '/../../storage/data/settings.json';
 
     public static function getAll() {
         if (file_exists(self::$dataFile)) {

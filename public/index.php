@@ -2,20 +2,20 @@
 session_start();
 
 // Load Configuration
-require_once 'config/config.php';
+require_once '../config/config.php';
 
 // Load Core Libraries
-require_once 'core/Database.php';
-require_once 'core/Controller.php';
-require_once 'core/Model.php';
+require_once '../app/Core/Database.php';
+require_once '../app/Core/Controller.php';
+require_once '../app/Core/Model.php';
 
 // Load Models
-require_once 'models/Product.php';
-require_once 'models/Setting.php';
+require_once '../app/Models/Product.php';
+require_once '../app/Models/Setting.php';
 
 // Load Controllers
-require_once 'controllers/HomeController.php';
-require_once 'controllers/AdminController.php';
+require_once '../app/Controllers/HomeController.php';
+require_once '../app/Controllers/AdminController.php';
 
 // Routing
 $action = isset($_GET['action']) ? $_GET['action'] : 'index';

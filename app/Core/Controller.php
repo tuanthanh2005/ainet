@@ -5,10 +5,10 @@ class Controller {
         // Extract data to be used in view
         extract($data);
 
-        if (file_exists('views/' . $view . '.php')) {
-            require_once 'views/' . $view . '.php';
+        if (file_exists('../app/Views/' . $view . '.php')) {
+            require_once '../app/Views/' . $view . '.php';
         } else {
-            die("View does not exist.");
+            die("View does not exist: " . $view);
         }
     }
     
