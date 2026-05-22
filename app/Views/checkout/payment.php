@@ -153,11 +153,14 @@ $missing = max(0, $qty - $got);
                                     $accountName = trim((string) ($settings['bank_name'] ?? ''));
                                     $amount = (int) round((float) ($order['amount'] ?? 0));
                                     $bankConfigMissing = ($bankId === '' || $accountNo === '' || $accountName === '');
+                                    $orderIdForPayment = strtoupper((string) ($order['id'] ?? ''));
+                                    $paymentMemoCode = sprintf('%06d', abs(crc32($orderIdForPayment)) % 1000000);
+                                    $paymentMemo = trim($paymentMemoCode . ' ' . $orderIdForPayment);
                                     
                                     $qrUrl = 'https://qr.sepay.vn/img?acc=' . rawurlencode($accountNo)
                                         . '&bank=' . rawurlencode($bankId)
                                         . '&amount=' . rawurlencode((string) $amount)
-                                        . '&des=' . rawurlencode((string) $order['id']);
+                                        . '&des=' . rawurlencode($paymentMemo);
                                     ?>
                                     <?php if ($bankConfigMissing): ?>
                                         <div class="alert alert-danger text-start mb-0" style="max-width: 280px;">
@@ -195,9 +198,9 @@ $missing = max(0, $qty - $got);
                                             <div class="p-2 bg-white rounded-3 border d-flex justify-content-between align-items-center" style="border-left: 4px solid #dc3545 !important;">
                                                 <div class="overflow-hidden">
                                                     <span class="text-muted smaller d-block">Nội dung chuyển khoản (MEMO)</span>
-                                                    <span class="text-danger fw-bold d-block text-truncate" id="bank-note" style="font-size: 1.2rem;"><?= htmlspecialchars($order['id']) ?></span>
+                                                    <span class="text-danger fw-bold d-block text-truncate" id="bank-note" style="font-size: 1.2rem;"><?= htmlspecialchars($paymentMemo) ?></span>
                                                 </div>
-                                                <button class="btn btn-sm btn-light border ms-2" onclick="copyText('<?= htmlspecialchars($order['id']) ?>')"><i class="fa-regular fa-copy"></i></button>
+                                                <button class="btn btn-sm btn-light border ms-2" onclick="copyText(<?= htmlspecialchars(json_encode($paymentMemo), ENT_QUOTES, 'UTF-8') ?>)"><i class="fa-regular fa-copy"></i></button>
                                             </div>
                                         </div>
                                     </div>
