@@ -24,18 +24,17 @@
 </head>
 
 <body>
-    <script>
-        window.APP_USER_LOGGED_IN = <?php echo $currentUser ? 'true' : 'false'; ?>;
-    </script>
-    <!-- Global Toast Notification Container -->
-    <div id="app-toast-container" role="region" aria-label="Thông báo" aria-live="polite"></div>
     <?php
     $currentUser = $_SESSION['user'] ?? null;
     $flashSuccess = $_SESSION['flash_success'] ?? null;
     $flashError = $_SESSION['flash_error'] ?? null;
     unset($_SESSION['flash_success'], $_SESSION['flash_error']);
     ?>
-
+    <script>
+        window.APP_USER_LOGGED_IN = <?php echo $currentUser ? 'true' : 'false'; ?>;
+    </script>
+    <!-- Global Toast Notification Container -->
+    <div id="app-toast-container" role="region" aria-label="Thông báo" aria-live="polite"></div>
     <div class="mini-banner">
         <div class="marquee-wrapper">
             <span class="marquee-item">🔥 <strong>HỆ THỐNG TÀI KHOẢN PREMIUM TỰ ĐỘNG 24/7:</strong> Cung cấp ChatGPT Plus, API, YouTube Premium, Github Copilot, Canva Pro, Netflix... chính hãng giá tốt nhất thị trường!</span>
