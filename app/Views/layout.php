@@ -422,7 +422,7 @@
             </button>
             <input type="file" id="user-chat-file" class="d-none" accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.zip,.txt,.csv">
             <textarea id="user-chat-input" class="form-control form-control-sm chat-textarea" placeholder="Nhập tin nhắn..." maxlength="700" rows="1"></textarea>
-            <button type="submit" class="btn btn-dark btn-sm rounded-circle" id="user-chat-send" title="Gửi"><i class="fa-solid fa-paper-plane"></i></button>
+            <button type="submit" class="btn btn-dark btn-sm rounded-circle" title="Gửi"><i class="fa-solid fa-paper-plane"></i></button>
         </form>
     </div>
     <script>
@@ -440,12 +440,9 @@
         const btnOpen = document.getElementById('btnOpenChat');
         const btnClose = document.getElementById('btnCloseChat');
         const charCounter = document.getElementById('user-chat-counter');
-        const sendBtn = document.getElementById('user-chat-send');
         let lastId = 0;
         let pollTimer = null;
         let pendingFile = null;
-        let isSending = false;
-        const renderedIds = new Set();
 
         function playNotificationSound() {
             try {
@@ -516,8 +513,6 @@
         }
 
         function renderMessage(m) {
-            if (m.id && renderedIds.has(String(m.id))) return;
-            if (m.id) renderedIds.add(String(m.id));
             const isMe = m.sender === 'user';
             const time = m.created_at ? new Date(m.created_at.replace(' ', 'T')).toLocaleTimeString('vi-VN', { hour:'2-digit', minute:'2-digit' }) : '';
             const cls  = isMe ? 'msg-me' : 'msg-them';
@@ -526,15 +521,6 @@
             list.insertAdjacentHTML('beforeend',
                 `<div class="chat-msg ${cls}">${bodyHtml}${attHtml ? `<div class="bubble bubble-att">${attHtml}</div>` : ''}<div class="meta">${time}</div></div>`);
             list.scrollTop = list.scrollHeight;
-        }
-
-        function renderPendingMessage(body) {
-            const time = new Date().toLocaleTimeString('vi-VN', { hour:'2-digit', minute:'2-digit' });
-            const bodyHtml = body ? `<div class="bubble">${escapeHtml(body)}</div>` : '';
-            list.insertAdjacentHTML('beforeend',
-                `<div class="chat-msg msg-me chat-pending">${bodyHtml}<div class="meta">${time}</div></div>`);
-            list.scrollTop = list.scrollHeight;
-            return list.querySelector('.chat-pending:last-child');
         }
 
         function poll() {
@@ -659,49 +645,26 @@
 
         form.addEventListener('submit', e => {
             e.preventDefault();
-            if (isSending) return;
             const body = input.value.trim();
             if (!body && !pendingFile) return;
-            isSending = true;
-            sendBtn.disabled = true;
-            sendBtn.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
             const fd = new FormData();
             fd.append('body', body);
             fd.append('csrf_token', csrf);
             if (pendingFile) fd.append('file', pendingFile);
-            const hadFile = !!pendingFile;
-            input.value = '';
-            autoGrow();
-            clearAttachment();
-            charCounter.style.display = 'none';
-            const pendingEl = !hadFile ? renderPendingMessage(body) : null;
             fetch(APP_BASE + 'index.php?action=chatSend', {
                 method: 'POST',
                 headers: { 'X-Requested-With':'XMLHttpRequest', 'X-CSRF-Token': csrf },
                 body: fd, credentials:'same-origin'
             }).then(r => r.json()).then(d => {
                 if (d.success) {
-                    if (pendingEl && d.id) {
-                        renderedIds.add(String(d.id));
-                        pendingEl.classList.remove('chat-pending');
-                    }
-                    if (d.id && d.id > lastId) lastId = d.id;
+                    input.value = '';
+                    autoGrow();
+                    clearAttachment();
+                    charCounter.style.display = 'none';
                     poll();
                 } else {
-                    if (pendingEl) pendingEl.remove();
                     AppNotify.error(d.message || 'Không thể gửi tin nhắn.', 'Lỗi gửi tin');
-                    input.value = body;
-                    autoGrow();
                 }
-            }).catch(() => {
-                if (pendingEl) pendingEl.remove();
-                AppNotify.error('Không thể kết nối server.', 'Lỗi gửi tin');
-                input.value = body;
-                autoGrow();
-            }).finally(() => {
-                isSending = false;
-                sendBtn.disabled = false;
-                sendBtn.innerHTML = '<i class="fa-solid fa-paper-plane"></i>';
             });
         });
 
