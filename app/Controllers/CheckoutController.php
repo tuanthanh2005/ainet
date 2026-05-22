@@ -141,6 +141,27 @@ class CheckoutController extends Controller {
         exit;
     }
 
+    public function checkOrderStatus() {
+        $orderId = $_GET['id'] ?? '';
+        $order = Order::getById($orderId);
+        if (!$order) {
+            $this->json(['success' => false, 'message' => 'Order not found'], 404);
+        }
+
+        if (($order['customer_email'] ?? '') !== ($_SESSION['user']['email'] ?? '_')
+            && ($_SESSION['user']['role'] ?? '') !== 'admin') {
+            $this->json(['success' => false, 'message' => 'Forbidden'], 403);
+        }
+
+        $this->json([
+            'success' => true,
+            'status' => $order['status'] ?? 'pending',
+            'redirect' => ($order['status'] ?? '') === 'completed'
+                ? url('index.php?action=success&id=' . urlencode($orderId))
+                : null,
+        ]);
+    }
+
     // WEBHOOK SEPAY
     public function sepayWebhook() {
         return $this->handleSePayWebhook();
@@ -248,20 +269,57 @@ class CheckoutController extends Controller {
         }
         $debug['payload'] = $data;
 
-        if (($data['transferType'] ?? 'in') !== 'in') {
-            $debug['result'] = 'ignored_non_in';
-            $this->writeSePayDebug($debug);
-            echo json_encode(['success' => true, 'message' => 'Ignored non-in transaction']);
-            exit;
+        $isMerchantIpn = isset($data['notification_type'], $data['order']) && is_array($data['order']);
+        if ($isMerchantIpn) {
+            if (($data['notification_type'] ?? '') !== 'ORDER_PAID') {
+                $debug['result'] = 'ignored_merchant_event';
+                $this->writeSePayDebug($debug);
+                echo json_encode(['success' => true, 'message' => 'Ignored merchant event']);
+                exit;
+            }
+
+            $orderId = strtoupper(trim((string) ($data['order']['order_invoice_number'] ?? $data['order']['order_id'] ?? '')));
+            $paidAmount = (float) ($data['transaction']['transaction_amount'] ?? $data['order']['order_amount'] ?? 0);
+            $transactionId = $data['transaction']['transaction_id']
+                ?? $data['transaction']['id']
+                ?? $data['order']['order_id']
+                ?? null;
+            $memo = trim(implode(' ', array_filter([
+                $data['order']['order_invoice_number'] ?? '',
+                $data['order']['order_id'] ?? '',
+                $data['order']['order_description'] ?? '',
+            ])));
+        } else {
+            $transferType = strtolower((string) ($data['transferType'] ?? $data['transfer_type'] ?? 'in'));
+            if (!in_array($transferType, ['in', 'credit'], true)) {
+                $debug['result'] = 'ignored_non_in';
+                $this->writeSePayDebug($debug);
+                echo json_encode(['success' => true, 'message' => 'Ignored non-in transaction']);
+                exit;
+            }
+
+            $memo = trim(implode(' ', array_filter([
+                $data['code'] ?? '',
+                $data['payment_code'] ?? '',
+                $data['content'] ?? '',
+                $data['description'] ?? '',
+            ])));
+            preg_match('/AC[0-9]{6}[A-Z0-9]{4}/i', $memo, $matches);
+            $orderId = strtoupper($matches[0] ?? '');
+            $paidAmount = (float) ($data['transferAmount'] ?? $data['amount'] ?? 0);
+            $transactionId = $data['id']
+                ?? $data['transaction_id']
+                ?? $data['referenceCode']
+                ?? $data['reference_code']
+                ?? null;
         }
 
-        $memo = trim(implode(' ', array_filter([
-            $data['code'] ?? '',
-            $data['content'] ?? '',
-            $data['description'] ?? '',
-        ])));
-        preg_match('/AC[0-9]{6}[A-Z0-9]{4}/i', $memo, $matches);
-        $orderId = strtoupper($matches[0] ?? '');
+        if ($orderId !== '' && !preg_match('/^AC[0-9]{6}[A-Z0-9]{4}$/i', $orderId)) {
+            preg_match('/AC[0-9]{6}[A-Z0-9]{4}/i', $orderId . ' ' . $memo, $matches);
+            $orderId = strtoupper($matches[0] ?? '');
+        }
+
+        $debug['ipn_type'] = $isMerchantIpn ? 'merchant_ipn' : 'bank_webhook';
         $debug['memo'] = $memo;
         $debug['order_id'] = $orderId;
 
@@ -270,7 +328,6 @@ class CheckoutController extends Controller {
             $debug['order_found'] = (bool) $order;
             $debug['order_status'] = $order['status'] ?? null;
             if ($order && $order['status'] === 'pending') {
-                $paidAmount = (float) ($data['transferAmount'] ?? 0);
                 if ($paidAmount < (float) ($order['amount'] ?? 0)) {
                     if (APP_DEBUG) @file_put_contents($logFile, "FAILED: Underpaid $orderId amount=$paidAmount expected={$order['amount']}\n", FILE_APPEND);
                     $debug['result'] = 'underpaid';
@@ -281,7 +338,6 @@ class CheckoutController extends Controller {
                     exit;
                 }
 
-                $transactionId = $data['id'] ?? null;
                 if (Order::updateStatus($orderId, 'completed', $transactionId)) {
                     try {
                         $delivered = Stock::claimForOrder(
@@ -340,6 +396,16 @@ class CheckoutController extends Controller {
             ?? '';
         if ($apiKey !== '' && hash_equals('Apikey ' . $apiKey, trim((string) $auth))) {
             return true;
+        }
+
+        $secretKey = $_SERVER['HTTP_X_SECRET_KEY']
+            ?? $headers['X-Secret-Key']
+            ?? $headers['x-secret-key']
+            ?? '';
+        if ($secretKey !== '') {
+            $secretKey = trim((string) $secretKey);
+            return ($legacyToken !== '' && hash_equals($legacyToken, $secretKey))
+                || ($apiKey !== '' && hash_equals($apiKey, $secretKey));
         }
 
         $webhookToken = $_SERVER['HTTP_X_SEPAY_TOKEN']

@@ -613,10 +613,10 @@
                                             </select>
                                         </div>
                                         <div class="col-md-4 mb-3">
-                                            <label class="form-label">Webhook Token (Bảo mật)</label>
+                                            <label class="form-label">Secret Key / Webhook Token (Bảo mật)</label>
                                             <input type="text" class="form-control" id="st_sepay_token"
                                                 value="<?php echo htmlspecialchars($settings['sepay_token'] ?? ''); ?>"
-                                                placeholder="Nhập Token từ SePay">
+                                                placeholder="Nhập Secret Key hoặc Webhook Token từ SePay">
                                         </div>
                                         <div class="col-md-6 mb-3">
                                             <label class="form-label">SePay Merchant ID</label>
@@ -655,7 +655,12 @@
                                             <i class="fa-solid fa-circle-info text-primary me-2"></i>
                                             <span class="small fw-bold">Webhook URL:</span>
                                             <code class="ms-2 text-danger"><?= url('index.php?action=sepayWebhook') ?></code>
+                                            <button type="button" class="btn btn-sm btn-outline-primary ms-2" onclick="loadSePayDebug()">
+                                                <i class="fa-solid fa-bug me-1"></i>Kiểm tra webhook cuối
+                                            </button>
                                         </div>
+                                        <pre id="sepay-debug-output" class="small bg-white border rounded-3 p-3 mt-3 mb-0 d-none"
+                                            style="white-space:pre-wrap;max-height:260px;overflow:auto;"></pre>
                                         <small class="text-muted d-block mt-1">Cấu hình Webhook URL này trên dashboard
                                             SePay để nhận thông báo thanh toán tự động.</small>
                                     </div>
@@ -1355,6 +1360,32 @@
                         });
                 }
             })
+        }
+
+        function loadSePayDebug() {
+            const out = document.getElementById('sepay-debug-output');
+            if (!out) return;
+            out.classList.remove('d-none');
+            out.textContent = 'Đang tải webhook gần nhất...';
+            fetch('?action=sepayDebug', {
+                headers: { 'Accept': 'application/json' },
+                credentials: 'same-origin'
+            })
+                .then(response => response.json())
+                .then(data => {
+                    out.textContent = JSON.stringify(data, null, 2);
+                    if (data.result === 'completed') {
+                        AppNotify.success('Webhook cuối đã duyệt đơn thành công.', 'SePay OK');
+                    } else if (data.result === 'unauthorized') {
+                        AppNotify.error('Webhook bị từ chối xác thực. Kiểm tra API Key/Auth method trên SePay.', 'SePay lỗi');
+                    } else if (data.result === 'underpaid') {
+                        AppNotify.error('Giao dịch thiếu tiền so với đơn hàng.', 'SePay lỗi');
+                    }
+                })
+                .catch(() => {
+                    out.textContent = 'Không đọc được debug webhook.';
+                    AppNotify.error('Không đọc được debug webhook.', 'SePay lỗi');
+                });
         }
 
         function saveSettings() {

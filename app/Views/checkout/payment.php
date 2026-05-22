@@ -148,12 +148,15 @@ $missing = max(0, $qty - $got);
                                 <!-- QR Code SePay -->
                                 <div class="qr-box p-3 bg-white rounded-4 border shadow-sm mb-4 d-inline-block position-relative overflow-hidden">
                                     <?php
-                                    $bankId = $settings['bank_id'] ?? 'MBBank';
-                                    $accountNo = $settings['bank_account'] ?? '';
-                                    $accountName = $settings['bank_name'] ?? '';
-                                    $amount = $order['amount'];
+                                    $bankId = trim((string) ($settings['bank_id'] ?? 'MBBank'));
+                                    $accountNo = trim((string) ($settings['bank_account'] ?? ''));
+                                    $accountName = trim((string) ($settings['bank_name'] ?? ''));
+                                    $amount = (int) round((float) ($order['amount'] ?? 0));
                                     
-                                    $qrUrl = "https://qr.sepay.vn/img?acc={$accountNo}&bank={$bankId}&amount={$amount}&des=" . urlencode($order['id']);
+                                    $qrUrl = 'https://qr.sepay.vn/img?acc=' . rawurlencode($accountNo)
+                                        . '&bank=' . rawurlencode($bankId)
+                                        . '&amount=' . rawurlencode((string) $amount)
+                                        . '&des=' . rawurlencode((string) $order['id']);
                                     ?>
                                     <img src="<?= $qrUrl ?>" alt="SePay QR" class="img-fluid" style="max-width: 280px; min-height: 280px;">
                                     
@@ -293,6 +296,24 @@ $timeLeft = max(0, 300 - $elapsed);
 let timeLeft = <?= $timeLeft ?>;
 const timerEl = document.getElementById('countdown');
 if (timerEl && timeLeft > 0) {
+    const orderStatusUrl = <?= json_encode(url('index.php?action=checkOrderStatus&id=' . urlencode($order['id']))) ?>;
+    const pollOrderStatus = () => {
+        fetch(orderStatusUrl, {
+            headers: { 'Accept': 'application/json' },
+            credentials: 'same-origin'
+        })
+            .then(response => response.ok ? response.json() : null)
+            .then(data => {
+                if (data && data.success && data.status === 'completed' && data.redirect) {
+                    window.location.href = data.redirect;
+                }
+            })
+            .catch(() => {});
+    };
+
+    pollOrderStatus();
+    const statusInterval = setInterval(pollOrderStatus, 5000);
+
     const updateTimerDisplay = () => {
         const minutes = Math.floor(timeLeft / 60);
         const seconds = timeLeft % 60;
@@ -307,6 +328,7 @@ if (timerEl && timeLeft > 0) {
         
         if (timeLeft <= 0) {
             clearInterval(timerInterval);
+            clearInterval(statusInterval);
             
             // Dynamic switch to expired view
             const activeCont = document.getElementById('payment-active-container');
