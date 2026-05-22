@@ -111,7 +111,7 @@ class Upload {
      * tags and strip dangerous attributes (event handlers, javascript: URLs).
      */
     public static function sanitizeHtml(string $html): string {
-        $allowed = '<p><br><strong><b><em><i><u><s><h1><h2><h3><h4><ul><ol><li><blockquote><a><img><span>';
+        $allowed = '<p><br><strong><b><em><i><u><s><h1><h2><h3><h4><ul><ol><li><blockquote><a><img><span><table><thead><tbody><tr><th><td>';
         $clean = strip_tags($html, $allowed);
         // Remove any inline event handlers
         $clean = preg_replace('/\son[a-z]+\s*=\s*"[^"]*"/i', '', $clean);

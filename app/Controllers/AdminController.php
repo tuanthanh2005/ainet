@@ -92,6 +92,8 @@ class AdminController extends Controller {
 
         $products = Product::getAll();
 
+        $description = Upload::sanitizeHtml(trim((string) ($_POST['description'] ?? '')));
+
         $data = [
             'id'            => $id ?: 'prod_' . time(),
             'title'         => $title,
@@ -101,7 +103,7 @@ class AdminController extends Controller {
             'status'        => in_array($_POST['status'] ?? '', ['active', 'out_of_stock', 'hidden'], true) ? $_POST['status'] : 'active',
             'image'         => $_POST['image'] ?? '',
             'feature_text'  => $_POST['desc'] ?? '',
-            'description'   => $_POST['description'] ?? '',
+            'description'   => $description,
             'feature_icon'  => 'fa-box',
             'rating'        => 5,
             'sold_count'    => 0,

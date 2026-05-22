@@ -404,6 +404,10 @@
             width: 32px;
             padding: 0;
         }
+        .product-detail-editor:empty::before {
+            content: attr(data-placeholder);
+            color: #9ca3af;
+        }
         .rich-editor {
             min-height: 220px;
             max-height: 360px;
@@ -1035,16 +1039,19 @@
                             <div class="col-12 mb-3">
                                 <label class="form-label">Mô tả chi tiết / Nội dung bộ công cụ</label>
                                 <div class="product-detail-toolbar btn-group flex-wrap mb-1" role="toolbar" aria-label="Công cụ định dạng mô tả sản phẩm">
-                                    <button type="button" class="btn btn-sm btn-light border" data-insert="# " title="Tiêu đề H1">H1</button>
-                                    <button type="button" class="btn btn-sm btn-light border" data-insert="## " title="Tiêu đề H2">H2</button>
-                                    <button type="button" class="btn btn-sm btn-light border icon-only" data-wrap="**" title="Đậm"><i class="fa-solid fa-bold"></i></button>
-                                    <button type="button" class="btn btn-sm btn-light border icon-only" data-insert="- " title="Danh sách"><i class="fa-solid fa-list-ul"></i></button>
+                                    <button type="button" class="btn btn-sm btn-light border icon-only" data-cmd="bold" title="Đậm"><i class="fa-solid fa-bold"></i></button>
+                                    <button type="button" class="btn btn-sm btn-light border icon-only" data-cmd="italic" title="Nghiêng"><i class="fa-solid fa-italic"></i></button>
+                                    <button type="button" class="btn btn-sm btn-light border icon-only" data-cmd="insertUnorderedList" title="Danh sách"><i class="fa-solid fa-list-ul"></i></button>
+                                    <button type="button" class="btn btn-sm btn-light border icon-only" data-cmd="insertOrderedList" title="Danh sách số"><i class="fa-solid fa-list-ol"></i></button>
+                                    <button type="button" class="btn btn-sm btn-light border" data-cmd="formatBlock" data-arg="H2" title="Tiêu đề H2">H2</button>
+                                    <button type="button" class="btn btn-sm btn-light border" data-cmd="formatBlock" data-arg="H3" title="Tiêu đề H3">H3</button>
                                     <button type="button" class="btn btn-sm btn-light border" data-template="table" title="Bảng gói">Bảng</button>
                                     <button type="button" class="btn btn-sm btn-light border" data-template="cta" title="CTA">CTA</button>
                                     <button type="button" class="btn btn-sm btn-light border" data-template="seo" title="Khung mô tả SEO">Mẫu SEO</button>
                                 </div>
-                                <textarea class="form-control" id="p_detail_desc" rows="5"
-                                    placeholder="Nhập nội dung hiển thị trong tab Mô tả chi tiết. Ví dụ: Bộ công cụ bao gồm..., lưu ý sử dụng, chính sách kèm theo..."></textarea>
+                                <div id="p_detail_desc_editor" class="rich-editor product-detail-editor" contenteditable="true"
+                                     data-placeholder="Dán nội dung từ ChatGPT, Word hoặc website vào đây. Editor sẽ giữ heading, bullet, bảng cơ bản."></div>
+                                <textarea class="d-none" id="p_detail_desc"></textarea>
                             </div>
 
                             <div class="col-12">
@@ -1209,6 +1216,8 @@
         function openProductModal() {
             document.getElementById('productForm').reset();
             document.getElementById('p_id').value = '';
+            document.getElementById('p_detail_desc').value = '';
+            document.getElementById('p_detail_desc_editor').innerHTML = '';
             document.getElementById('modalTitle').innerText = "Thêm Sản phẩm mới";
             renderVariants([]);
             getProductModal().show();
@@ -1242,6 +1251,7 @@
                 document.getElementById('p_image').value = p.image;
                 document.getElementById('p_desc').value = p.feature_text || '';
                 document.getElementById('p_detail_desc').value = p.description || '';
+                document.getElementById('p_detail_desc_editor').innerHTML = p.description || '';
 
                 renderVariants(p.options || []);
 
@@ -1323,47 +1333,26 @@
             }
         }
 
-        function insertIntoProductDetail(textarea, text) {
-            const start = textarea.selectionStart || 0;
-            const end = textarea.selectionEnd || 0;
-            const before = textarea.value.slice(0, start);
-            const after = textarea.value.slice(end);
-            const prefix = before && !before.endsWith('\n') ? '\n' : '';
-            textarea.value = before + prefix + text + after;
-            const cursor = (before + prefix + text).length;
-            textarea.focus();
-            textarea.setSelectionRange(cursor, cursor);
-        }
-
-        function wrapProductDetailSelection(textarea, marker) {
-            const start = textarea.selectionStart || 0;
-            const end = textarea.selectionEnd || 0;
-            const selected = textarea.value.slice(start, end) || 'nội dung';
-            textarea.value = textarea.value.slice(0, start) + marker + selected + marker + textarea.value.slice(end);
-            textarea.focus();
-            textarea.setSelectionRange(start + marker.length, start + marker.length + selected.length);
-        }
-
         function productDetailTemplate(type) {
             if (type === 'table') {
-                return "\n| Gói dịch vụ | Thời hạn | Hình thức | Phù hợp với |\n|---|---|---|---|\n| Gói 1 | 1 tháng | Tự động | Cá nhân |\n";
+                return '<table><thead><tr><th>Gói dịch vụ</th><th>Thời hạn</th><th>Hình thức</th><th>Phù hợp với</th></tr></thead><tbody><tr><td>Gói 1</td><td>1 tháng</td><td>Tự động</td><td>Cá nhân</td></tr></tbody></table><p><br></p>';
             }
             if (type === 'cta') {
-                return "\n## Mua hàng tự động 24/7 tại AI CỦA TÔI\nChọn gói phù hợp, thanh toán QR và nhận sản phẩm tự động sau khi giao dịch thành công. Cần hỗ trợ nhanh, liên hệ Zalo 0569012134 hoặc Telegram @specademy.\n";
+                return '<h2>Mua hàng tự động 24/7 tại AI CỦA TÔI</h2><p>Chọn gói phù hợp, thanh toán QR và nhận sản phẩm tự động sau khi giao dịch thành công. Cần hỗ trợ nhanh, liên hệ Zalo 0569012134 hoặc Telegram @specademy.</p>';
             }
-            return "\n# Tên sản phẩm chuẩn SEO\n\nSapo ngắn giới thiệu lợi ích chính và từ khóa sản phẩm.\n\n## Vì sao nên mua tại AI CỦA TÔI?\n- Giao hàng tự động 24/7 sau thanh toán.\n- Bảo hành 1 đổi 1 trong thời gian sử dụng.\n- Hỗ trợ nhanh qua Zalo 0569012134 hoặc Telegram @specademy.\n\n## Tính năng và lợi ích nổi bật\n- \n- \n- \n\n## Bảng giá và tùy chọn gói\n| Gói dịch vụ | Thời hạn | Hình thức | Phù hợp với |\n|---|---|---|---|\n| Gói 1 | 1 tháng | Tự động | Cá nhân |\n\n## Chính sách bảo hành\n- Bảo hành 1 đổi 1 nếu lỗi kỹ thuật.\n- Hỗ trợ trong suốt thời gian sử dụng.\n\n## Hướng dẫn mua hàng\n1. Chọn gói trên aicuatoi.net.\n2. Thanh toán bằng QR ngân hàng.\n3. Hệ thống xác nhận và giao hàng tự động.\n";
+            return '<h1>Tên sản phẩm chuẩn SEO</h1><p>Sapo ngắn giới thiệu lợi ích chính và từ khóa sản phẩm.</p><h2>Vì sao nên mua tại AI CỦA TÔI?</h2><ul><li>Giao hàng tự động 24/7 sau thanh toán.</li><li>Bảo hành 1 đổi 1 trong thời gian sử dụng.</li><li>Hỗ trợ nhanh qua Zalo 0569012134 hoặc Telegram @specademy.</li></ul><h2>Tính năng và lợi ích nổi bật</h2><ul><li></li><li></li><li></li></ul><h2>Bảng giá và tùy chọn gói</h2>' + productDetailTemplate('table') + '<h2>Chính sách bảo hành</h2><ul><li>Bảo hành 1 đổi 1 nếu lỗi kỹ thuật.</li><li>Hỗ trợ trong suốt thời gian sử dụng.</li></ul><h2>Hướng dẫn mua hàng</h2><ol><li>Chọn gói trên aicuatoi.net.</li><li>Thanh toán bằng QR ngân hàng.</li><li>Hệ thống xác nhận và giao hàng tự động.</li></ol>';
         }
 
         document.querySelectorAll('.product-detail-toolbar button').forEach(btn => {
+            btn.addEventListener('mousedown', e => e.preventDefault());
             btn.addEventListener('click', () => {
-                const textarea = document.getElementById('p_detail_desc');
-                if (!textarea) return;
-                if (btn.dataset.wrap) {
-                    wrapProductDetailSelection(textarea, btn.dataset.wrap);
-                } else if (btn.dataset.template) {
-                    insertIntoProductDetail(textarea, productDetailTemplate(btn.dataset.template));
+                const editor = document.getElementById('p_detail_desc_editor');
+                if (!editor) return;
+                editor.focus();
+                if (btn.dataset.template) {
+                    document.execCommand('insertHTML', false, productDetailTemplate(btn.dataset.template));
                 } else {
-                    insertIntoProductDetail(textarea, btn.dataset.insert || '');
+                    document.execCommand(btn.dataset.cmd, false, btn.dataset.arg || null);
                 }
             });
         });
@@ -1394,6 +1383,7 @@
             formData.append('status', document.getElementById('p_status').value);
             formData.append('image', document.getElementById('p_image').value);
             formData.append('desc', document.getElementById('p_desc').value);
+            document.getElementById('p_detail_desc').value = document.getElementById('p_detail_desc_editor').innerHTML.trim();
             formData.append('description', document.getElementById('p_detail_desc').value);
             formData.append('variants', JSON.stringify(variants));
 

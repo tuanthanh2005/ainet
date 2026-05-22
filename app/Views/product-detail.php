@@ -190,7 +190,13 @@
                         <p class="mb-4">Lưu ý: Bảo Hành</p>
                         <p class="mb-4">Tài khoản <?= htmlspecialchars($product['title']) ?> bao gồm:</p>
                         <?php if ($detailDescription !== ''): ?>
-                            <div class="product-detail-description"><?= nl2br(htmlspecialchars($detailDescription)) ?></div>
+                            <div class="product-detail-description">
+                                <?php if ($detailDescription !== strip_tags($detailDescription)): ?>
+                                    <?= $detailDescription ?>
+                                <?php else: ?>
+                                    <?= nl2br(htmlspecialchars($detailDescription)) ?>
+                                <?php endif; ?>
+                            </div>
                         <?php else: ?>
                             <p>Thông tin chi tiết đang được cập nhật.</p>
                         <?php endif; ?>
@@ -229,3 +235,39 @@
         </div>
     </div>
 </div>
+
+<style>
+.product-detail-description h1,
+.product-detail-description h2,
+.product-detail-description h3 {
+    color: #111;
+    font-weight: 800;
+    margin: 1.25rem 0 0.65rem;
+}
+.product-detail-description h1 { font-size: 1.45rem; }
+.product-detail-description h2 { font-size: 1.25rem; }
+.product-detail-description h3 { font-size: 1.08rem; }
+.product-detail-description ul,
+.product-detail-description ol {
+    padding-left: 1.35rem;
+    margin-bottom: 1rem;
+}
+.product-detail-description li { margin-bottom: 0.35rem; }
+.product-detail-description table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1rem 0;
+    background: #fff;
+}
+.product-detail-description th,
+.product-detail-description td {
+    border: 1px solid #e5e7eb;
+    padding: 0.65rem 0.75rem;
+    vertical-align: top;
+}
+.product-detail-description th {
+    color: #111;
+    background: #f8fafc;
+    font-weight: 700;
+}
+</style>
