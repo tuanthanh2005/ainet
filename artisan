@@ -1,0 +1,255 @@
+#!/usr/bin/env php
+<?php
+
+if (php_sapi_name() !== 'cli') {
+    echo "This script must be run from the command line.\n";
+    exit(1);
+}
+
+define('APP_ROOT', __DIR__);
+
+// Load Configuration and Database Core
+require_once APP_ROOT . '/config/config.php';
+require_once APP_ROOT . '/app/Core/Database.php';
+
+// Helper for output styles
+function info($text) {
+    echo "\e[32m" . $text . "\e[0m\n";
+}
+
+function error($text) {
+    echo "\e[31m" . $text . "\e[0m\n";
+}
+
+function warn($text) {
+    echo "\e[33m" . $text . "\e[0m\n";
+}
+
+function line($text) {
+    echo $text . "\n";
+}
+
+// Ensure migrations table exists
+function ensureMigrationsTable(PDO $pdo) {
+    $pdo->exec("
+        CREATE TABLE IF NOT EXISTS migrations (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            migration VARCHAR(255) NOT NULL,
+            batch INT NOT NULL
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    ");
+}
+
+$command = $argv[1] ?? 'help';
+
+try {
+    $pdo = Database::getInstance();
+} catch (Exception $e) {
+    error("Database connection failed: " . $e->getMessage());
+    exit(1);
+}
+
+switch ($command) {
+    case 'migrate':
+        ensureMigrationsTable($pdo);
+        info("Running migrations...");
+
+        // Get run migrations
+        $runMigrations = $pdo->query("SELECT migration FROM migrations")->fetchAll(PDO::FETCH_COLUMN);
+
+        // Get files
+        $files = glob(APP_ROOT . '/database/migrations/*.php');
+        sort($files);
+
+        // Get max batch
+        $maxBatch = (int)$pdo->query("SELECT MAX(batch) FROM migrations")->fetchColumn();
+        $nextBatch = $maxBatch + 1;
+
+        $migratedCount = 0;
+        foreach ($files as $file) {
+            $name = basename($file, '.php');
+            if (in_array($name, $runMigrations, true)) {
+                continue;
+            }
+
+            line("Migrating: $name");
+            $start = microtime(true);
+
+            // Require file and call up()
+            $migration = require $file;
+            if (is_object($migration) && method_exists($migration, 'up')) {
+                $pdo->beginTransaction();
+                try {
+                    $migration->up($pdo);
+                    
+                    // Log migration
+                    $stmt = $pdo->prepare("INSERT INTO migrations (migration, batch) VALUES (?, ?)");
+                    $stmt->execute([$name, $nextBatch]);
+                    
+                    if ($pdo->inTransaction()) {
+                        $pdo->commit();
+                    }
+                    $duration = round((microtime(true) - $start) * 1000, 2);
+                    info("Migrated:  $name ($duration ms)");
+                    $migratedCount++;
+                } catch (Exception $e) {
+                    if ($pdo->inTransaction()) {
+                        $pdo->rollBack();
+                    }
+                    error("Migration failed: $name. Error: " . $e->getMessage());
+                    exit(1);
+                }
+            } else {
+                warn("Warning: migration file $name does not return an anonymous class with up() method.");
+            }
+        }
+
+        if ($migratedCount === 0) {
+            info("Nothing to migrate.");
+        }
+        break;
+
+    case 'migrate:rollback':
+        ensureMigrationsTable($pdo);
+        warn("Rolling back migrations...");
+
+        // Get max batch
+        $lastBatch = $pdo->query("SELECT MAX(batch) FROM migrations")->fetchColumn();
+        if (!$lastBatch) {
+            info("Nothing to rollback.");
+            break;
+        }
+
+        // Get migrations in last batch (reverse execution order)
+        $stmt = $pdo->prepare("SELECT migration FROM migrations WHERE batch = ? ORDER BY id DESC");
+        $stmt->execute([$lastBatch]);
+        $rollbackList = $stmt->fetchAll(PDO::FETCH_COLUMN);
+
+        foreach ($rollbackList as $name) {
+            line("Rolling back: $name");
+            $file = APP_ROOT . "/database/migrations/{$name}.php";
+
+            if (file_exists($file)) {
+                $migration = require $file;
+                if (is_object($migration) && method_exists($migration, 'down')) {
+                    $pdo->beginTransaction();
+                    try {
+                        $migration->down($pdo);
+                        
+                        // Delete record
+                        $delStmt = $pdo->prepare("DELETE FROM migrations WHERE migration = ?");
+                        $delStmt->execute([$name]);
+                        
+                        if ($pdo->inTransaction()) {
+                            $pdo->commit();
+                        }
+                        info("Rolled back:  $name");
+                    } catch (Exception $e) {
+                        if ($pdo->inTransaction()) {
+                            $pdo->rollBack();
+                        }
+                        error("Rollback failed: $name. Error: " . $e->getMessage());
+                        exit(1);
+                    }
+                } else {
+                    warn("Warning: migration file $name does not return an class with down() method.");
+                }
+            } else {
+                warn("Migration file not found: $name. Removing from migrations tracking table anyway.");
+                $pdo->exec("DELETE FROM migrations WHERE migration = " . $pdo->quote($name));
+            }
+        }
+        break;
+
+    case 'migrate:status':
+        ensureMigrationsTable($pdo);
+        
+        $runMigrations = [];
+        $stmt = $pdo->query("SELECT migration, batch FROM migrations");
+        while ($row = $stmt->fetch()) {
+            $runMigrations[$row['migration']] = $row['batch'];
+        }
+
+        $files = glob(APP_ROOT . '/database/migrations/*.php');
+        sort($files);
+
+        if (empty($files)) {
+            warn("No migrations found in database/migrations/");
+            break;
+        }
+
+        line("\n+------+-------------------------------------------------------+-------+");
+        line("| Ran? | Migration                                             | Batch |");
+        line("+------+-------------------------------------------------------+-------+");
+        
+        foreach ($files as $file) {
+            $name = basename($file, '.php');
+            $ran = isset($runMigrations[$name]);
+            $ranText = $ran ? "\e[32mYes\e[0m " : "\e[31mNo\e[0m  ";
+            $batchText = $ran ? str_pad($runMigrations[$name], 5, ' ', STR_PAD_LEFT) : '     ';
+            
+            // Format output row
+            $paddedName = str_pad($name, 53, ' ', STR_PAD_RIGHT);
+            line("| $ranText | $paddedName | $batchText |");
+        }
+        line("+------+-------------------------------------------------------+-------+\n");
+        break;
+
+    case 'make:migration':
+        $name = $argv[2] ?? '';
+        if (empty($name)) {
+            error("ERROR: Please specify a migration name.");
+            line("Example: php artisan make:migration create_sessions_table");
+            exit(1);
+        }
+
+        // Normalize migration name
+        $name = strtolower(trim($name));
+        $name = preg_replace('/[^a-z0-9_]/', '_', $name);
+        $name = preg_replace('/_+/', '_', $name);
+
+        $filename = date('Y_m_d_His') . '_' . $name . '.php';
+        $targetDir = APP_ROOT . '/database/migrations';
+        
+        if (!is_dir($targetDir)) {
+            mkdir($targetDir, 0755, true);
+        }
+
+        $targetFile = $targetDir . '/' . $filename;
+
+        $boilerplate = <<<'TEMPLATE'
+<?php
+
+return new class {
+    public function up(PDO $pdo) {
+        $pdo->exec("
+            // CREATE TABLE IF NOT EXISTS ...
+        ");
+    }
+
+    public function down(PDO $pdo) {
+        $pdo->exec("
+            // DROP TABLE IF EXISTS ...
+        ");
+    }
+};
+TEMPLATE;
+
+        if (file_put_contents($targetFile, $boilerplate) !== false) {
+            info("Created Migration: database/migrations/{$filename}");
+        } else {
+            error("ERROR: Failed to create migration file.");
+        }
+        break;
+
+    case 'help':
+    default:
+        line("\n\e[1mAI CỦA TÔI Artisan Command Line Tool\e[0m");
+        line("Usage: php artisan [command] [arguments]\n");
+        line("\e[33mAvailable commands:\e[0m");
+        line("  \e[32mmigrate\e[0m                 Run outstanding migrations");
+        line("  \e[32mmigrate:rollback\e[0m        Rollback the last batch of migrations");
+        line("  \e[32mmigrate:status\e[0m          Show the status of each migration");
+        line("  \e[32mmake:migration [name]\e[0m   Create a new migration boilerplate file\n");
+        break;
+}

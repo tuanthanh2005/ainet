@@ -37,23 +37,8 @@ class FileSystem {
     public function url($path) {
         $config = $this->getDiskConfig();
         if (isset($config['url'])) {
-            return $config['url'] . '/' . $path;
+            return rtrim($config['url'], '/') . '/' . ltrim($path, '/');
         }
         return $path;
-    }
-
-    public static function storage_link() {
-        $target = __DIR__ . '/../../storage/app/public';
-        $link = __DIR__ . '/../../public/storage';
-        
-        if (!file_exists($link)) {
-            if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
-                exec("mklink /J \"$link\" \"$target\"");
-            } else {
-                symlink($target, $link);
-            }
-            return true;
-        }
-        return false;
     }
 }

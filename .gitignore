@@ -5,6 +5,11 @@ data/*.json
 # Logs
 *.log
 
+# Hostinger/public upload runtime files
+storage/
+public/storage/
+public_html/
+
 # IDE
 .vscode/
 .idea/

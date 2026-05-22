@@ -2,13 +2,27 @@
 
 class Controller {
     public function view($view, $data = []) {
+        $template = $view;
+        $contentView = $data['view'] ?? null;
+        unset($data['view']);
+
         // Extract data to be used in view
         extract($data);
+        $view = $contentView;
 
-        if (file_exists('../app/Views/' . $view . '.php')) {
-            require_once '../app/Views/' . $view . '.php';
+        $viewRoot = (defined('APP_ROOT') ? APP_ROOT : dirname(__DIR__, 2)) . DIRECTORY_SEPARATOR . 'app' . DIRECTORY_SEPARATOR . 'Views';
+        $templatePath = $viewRoot . DIRECTORY_SEPARATOR . str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $template) . '.php';
+
+        if (file_exists($templatePath)) {
+            $currentDir = getcwd();
+            chdir($viewRoot);
+            try {
+                require $templatePath;
+            } finally {
+                chdir($currentDir);
+            }
         } else {
-            die("View does not exist: " . $view);
+            die("View does not exist: " . $template);
         }
     }
     

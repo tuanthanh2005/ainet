@@ -9,48 +9,793 @@ class HomeController extends Controller {
 
     public function index() {
         $products = Product::getAll();
+        $categories = Category::getAll();
+        $blogs = Blog::getAll();
+        $recentOrders = RecentOrder::getAll();
         $settings = $this->settings;
-        
+
+        // Current active tab: default is products
+        $tab = $_GET['tab'] ?? 'products';
+        if (!in_array($tab, ['products', 'blog'])) {
+            $tab = 'products';
+        }
+
+        // Filtering by category (only applies to products tab)
+        $categorySlug = $_GET['category'] ?? '';
+        if ($categorySlug !== '' && $categorySlug !== 'all') {
+            $products = array_filter($products, function($p) use ($categorySlug) {
+                return ($p['category_slug'] ?? '') === $categorySlug;
+            });
+        }
+
+        // Filtering by search query
+        $q = trim($_GET['q'] ?? '');
+        if ($q !== '') {
+            $variants = $this->expandQuery($q);
+            $scoredProducts = [];
+            foreach ($products as $p) {
+                $score = $this->scoreProduct($p, $variants);
+                if ($score >= 0.45) {
+                    $scoredProducts[] = [
+                        'product' => $p,
+                        'score' => $score
+                    ];
+                }
+            }
+            // Sort by score desc
+            usort($scoredProducts, function($a, $b) {
+                return $b['score'] <=> $a['score'];
+            });
+            $products = array_column($scoredProducts, 'product');
+        }
+
+        // Pagination/Limit: default is 12
+        $limit = (int) ($_GET['limit'] ?? 12);
+        if ($limit < 1) $limit = 12;
+
+        $totalFilteredProducts = count($products);
+        $products = array_slice($products, 0, $limit);
+        $remainingProducts = max(0, $totalFilteredProducts - $limit);
+
+        Seo::set([
+            'title'       => 'Tài khoản AI Premium chính chủ - ChatGPT, YouTube, GitHub Copilot',
+            'description' => trim($settings['footerDesc'] ?? '') ?: 'Mua tài khoản ChatGPT Plus, YouTube Premium, GitHub Copilot, Netflix giá tốt. Bảo hành 1 đổi 1, kích hoạt trong 5 phút, hỗ trợ 24/7.',
+            'keywords'    => ['tài khoản chatgpt plus', 'youtube premium', 'github copilot', 'netflix premium', 'tài khoản ai', SITENAME],
+            'image'       => $settings['about_image'] ?? '',
+            'canonical'   => Url::home(),
+            'type'        => 'website',
+        ]);
+
         $this->view('layout', [
             'view' => 'home',
             'products' => $products,
-            'settings' => $settings
+            'categories' => $categories,
+            'blogs' => $blogs,
+            'recentOrders' => $recentOrders,
+            'settings' => $settings,
+            'tab' => $tab,
+            'categorySlug' => $categorySlug,
+            'searchQuery' => $q,
+            'limit' => $limit,
+            'remainingProducts' => $remainingProducts
         ]);
     }
 
     public function blogDetail() {
+        $id = $_GET['id'] ?? null;
+        $blog = $id ? Blog::getById($id) : null;
+
+        if (!$blog) {
+            http_response_code(404);
+            Seo::set([
+                'title'       => 'Bài viết không tồn tại',
+                'description' => 'Bài viết bạn đang tìm có thể đã bị gỡ hoặc không còn hiệu lực.',
+                'robots'      => 'noindex,follow',
+            ]);
+            $this->view('layout', [
+                'view' => 'blog_detail',
+                'blog' => null,
+                'sidebarProducts' => [],
+                'settings' => $this->settings
+            ]);
+            return;
+        }
+
         $allProducts = Product::getAll();
-        $settings = $this->settings;
         shuffle($allProducts);
         $sidebarProducts = array_slice($allProducts, 0, 3);
-        
+
+        $excerpt = Seo::truncate(strip_tags($blog['description'] ?? ''), 200);
+        Seo::set([
+            'title'       => $blog['title'] ?? 'Bài viết',
+            'description' => $excerpt,
+            'image'       => $blog['image'] ?? '',
+            'canonical'   => Url::blog($blog),
+            'type'        => 'article',
+            'structured'  => [
+                '@context'      => 'https://schema.org',
+                '@type'         => 'BlogPosting',
+                'headline'      => $blog['title'] ?? '',
+                'image'         => $blog['image'] ?? '',
+                'datePublished' => !empty($blog['created_at']) ? date('c', strtotime($blog['created_at'])) : null,
+                'author'        => ['@type' => 'Organization', 'name' => SITENAME],
+                'publisher'     => ['@type' => 'Organization', 'name' => SITENAME],
+                'mainEntityOfPage' => Url::blog($blog),
+                'description'   => $excerpt,
+            ],
+        ]);
+
         $this->view('layout', [
             'view' => 'blog_detail',
+            'blog' => $blog,
             'sidebarProducts' => $sidebarProducts,
-            'settings' => $settings
+            'settings' => $this->settings
         ]);
     }
 
     public function productDetail() {
         $id = isset($_GET['id']) ? $_GET['id'] : null;
         if (!$id) {
-            header('Location: index.php');
+            header('Location: ' . url());
             exit;
         }
 
         $product = Product::getById($id);
         $settings = $this->settings;
-        
+
         if (!$product) {
-            echo "Product not found";
-            exit;
+            http_response_code(404);
+            Seo::set([
+                'title'       => 'Sản phẩm không tồn tại',
+                'description' => 'Sản phẩm bạn đang tìm không còn hoặc đã bị gỡ.',
+                'robots'      => 'noindex,follow',
+            ]);
+            $this->view('layout', [
+                'view' => 'product-detail',
+                'product' => null,
+                'settings' => $settings,
+            ]);
+            return;
         }
+
+        $excerpt = Seo::truncate(strip_tags($product['description'] ?? ($product['feature_text'] ?? '')), 200);
+        Seo::set([
+            'title'       => $product['title'] ?? 'Sản phẩm',
+            'description' => $excerpt ?: 'Mua ' . ($product['title'] ?? 'sản phẩm') . ' chính chủ, bảo hành 1 đổi 1.',
+            'image'       => $product['image'] ?? '',
+            'canonical'   => Url::product($product),
+            'type'        => 'product',
+            'keywords'    => [$product['title'] ?? '', $product['category'] ?? '', SITENAME],
+            'structured'  => [
+                '@context'    => 'https://schema.org',
+                '@type'       => 'Product',
+                'name'        => $product['title'] ?? '',
+                'image'       => $product['image'] ?? '',
+                'description' => $excerpt,
+                'brand'       => ['@type' => 'Brand', 'name' => SITENAME],
+                'offers'      => [
+                    '@type'         => 'Offer',
+                    'priceCurrency' => 'VND',
+                    'price'         => (string) ($product['price'] ?? 0),
+                    'availability'  => ($product['status'] ?? 'active') === 'active'
+                        ? 'https://schema.org/InStock'
+                        : 'https://schema.org/OutOfStock',
+                    'url'           => Url::product($product),
+                ],
+            ],
+        ]);
 
         $this->view('layout', [
             'view' => 'product-detail',
             'product' => $product,
             'settings' => $settings
         ]);
+    }
+
+    public function register() {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            header('Location: ' . url());
+            exit;
+        }
+
+        $name = trim($_POST['name'] ?? '');
+        $email = strtolower(trim($_POST['email'] ?? ''));
+        $password = $_POST['password'] ?? '';
+
+        if ($name === '' || !filter_var($email, FILTER_VALIDATE_EMAIL) || strlen($password) < 6) {
+            $_SESSION['flash_error'] = 'Vui lòng nhập đúng họ tên, email và mật khẩu tối thiểu 6 ký tự.';
+            header('Location: ' . url());
+            exit;
+        }
+
+        if (User::findByEmail($email)) {
+            $_SESSION['flash_error'] = 'Email này đã được đăng ký.';
+            header('Location: ' . url());
+            exit;
+        }
+
+        User::create($name, $email, $password);
+        $user = User::findByEmail($email);
+        Auth::login($user);
+
+        $_SESSION['flash_success'] = 'Đăng ký thành công.';
+        header('Location: ' . url());
+        exit;
+    }
+
+    public function login() {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            header('Location: ' . url());
+            exit;
+        }
+
+        if (!Auth::checkLoginRateLimit()) {
+            $_SESSION['flash_error'] = 'Bạn đã thử đăng nhập quá nhiều lần. Vui lòng đợi vài phút.';
+            header('Location: ' . url());
+            exit;
+        }
+
+        $email = strtolower(trim($_POST['email'] ?? ''));
+        $password = $_POST['password'] ?? '';
+        $user = User::findByEmail($email);
+
+        if (!$user || !password_verify($password, $user['password'])) {
+            Auth::recordFailedLogin();
+            $_SESSION['flash_error'] = 'Email hoặc mật khẩu không đúng.';
+            header('Location: ' . url());
+            exit;
+        }
+
+        if (($user['status'] ?? '') !== 'active') {
+            Auth::recordFailedLogin();
+            $_SESSION['flash_error'] = 'Tài khoản đang bị khóa.';
+            header('Location: ' . url());
+            exit;
+        }
+
+        Auth::login($user);
+        $_SESSION['flash_success'] = 'Đăng nhập thành công.';
+
+        if (($user['role'] ?? 'user') === 'admin') {
+            header('Location: ' . url('index.php?action=adminDashboard'));
+        } else {
+            header('Location: ' . url());
+        }
+        exit;
+    }
+
+    public function logout() {
+        Auth::logout();
+        $_SESSION['flash_success'] = 'Đã đăng xuất.';
+        header('Location: ' . url());
+        exit;
+    }
+
+    /** Bước 1: Redirect user đến Google để xác thực */
+    public function googleLogin() {
+        if (!GoogleAuth::isConfigured()) {
+            $_SESSION['flash_error'] = 'Đăng nhập Google chưa được cấu hình.';
+            header('Location: ' . url());
+            exit;
+        }
+        header('Location: ' . GoogleAuth::getAuthUrl());
+        exit;
+    }
+
+    /** Bước 2: Xử lý callback từ Google sau khi user đồng ý */
+    public function googleCallback() {
+        // Kiểm tra lỗi từ Google
+        if (!empty($_GET['error'])) {
+            $_SESSION['flash_error'] = 'Đăng nhập Google bị hủy hoặc có lỗi.';
+            header('Location: ' . url());
+            exit;
+        }
+
+        $code  = trim($_GET['code'] ?? '');
+        $state = trim($_GET['state'] ?? '');
+
+        // Xác minh CSRF state
+        if ($code === '' || !GoogleAuth::verifyState($state)) {
+            $_SESSION['flash_error'] = 'Yêu cầu không hợp lệ. Vui lòng thử lại.';
+            header('Location: ' . url());
+            exit;
+        }
+
+        // Đổi code lấy access_token
+        $tokens = GoogleAuth::fetchTokens($code);
+        if (!$tokens) {
+            $_SESSION['flash_error'] = 'Không thể lấy token từ Google. Vui lòng thử lại.';
+            header('Location: ' . url());
+            exit;
+        }
+
+        // Lấy thông tin user từ Google
+        $info = GoogleAuth::fetchUserInfo($tokens['access_token']);
+        if (!$info || empty($info['email'])) {
+            $_SESSION['flash_error'] = 'Không thể lấy thông tin tài khoản Google.';
+            header('Location: ' . url());
+            exit;
+        }
+
+        $googleId = $info['id'];
+        $email    = $info['email'];
+        $name     = $info['name'];
+        $avatar   = $info['picture'] ?? '';
+
+        // Case 1: Đã có tài khoản liên kết Google ID
+        $user = User::findByGoogleId($googleId);
+
+        if (!$user) {
+            // Case 2: Tìm tài khoản qua email (email đã đăng ký trước đó)
+            $existing = User::findByEmail($email);
+            if ($existing) {
+                // Tự động liên kết Google ID vào tài khoản email cũ
+                User::linkGoogleId((int) $existing['id'], $googleId, $avatar);
+                $user = User::findByEmail($email);
+            } else {
+                // Case 3: Tạo tài khoản mới từ Google
+                $user = User::createFromGoogle($name, $email, $googleId, $avatar);
+                if (!$user) {
+                    $_SESSION['flash_error'] = 'Không thể tạo tài khoản. Vui lòng thử lại.';
+                    header('Location: ' . url());
+                    exit;
+                }
+            }
+        }
+
+        // Kiểm tra tài khoản có bị khoá không
+        if (($user['status'] ?? '') !== 'active') {
+            $_SESSION['flash_error'] = 'Tài khoản này đã bị khoá.';
+            header('Location: ' . url());
+            exit;
+        }
+
+        // Đăng nhập thành công
+        Auth::login($user);
+        $_SESSION['flash_success'] = 'Đăng nhập với Google thành công! Xin chào ' . htmlspecialchars($name) . '.';
+
+        if (($user['role'] ?? 'user') === 'admin') {
+            header('Location: ' . url('index.php?action=adminDashboard'));
+        } else {
+            header('Location: ' . url());
+        }
+        exit;
+    }
+
+    public function profile() {
+        $this->requireLogin();
+
+        $user = User::findById($_SESSION['user']['id']);
+        if (!$user) {
+            unset($_SESSION['user']);
+            $_SESSION['flash_error'] = 'Tài khoản không tồn tại.';
+            header('Location: ' . url());
+            exit;
+        }
+
+        $this->view('layout', [
+            'view' => 'profile',
+            'settings' => $this->settings,
+            'user' => $user
+        ]);
+    }
+
+    public function updatePassword() {
+        $this->requireLogin();
+
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            header('Location: ' . url('index.php?action=profile'));
+            exit;
+        }
+
+        $currentPassword = $_POST['current_password'] ?? '';
+        $newPassword = $_POST['new_password'] ?? '';
+        $confirmPassword = $_POST['confirm_password'] ?? '';
+        $user = User::findWithPasswordById($_SESSION['user']['id']);
+
+        if (!$user || !password_verify($currentPassword, $user['password'])) {
+            $_SESSION['flash_error'] = 'Mật khẩu hiện tại không đúng.';
+            header('Location: ' . url('index.php?action=profile'));
+            exit;
+        }
+
+        if (strlen($newPassword) < 6) {
+            $_SESSION['flash_error'] = 'Mật khẩu mới phải có ít nhất 6 ký tự.';
+            header('Location: ' . url('index.php?action=profile'));
+            exit;
+        }
+
+        if ($newPassword !== $confirmPassword) {
+            $_SESSION['flash_error'] = 'Xác nhận mật khẩu mới không khớp.';
+            header('Location: ' . url('index.php?action=profile'));
+            exit;
+        }
+
+        User::updatePassword($user['id'], $newPassword);
+        $_SESSION['flash_success'] = 'Đổi mật khẩu thành công.';
+        header('Location: ' . url('index.php?action=profile'));
+        exit;
+    }
+
+    public function orderHistory() {
+        $this->requireLogin();
+
+        $email = $_SESSION['user']['email'] ?? '';
+        $orders = [];
+        if ($email !== '') {
+            $db = Database::getInstance();
+            $stmt = $db->prepare("SELECT * FROM orders WHERE customer_email = ? ORDER BY created_at DESC LIMIT 100");
+            $stmt->execute([$email]);
+            $orders = $stmt->fetchAll();
+            foreach ($orders as &$o) {
+                $decoded = !empty($o['delivered_items']) ? json_decode($o['delivered_items'], true) : [];
+                $o['delivered_items'] = is_array($decoded) ? $decoded : [];
+            }
+            unset($o);
+        }
+
+        $this->view('layout', [
+            'view'     => 'order-history',
+            'settings' => $this->settings,
+            'user'     => $_SESSION['user'],
+            'orders'   => $orders,
+        ]);
+    }
+
+    public function searchIndex() {
+        header('Content-Type: application/json');
+        header('Cache-Control: public, max-age=120');
+
+        $items = [];
+        try {
+            foreach (Product::getAll() as $p) {
+                if (($p['status'] ?? 'active') === 'hidden') continue;
+                $items[] = [
+                    'type'  => 'product',
+                    'id'    => $p['id'] ?? '',
+                    'title' => $p['title'] ?? '',
+                    'cat'   => $p['category'] ?? ($p['category_slug'] ?? ''),
+                    'desc'  => $p['feature_text'] ?? '',
+                    'image' => $p['image'] ?? '',
+                    'price' => (float) ($p['price'] ?? 0),
+                    'url'   => Url::product($p),
+                ];
+            }
+        } catch (Throwable $e) {}
+
+        try {
+            foreach (Category::getAll() as $c) {
+                $items[] = [
+                    'type'  => 'category',
+                    'id'    => (int) ($c['id'] ?? 0),
+                    'title' => $c['name'] ?? '',
+                    'cat'   => 'Danh mục',
+                    'slug'  => $c['slug'] ?? '',
+                    'icon'  => $c['icon'] ?? '',
+                    'url'   => url('?category=' . urlencode($c['slug'] ?? '')),
+                ];
+            }
+        } catch (Throwable $e) {}
+
+        try {
+            foreach (Blog::getAll() as $b) {
+                $items[] = [
+                    'type'  => 'blog',
+                    'id'    => (int) ($b['id'] ?? 0),
+                    'title' => $b['title'] ?? '',
+                    'cat'   => 'Tạp chí',
+                    'desc'  => mb_substr(strip_tags($b['description'] ?? ''), 0, 120),
+                    'image' => $b['image'] ?? '',
+                    'url'   => Url::blog($b),
+                ];
+            }
+        } catch (Throwable $e) {}
+
+        echo json_encode(['items' => $items], JSON_UNESCAPED_UNICODE);
+        exit;
+    }
+
+    public function about() {
+        Seo::set([
+            'title'       => 'Giới thiệu',
+            'description' => Seo::truncate(strip_tags($this->settings['about_desc'] ?? ''), 200) ?: 'Giới thiệu về ' . SITENAME,
+            'image'       => $this->settings['about_image'] ?? '',
+            'canonical'   => Url::about(),
+            'type'        => 'website',
+        ]);
+        $this->view('layout', [
+            'view' => 'about',
+            'settings' => $this->settings
+        ]);
+    }
+
+    public function contact() {
+        Seo::set([
+            'title'       => 'Liên hệ',
+            'description' => Seo::truncate(strip_tags($this->settings['contact_desc'] ?? ''), 200) ?: 'Thông tin liên hệ ' . SITENAME,
+            'canonical'   => Url::contact(),
+            'type'        => 'website',
+        ]);
+        $this->view('layout', [
+            'view' => 'contact',
+            'settings' => $this->settings
+        ]);
+    }
+
+    public function productAction() {
+        $productId = $_POST['product_id'] ?? '';
+        $variantIdx = (int)($_POST['variant_idx'] ?? 0);
+        $actionType = $_POST['action_type'] ?? 'buy';
+
+        $product = Product::getById($productId);
+        if (!$product) {
+            $_SESSION['flash_error'] = 'Sản phẩm không tồn tại.';
+            header('Location: ' . url());
+            exit;
+        }
+
+        if ($actionType === 'buy') {
+            header('Location: ' . url('index.php?action=checkoutPage&product_id=' . urlencode($productId) . '&variant_idx=' . urlencode($variantIdx)));
+            exit;
+        }
+
+        // Otherwise 'cart' addition
+        if (!isset($_SESSION['cart'])) {
+            $_SESSION['cart'] = [];
+        }
+        $found = false;
+        foreach ($_SESSION['cart'] as &$item) {
+            if ($item['id'] == $productId) {
+                $item['quantity']++;
+                $found = true;
+                break;
+            }
+        }
+        if (!$found) {
+            $_SESSION['cart'][] = [
+                'id' => $product['id'],
+                'title' => $product['title'],
+                'price' => $product['price'],
+                'image' => $product['image'],
+                'quantity' => 1
+            ];
+        }
+        $_SESSION['flash_success'] = "Đã thêm " . $product['title'] . " vào giỏ hàng.";
+        header('Location: ' . url('index.php?action=cart'));
+        exit;
+    }
+
+    public function addToCart() {
+        $productId = $_GET['id'] ?? '';
+        if (!$productId) {
+            $_SESSION['flash_error'] = 'Sản phẩm không hợp lệ.';
+            header('Location: ' . (empty($_SERVER['HTTP_REFERER']) ? url() : $_SERVER['HTTP_REFERER']));
+            exit;
+        }
+
+        $product = Product::getById($productId);
+        if (!$product) {
+            $_SESSION['flash_error'] = 'Sản phẩm không tồn tại.';
+            header('Location: ' . (empty($_SERVER['HTTP_REFERER']) ? url() : $_SERVER['HTTP_REFERER']));
+            exit;
+        }
+
+        if (!isset($_SESSION['cart'])) {
+            $_SESSION['cart'] = [];
+        }
+
+        $found = false;
+        foreach ($_SESSION['cart'] as &$item) {
+            if ($item['id'] == $productId) {
+                $item['quantity']++;
+                $found = true;
+                break;
+            }
+        }
+
+        if (!$found) {
+            $_SESSION['cart'][] = [
+                'id' => $product['id'],
+                'title' => $product['title'],
+                'price' => $product['price'],
+                'image' => $product['image'],
+                'quantity' => 1
+            ];
+        }
+
+        $_SESSION['flash_success'] = "Đã thêm " . $product['title'] . " vào giỏ hàng.";
+        header('Location: ' . (empty($_SERVER['HTTP_REFERER']) ? url() : $_SERVER['HTTP_REFERER']));
+        exit;
+    }
+
+    public function cart() {
+        $cart = $_SESSION['cart'] ?? [];
+        $total = 0;
+        foreach ($cart as $item) {
+            $total += $item['price'] * $item['quantity'];
+        }
+
+        Seo::set([
+            'title'       => 'Giỏ hàng',
+            'description' => 'Giỏ hàng của bạn tại ' . SITENAME,
+            'canonical'   => Url::cart(),
+            'robots'      => 'noindex,follow',
+        ]);
+
+        $this->view('layout', [
+            'view' => 'cart',
+            'settings' => $this->settings,
+            'cart' => $cart,
+            'total' => $total
+        ]);
+    }
+
+    public function removeFromCart() {
+        $productId = $_GET['id'] ?? '';
+        if (isset($_SESSION['cart'])) {
+            foreach ($_SESSION['cart'] as $key => $item) {
+                if ($item['id'] == $productId) {
+                    unset($_SESSION['cart'][$key]);
+                    break;
+                }
+            }
+            // Re-index array
+            $_SESSION['cart'] = array_values($_SESSION['cart']);
+        }
+        header('Location: ' . url('index.php?action=cart'));
+        exit;
+    }
+
+    public function updateCartQuantity() {
+        $productId = $_GET['id'] ?? '';
+        $change = (int)($_GET['change'] ?? 0);
+        
+        if (isset($_SESSION['cart']) && $productId !== '') {
+            foreach ($_SESSION['cart'] as $key => &$item) {
+                if ($item['id'] == $productId) {
+                    $item['quantity'] += $change;
+                    if ($item['quantity'] <= 0) {
+                        unset($_SESSION['cart'][$key]);
+                    }
+                    break;
+                }
+            }
+            $_SESSION['cart'] = array_values($_SESSION['cart']);
+        }
+
+        header('Location: ' . url('index.php?action=cart'));
+        exit;
+    }
+
+    // Search Helper Logic
+    private static $ALIASES = [
+        'gpt' => 'chatgpt', 'vgpt' => 'chatgpt', 'chat' => 'chatgpt', 'openai' => 'chatgpt',
+        'git' => 'github', 'gh' => 'github', 'cop' => 'copilot', 'copilot' => 'githubcopilot',
+        'yt' => 'youtube', 'ytb' => 'youtube', 'youtub' => 'youtube',
+        'nf' => 'netflix', 'netf' => 'netflix',
+        'ggdrive' => 'googledrive', 'gdrive' => 'googledrive',
+        'spo' => 'spotify', 'spt' => 'spotify',
+        'cs' => 'cursor', 'cur' => 'cursor',
+        'fb' => 'facebook', 'tiktok' => 'tiktok', 'tik' => 'tiktok',
+        'cl' => 'claude', 'claude' => 'claudeai',
+        'gemi' => 'gemini', 'bard' => 'gemini',
+        'mid' => 'midjourney', 'mj' => 'midjourney',
+    ];
+
+    private function normalizeString($s) {
+        $s = mb_strtolower($s, 'UTF-8');
+        $unicode = [
+            'a' => 'á|à|ả|ã|ạ|ă|ắ|ằ|ẳ|ẵ|ặ|â|ấ|ầ|ẩ|ẫ|ậ',
+            'd' => 'đ',
+            'e' => 'é|è|ẻ|ẽ|ẹ|ê|ế|ề|ể|ễ|ệ',
+            'i' => 'í|ì|ỉ|ĩ|ị',
+            'o' => 'ó|ò|ỏ|õ|ọ|ô|ố|ồ|ổ|ỗ|ộ|ơ|ớ|ờ|ở|ỡ|ợ',
+            'u' => 'ú|ù|ủ|ũ|ụ|ư|ứ|ừ|ử|ữ|ự',
+            'y' => 'ý|ỳ|ỷ|ỹ|ỵ',
+        ];
+        foreach ($unicode as $nonDiacritic => $diacriticPattern) {
+            $s = preg_replace("/($diacriticPattern)/i", $nonDiacritic, $s);
+        }
+        return $s;
+    }
+
+    private function getTokens($s) {
+        $normalized = $this->normalizeString($s);
+        $parts = preg_split('/[^a-z0-9]+/', $normalized);
+        return array_filter($parts);
+    }
+
+    private function expandQuery($q) {
+        $norm = $this->normalizeString($q);
+        $noSpace = preg_replace('/[^a-z0-9]/', '', $norm);
+        $variants = [$norm, $noSpace];
+
+        if (isset(self::$ALIASES[$noSpace])) {
+            $variants[] = self::$ALIASES[$noSpace];
+        }
+
+        foreach ($this->getTokens($q) as $t) {
+            if (isset(self::$ALIASES[$t])) {
+                $variants[] = self::$ALIASES[$t];
+            }
+        }
+
+        return array_values(array_filter(array_unique($variants)));
+    }
+
+    private function getBigrams($s) {
+        $out = [];
+        $str = ' ' . $s . ' ';
+        $len = mb_strlen($str, 'UTF-8');
+        for ($i = 0; $i < $len - 1; $i++) {
+            $out[] = mb_substr($str, $i, 2, 'UTF-8');
+        }
+        return array_unique($out);
+    }
+
+    private function diceCoef($a, $b) {
+        if (empty($a) || empty($b)) return 0;
+        $inter = count(array_intersect($a, $b));
+        return (2 * $inter) / (count($a) + count($b));
+    }
+
+    private function scoreProduct($product, $queries) {
+        $title = $product['title'] ?? '';
+        $cat = $product['category'] ?? ($product['category_slug'] ?? '');
+        $desc = $product['feature_text'] ?? '';
+        
+        $haystack = $this->normalizeString($title . ' ' . $cat . ' ' . $desc);
+        $haystackJoined = preg_replace('/\s+/', '', $haystack);
+        $best = 0;
+
+        foreach ($queries as $q) {
+            if ($q === '') continue;
+            
+            $titleNorm = $this->normalizeString($title);
+            if ($titleNorm === $q) {
+                $best = max($best, 1.0);
+                continue;
+            }
+            if (strpos($titleNorm, $q) === 0) {
+                $best = max($best, 0.95);
+                continue;
+            }
+            if (strpos($haystack, $q) !== false) {
+                $best = max($best, 0.85);
+                continue;
+            }
+            if (strpos($haystackJoined, $q) !== false) {
+                $best = max($best, 0.78);
+                continue;
+            }
+            $tokens = $this->getTokens($title);
+            $tokenMatches = false;
+            foreach ($tokens as $t) {
+                if (strpos($t, $q) === 0 || strpos($q, $t) === 0) {
+                    $tokenMatches = true;
+                    break;
+                }
+            }
+            if ($tokenMatches) {
+                $best = max($best, 0.72);
+                continue;
+            }
+            
+            $score = $this->diceCoef($this->getBigrams($q), $this->getBigrams($titleNorm));
+            if ($score > $best) {
+                $best = $score;
+            }
+        }
+
+        return $best;
+    }
+
+    private function loginUser($user) {
+        Auth::login($user);
+    }
+
+    private function requireLogin() {
+        Auth::requireLogin();
     }
 }
 ?>

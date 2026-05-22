@@ -1,185 +1,146 @@
-let cartTotal = 0;
+/**
+ * ============================================================
+ * AppNotify — Global Premium Toast Notification System
+ * ============================================================
+ * Usage:
+ *   AppNotify.success('Đăng nhập thành công!', 'Chào mừng trở lại 👋')
+ *   AppNotify.error('Đăng nhập thất bại', 'Sai tên đăng nhập hoặc mật khẩu.')
+ *   AppNotify.warning('Cảnh báo', 'Phiên đăng nhập sắp hết hạn.')
+ *   AppNotify.info('Thông báo', 'Đơn hàng của bạn đang được xử lý.')
+ *   const id = AppNotify.loading('Đang xử lý...')
+ *   AppNotify.dismiss(id)
+ * ============================================================
+ */
+const AppNotify = (() => {
+    const TYPES = {
+        success: { icon: 'fa-circle-check',     title: 'Thành công',    duration: 4000 },
+        error:   { icon: 'fa-circle-xmark',     title: 'Lỗi',           duration: 6000 },
+        warning: { icon: 'fa-triangle-exclamation', title: 'Cảnh báo',  duration: 5000 },
+        info:    { icon: 'fa-circle-info',       title: 'Thông báo',     duration: 4500 },
+        loading: { icon: 'fa-circle-notch',      title: 'Đang xử lý...', duration: 0 },
+    };
 
-function addToCart(productName) {
-    cartTotal++;
-    document.getElementById('cart-count').innerText = cartTotal;
+    let container = null;
+    let counter = 0;
 
-    // Hiệu ứng Toast Minimalist Trắng Đen
-    const Toast = Swal.mixin({
-        toast: true,
-        position: 'bottom-end',
-        showConfirmButton: false,
-        timer: 2500,
-        timerProgressBar: true,
-        background: '#111',
-        color: '#fff',
-        iconColor: '#fff',
-        customClass: { popup: 'rounded-4 shadow-lg' },
-        didOpen: (toast) => {
-            toast.addEventListener('mouseenter', Swal.stopTimer)
-            toast.addEventListener('mouseleave', Swal.resumeTimer)
+    function getContainer() {
+        if (!container) {
+            container = document.getElementById('app-toast-container');
+            if (!container) {
+                container = document.createElement('div');
+                container.id = 'app-toast-container';
+                document.body.appendChild(container);
+            }
         }
-    });
-
-    Toast.fire({
-        icon: 'success',
-        title: `Đã thêm ${productName}`
-    });
-}
-
-function buyNow(productName) {
-    Swal.fire({
-        title: 'Xác nhận đơn hàng',
-        html: `<p class="text-muted">Bạn đang tiến hành thanh toán cho:<br><strong class="text-dark fs-5">${productName}</strong></p>`,
-        icon: 'none',
-        showCancelButton: true,
-        confirmButtonColor: '#000',
-        cancelButtonColor: '#e5e7eb',
-        confirmButtonText: 'Tiến hành thanh toán',
-        cancelButtonText: '<span style="color:#000">Hủy bỏ</span>',
-        customClass: { confirmButton: 'rounded-pill px-4 py-2', cancelButton: 'rounded-pill px-4 py-2', popup: 'rounded-4' },
-        backdrop: `rgba(0,0,0,0.4)`
-    }).then((result) => {
-        if (result.isConfirmed) {
-            Swal.fire({
-                title: 'Đơn hàng thành công',
-                text: `Hệ thống sẽ gửi ${productName} tới email của bạn.`,
-                icon: 'success',
-                confirmButtonColor: '#000',
-                customClass: { confirmButton: 'rounded-pill px-5 py-2', popup: 'rounded-4' }
-            });
-        }
-    });
-}
-
-function switchTab(tabName, event) {
-    document.getElementById('products-section').style.display = 'none';
-    document.getElementById('blog-section').style.display = 'none';
-    document.getElementById('detail-section').style.display = 'none'; // Đóng trang detail nếu đang mở
-
-    if (tabName === 'products') {
-        document.getElementById('products-section').style.display = 'block';
-    } else if (tabName === 'blog') {
-        document.getElementById('blog-section').style.display = 'block';
+        return container;
     }
 
-    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-    event.target.closest('.tab-btn').classList.add('active');
-}
+    function show(type, message, title, duration) {
+        const cfg = TYPES[type] || TYPES.info;
+        const id = 'toast-' + (++counter);
+        const dur = (duration !== undefined && duration !== null) ? duration : cfg.duration;
+        const finalTitle = title || cfg.title;
 
-const products = {
-    'chatgpt-plus': {
-        title: 'Tài khoản ChatGPT Plus (1 Tháng)',
-        category: 'ChatGPT',
-        price: '450.000đ',
-        image: 'https://images.unsplash.com/photo-1675271591211-126ad94e4958?auto=format&fit=crop&q=80&w=800&h=500',
-        description: 'Nâng cấp lên ChatGPT Plus và tận hưởng truy cập không giới hạn vào AI tiên tiến nhất, phản hồi siêu tốc độ và truy cập vào các tính năng mới ngay lập tức.',
-        options: ['Gói Cấp Tốc (Bảo hành 1 Ngày)', 'Gói Tiêu Chuẩn (Bảo hành 7 Ngày)', 'Gói Premium (Bảo hành 30 Ngày)']
-    },
-    'youtube-premium': {
-        title: 'YouTube Premium (Mail Chính Chủ)',
-        category: 'YouTube',
-        price: '250.000đ',
-        image: 'https://images.unsplash.com/photo-1611162617474-5b21e879e113?auto=format&fit=crop&q=80&w=800&h=500',
-        description: 'Trải nghiệm xem video không quảng cáo, phát trong nền và tải xuống dễ dàng. Nâng cấp trực tiếp trên email cá nhân của bạn, tuyệt đối an toàn.',
-        options: ['Bảo hành trọn đời (Gói Cá nhân)', 'Bảo hành 1 Năm (Gói Gia đình)']
-    },
-    'github-copilot': {
-        title: 'Github Copilot (Gói Dev 1 Năm)',
-        category: 'GitHub',
-        price: '150.000đ',
-        image: 'https://images.unsplash.com/photo-1618401471353-b98afee0b2eb?auto=format&fit=crop&q=80&w=800&h=500',
-        description: 'Trợ lý lập trình AI đẳng cấp. Tự động đề xuất code, tiết kiệm hàng giờ gõ phím. Hỗ trợ mọi ngôn ngữ lập trình phổ biến nhất hiện nay.',
-        options: ['Gói Sinh Viên (Bảo hành 6 tháng)', 'Gói Chuyên Nghiệp (Bảo hành 1 Năm)']
-    },
-    'netflix-premium': {
-        title: 'Netflix Premium 4K (1 Tháng)',
-        category: 'Netflix',
-        price: '85.000đ',
-        image: 'https://images.unsplash.com/photo-1522869635100-9f4c5e86aa37?auto=format&fit=crop&q=80&w=800&h=500',
-        description: 'Đắm chìm vào thế giới điện ảnh với chất lượng Ultra HD 4K sắc nét nhất. Profile riêng tư được bảo mật bằng mã PIN.',
-        options: ['Profile Tiêu Chuẩn (Bảo hành 1 Tháng)', 'Profile Cao Cấp 4K (Bảo hành 3 Tháng)']
-    }
-};
+        const toast = document.createElement('div');
+        toast.id = id;
+        toast.className = `app-toast toast-${type}`;
+        toast.setAttribute('role', 'alert');
+        toast.setAttribute('aria-live', type === 'error' ? 'assertive' : 'polite');
 
-let currentProductId = null;
-
-function showProductDetail(productId) {
-    const product = products[productId];
-    if (!product) return;
-
-    currentProductId = productId;
-
-    document.getElementById('detail-image').src = product.image;
-    document.getElementById('detail-category').textContent = product.category;
-    document.getElementById('detail-title').textContent = product.title;
-    document.getElementById('detail-price').textContent = product.price;
-    document.getElementById('detail-desc').textContent = product.description;
-
-    const optionsHTML = product.options.map((option, index) => 
-        `<div class="option-item ${index === 0 ? 'selected' : ''}" onclick="selectOption(this)">
-            <div class="d-flex align-items-center">
-                <div style="width: 16px; height: 16px; border: 1px solid #000; border-radius: 50%; margin-right: 12px; display: flex; align-items: center; justify-content: center;">
-                    <div class="radio-dot" style="width: 8px; height: 8px; background: ${index === 0 ? '#000' : 'transparent'}; border-radius: 50%;"></div>
-                </div>
-                <span>${option}</span>
+        toast.innerHTML = `
+            <div class="app-toast-icon">
+                <i class="fa-solid ${cfg.icon}"></i>
             </div>
-        </div>`
-    ).join('');
-    document.getElementById('product-options').innerHTML = optionsHTML;
+            <div class="app-toast-body">
+                <div class="app-toast-title">${finalTitle}</div>
+                ${message ? `<div class="app-toast-message">${message}</div>` : ''}
+            </div>
+            <button class="app-toast-close" aria-label="Đóng thông báo">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            ${dur > 0 ? `<div class="app-toast-progress" style="transition-duration:${dur}ms"></div>` : ''}
+        `;
 
-    document.getElementById('products-section').style.display = 'none';
-    document.getElementById('blog-section').style.display = 'none';
-    document.getElementById('detail-section').style.display = 'block';
-    
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-}
+        // Close button
+        toast.querySelector('.app-toast-close').addEventListener('click', (e) => {
+            e.stopPropagation();
+            dismiss(id);
+        });
 
-function goBackToProducts(event) {
-    event.preventDefault();
-    document.getElementById('detail-section').style.display = 'none';
-    document.getElementById('products-section').style.display = 'block';
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-}
+        // Click entire toast to dismiss
+        toast.addEventListener('click', () => dismiss(id));
 
-function selectOption(element) {
-    document.querySelectorAll('.option-item').forEach(item => {
-        item.classList.remove('selected');
-        item.querySelector('.radio-dot').style.background = 'transparent';
-    });
-    element.classList.add('selected');
-    element.querySelector('.radio-dot').style.background = '#000';
-}
+        getContainer().appendChild(toast);
 
-function addToCartFromDetail() {
-    if (products[currentProductId]) addToCart(products[currentProductId].title);
-}
+        // Animate progress bar
+        if (dur > 0) {
+            const bar = toast.querySelector('.app-toast-progress');
+            if (bar) {
+                // Force reflow to start animation
+                requestAnimationFrame(() => {
+                    requestAnimationFrame(() => {
+                        bar.style.transform = 'scaleX(0)';
+                    });
+                });
+                setTimeout(() => dismiss(id), dur);
+            }
+        }
 
-function showCheckout() {
-    if (products[currentProductId]) buyNow(products[currentProductId].title);
-}
-
-function filterProducts(category, event) {
-    const allProducts = document.querySelectorAll('.product-item');
-    const allButtons = document.querySelectorAll('.cat-pill');
-
-    if (allButtons.length > 0 && event && event.target) {
-        allButtons.forEach(btn => btn.classList.remove('active'));
-        const btn = event.target.closest('.cat-pill');
-        if (btn) btn.classList.add('active');
+        return id;
     }
 
-    allProducts.forEach((product, index) => {
-        if (category === 'all' || product.dataset.category === category) {
-            product.style.display = 'block';
-            // Reset animation for fresh load feel
-            product.style.animation = 'none';
-            product.offsetHeight; // trigger reflow
-            product.style.animation = `fadeIn 0.5s ease forwards ${index * 0.1}s`;
-        } else {
-            product.style.display = 'none';
-        }
+    function dismiss(id) {
+        const toast = document.getElementById(id);
+        if (!toast || toast.classList.contains('toast-hiding')) return;
+        toast.classList.add('toast-hiding');
+        toast.addEventListener('animationend', () => toast.remove(), { once: true });
+        // Fallback remove
+        setTimeout(() => toast.remove(), 500);
+    }
+
+    function dismissAll() {
+        document.querySelectorAll('.app-toast').forEach(t => {
+            if (!t.classList.contains('toast-hiding')) {
+                t.classList.add('toast-hiding');
+                setTimeout(() => t.remove(), 400);
+            }
+        });
+    }
+
+    return {
+        success: (message, title, duration) => show('success', message, title, duration),
+        error:   (message, title, duration) => show('error',   message, title, duration),
+        warning: (message, title, duration) => show('warning', message, title, duration),
+        info:    (message, title, duration) => show('info',    message, title, duration),
+        loading: (message, title)           => show('loading', message, title, 0),
+        dismiss: (id)                       => dismiss(id),
+        dismissAll,
+    };
+})();
+
+// Helper: copy text to clipboard and show AppNotify toast
+function copyText(textOrId) {
+    let text = textOrId;
+    // If it is a selector or element ID, try to read the inner text
+    const el = document.getElementById(textOrId);
+    if (el) {
+        text = el.innerText || el.textContent;
+    }
+    
+    navigator.clipboard.writeText(text).then(() => {
+        AppNotify.success('Đã sao chép: ' + text, 'Sao chép', 1800);
+    }).catch(err => {
+        console.error('Failed to copy: ', err);
+        AppNotify.error('Không thể sao chép vào clipboard.', 'Lỗi');
     });
+}
+
+// Helper: Toggle password field visibility
+function togglePass() {
+    const p = document.getElementById('u_pass');
+    if (p) {
+        p.type = p.type === 'password' ? 'text' : 'password';
+    }
 }
 
 // Scroll to Top Logic
@@ -203,4 +164,118 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         });
     }
+});
+
+// Product detail variant selection (visual updates only)
+function selectOption(element) {
+    document.querySelectorAll('.option-item').forEach(item => {
+        item.classList.remove('selected');
+    });
+    element.classList.add('selected');
+
+    // Also check the nested radio input
+    const radio = element.querySelector('input[type="radio"]');
+    if (radio) {
+        radio.checked = true;
+    }
+
+    const price    = parseFloat(element.dataset.price) || 0;
+    const original = parseFloat(element.dataset.originalPrice) || 0;
+    const stock    = element.dataset.stock !== undefined ? parseInt(element.dataset.stock, 10) : null;
+
+    const fmt = new Intl.NumberFormat('vi-VN');
+
+    const cur  = document.getElementById('detail-current-price');
+    const orig = document.getElementById('detail-original-price');
+    const badge = document.getElementById('detail-discount-badge');
+    const pct   = document.getElementById('detail-discount-pct');
+
+    if (cur) cur.innerText = fmt.format(price) + 'đ';
+
+    if (orig && badge && pct) {
+        if (original > price && price > 0) {
+            const off = Math.round((1 - price / original) * 100);
+            orig.innerText = fmt.format(original) + 'đ';
+            orig.style.display = '';
+            pct.innerText = off;
+            badge.style.display = '';
+        } else {
+            orig.style.display = 'none';
+            badge.style.display = 'none';
+        }
+    }
+
+    if (stock !== null && stock !== undefined) {
+        const stockEl = document.getElementById('detail-stock');
+        if (stockEl) stockEl.innerText = stock;
+    }
+}
+
+// Homepage: purchase popup notification cycle (visual only)
+function initRecentPurchasePopup() {
+    const popup = document.getElementById('recent-purchase-popup');
+    if (!popup) return;
+
+    if (typeof fakeOrders === 'undefined' || fakeOrders.length === 0) {
+        popup.style.display = 'none';
+        return;
+    }
+
+    let orderIndex = 0;
+    let hideTimeout = null;
+
+    function showNextOrder() {
+        if (orderIndex >= fakeOrders.length) orderIndex = 0;
+        const order = fakeOrders[orderIndex];
+
+        const avatarBg = document.getElementById('popup-avatar-bg');
+        const avatarTxt = document.getElementById('popup-avatar-text');
+        const custName = document.getElementById('popup-customer-name');
+        const prodName = document.getElementById('popup-product-name');
+        const prodPrice = document.getElementById('popup-product-price');
+        const timeEl = document.getElementById('popup-time');
+        const locEl = document.getElementById('popup-location');
+
+        if (avatarBg) avatarBg.style.backgroundColor = order.bg;
+        if (avatarTxt) avatarTxt.innerText = order.initial;
+        if (custName) custName.innerText = order.name;
+        if (prodName) prodName.innerText = order.product;
+        if (prodPrice) prodPrice.innerText = order.price;
+        if (timeEl) timeEl.innerText = order.time;
+        if (locEl) locEl.innerText = order.location;
+
+        popup.classList.add('show');
+        const progressBar = document.getElementById('purchase-progress-bar');
+        if (progressBar) {
+            progressBar.style.width = '0%';
+            setTimeout(() => {
+                progressBar.style.transition = 'width 5s linear';
+                progressBar.style.width = '100%';
+            }, 10);
+        }
+
+        hideTimeout = setTimeout(() => {
+            popup.classList.remove('show');
+            if (progressBar) {
+                progressBar.style.transition = 'none';
+                progressBar.style.width = '0%';
+            }
+            orderIndex++;
+            setTimeout(showNextOrder, 5000);
+        }, 5000);
+    }
+
+    setTimeout(showNextOrder, 3000);
+}
+
+function closePurchasePopup() {
+    const popup = document.getElementById('recent-purchase-popup');
+    if (popup) {
+        popup.classList.remove('show');
+    }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    // Initialize the visual popup notification
+    initRecentPurchasePopup();
 });
