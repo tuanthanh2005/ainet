@@ -53,7 +53,7 @@ $missing = max(0, $qty - $got);
                                     </div>
                                     <div>
                                         <h6 class="fw-bold mb-1 text-dark">Giao hàng thủ công</h6>
-                                        <p class="text-muted small mb-0">Hệ thống hiện tại hết gói sẵn có trong kho. Bạn hãy sao chép mã đơn hàng dưới đây gửi cho Admin qua Telegram hoặc Zalo để nhận tài khoản/key lập tức.</p>
+                                        <p class="text-muted small mb-0">Hệ thống hiện tại hết gói sẵn có trong kho. Bạn hãy Coppy hàng dưới đây gửi cho Admin qua Telegram hoặc Zalo để nhận tài khoản/key lập tức.</p>
                                     </div>
                                 </div>
                                 <div class="bg-white border rounded-3 p-3 d-flex align-items-center gap-2 mb-3">
@@ -97,7 +97,7 @@ $missing = max(0, $qty - $got);
                                 <?php if ($missing > 0): ?>
                                     <div class="alert alert-warning border-0 rounded-3 mt-3 mb-0 small">
                                         <i class="fa-solid fa-circle-info me-2"></i>
-                                        Còn <strong><?= $missing ?></strong> sản phẩm chưa giao do hết kho. Hãy sao chép mã đơn
+                                        Còn <strong><?= $missing ?></strong> sản phẩm chưa giao do hết kho. Hãy copy mã đơn
                                         <code class="px-2 py-1 bg-white border rounded">#<?= htmlspecialchars($order['id']) ?></code>
                                         và gửi cho admin để được giao bổ sung.
                                     </div>

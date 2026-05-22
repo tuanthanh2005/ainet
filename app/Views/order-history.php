@@ -105,7 +105,7 @@ foreach (($orders ?? []) as $o) {
                                     </div>
                                     <div class="oh-id-row">
                                         <code class="oh-id">#<?= htmlspecialchars($order['id']) ?></code>
-                                        <button type="button" class="oh-copy-mini" onclick="copyOrderText(this, '#<?= htmlspecialchars($order['id']) ?>')" title="Sao chép mã đơn">
+                                        <button type="button" class="oh-copy-mini" onclick="copyOrderText(this, '#<?= htmlspecialchars($order['id']) ?>')" title="Coppy">
                                             <i class="fa-regular fa-copy"></i>
                                         </button>
                                         <span class="oh-date">
@@ -169,14 +169,14 @@ foreach (($orders ?? []) as $o) {
                                                 </div>
                                                 <div>
                                                     <h6 class="fw-bold mb-1">Đơn của bạn</h6>
-                                                    <p class="text-muted small mb-0">Đơn của bạn đã thanh toán thành công. Hãy <strong>sao chép mã đơn</strong> bên dưới và gửi cho admin để được giao thủ công nhanh nhất.</p>
+                                                    <p class="text-muted small mb-0">Đơn của bạn đã thanh toán thành công. Hãy <strong>Coppy</strong> bên dưới và gửi cho admin để được giao thủ công nhanh nhất.</p>
                                                 </div>
                                             </div>
                                             <div class="oh-code-box">
                                                 <code class="flex-grow-1">#<?= htmlspecialchars($order['id']) ?></code>
                                                 <button type="button" class="btn btn-dark px-3"
                                                         onclick="copyOrderText(this, '#<?= htmlspecialchars($order['id']) ?>')">
-                                                    <i class="fa-regular fa-copy me-1"></i>Sao chép mã đơn
+                                                    <i class="fa-regular fa-copy me-1"></i>Copy
                                                 </button>
                                             </div>
                                             <div class="d-flex flex-wrap gap-2 mt-3">
@@ -225,11 +225,11 @@ foreach (($orders ?? []) as $o) {
                                         <?php if ($missing > 0): ?>
                                             <div class="alert alert-warning border-0 rounded-3 mt-3 mb-0 small d-flex align-items-center gap-2 flex-wrap">
                                                 <i class="fa-solid fa-circle-info"></i>
-                                                <span>Còn <strong><?= $missing ?></strong> sản phẩm chưa giao do hết kho. Hãy sao chép mã đơn</span>
+                                                <span>Còn <strong><?= $missing ?></strong> sản phẩm chưa giao do hết kho. Hãy <strong>copy</strong> mã đơn</span>
                                                 <code class="px-2 py-1 bg-white border rounded">#<?= htmlspecialchars($order['id']) ?></code>
                                                 <button type="button" class="btn btn-sm btn-dark"
                                                         onclick="copyOrderText(this, '#<?= htmlspecialchars($order['id']) ?>')">
-                                                    <i class="fa-regular fa-copy me-1"></i>Sao chép
+                                                    <i class="fa-regular fa-copy me-1"></i>Copy
                                                 </button>
                                                 <span>và gửi cho admin để được giao bổ sung.</span>
                                             </div>
@@ -454,6 +454,12 @@ foreach (($orders ?? []) as $o) {
     border: 1px solid #efefef;
     border-radius: 10px;
     padding: 10px 12px;
+}
+.oh-code-box .btn {
+    flex: 0 0 auto;
+    white-space: nowrap;
+    padding-left: 12px !important;
+    padding-right: 12px !important;
 }
 .oh-code-box code {
     font-size: 1.1rem;
