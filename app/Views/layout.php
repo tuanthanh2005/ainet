@@ -669,6 +669,31 @@
     <!-- Link to separated JS -->
     <script src="<?php echo asset('js/main.js'); ?>"></script>
 
+    <!-- Debug Log for Modals -->
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        console.log('[Debug] DOM loaded. Bootstrap check:', typeof bootstrap !== 'undefined' ? 'OK' : 'MISSING');
+        
+        document.querySelectorAll('[data-bs-toggle="modal"]').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const target = this.getAttribute('data-bs-target');
+                console.log('[Debug] Button clicked:', this.textContent.trim(), '| Target:', target);
+                const el = document.querySelector(target);
+                if (!el) {
+                    console.error('[Debug] Target modal element not found:', target);
+                } else {
+                    console.log('[Debug] Target modal element exists in DOM:', el);
+                }
+                if (typeof bootstrap === 'undefined') {
+                    console.error('[Debug] Bootstrap JS is not loaded!');
+                } else {
+                    console.log('[Debug] Bootstrap JS is loaded.');
+                }
+            });
+        });
+    });
+    </script>
+
     <!-- Flash Session Notifications via AppNotify -->
     <?php if ($flashSuccess || $flashError): ?>
     <script>
