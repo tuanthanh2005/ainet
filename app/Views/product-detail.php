@@ -187,8 +187,6 @@
                 <div class="tab-pane fade show active" id="desc" role="tabpanel" aria-labelledby="desc-tab">
                     <div class="text-muted lh-lg" style="font-size: 0.95rem;">
                         <?php $detailDescription = trim((string) ($product['description'] ?? '')) ?: $shortDescription; ?>
-                        <p class="mb-4">Lưu ý: Bảo Hành</p>
-                        <p class="mb-4">Tài khoản <?= htmlspecialchars($product['title']) ?> bao gồm:</p>
                         <?php if ($detailDescription !== ''): ?>
                             <div class="product-detail-description">
                                 <?php if ($detailDescription !== strip_tags($detailDescription)): ?>
