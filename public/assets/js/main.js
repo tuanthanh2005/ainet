@@ -164,6 +164,8 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         });
     }
+
+    setupAuthRequiredActions();
 });
 
 // Product detail variant selection (visual updates only)
@@ -209,6 +211,40 @@ function selectOption(element) {
         const stockEl = document.getElementById('detail-stock');
         if (stockEl) stockEl.innerText = stock;
     }
+}
+
+function openLoginPrompt(message) {
+    const text = message || 'Bạn cần đăng nhập để tiếp tục.';
+    AppNotify.info(text, 'Yêu cầu đăng nhập');
+
+    const loginModalEl = document.getElementById('loginModal');
+    if (loginModalEl && typeof bootstrap !== 'undefined') {
+        const loginModal = bootstrap.Modal.getOrCreateInstance(loginModalEl);
+        loginModal.show();
+    }
+}
+
+function setupAuthRequiredActions() {
+    if (window.APP_USER_LOGGED_IN) {
+        return;
+    }
+
+    document.querySelectorAll('a[data-auth-required="true"]').forEach(anchor => {
+        anchor.addEventListener('click', function(event) {
+            event.preventDefault();
+            openLoginPrompt('Bạn cần đăng nhập để mua sản phẩm.');
+        });
+    });
+
+    document.querySelectorAll('form[data-requires-login="buy"]').forEach(form => {
+        form.addEventListener('submit', function(event) {
+            const actionType = form.querySelector('[name="action_type"]');
+            if (actionType && actionType.value === 'buy') {
+                event.preventDefault();
+                openLoginPrompt('Bạn cần đăng nhập để mua ngay.');
+            }
+        });
+    });
 }
 
 // Homepage: purchase popup notification cycle (visual only)

@@ -24,6 +24,9 @@
 </head>
 
 <body>
+    <script>
+        window.APP_USER_LOGGED_IN = <?php echo $currentUser ? 'true' : 'false'; ?>;
+    </script>
     <!-- Global Toast Notification Container -->
     <div id="app-toast-container" role="region" aria-label="Thông báo" aria-live="polite"></div>
     <?php

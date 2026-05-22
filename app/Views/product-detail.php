@@ -79,7 +79,7 @@
                     <?= htmlspecialchars($product['description']) ?>
                 </p>
 
-                <form method="POST" action="<?php echo url('index.php?action=productAction'); ?>">
+                <form method="POST" action="<?php echo url('index.php?action=productAction'); ?>" data-requires-login="buy">
                     <?php echo Csrf::field(); ?>
                     <input type="hidden" name="product_id" value="<?= htmlspecialchars($product['id']) ?>">
                     <input type="hidden" name="action_type" id="detail-action-type" value="buy">

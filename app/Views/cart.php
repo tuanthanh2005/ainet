@@ -78,7 +78,7 @@
                         
                         <div class="d-grid gap-2">
                             <?php foreach ($cart as $item): ?>
-                                <a href="<?= url('index.php?action=checkoutPage&product_id=' . $item['id'] . '&variant_idx=0') ?>" class="btn btn-dark py-3 rounded-3 d-flex justify-content-between align-items-center px-4">
+                                <a href="<?= url('index.php?action=checkoutPage&product_id=' . $item['id'] . '&variant_idx=0') ?>" class="btn btn-dark py-3 rounded-3 d-flex justify-content-between align-items-center px-4" data-auth-required="true">
                                     <span>Mua ngay <?= htmlspecialchars($item['title']) ?></span>
                                     <i class="fa-solid fa-chevron-right fs-small"></i>
                                 </a>

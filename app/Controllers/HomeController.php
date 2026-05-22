@@ -647,14 +647,21 @@ class HomeController extends Controller {
     public function removeFromCart() {
         $productId = $_GET['id'] ?? '';
         if (isset($_SESSION['cart'])) {
+            $found = false;
             foreach ($_SESSION['cart'] as $key => $item) {
                 if ($item['id'] == $productId) {
+                    $found = true;
+                    $_SESSION['flash_success'] = 'Đã xóa "' . $item['title'] . '" khỏi giỏ hàng.';
                     unset($_SESSION['cart'][$key]);
                     break;
                 }
             }
-            // Re-index array
             $_SESSION['cart'] = array_values($_SESSION['cart']);
+            if (!$found) {
+                $_SESSION['flash_error'] = 'Không tìm thấy sản phẩm trong giỏ hàng.';
+            }
+        } else {
+            $_SESSION['flash_error'] = 'Giỏ hàng đang trống.';
         }
         header('Location: ' . url('index.php?action=cart'));
         exit;
@@ -665,16 +672,26 @@ class HomeController extends Controller {
         $change = (int)($_GET['change'] ?? 0);
         
         if (isset($_SESSION['cart']) && $productId !== '') {
+            $found = false;
             foreach ($_SESSION['cart'] as $key => &$item) {
                 if ($item['id'] == $productId) {
+                    $found = true;
                     $item['quantity'] += $change;
                     if ($item['quantity'] <= 0) {
+                        $_SESSION['flash_success'] = 'Đã xóa "' . $item['title'] . '" khỏi giỏ hàng.';
                         unset($_SESSION['cart'][$key]);
+                    } else {
+                        $_SESSION['flash_success'] = 'Cập nhật số lượng "' . $item['title'] . '" thành ' . $item['quantity'] . '.';
                     }
                     break;
                 }
             }
             $_SESSION['cart'] = array_values($_SESSION['cart']);
+            if (!$found) {
+                $_SESSION['flash_error'] = 'Không tìm thấy sản phẩm cần cập nhật.';
+            }
+        } else {
+            $_SESSION['flash_error'] = 'Không thể cập nhật giỏ hàng.';
         }
 
         header('Location: ' . url('index.php?action=cart'));

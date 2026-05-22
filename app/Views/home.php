@@ -74,7 +74,7 @@
                             <?php endif; ?>
                             <div class="product-actions position-relative" style="z-index: 2;">
                                 <a href="<?= url('index.php?action=checkoutPage&product_id=' . urlencode($product['id']) . '&variant_idx=0') ?>" 
-                                   class="btn btn-buy shadow-sm">Mua ngay</a>
+                                   class="btn btn-buy shadow-sm" data-auth-required="true">Mua ngay</a>
                                 <a href="<?= url('index.php?action=addToCart&id=' . urlencode($product['id'])) ?>" 
                                    class="btn btn-cart-icon shadow-sm" title="Thêm">
                                     <i class="fa-solid fa-plus"></i>
