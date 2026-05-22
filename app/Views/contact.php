@@ -1,8 +1,8 @@
 <div class="contact-page py-5">
     <div class="contact-container fade-in-element">
-        <div class="row g-5">
+        <div class="row gy-5 gx-4 gx-lg-5">
             <div class="col-lg-5">
-                <div class="contact-info-card bg-dark text-white p-5 rounded-4 h-100 shadow-lg">
+                <div class="contact-info-card bg-dark text-white p-4 p-md-5 rounded-4 h-100 shadow-lg">
                     <h3 class="fw-bold mb-4">
 
 
@@ -57,7 +57,7 @@
                 </div>
             </div>
             <div class="col-lg-7">
-                <div class="contact-form-wrapper bg-white p-5 rounded-4 shadow-sm border">
+                <div class="contact-form-wrapper bg-white p-4 p-md-5 rounded-4 shadow-sm border">
                     <h3 class="fw-bold mb-4 text-dark">Gửi tin nhắn cho chúng tôi</h3>
                     <form id="contactForm">
                         <div class="row g-4">
