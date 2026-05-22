@@ -706,24 +706,6 @@
                 });
             });
         }
-
-        // Failsafe: Đảm bảo nút modal hoạt động ngay cả khi Bootstrap chậm load
-        document.querySelectorAll('[data-bs-toggle="modal"]').forEach(btn => {
-            if (!btn._bsModalBound) {
-                btn._bsModalBound = true;
-                btn.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    const targetId = this.getAttribute('data-bs-target');
-                    if (!targetId) return;
-                    const el = document.querySelector(targetId);
-                    if (!el) return;
-                    if (typeof bootstrap !== 'undefined') {
-                        const m = bootstrap.Modal.getOrCreateInstance(el);
-                        m.show();
-                    }
-                });
-            }
-        });
     });
     </script>
     <?php endif; ?>
