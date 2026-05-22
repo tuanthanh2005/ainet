@@ -166,11 +166,9 @@ class TelegramService {
             $lines[] = "⏰ {$time}";
             $lines[] = "_Trả lời tại trang admin chat_";
 
-            if (!self::sendRaw(implode("\n", $lines))) {
-                error_log('Telegram new chat notification failed or is not configured.');
-            }
+            self::sendRaw(implode("\n", $lines));
         } catch (Throwable $e) {
-            error_log('Telegram new chat notification error: ' . $e->getMessage());
+            // Silent fail
         }
     }
 
