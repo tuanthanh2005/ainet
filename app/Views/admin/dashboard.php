@@ -390,6 +390,20 @@
             font-weight: 600;
         }
         .rich-toolbar .btn[data-arg^="H"] { width: auto; padding: 0 8px; }
+        .product-detail-toolbar .btn {
+            width: auto;
+            min-width: 32px;
+            height: 32px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 8px;
+            font-weight: 600;
+        }
+        .product-detail-toolbar .btn.icon-only {
+            width: 32px;
+            padding: 0;
+        }
         .rich-editor {
             min-height: 220px;
             max-height: 360px;
@@ -1020,6 +1034,15 @@
                             </div>
                             <div class="col-12 mb-3">
                                 <label class="form-label">Mô tả chi tiết / Nội dung bộ công cụ</label>
+                                <div class="product-detail-toolbar btn-group flex-wrap mb-1" role="toolbar" aria-label="Công cụ định dạng mô tả sản phẩm">
+                                    <button type="button" class="btn btn-sm btn-light border" data-insert="# " title="Tiêu đề H1">H1</button>
+                                    <button type="button" class="btn btn-sm btn-light border" data-insert="## " title="Tiêu đề H2">H2</button>
+                                    <button type="button" class="btn btn-sm btn-light border icon-only" data-wrap="**" title="Đậm"><i class="fa-solid fa-bold"></i></button>
+                                    <button type="button" class="btn btn-sm btn-light border icon-only" data-insert="- " title="Danh sách"><i class="fa-solid fa-list-ul"></i></button>
+                                    <button type="button" class="btn btn-sm btn-light border" data-template="table" title="Bảng gói">Bảng</button>
+                                    <button type="button" class="btn btn-sm btn-light border" data-template="cta" title="CTA">CTA</button>
+                                    <button type="button" class="btn btn-sm btn-light border" data-template="seo" title="Khung mô tả SEO">Mẫu SEO</button>
+                                </div>
                                 <textarea class="form-control" id="p_detail_desc" rows="5"
                                     placeholder="Nhập nội dung hiển thị trong tab Mô tả chi tiết. Ví dụ: Bộ công cụ bao gồm..., lưu ý sử dụng, chính sách kèm theo..."></textarea>
                             </div>
@@ -1299,6 +1322,51 @@
                 container.innerHTML = '<p class="text-muted small mb-0 text-center">Chưa có loại nào. Nhấn "Thêm loại" để bắt đầu.</p>';
             }
         }
+
+        function insertIntoProductDetail(textarea, text) {
+            const start = textarea.selectionStart || 0;
+            const end = textarea.selectionEnd || 0;
+            const before = textarea.value.slice(0, start);
+            const after = textarea.value.slice(end);
+            const prefix = before && !before.endsWith('\n') ? '\n' : '';
+            textarea.value = before + prefix + text + after;
+            const cursor = (before + prefix + text).length;
+            textarea.focus();
+            textarea.setSelectionRange(cursor, cursor);
+        }
+
+        function wrapProductDetailSelection(textarea, marker) {
+            const start = textarea.selectionStart || 0;
+            const end = textarea.selectionEnd || 0;
+            const selected = textarea.value.slice(start, end) || 'nội dung';
+            textarea.value = textarea.value.slice(0, start) + marker + selected + marker + textarea.value.slice(end);
+            textarea.focus();
+            textarea.setSelectionRange(start + marker.length, start + marker.length + selected.length);
+        }
+
+        function productDetailTemplate(type) {
+            if (type === 'table') {
+                return "\n| Gói dịch vụ | Thời hạn | Hình thức | Phù hợp với |\n|---|---|---|---|\n| Gói 1 | 1 tháng | Tự động | Cá nhân |\n";
+            }
+            if (type === 'cta') {
+                return "\n## Mua hàng tự động 24/7 tại AI CỦA TÔI\nChọn gói phù hợp, thanh toán QR và nhận sản phẩm tự động sau khi giao dịch thành công. Cần hỗ trợ nhanh, liên hệ Zalo 0569012134 hoặc Telegram @specademy.\n";
+            }
+            return "\n# Tên sản phẩm chuẩn SEO\n\nSapo ngắn giới thiệu lợi ích chính và từ khóa sản phẩm.\n\n## Vì sao nên mua tại AI CỦA TÔI?\n- Giao hàng tự động 24/7 sau thanh toán.\n- Bảo hành 1 đổi 1 trong thời gian sử dụng.\n- Hỗ trợ nhanh qua Zalo 0569012134 hoặc Telegram @specademy.\n\n## Tính năng và lợi ích nổi bật\n- \n- \n- \n\n## Bảng giá và tùy chọn gói\n| Gói dịch vụ | Thời hạn | Hình thức | Phù hợp với |\n|---|---|---|---|\n| Gói 1 | 1 tháng | Tự động | Cá nhân |\n\n## Chính sách bảo hành\n- Bảo hành 1 đổi 1 nếu lỗi kỹ thuật.\n- Hỗ trợ trong suốt thời gian sử dụng.\n\n## Hướng dẫn mua hàng\n1. Chọn gói trên aicuatoi.net.\n2. Thanh toán bằng QR ngân hàng.\n3. Hệ thống xác nhận và giao hàng tự động.\n";
+        }
+
+        document.querySelectorAll('.product-detail-toolbar button').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const textarea = document.getElementById('p_detail_desc');
+                if (!textarea) return;
+                if (btn.dataset.wrap) {
+                    wrapProductDetailSelection(textarea, btn.dataset.wrap);
+                } else if (btn.dataset.template) {
+                    insertIntoProductDetail(textarea, productDetailTemplate(btn.dataset.template));
+                } else {
+                    insertIntoProductDetail(textarea, btn.dataset.insert || '');
+                }
+            });
+        });
 
         function saveProduct() {
             const variants = [];
