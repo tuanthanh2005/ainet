@@ -383,6 +383,10 @@
         <?php endif; ?>
     </div>
 
+    <!-- Bootstrap & SweetAlert2 — Load TRƯỚC các modal để data-bs-toggle hoạt động -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
     <?php if ($currentUser && ($currentUser['role'] ?? 'user') !== 'admin'): ?>
     <!-- User chat box -->
     <div id="user-chatbox" class="user-chatbox shadow-lg" style="display:none;">
@@ -661,10 +665,6 @@
     })();
     </script>
     <?php endif; ?>
-
-    <!-- Bootstrap & SweetAlert2 — Load TRƯỚC các modal để data-bs-toggle hoạt động -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <!-- Link to separated JS -->
     <script src="<?php echo asset('js/main.js'); ?>"></script>
