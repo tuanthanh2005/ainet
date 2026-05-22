@@ -251,6 +251,8 @@ $missing = max(0, $qty - $got);
 .qr-box {
     width: min(280px, 100%);
     max-width: 100%;
+    margin-left: auto;
+    margin-right: auto;
     border: 2px dashed #dee2e6 !important;
 }
 .sepay-qr-img {
