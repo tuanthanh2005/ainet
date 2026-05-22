@@ -167,7 +167,7 @@ $missing = max(0, $qty - $got);
                                             Thiếu cấu hình ngân hàng. Vui lòng nhập Ngân hàng, Số tài khoản và Tên chủ tài khoản trong admin.
                                         </div>
                                     <?php else: ?>
-                                        <img src="<?= htmlspecialchars($qrUrl, ENT_QUOTES, 'UTF-8') ?>" alt="SePay QR" class="img-fluid" style="max-width: 280px; min-height: 280px;">
+                                        <img src="<?= htmlspecialchars($qrUrl, ENT_QUOTES, 'UTF-8') ?>" alt="SePay QR" class="sepay-qr-img">
                                     <?php endif; ?>
                                     
                                     <!-- Laser scanning visual effect -->
@@ -248,7 +248,18 @@ $missing = max(0, $qty - $got);
 .stepper-item.completed .step-counter { background: #198754; color: #fff; }
 .stepper-line { position: absolute; top: 20px; left: 10%; width: 80%; height: 4px; background: #e9ecef; z-index: 1; border-radius: 2px; }
 .success-icon-bg { width: 100px; height: 100px; background: #198754; color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 50px; box-shadow: 0 15px 30px rgba(25,135,84,0.3); }
-.qr-box { max-width: 100%; border: 2px dashed #dee2e6 !important; }
+.qr-box {
+    width: min(280px, 100%);
+    max-width: 100%;
+    border: 2px dashed #dee2e6 !important;
+}
+.sepay-qr-img {
+    display: block;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 1 / 1;
+    object-fit: contain;
+}
 .scanning-line {
     position: absolute;
     top: 0;
