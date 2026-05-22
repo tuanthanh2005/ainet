@@ -75,7 +75,7 @@
                     </div>
                 </div>
 
-                <p class="text-muted mb-4 lh-lg" style="font-size: 0.95rem;">
+                <p class="detail-desc mb-4 lh-lg">
                     <?= htmlspecialchars($product['description']) ?>
                 </p>
 
