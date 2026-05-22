@@ -58,10 +58,10 @@ class HomeController extends Controller {
         $remainingProducts = max(0, $totalFilteredProducts - $limit);
 
         Seo::set([
-            'title'       => 'Tài khoản AI Premium chính chủ - ChatGPT, YouTube, GitHub Copilot',
-            'description' => trim($settings['footerDesc'] ?? '') ?: 'Mua tài khoản ChatGPT Plus, YouTube Premium, GitHub Copilot, Netflix giá tốt. Bảo hành 1 đổi 1, kích hoạt trong 5 phút, hỗ trợ 24/7.',
-            'keywords'    => ['tài khoản chatgpt plus', 'youtube premium', 'github copilot', 'netflix premium', 'tài khoản ai', SITENAME],
-            'image'       => $settings['about_image'] ?? '',
+            'title'       => 'Tài khoản AI Premium - Gemini Advanced, ChatGPT, Copilot',
+            'description' => 'Cung cấp tài khoản Gemini Advanced (Google One AI Premium), ChatGPT Plus, YouTube Premium, GitHub Copilot giá tốt nhất. Kích hoạt tự động, bảo hành 1 đổi 1 uy tín.',
+            'keywords'    => ['tài khoản gemini advanced', 'google gemini advanced', 'tài khoản chatgpt plus', 'youtube premium', 'github copilot', 'tài khoản ai', SITENAME],
+            'image'       => url('assets/images/gemini_share.png'),
             'canonical'   => Url::home(),
             'type'        => 'website',
         ]);
@@ -172,16 +172,30 @@ class HomeController extends Controller {
                 'name'        => $product['title'] ?? '',
                 'image'       => $product['image'] ?? '',
                 'description' => $excerpt,
-                'brand'       => ['@type' => 'Brand', 'name' => SITENAME],
+                'sku'         => 'prod_' . ($product['id'] ?? ''),
+                'mpn'         => 'mpn_' . ($product['id'] ?? ''),
+                'brand'       => [
+                    '@type' => 'Brand',
+                    'name'  => SITENAME
+                ],
                 'offers'      => [
                     '@type'         => 'Offer',
                     'priceCurrency' => 'VND',
                     'price'         => (string) ($product['price'] ?? 0),
+                    'priceValidUntil'=> date('Y-12-31'),
+                    'valueAddedTaxIncluded' => 'true',
                     'availability'  => ($product['status'] ?? 'active') === 'active'
                         ? 'https://schema.org/InStock'
                         : 'https://schema.org/OutOfStock',
                     'url'           => Url::product($product),
                 ],
+                'aggregateRating' => [
+                    '@type'       => 'AggregateRating',
+                    'ratingValue' => (string) ($product['rating'] ?? 5),
+                    'reviewCount' => (string) (max(1, (int) ($product['sold_count'] ?? 10))),
+                    'bestRating'  => '5',
+                    'worstRating' => '1',
+                ]
             ],
         ]);
 

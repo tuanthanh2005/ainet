@@ -156,6 +156,13 @@ if ($rawUrl !== '' && empty($_GET['action'])) {
                 $_GET['id']     = Url::extractId($second);
             }
             break;
+        case 'danh-muc':
+            if ($second !== '') {
+                $_GET['action']   = 'index';
+                $_GET['tab']      = 'products';
+                $_GET['category'] = $second;
+            }
+            break;
         case 'tap-chi':
             if ($second !== '') {
                 $_GET['action'] = 'blogDetail';

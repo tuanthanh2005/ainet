@@ -15,6 +15,10 @@ class Url {
         return url('tap-chi/' . $tail);
     }
 
+    public static function category(string $slug): string {
+        return url('danh-muc/' . urlencode($slug));
+    }
+
     public static function about(): string   { return url('gioi-thieu'); }
     public static function contact(): string { return url('lien-he'); }
     public static function cart(): string    { return url('gio-hang'); }

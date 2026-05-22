@@ -25,6 +25,17 @@ class SeoController extends Controller {
         } catch (Throwable $e) { /* ignore */ }
 
         try {
+            foreach (Category::getAll() as $cat) {
+                $urls[] = [
+                    'loc'        => Url::category($cat['slug']),
+                    'priority'   => '0.8',
+                    'changefreq' => 'weekly',
+                    'lastmod'    => $now,
+                ];
+            }
+        } catch (Throwable $e) { /* ignore */ }
+
+        try {
             foreach (Blog::getAll() as $blog) {
                 $urls[] = [
                     'loc'        => Url::blog($blog),

@@ -5,10 +5,10 @@
         $currentCat = $categorySlug ?? ($_GET['category'] ?? '');
         $qParam = !empty($searchQuery) ? '&q=' . urlencode($searchQuery) : '';
         ?>
-        <a href="<?php echo url('index.php?tab=products&category=all' . $qParam); ?>"
+        <a href="<?php echo $qParam ? url('index.php?tab=products&category=all' . $qParam) : Url::home(); ?>"
            class="cat-pill text-decoration-none <?php echo (empty($currentCat) || $currentCat === 'all') ? 'active' : ''; ?>">Tất Cả</a>
         <?php foreach ($categories as $cat): ?>
-            <a href="<?php echo url('index.php?tab=products&category=' . urlencode($cat['slug']) . $qParam); ?>"
+            <a href="<?php echo $qParam ? url('index.php?tab=products&category=' . urlencode($cat['slug']) . $qParam) : Url::category($cat['slug']); ?>"
                class="cat-pill text-decoration-none <?= $cat['is_pro'] ? 'pro-glow' : '' ?> <?php echo ($currentCat === $cat['slug']) ? 'active' : ''; ?>">
                 <?php if ($cat['icon']): ?>
                     <i class="fa-solid <?= htmlspecialchars($cat['icon']) ?> <?= htmlspecialchars($cat['icon_color']) ?>"></i>

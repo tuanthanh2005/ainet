@@ -11,7 +11,8 @@
 <?php if (!empty($metaRefresh)): ?>
     <meta http-equiv="refresh" content="5">
 <?php endif; ?>
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><circle cx='16' cy='16' r='14' fill='%230f172a'/><text x='50%25' y='55%25' font-size='14' font-weight='700' text-anchor='middle' fill='white' font-family='Arial'>AI</text></svg>">
+    <link rel="icon" type="image/png" href="<?php echo url('fvcoin.png'); ?>">
+    <link rel="icon" type="image/png" href="<?php echo url('fvcoin.pgn'); ?>">
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
