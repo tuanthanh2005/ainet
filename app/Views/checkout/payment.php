@@ -148,17 +148,24 @@ $missing = max(0, $qty - $got);
                                 <!-- QR Code SePay -->
                                 <div class="qr-box p-3 bg-white rounded-4 border shadow-sm mb-4 d-inline-block position-relative overflow-hidden">
                                     <?php
-                                    $bankId = trim((string) ($settings['bank_id'] ?? 'MBBank'));
+                                    $bankId = trim((string) ($settings['bank_id'] ?? ''));
                                     $accountNo = trim((string) ($settings['bank_account'] ?? ''));
                                     $accountName = trim((string) ($settings['bank_name'] ?? ''));
                                     $amount = (int) round((float) ($order['amount'] ?? 0));
+                                    $bankConfigMissing = ($bankId === '' || $accountNo === '' || $accountName === '');
                                     
                                     $qrUrl = 'https://qr.sepay.vn/img?acc=' . rawurlencode($accountNo)
                                         . '&bank=' . rawurlencode($bankId)
                                         . '&amount=' . rawurlencode((string) $amount)
                                         . '&des=' . rawurlencode((string) $order['id']);
                                     ?>
-                                    <img src="<?= $qrUrl ?>" alt="SePay QR" class="img-fluid" style="max-width: 280px; min-height: 280px;">
+                                    <?php if ($bankConfigMissing): ?>
+                                        <div class="alert alert-danger text-start mb-0" style="max-width: 280px;">
+                                            Thiếu cấu hình ngân hàng. Vui lòng nhập Ngân hàng, Số tài khoản và Tên chủ tài khoản trong admin.
+                                        </div>
+                                    <?php else: ?>
+                                        <img src="<?= htmlspecialchars($qrUrl, ENT_QUOTES, 'UTF-8') ?>" alt="SePay QR" class="img-fluid" style="max-width: 280px; min-height: 280px;">
+                                    <?php endif; ?>
                                     
                                     <!-- Laser scanning visual effect -->
                                     <div class="scanning-line"></div>

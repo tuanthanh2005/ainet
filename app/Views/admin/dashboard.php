@@ -634,14 +634,14 @@
                                             <label class="form-label">Ngân hàng (VietQR ID)</label>
                                             <input type="text" class="form-control" id="st_bank_id"
                                                 value="<?php echo htmlspecialchars($settings['bank_id'] ?? ''); ?>"
-                                                placeholder="Ví dụ: MBBank, VCB, ICB...">
+                                                placeholder="Ví dụ: KienLongBank, OCB, MBBank, VCB...">
                                             <small class="text-muted">Xem mã ngân hàng tại vietqr.io</small>
                                         </div>
                                         <div class="col-md-6 mb-3">
                                             <label class="form-label">Số tài khoản nhận tiền</label>
                                             <input type="text" class="form-control" id="st_bank_account"
                                                 value="<?php echo htmlspecialchars($settings['bank_account'] ?? ''); ?>"
-                                                placeholder="Nhập số tài khoản của bạn">
+                                                placeholder="Nhập số tài khoản nhận tiền">
                                         </div>
                                         <div class="col-md-6 mb-3">
                                             <label class="form-label">Tên chủ tài khoản</label>

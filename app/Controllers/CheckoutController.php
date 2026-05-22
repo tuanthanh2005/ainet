@@ -237,37 +237,36 @@ class CheckoutController extends Controller {
         header('Content-Type: application/json');
         $settings = Setting::getAll();
         $input = file_get_contents('php://input');
-        $logFile = rtrim(sys_get_temp_dir(), '/\\') . DIRECTORY_SEPARATOR . 'aicualtoi_sepay_webhook.log';
+        $logFile = $this->sePayLogPath();
         $debug = [
             'time' => date('c'),
+            'ip' => $_SERVER['REMOTE_ADDR'] ?? 'Unknown',
             'headers' => $this->safeHeaders(),
             'raw' => $input,
             'result' => 'received',
         ];
 
-        if (APP_DEBUG) {
-            @file_put_contents($logFile, date('Y-m-d H:i:s') . " | Input: $input\n", FILE_APPEND);
-        }
-
-        if (!$this->verifySePayAuth($settings)) {
-            http_response_code(401);
-            if (APP_DEBUG) @file_put_contents($logFile, "FAILED: Unauthorized\n", FILE_APPEND);
-            $debug['result'] = 'unauthorized';
-            $this->writeSePayDebug($debug);
-            echo json_encode(['success' => false, 'message' => 'Unauthorized']);
-            exit;
-        }
+        $this->appendSePayLog($logFile, $debug);
 
         $data = json_decode($input, true);
         if (!$data) {
             http_response_code(400);
-            if (APP_DEBUG) @file_put_contents($logFile, "FAILED: Invalid JSON\n", FILE_APPEND);
+            @file_put_contents($logFile, "[INVALID_JSON]\n", FILE_APPEND);
             $debug['result'] = 'invalid_json';
             $this->writeSePayDebug($debug);
             echo json_encode(['success' => false, 'message' => 'Invalid JSON']);
             exit;
         }
         $debug['payload'] = $data;
+
+        if (!$this->verifySePayAuth($settings, $data)) {
+            http_response_code(401);
+            @file_put_contents($logFile, "[AUTH_FAILED]\n", FILE_APPEND);
+            $debug['result'] = 'unauthorized';
+            $this->writeSePayDebug($debug);
+            echo json_encode(['success' => false, 'message' => 'Unauthorized']);
+            exit;
+        }
 
         $isMerchantIpn = isset($data['notification_type'], $data['order']) && is_array($data['order']);
         if ($isMerchantIpn) {
@@ -380,7 +379,7 @@ class CheckoutController extends Controller {
         exit;
     }
 
-    private function verifySePayAuth(array $settings): bool {
+    private function verifySePayAuth(array $settings, array $payload = []): bool {
         $apiKey = trim((string) ($settings['sepay_api_key'] ?? ''));
         $legacyToken = trim((string) ($settings['sepay_token'] ?? ''));
 
@@ -394,18 +393,30 @@ class CheckoutController extends Controller {
             ?? $headers['Authorization']
             ?? $headers['authorization']
             ?? '';
-        if ($apiKey !== '' && hash_equals('Apikey ' . $apiKey, trim((string) $auth))) {
-            return true;
+        if ($auth !== '') {
+            $authToken = preg_replace('/^(Bearer|Apikey)\s+/i', '', trim((string) $auth));
+            if ($this->matchesSePayToken($authToken, [$apiKey, $legacyToken])) {
+                return true;
+            }
+            if ($apiKey !== '' && hash_equals('Apikey ' . $apiKey, trim((string) $auth))) {
+                return true;
+            }
         }
 
         $secretKey = $_SERVER['HTTP_X_SECRET_KEY']
             ?? $headers['X-Secret-Key']
             ?? $headers['x-secret-key']
             ?? '';
-        if ($secretKey !== '') {
-            $secretKey = trim((string) $secretKey);
-            return ($legacyToken !== '' && hash_equals($legacyToken, $secretKey))
-                || ($apiKey !== '' && hash_equals($apiKey, $secretKey));
+        if ($this->matchesSePayToken($secretKey, [$legacyToken, $apiKey])) {
+            return true;
+        }
+
+        $apiKeyHeader = $_SERVER['HTTP_X_API_KEY']
+            ?? $headers['X-Api-Key']
+            ?? $headers['x-api-key']
+            ?? '';
+        if ($this->matchesSePayToken($apiKeyHeader, [$apiKey, $legacyToken])) {
+            return true;
         }
 
         $webhookToken = $_SERVER['HTTP_X_SEPAY_TOKEN']
@@ -413,8 +424,27 @@ class CheckoutController extends Controller {
             ?? $headers['X-SePay-Token']
             ?? $headers['x-sepay-token']
             ?? '';
+        if ($this->matchesSePayToken($webhookToken, [$legacyToken, $apiKey])) {
+            return true;
+        }
 
-        return $legacyToken !== '' && hash_equals($legacyToken, trim((string) $webhookToken));
+        return $this->matchesSePayToken($payload['token'] ?? '', [$legacyToken, $apiKey]);
+    }
+
+    private function matchesSePayToken($received, array $expectedTokens): bool {
+        $received = trim((string) $received);
+        if ($received === '') {
+            return false;
+        }
+
+        foreach ($expectedTokens as $expected) {
+            $expected = trim((string) $expected);
+            if ($expected !== '' && hash_equals($expected, $received)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     public function sepayDebug() {
@@ -438,7 +468,28 @@ class CheckoutController extends Controller {
     }
 
     private function sePayDebugPath(): string {
-        return rtrim(sys_get_temp_dir(), '/\\') . DIRECTORY_SEPARATOR . 'aicualtoi_last_sepay_webhook.json';
+        return $this->sePayLogDir() . DIRECTORY_SEPARATOR . 'sepay_last_webhook.json';
+    }
+
+    private function sePayLogPath(): string {
+        return $this->sePayLogDir() . DIRECTORY_SEPARATOR . 'sepay_webhook.log';
+    }
+
+    private function sePayLogDir(): string {
+        $root = defined('APP_ROOT') ? APP_ROOT : dirname(__DIR__, 2);
+        $dir = $root . DIRECTORY_SEPARATOR . 'storage' . DIRECTORY_SEPARATOR . 'logs';
+        if (!is_dir($dir)) {
+            @mkdir($dir, 0775, true);
+        }
+        return $dir;
+    }
+
+    private function appendSePayLog(string $logFile, array $debug): void {
+        $entry = '[' . date('Y-m-d H:i:s') . '] IP: ' . ($debug['ip'] ?? 'Unknown') . "\n";
+        $entry .= 'HEADERS: ' . json_encode($debug['headers'] ?? [], JSON_UNESCAPED_UNICODE) . "\n";
+        $entry .= 'BODY: ' . ($debug['raw'] ?? '') . "\n";
+        $entry .= "------------------------------------------\n";
+        @file_put_contents($logFile, $entry, FILE_APPEND);
     }
 
     private function safeHeaders(): array {
