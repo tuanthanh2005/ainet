@@ -391,6 +391,9 @@
     <!-- Bootstrap & SweetAlert2 — Load TRƯỚC các modal để data-bs-toggle hoạt động -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
+    <!-- AppNotify system - Load TRƯỚC các script sử dụng nó -->
+    <script src="<?php echo asset('js/main.js'); ?>"></script>
 
     <?php if ($currentUser && ($currentUser['role'] ?? 'user') !== 'admin'): ?>
     <!-- User chat box -->
@@ -671,8 +674,8 @@
     </script>
     <?php endif; ?>
 
-    <!-- Link to separated JS -->
-    <script src="<?php echo asset('js/main.js'); ?>"></script>
+    <!-- Link to separated JS - Already loaded above after Bootstrap -->
+    <!-- <script src="<?php echo asset('js/main.js'); ?>"></script> -->
 
     <!-- Debug Log for Modals -->
     <script>

@@ -1047,6 +1047,9 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
+    <!-- AppNotify system - Load TRƯỚC các script sử dụng nó -->
+    <script src="<?php echo asset('js/main.js'); ?>"></script>
 
     <script>
         const APP_STATE = {
