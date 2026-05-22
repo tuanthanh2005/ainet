@@ -146,7 +146,7 @@ $missing = max(0, $qty - $got);
                                 </div>
 
                                 <!-- QR Code SePay -->
-                                <div class="qr-box p-3 bg-white rounded-4 border shadow-sm mb-4 d-inline-block position-relative overflow-hidden">
+                                <div class="qr-box p-3 bg-white rounded-4 border shadow-sm mb-4 position-relative overflow-hidden">
                                     <?php
                                     $bankId = trim((string) ($settings['bank_id'] ?? ''));
                                     $accountNo = trim((string) ($settings['bank_account'] ?? ''));
@@ -249,10 +249,12 @@ $missing = max(0, $qty - $got);
 .stepper-line { position: absolute; top: 20px; left: 10%; width: 80%; height: 4px; background: #e9ecef; z-index: 1; border-radius: 2px; }
 .success-icon-bg { width: 100px; height: 100px; background: #198754; color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 50px; box-shadow: 0 15px 30px rgba(25,135,84,0.3); }
 .qr-box {
-    width: min(280px, 100%);
+    display: block !important;
+    width: min(320px, 100%);
     max-width: 100%;
     margin-left: auto;
     margin-right: auto;
+    box-sizing: border-box;
     border: 2px dashed #dee2e6 !important;
 }
 .sepay-qr-img {
