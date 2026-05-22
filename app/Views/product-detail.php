@@ -75,9 +75,12 @@
                     </div>
                 </div>
 
-                <p class="text-muted mb-4 lh-lg" style="font-size: 0.95rem;">
-                    <?= htmlspecialchars($product['description']) ?>
-                </p>
+                <?php $shortDescription = trim((string) ($product['feature_text'] ?? '')) ?: trim((string) ($product['description'] ?? '')); ?>
+                <?php if ($shortDescription !== ''): ?>
+                    <p class="text-muted mb-4 lh-lg" style="font-size: 0.95rem;">
+                        <?= htmlspecialchars($shortDescription) ?>
+                    </p>
+                <?php endif; ?>
 
                 <form method="POST" action="<?php echo url('index.php?action=productAction'); ?>" data-requires-login="buy">
                     <?php echo Csrf::field(); ?>
@@ -183,9 +186,14 @@
             <div class="tab-content border-top pt-4" id="productTabsContent">
                 <div class="tab-pane fade show active" id="desc" role="tabpanel" aria-labelledby="desc-tab">
                     <div class="text-muted lh-lg" style="font-size: 0.95rem;">
+                        <?php $detailDescription = trim((string) ($product['description'] ?? '')) ?: $shortDescription; ?>
                         <p class="mb-4">Lưu ý: Bảo Hành</p>
                         <p class="mb-4">Tài khoản <?= htmlspecialchars($product['title']) ?> bao gồm:</p>
-                        <p><?= htmlspecialchars($product['description']) ?></p>
+                        <?php if ($detailDescription !== ''): ?>
+                            <div class="product-detail-description"><?= nl2br(htmlspecialchars($detailDescription)) ?></div>
+                        <?php else: ?>
+                            <p>Thông tin chi tiết đang được cập nhật.</p>
+                        <?php endif; ?>
                     </div>
                 </div>
                 <div class="tab-pane fade" id="reviews" role="tabpanel" aria-labelledby="reviews-tab">

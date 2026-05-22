@@ -1018,6 +1018,11 @@
                                 <input type="text" class="form-control" id="p_desc"
                                     placeholder="Ví dụ: Cấp tốc 5 phút, Bảo hành trọn đời...">
                             </div>
+                            <div class="col-12 mb-3">
+                                <label class="form-label">Mô tả chi tiết / Nội dung bộ công cụ</label>
+                                <textarea class="form-control" id="p_detail_desc" rows="5"
+                                    placeholder="Nhập nội dung hiển thị trong tab Mô tả chi tiết. Ví dụ: Bộ công cụ bao gồm..., lưu ý sử dụng, chính sách kèm theo..."></textarea>
+                            </div>
 
                             <div class="col-12">
                                 <div class="d-flex justify-content-between align-items-center mb-2">
@@ -1213,6 +1218,7 @@
                 document.getElementById('p_status').value = p.status || 'active';
                 document.getElementById('p_image').value = p.image;
                 document.getElementById('p_desc').value = p.feature_text || '';
+                document.getElementById('p_detail_desc').value = p.description || '';
 
                 renderVariants(p.options || []);
 
@@ -1320,6 +1326,7 @@
             formData.append('status', document.getElementById('p_status').value);
             formData.append('image', document.getElementById('p_image').value);
             formData.append('desc', document.getElementById('p_desc').value);
+            formData.append('description', document.getElementById('p_detail_desc').value);
             formData.append('variants', JSON.stringify(variants));
 
             fetch('?action=adminSaveProduct', {

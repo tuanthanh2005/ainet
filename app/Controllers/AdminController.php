@@ -101,6 +101,7 @@ class AdminController extends Controller {
             'status'        => in_array($_POST['status'] ?? '', ['active', 'out_of_stock', 'hidden'], true) ? $_POST['status'] : 'active',
             'image'         => $_POST['image'] ?? '',
             'feature_text'  => $_POST['desc'] ?? '',
+            'description'   => $_POST['description'] ?? '',
             'feature_icon'  => 'fa-box',
             'rating'        => 5,
             'sold_count'    => 0,
