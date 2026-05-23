@@ -4,11 +4,12 @@
         <?php
         $currentCat = $categorySlug ?? ($_GET['category'] ?? '');
         $qParam = !empty($searchQuery) ? '&q=' . urlencode($searchQuery) : '';
+        $sortParam = !empty($_GET['sort']) ? '&sort=' . urlencode($_GET['sort']) : '';
         ?>
-        <a href="<?php echo $qParam ? url('index.php?tab=products&category=all' . $qParam) : Url::home(); ?>"
+        <a href="<?php echo url('index.php?tab=products&category=all' . $qParam . $sortParam); ?>"
            class="cat-pill text-decoration-none <?php echo (empty($currentCat) || $currentCat === 'all') ? 'active' : ''; ?>">Tất Cả</a>
         <?php foreach ($categories as $cat): ?>
-            <a href="<?php echo $qParam ? url('index.php?tab=products&category=' . urlencode($cat['slug']) . $qParam) : Url::category($cat['slug']); ?>"
+            <a href="<?php echo url('index.php?tab=products&category=' . urlencode($cat['slug']) . $qParam . $sortParam); ?>"
                class="cat-pill text-decoration-none <?= $cat['is_pro'] ? 'pro-glow' : '' ?> <?php echo ($currentCat === $cat['slug']) ? 'active' : ''; ?>">
                 <?php if ($cat['icon']): ?>
                     <i class="fa-solid <?= htmlspecialchars($cat['icon']) ?> <?= htmlspecialchars($cat['icon_color']) ?>"></i>
@@ -91,7 +92,8 @@
         <?php
         $newLimit = $limit + 12;
         $catParam = !empty($currentCat) ? '&category=' . urlencode($currentCat) : '';
-        $loadMoreUrl = url('index.php?tab=products' . $catParam . $qParam . '&limit=' . $newLimit);
+        $sortParam = !empty($_GET['sort']) ? '&sort=' . urlencode($_GET['sort']) : '';
+        $loadMoreUrl = url('index.php?tab=products' . $catParam . $qParam . $sortParam . '&limit=' . $newLimit);
         ?>
         <div id="product-load-more-wrap" class="text-center mt-4">
             <a href="<?= $loadMoreUrl ?>" class="btn btn-outline-dark px-4 py-2 rounded-pill fw-bold text-decoration-none">

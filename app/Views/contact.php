@@ -35,23 +35,21 @@
                     </div>
 
                     <div class="mt-auto pt-5">
-                        <div class="d-flex gap-3">
-                            <?php
-                            $socialLinks = json_decode($settings['social_links_json'] ?? '[]', true);
-                            if (empty($socialLinks)) {
-                                $socialLinks = [
-                                    ['icon' => 'fa-facebook-f', 'url' => '#'],
-                                    ['icon' => 'fa-zalo', 'url' => '#'],
-                                    ['icon' => 'fa-tiktok', 'url' => '#']
-                                ];
-                            }
-                            foreach ($socialLinks as $link):
-                                ?>
-                                <a href="<?= htmlspecialchars($link['url']) ?>"
-                                    class="btn btn-outline-light rounded-circle p-0 d-flex align-items-center justify-content-center"
-                                    style="width: 40px; height: 40px;"><i
-                                        class="<?= htmlspecialchars($link['icon']) ?>"></i></a>
-                            <?php endforeach; ?>
+                        <div class="p-3 rounded-3" style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1);">
+                            <div class="d-flex align-items-start gap-2 mb-3">
+                                <i class="fa-regular fa-clock text-warning mt-1" style="font-size: 0.9rem;"></i>
+                                <div>
+                                    <h6 class="fw-bold mb-1 text-white" style="font-size: 0.85rem;">Thời gian hỗ trợ</h6>
+                                    <p class="mb-0 text-light opacity-75" style="font-size: 0.75rem; line-height: 1.4;">Phục vụ liên tục từ 08:00 đến 23:30 hàng ngày (kể cả Thứ 7, Chủ Nhật và ngày lễ).</p>
+                                </div>
+                            </div>
+                            <div class="d-flex align-items-start gap-2">
+                                <i class="fa-solid fa-circle-info text-info mt-1" style="font-size: 0.9rem;"></i>
+                                <div>
+                                    <h6 class="fw-bold mb-1 text-white" style="font-size: 0.85rem;">Hướng dẫn hỗ trợ nhanh</h6>
+                                    <p class="mb-0 text-light opacity-75" style="font-size: 0.75rem; line-height: 1.4;">Khi liên hệ, vui lòng gửi kèm <strong>Mã đơn hàng</strong> hoặc <strong>Email đăng ký</strong> để admin kiểm tra và xử lý ngay lập tức.</p>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>

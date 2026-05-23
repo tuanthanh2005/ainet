@@ -49,6 +49,30 @@ class HomeController extends Controller {
             $products = array_column($scoredProducts, 'product');
         }
 
+        // Sorting logic
+        $sort = $_GET['sort'] ?? 'newest';
+        if ($q === '') {
+            usort($products, function($a, $b) use ($sort) {
+                if ($sort === 'price_asc') {
+                    return $a['price'] <=> $b['price'];
+                } elseif ($sort === 'best_seller') {
+                    return $b['sold_count'] <=> $a['sold_count'];
+                } else {
+                    return strtotime($b['created_at']) <=> strtotime($a['created_at']);
+                }
+            });
+        } else {
+            if ($sort === 'price_asc' || $sort === 'best_seller') {
+                usort($products, function($a, $b) use ($sort) {
+                    if ($sort === 'price_asc') {
+                        return $a['price'] <=> $b['price'];
+                    } else {
+                        return $b['sold_count'] <=> $a['sold_count'];
+                    }
+                });
+            }
+        }
+
         // Pagination/Limit: default is 12
         $limit = (int) ($_GET['limit'] ?? 12);
         if ($limit < 1) $limit = 12;
@@ -76,6 +100,7 @@ class HomeController extends Controller {
             'tab' => $tab,
             'categorySlug' => $categorySlug,
             'searchQuery' => $q,
+            'sort' => $sort,
             'limit' => $limit,
             'remainingProducts' => $remainingProducts
         ]);

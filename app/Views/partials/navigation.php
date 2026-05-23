@@ -6,8 +6,8 @@ if (!in_array($activeTab, ['products', 'blog'])) {
 }
 ?>
 <div class="navigation-wrapper mb-4">
-    <div class="d-flex justify-content-between align-items-center mb-2 border-bottom border-light">
-        <div class="tab-nav">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-2 border-bottom border-light pb-2 pb-md-0">
+        <div class="tab-nav flex-grow-1 flex-md-grow-0">
             <a href="<?php echo url('index.php?tab=products'); ?>"
                class="tab-btn text-decoration-none <?php echo ($currentAction === 'index' && $activeTab === 'products') ? 'active' : ''; ?>">Sản Phẩm</a>
             <a href="<?php echo url('index.php?tab=blog'); ?>"
@@ -22,13 +22,24 @@ if (!in_array($activeTab, ['products', 'blog'])) {
                 Hệ</a>
         </div>
 
-        <?php if ($currentAction === 'index'): ?>
-            <select
-                class="form-select w-auto border-0 bg-transparent fw-semibold shadow-none cursor-pointer d-none d-md-block">
-                <option>Mới cập nhật</option>
-                <option>Giá: Thấp đến Cao</option>
-                <option>Bán chạy nhất</option>
+        <?php if ($currentAction === 'index' && $activeTab === 'products'): ?>
+            <?php $currentSort = $sort ?? $_GET['sort'] ?? 'newest'; ?>
+            <select id="product-sort-select"
+                class="form-select w-auto border-0 bg-transparent fw-semibold shadow-none cursor-pointer ms-auto"
+                style="font-size: 0.9rem;"
+                onchange="handleSortChange(this.value)">
+                <option value="newest" <?php echo $currentSort === 'newest' ? 'selected' : ''; ?>>Mới cập nhật</option>
+                <option value="price_asc" <?php echo $currentSort === 'price_asc' ? 'selected' : ''; ?>>Giá: Thấp đến Cao</option>
+                <option value="best_seller" <?php echo $currentSort === 'best_seller' ? 'selected' : ''; ?>>Bán chạy nhất</option>
             </select>
         <?php endif; ?>
     </div>
 </div>
+
+<script>
+function handleSortChange(val) {
+    const urlParams = new URLSearchParams(window.location.search);
+    urlParams.set('sort', val);
+    window.location.search = urlParams.toString();
+}
+</script>
