@@ -704,7 +704,15 @@
                 method: 'POST',
                 headers: { 'X-Requested-With':'XMLHttpRequest', 'X-CSRF-Token': csrf },
                 body: fd, credentials:'same-origin'
-            }).then(r => r.json()).then(d => {
+            }).then(async r => {
+                const text = await r.text();
+                try {
+                    return JSON.parse(text);
+                } catch (e) {
+                    console.error("Server raw response:", text);
+                    throw new Error("Phản hồi từ server không hợp lệ (không phải JSON). Chi tiết lỗi trong Console trình duyệt.");
+                }
+            }).then(d => {
                 if (d.success) {
                     if (d.id) {
                         renderedIds.add(String(d.id));
@@ -724,9 +732,10 @@
                     input.value = body;
                     autoGrow();
                 }
-            }).catch(() => {
+            }).catch(err => {
+                console.error("Chat send error:", err);
                 if (pendingEl) pendingEl.remove();
-                AppNotify.error('Không thể kết nối server.', 'Lỗi gửi tin');
+                AppNotify.error(err.message || 'Không thể kết nối server.', 'Lỗi gửi tin');
                 input.value = body;
                 autoGrow();
             }).finally(() => {

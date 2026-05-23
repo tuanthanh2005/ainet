@@ -2210,7 +2210,15 @@
                         headers: { 'X-Requested-With': 'XMLHttpRequest', 'X-CSRF-Token': APP_STATE.csrfToken },
                         body: fd, credentials: 'same-origin'
                     })
-                    .then(r => r.json())
+                    .then(async r => {
+                        const text = await r.text();
+                        try {
+                            return JSON.parse(text);
+                        } catch (e) {
+                            console.error("Server raw response:", text);
+                            throw new Error("Phản hồi từ server không hợp lệ (không phải JSON). Chi tiết lỗi trong Console trình duyệt.");
+                        }
+                    })
                     .then(d => {
                         if (d.success) {
                             adminReplyInput.value = '';
@@ -2222,8 +2230,9 @@
                             AppNotify.error(d.message || 'Không thể gửi.', 'Lỗi gửi');
                         }
                     })
-                    .catch(() => {
-                        AppNotify.error('Không thể kết nối server.', 'Lỗi kết nối');
+                    .catch(err => {
+                        console.error("Admin chat send error:", err);
+                        AppNotify.error(err.message || 'Không thể kết nối server.', 'Lỗi kết nối');
                     })
                     .finally(() => {
                         adminIsSending = false;
