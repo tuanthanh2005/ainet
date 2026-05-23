@@ -1,32 +1,22 @@
 <?php
 
-/**
- * AdminController quản lý các chức năng dành riêng cho quản trị viên.
- * Mọi phương thức tại đây đều được bảo vệ bởi Auth::requireAdmin().
- */
 class AdminController extends Controller {
-
     public function __construct() {
-        // Kiểm tra quyền truy cập: Chỉ admin mới có thể gọi các phương thức trong class này
         Auth::requireAdmin();
     }
 
-    // Chuyển hướng tới bảng điều khiển (Dashboard)
     public function admin() {
         header('Location: ' . url('index.php?action=adminDashboard'));
         exit;
     }
 
-    // Hiển thị bảng điều khiển với dữ liệu tổng hợp
     public function adminDashboard() {
-        // Lấy dữ liệu từ các Model (Settings, Products, Categories, Orders, Blogs)
         $settings   = Setting::getAll();
         $products   = Product::getAll();
         $categories = Category::getAll();
         $orders     = Order::getAll();
         $blogs      = Blog::getAll();
 
-        // Render view dashboard với dữ liệu đã lấy
         $this->view('admin/dashboard', [
             'settings'    => $settings,
             'products'    => $products,
@@ -37,14 +27,11 @@ class AdminController extends Controller {
         ]);
     }
 
-    // Lưu cấu hình hệ thống
     public function adminSaveSettings() {
-        // Kiểm tra phương thức gửi lên phải là POST
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             $this->jsonError('Method not allowed', 405);
         }
 
-        // Danh sách các key cho phép lưu vào file settings
         $allowed = [
             'bannerText', 'zalo', 'footerDesc', 'socialLink', 'copyright',
             'sepay_active', 'sepay_mode', 'sepay_token', 'sepay_merchant_id',
@@ -52,7 +39,8 @@ class AdminController extends Controller {
             'about_title', 'about_desc', 'about_image', 'about_stat_value',
             'about_stat_label', 'about_features', 'contact_title', 'contact_desc',
             'contact_methods', 'social_links_json', 'terms_of_service', 'privacy_policy',
-            'demo_payment_active', 'telegram_bot_token', 'telegram_chat_id',
+            'demo_payment_active',
+            'telegram_bot_token', 'telegram_chat_id',
         ];
 
         $data = [];
@@ -60,7 +48,7 @@ class AdminController extends Controller {
             $data[$key] = $_POST[$key] ?? '';
         }
 
-        // Validate các trường dữ liệu dạng JSON (về mảng) để tránh lưu rác
+        // Validate JSON-shaped fields to avoid stored garbage
         foreach (['about_features', 'contact_methods', 'social_links_json'] as $jsonKey) {
             if ($data[$jsonKey] === '') {
                 $data[$jsonKey] = '[]';
@@ -72,42 +60,40 @@ class AdminController extends Controller {
             }
         }
 
-        // Xử lý các flag logic (chuyển đổi sang string '1' hoặc '0')
+        // Sepay flags
         $data['sepay_active'] = ($data['sepay_active'] === '1') ? '1' : '0';
         $data['demo_payment_active'] = ($data['demo_payment_active'] === '1') ? '1' : '0';
-        
-        // Đảm bảo sepay_mode chỉ nhận 1 trong 2 giá trị cho phép
         if (!in_array($data['sepay_mode'], ['production', 'sandbox'], true)) {
             $data['sepay_mode'] = 'production';
         }
 
         Setting::saveAll($data);
+
         $this->jsonSuccess();
     }
 
-    // Thêm hoặc cập nhật sản phẩm
     public function adminSaveProduct() {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             $this->jsonError('Method not allowed', 405);
         }
 
-        $id    = trim($_POST['id'] ?? '');
-        $title = trim($_POST['title'] ?? '');
-        $price = (float) ($_POST['price'] ?? 0);
+        $id       = trim($_POST['id'] ?? '');
+        $title    = trim($_POST['title'] ?? '');
+        $price    = (float) ($_POST['price'] ?? 0);
 
-        // Kiểm tra dữ liệu bắt buộc
         if ($title === '' || $price < 0) {
             $this->jsonError('Dữ liệu sản phẩm không hợp lệ.');
         }
 
-        // Xử lý biến thể sản phẩm (variants)
         $variants = json_decode($_POST['variants'] ?? '[]', true);
-        if (!is_array($variants)) { $variants = []; }
+        if (!is_array($variants)) {
+            $variants = [];
+        }
 
         $products = Product::getAll();
+
         $description = Upload::sanitizeHtml(trim((string) ($_POST['description'] ?? '')));
 
-        // Chuẩn bị dữ liệu sản phẩm
         $data = [
             'id'            => $id ?: 'prod_' . time(),
             'title'         => $title,
@@ -125,7 +111,6 @@ class AdminController extends Controller {
             'is_upgrade'    => isset($_POST['is_upgrade']) ? (int) $_POST['is_upgrade'] : 0,
         ];
 
-        // Cập nhật nếu đã có ID, thêm mới nếu chưa tồn tại
         if ($id) {
             $found = false;
             foreach ($products as &$p) {
@@ -138,7 +123,9 @@ class AdminController extends Controller {
                 }
             }
             unset($p);
-            if (!$found) { $products[] = $data; }
+            if (!$found) {
+                $products[] = $data;
+            }
         } else {
             $products[] = $data;
         }
@@ -147,17 +134,17 @@ class AdminController extends Controller {
         $this->jsonSuccess();
     }
 
-    // Xóa sản phẩm
     public function adminDeleteProduct() {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             $this->jsonError('Method not allowed', 405);
         }
 
         $id = $_POST['id'] ?? '';
-        if ($id === '') { $this->jsonError('Thiếu mã sản phẩm.'); }
+        if ($id === '') {
+            $this->jsonError('Thiếu mã sản phẩm.');
+        }
 
         $products = Product::getAll();
-        // Lọc loại bỏ sản phẩm có ID trùng với ID cần xóa
         $products = array_values(array_filter($products, function ($p) use ($id) {
             return ($p['id'] ?? '') !== $id;
         }));
@@ -166,7 +153,6 @@ class AdminController extends Controller {
         $this->jsonSuccess();
     }
 
-    // Thêm hoặc sửa danh mục
     public function adminSaveCategory() {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             $this->jsonError('Method not allowed', 405);
@@ -182,12 +168,11 @@ class AdminController extends Controller {
 
         $categories = Category::getAll();
 
-        // Kiểm tra slug có bị trùng không
         foreach ($categories as $existing) {
             $sameSlug = strtolower((string) ($existing['slug'] ?? '')) === strtolower($slug);
             $sameId = $id !== '' && (int) ($existing['id'] ?? 0) === (int) $id;
             if ($sameSlug && !$sameId) {
-                $this->jsonError('Slug danh mục đã tồn tại.');
+                $this->jsonError('Slug danh mục đã tồn tại. Vui lòng dùng slug khác.');
             }
         }
 
@@ -200,7 +185,6 @@ class AdminController extends Controller {
             'icon_color' => $_POST['icon_color'] ?? '',
         ];
 
-        // Cập nhật hoặc thêm mới vào mảng danh mục
         if ($id) {
             $found = false;
             foreach ($categories as &$c) {
@@ -211,7 +195,9 @@ class AdminController extends Controller {
                 }
             }
             unset($c);
-            if (!$found) { $categories[] = $data; }
+            if (!$found) {
+                $categories[] = $data;
+            }
         } else {
             $categories[] = $data;
         }
@@ -224,14 +210,15 @@ class AdminController extends Controller {
         $this->jsonSuccess();
     }
 
-    // Xóa danh mục
     public function adminDeleteCategory() {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             $this->jsonError('Method not allowed', 405);
         }
 
         $id = $_POST['id'] ?? '';
-        if ($id === '') { $this->jsonError('Thiếu ID danh mục.'); }
+        if ($id === '') {
+            $this->jsonError('Thiếu ID danh mục.');
+        }
 
         $categories = Category::getAll();
         $categories = array_values(array_filter($categories, function ($c) use ($id) {
@@ -242,7 +229,6 @@ class AdminController extends Controller {
         $this->jsonSuccess();
     }
 
-    // Lưu bài viết blog (Dùng SQL trực tiếp)
     public function adminSaveBlog() {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             $this->jsonError('Method not allowed', 405);
@@ -253,9 +239,11 @@ class AdminController extends Controller {
         $imageUrl    = trim($_POST['image'] ?? '');
         $description = trim($_POST['description'] ?? '');
 
-        if ($title === '') { $this->jsonError('Tiêu đề bài viết không được trống.'); }
+        if ($title === '') {
+            $this->jsonError('Tiêu đề bài viết không được trống.');
+        }
 
-        // Xử lý upload ảnh (nếu có file upload mới thì ưu tiên dùng)
+        // Image upload (file takes precedence over URL field)
         try {
             if (!empty($_FILES['image_file']['name'])) {
                 $stored = Upload::store($_FILES['image_file'], 'blogs', Upload::IMAGE_MIMES);
@@ -269,11 +257,9 @@ class AdminController extends Controller {
 
         $db = Database::getInstance();
         if ($id !== '') {
-            // Cập nhật bài viết hiện có
             $stmt = $db->prepare('UPDATE blogs SET title = ?, image = ?, description = ? WHERE id = ?');
             $stmt->execute([$title, $imageUrl, $description, (int) $id]);
         } else {
-            // Thêm mới
             $stmt = $db->prepare('INSERT INTO blogs (title, image, description) VALUES (?, ?, ?)');
             $stmt->execute([$title, $imageUrl, $description]);
         }
@@ -281,14 +267,15 @@ class AdminController extends Controller {
         $this->jsonSuccess(['image' => $imageUrl]);
     }
 
-    // Xóa bài viết blog
     public function adminDeleteBlog() {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             $this->jsonError('Method not allowed', 405);
         }
 
         $id = (int) ($_POST['id'] ?? 0);
-        if ($id <= 0) { $this->jsonError('Thiếu ID bài viết.'); }
+        if ($id <= 0) {
+            $this->jsonError('Thiếu ID bài viết.');
+        }
 
         $db = Database::getInstance();
         $stmt = $db->prepare('DELETE FROM blogs WHERE id = ?');
@@ -297,9 +284,7 @@ class AdminController extends Controller {
         $this->jsonSuccess();
     }
 
-    /** --- CHỨC NĂNG CHAT ADMIN --- **/
-
-    // Lấy danh sách các luồng chat (Threads)
+    /** Admin chat: list user threads */
     public function adminChatThreads() {
         try {
             $threads = Message::threadsForAdmin();
@@ -310,54 +295,67 @@ class AdminController extends Controller {
         }
     }
 
-    // Tải nội dung chi tiết của một luồng chat
+    /** Admin chat: load a single thread */
     public function adminChatThread() {
         $userId = (int) ($_GET['user_id'] ?? 0);
-        if ($userId <= 0) { $this->jsonError('Thiếu user_id.'); }
-        
+        if ($userId <= 0) {
+            $this->jsonError('Thiếu user_id.');
+        }
         $since = (int) ($_GET['since'] ?? 0);
         try {
             $messages = Message::thread($userId, $since);
-            Message::markRead($userId, 'user'); // Đánh dấu là đã đọc
+            Message::markRead($userId, 'user');
             $user = User::findById($userId);
-            $this->jsonSuccess(['messages' => $messages, 'user' => $user]);
+            $this->jsonSuccess([
+                'messages' => $messages,
+                'user'     => $user,
+            ]);
         } catch (Throwable $e) {
             error_log('adminChatThread error: ' . $e->getMessage());
             $this->jsonError('Không thể tải tin nhắn: ' . $e->getMessage());
         }
     }
 
-    // Admin gửi phản hồi trong luồng chat
+    /** Admin chat: reply to a user thread */
     public function adminChatSend() {
-        if ($_SERVER['REQUEST_METHOD'] !== 'POST') { $this->jsonError('Method not allowed', 405); }
-        
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            $this->jsonError('Method not allowed', 405);
+        }
         $userId = (int) ($_POST['user_id'] ?? 0);
         $body   = trim($_POST['body'] ?? '');
-        if ($userId <= 0) { $this->jsonError('Thiếu user_id.'); }
+        if ($userId <= 0) {
+            $this->jsonError('Thiếu user_id.');
+        }
 
         $attachment = null;
         try {
             if (!empty($_FILES['chat_file']['name'])) {
                 $attachment = ChatUpload::store($_FILES['chat_file']);
             }
-        } catch (Throwable $e) { $this->jsonError($e->getMessage()); }
+        } catch (Throwable $e) {
+            $this->jsonError($e->getMessage());
+        }
 
-        if ($body === '' && !$attachment) { $this->jsonError('Tin nhắn không được trống.'); }
-        if (mb_strlen($body) > 700) { $this->jsonError('Tin nhắn không được quá 700 ký tự.'); }
-        
+        if ($body === '' && !$attachment) {
+            $this->jsonError('Tin nhắn không được trống.');
+        }
+        if (mb_strlen($body) > 700) {
+            $this->jsonError('Tin nhắn không được quá 700 ký tự.');
+        }
         $id = Message::send($userId, 'admin', $body !== '' ? $body : null, $attachment);
         $this->jsonSuccess(['id' => $id]);
     }
 
-    // Lấy số lượng tin nhắn chưa đọc (cho huy hiệu thông báo)
+    /** Admin chat: unread count for badge */
     public function adminChatUnread() {
         $this->jsonSuccess(['unread' => Message::unreadForAdmin()]);
     }
 
-    /** --- CẤU HÌNH BOT TELEGRAM --- **/
-
+    /** Telegram: test bot configuration */
     public function adminTelegramTest() {
-        if ($_SERVER['REQUEST_METHOD'] !== 'POST') { $this->jsonError('Method not allowed', 405); }
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            $this->jsonError('Method not allowed', 405);
+        }
         $result = TelegramService::sendTest();
         if ($result['success']) {
             $this->jsonSuccess(['message' => $result['message']]);
@@ -366,34 +364,37 @@ class AdminController extends Controller {
         }
     }
 
-    /** --- QUẢN LÝ KHO (STOCK) --- **/
-
+    /** Stock — list items for one variant */
     public function adminStockList() {
         $productId = $_GET['product_id'] ?? '';
         $variantIdx = (int) ($_GET['variant_idx'] ?? 0);
-        if ($productId === '') { $this->jsonError('Thiếu product_id.'); }
-        
+        if ($productId === '') {
+            $this->jsonError('Thiếu product_id.');
+        }
         $items = Stock::listForVariant($productId, $variantIdx);
         $available = Stock::countAvailable($productId, $variantIdx);
-        $this->jsonSuccess(['items' => $items, 'available' => $available]);
+        $this->jsonSuccess([
+            'items'     => $items,
+            'available' => $available,
+        ]);
     }
 
-    // Thêm hàng loạt mã vào kho từ textarea
+    /** Stock — bulk add from textarea (one line = one unit) */
     public function adminStockAdd() {
-        if ($_SERVER['REQUEST_METHOD'] !== 'POST') { $this->jsonError('Method not allowed', 405); }
-        
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            $this->jsonError('Method not allowed', 405);
+        }
         $productId = $_POST['product_id'] ?? '';
         $variantIdx = (int) ($_POST['variant_idx'] ?? 0);
         $raw = (string) ($_POST['lines'] ?? '');
-        
-        if ($productId === '') { $this->jsonError('Thiếu product_id.'); }
-        
-        // Tách các dòng từ textarea
+        if ($productId === '') {
+            $this->jsonError('Thiếu product_id.');
+        }
         $lines = preg_split('/\r\n|\r|\n/', $raw);
         $added = Stock::bulkAdd($productId, $variantIdx, $lines);
-        
-        if ($added === 0) { $this->jsonError('Không có dòng hợp lệ.'); }
-        
+        if ($added === 0) {
+            $this->jsonError('Không có dòng hợp lệ.');
+        }
         $this->jsonSuccess([
             'added'     => $added,
             'available' => Stock::countAvailable($productId, $variantIdx),
@@ -401,24 +402,23 @@ class AdminController extends Controller {
     }
 
     public function adminStockDelete() {
-        if ($_SERVER['REQUEST_METHOD'] !== 'POST') { $this->jsonError('Method not allowed', 405); }
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            $this->jsonError('Method not allowed', 405);
+        }
         $id = (int) ($_POST['id'] ?? 0);
-        if ($id <= 0) { $this->jsonError('Thiếu ID.'); }
-        
+        if ($id <= 0) {
+            $this->jsonError('Thiếu ID.');
+        }
         Stock::delete($id);
         $this->jsonSuccess();
     }
 
-    /** --- CÁC PHƯƠNG THỨC HỖ TRỢ PHẢN HỒI JSON --- **/
-
-    // Phản hồi thành công
     private function jsonSuccess(array $payload = []): void {
         header('Content-Type: application/json');
         echo json_encode(array_merge(['success' => true], $payload));
         exit;
     }
 
-    // Phản hồi lỗi
     private function jsonError(string $message, int $code = 400): void {
         http_response_code($code);
         header('Content-Type: application/json');

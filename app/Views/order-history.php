@@ -180,8 +180,12 @@ foreach (($orders ?? []) as $o) {
                                                 </button>
                                             </div>
                                             <div class="d-flex flex-wrap gap-2 mt-3">
+                                                <button type="button" class="btn btn-sm btn-dark"
+                                                        onclick="openChatWithOrderId('<?= htmlspecialchars($order['id']) ?>')">
+                                                    <i class="fa-regular fa-comment-dots me-1"></i>Nhắn admin qua Chat
+                                                </button>
                                                 <a href="https://t.me/specademy" target="_blank" class="btn btn-sm btn-outline-primary">
-                                                    <i class="fa-brands fa-telegram me-1"></i>Liên hệ Telegram
+                                                    <i class="fa-brands fa-telegram me-1"></i>Telegram
                                                 </a>
                                             </div>
                                         </div>
@@ -499,4 +503,20 @@ function copyAllItems(btn) {
     });
 }
 
+function openChatWithOrderId(orderId) {
+    const btn = document.getElementById('btnOpenChat');
+    if (!btn) {
+        AppNotify.warning('Hệ thống chat chỉ khả dụng cho tài khoản đã đăng nhập.', 'Yêu cầu đăng nhập');
+        return;
+    }
+    btn.click();
+    setTimeout(() => {
+        const input = document.getElementById('user-chat-input');
+        if (input && !input.value.trim()) {
+            input.value = `Xin chào admin, đơn hàng của tôi là #${orderId} chưa được giao. Mong admin xử lý sớm. Cảm ơn!`;
+            input.focus();
+            input.dispatchEvent(new Event('input'));
+        }
+    }, 200);
+}
 </script>
