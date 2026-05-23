@@ -730,7 +730,7 @@
             clearAttachment();
             charCounter.style.display = 'none';
             const pendingEl = renderPendingMessage(body, pendingFile);
-            fetch(APP_BASE + 'index.php?action=chatSend', {
+            fetch(APP_BASE + 'index.php?action=sendUserChat', {
                 method: 'POST',
                 headers: { 'X-Requested-With':'XMLHttpRequest', 'X-CSRF-Token': csrf },
                 body: fd, credentials:'same-origin'

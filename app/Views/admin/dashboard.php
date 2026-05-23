@@ -1912,6 +1912,7 @@
         let activeChatUserId = null;
         let lastAdminMsgId = 0;
         let lastUnreadCount = 0;
+        const adminRenderedIds = new Set();
 
         function escHtml(s) {
             return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -2005,6 +2006,7 @@
         function openChatThread(userId) {
             activeChatUserId = userId;
             lastAdminMsgId = 0;
+            adminRenderedIds.clear();
             fetch('?action=adminChatThread&user_id=' + userId, { credentials: 'same-origin' })
                 .then(r => r.json())
                 .then(d => {
@@ -2013,6 +2015,7 @@
                     const wrap = document.getElementById('chat-messages');
                     wrap.innerHTML = '';
                     (d.messages || []).forEach(m => {
+                        if (m.id) adminRenderedIds.add(String(m.id));
                         const isAdmin = m.sender === 'admin';
                         const time = m.created_at ? new Date(m.created_at.replace(' ', 'T')).toLocaleTimeString('vi-VN', { hour:'2-digit', minute:'2-digit' }) : '';
                         const cls = isAdmin ? 'msg-me' : 'msg-them';
@@ -2106,6 +2109,9 @@
                             const wrap = document.getElementById('chat-messages');
                             let hasNewUserMsg = false;
                             d.messages.forEach(m => {
+                                if (m.id && adminRenderedIds.has(String(m.id))) return;
+                                if (m.id) adminRenderedIds.add(String(m.id));
+
                                 const isAdmin = m.sender === 'admin';
                                 const time = m.created_at ? new Date(m.created_at.replace(' ', 'T')).toLocaleTimeString('vi-VN', { hour:'2-digit', minute:'2-digit' }) : '';
                                 const cls = isAdmin ? 'msg-me' : 'msg-them';

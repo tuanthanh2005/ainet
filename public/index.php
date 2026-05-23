@@ -219,7 +219,7 @@ if (in_array($action, ['sitemap', 'robots'], true)) {
     $controllerName = 'SeoController';
 } elseif (strpos($action, 'admin') === 0) {
     $controllerName = 'AdminController';
-} elseif (in_array($action, ['chatPoll', 'chatSend', 'chatUnread', 'chatFile'], true)) {
+} elseif (in_array($action, ['chatPoll', 'sendUserChat', 'chatUnread', 'chatFile'], true)) {
     $controllerName = 'ChatController';
 } elseif (in_array($action, ['checkout', 'payment', 'sepayWebhook', 'checkOrderStatus', 'createOrderJson', 'history', 'success', 'checkoutPage', 'paymentDemo', 'sepayDebug'])) {
     $controllerName = 'CheckoutController';
