@@ -700,7 +700,7 @@
             const fd = new FormData();
             fd.append('body', body);
             fd.append('csrf_token', csrf);
-            if (pendingFile) fd.append('file', pendingFile);
+            if (pendingFile) fd.append('chat_file', pendingFile);
             const hadFile = !!pendingFile;
             input.value = '';
             autoGrow();

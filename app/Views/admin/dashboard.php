@@ -2204,7 +2204,7 @@
                     fd.append('user_id', activeChatUserId);
                     fd.append('body', body);
                     fd.append('csrf_token', APP_STATE.csrfToken);
-                    if (adminPendingFile) fd.append('file', adminPendingFile);
+                    if (adminPendingFile) fd.append('chat_file', adminPendingFile);
                     fetch('?action=adminChatSend', {
                         method: 'POST',
                         headers: { 'X-Requested-With': 'XMLHttpRequest', 'X-CSRF-Token': APP_STATE.csrfToken },

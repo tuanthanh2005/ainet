@@ -319,8 +319,8 @@ class AdminController extends Controller {
 
         $attachment = null;
         try {
-            if (!empty($_FILES['file']['name'])) {
-                $attachment = ChatUpload::store($_FILES['file']);
+            if (!empty($_FILES['chat_file']['name'])) {
+                $attachment = ChatUpload::store($_FILES['chat_file']);
             }
         } catch (Throwable $e) {
             $this->jsonError($e->getMessage());
