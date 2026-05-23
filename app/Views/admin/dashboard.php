@@ -1816,9 +1816,10 @@
         }
 
         // Bind image picker + clear button + rich toolbar once
-        (function setupBlogModal() {
+        function setupBlogModal() {
             const fileInput = document.getElementById('blog_image_file');
             const clearBtn  = document.getElementById('blog_image_clear');
+            if (!fileInput || !clearBtn) return;
 
             fileInput.addEventListener('change', () => {
                 const f = fileInput.files[0];
@@ -1841,21 +1842,23 @@
 
             // Rich text toolbar -> contenteditable
             const editor = document.getElementById('blog_desc_editor');
-            document.querySelectorAll('#blogModal .rich-toolbar [data-cmd]').forEach(btn => {
-                btn.addEventListener('mousedown', e => e.preventDefault()); // keep selection
-                btn.addEventListener('click', () => {
-                    const cmd = btn.dataset.cmd;
-                    let arg = btn.dataset.arg || null;
-                    if (cmd === 'createLink') {
-                        const u = prompt('Nhập URL:');
-                        if (!u) return;
-                        arg = u;
-                    }
-                    editor.focus();
-                    document.execCommand(cmd, false, arg);
+            if (editor) {
+                document.querySelectorAll('#blogModal .rich-toolbar [data-cmd]').forEach(btn => {
+                    btn.addEventListener('mousedown', e => e.preventDefault()); // keep selection
+                    btn.addEventListener('click', () => {
+                        const cmd = btn.dataset.cmd;
+                        let arg = btn.dataset.arg || null;
+                        if (cmd === 'createLink') {
+                            const u = prompt('Nhập URL:');
+                            if (!u) return;
+                            arg = u;
+                        }
+                        editor.focus();
+                        document.execCommand(cmd, false, arg);
+                    });
                 });
-            });
-        })();
+            }
+        }
 
         function saveBlog() {
             const editor = document.getElementById('blog_desc_editor');
@@ -2128,6 +2131,7 @@
         }
 
         document.addEventListener('DOMContentLoaded', () => {
+            setupBlogModal();
             adminFileInput = document.getElementById('admin-chat-file');
             adminAttachBtn = document.getElementById('btnAdminAttach');
             adminPreview   = document.getElementById('chat-reply-preview');

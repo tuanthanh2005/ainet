@@ -535,6 +535,13 @@
                     pendingEl.classList.remove('chat-pending');
                     pendingEl.removeAttribute('data-body');
                     pendingEl.setAttribute('data-id', m.id);
+                    
+                    // Remove temporary attachment bubble if any (prevent duplication)
+                    const tempAtt = pendingEl.querySelector('.bubble-att');
+                    if (tempAtt) {
+                        tempAtt.remove();
+                    }
+
                     // Update attachment if any
                     const attHtml = renderAttachment(m);
                     if (attHtml) {
@@ -560,11 +567,27 @@
             list.scrollTop = list.scrollHeight;
         }
 
-        function renderPendingMessage(body) {
+        function renderPendingMessage(body, file = null) {
             const time = new Date().toLocaleTimeString('vi-VN', { hour:'2-digit', minute:'2-digit' });
             const bodyHtml = body ? `<div class="bubble">${escapeHtml(body)}</div>` : '';
+            let fileHtml = '';
+            if (file) {
+                const isImage = file.type.indexOf('image/') === 0;
+                if (isImage) {
+                    const tempUrl = URL.createObjectURL(file);
+                    fileHtml = `<div class="bubble bubble-att"><a href="#" onclick="return false;" class="chat-att-img pending-att-link"><img src="${tempUrl}" alt="${escapeHtml(file.name)}" class="pending-att-img"></a></div>`;
+                } else {
+                    fileHtml = `<div class="bubble bubble-att"><a href="#" onclick="return false;" class="chat-att-file pending-att-link">
+                        <i class="fa-solid fa-file-arrow-down"></i>
+                        <div class="chat-att-meta">
+                            <div class="fw-bold small text-truncate" style="max-width:200px;">${escapeHtml(file.name)}</div>
+                            <div class="small text-muted">${formatBytes(file.size)}</div>
+                        </div>
+                    </a></div>`;
+                }
+            }
             list.insertAdjacentHTML('beforeend',
-                `<div class="chat-msg msg-me chat-pending" data-body="${escapeHtml(body)}">${bodyHtml}<div class="meta">${time}</div></div>`);
+                `<div class="chat-msg msg-me chat-pending" data-body="${escapeHtml(body)}">${bodyHtml}${fileHtml}<div class="meta">${time}</div></div>`);
             list.scrollTop = list.scrollHeight;
             return list.querySelector('.chat-pending:last-child');
         }
@@ -706,7 +729,7 @@
             autoGrow();
             clearAttachment();
             charCounter.style.display = 'none';
-            const pendingEl = !hadFile ? renderPendingMessage(body) : null;
+            const pendingEl = renderPendingMessage(body, pendingFile);
             fetch(APP_BASE + 'index.php?action=chatSend', {
                 method: 'POST',
                 headers: { 'X-Requested-With':'XMLHttpRequest', 'X-CSRF-Token': csrf },
@@ -729,6 +752,19 @@
                         pendingEl.removeAttribute('data-body');
                         if (d.id) {
                             pendingEl.setAttribute('data-id', d.id);
+                            
+                            // Update temporary attachment links to official server paths
+                            const attLink = pendingEl.querySelector('.pending-att-link');
+                            if (attLink) {
+                                const realUrl = APP_BASE + 'index.php?action=chatFile&id=' + d.id;
+                                attLink.href = realUrl;
+                                attLink.removeAttribute('onclick');
+                                
+                                const attImg = pendingEl.querySelector('.pending-att-img');
+                                if (attImg) {
+                                    attImg.src = realUrl;
+                                }
+                            }
                         }
                     }
                     if (d.id && d.id > lastId) lastId = d.id;
