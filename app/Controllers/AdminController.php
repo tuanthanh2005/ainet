@@ -284,6 +284,73 @@ class AdminController extends Controller {
         $this->jsonSuccess();
     }
 
+    /** Admin chat: list user threads */
+    public function adminChatThreads() {
+        try {
+            $threads = Message::threadsForAdmin();
+            $this->jsonSuccess(['threads' => $threads, 'unread' => Message::unreadForAdmin()]);
+        } catch (Throwable $e) {
+            error_log('adminChatThreads error: ' . $e->getMessage());
+            $this->jsonError('Không thể tải danh sách: ' . $e->getMessage());
+        }
+    }
+
+    /** Admin chat: load a single thread */
+    public function adminChatThread() {
+        $userId = (int) ($_GET['user_id'] ?? 0);
+        if ($userId <= 0) {
+            $this->jsonError('Thiếu user_id.');
+        }
+        $since = (int) ($_GET['since'] ?? 0);
+        try {
+            $messages = Message::thread($userId, $since);
+            Message::markRead($userId, 'user');
+            $user = User::findById($userId);
+            $this->jsonSuccess([
+                'messages' => $messages,
+                'user'     => $user,
+            ]);
+        } catch (Throwable $e) {
+            error_log('adminChatThread error: ' . $e->getMessage());
+            $this->jsonError('Không thể tải tin nhắn: ' . $e->getMessage());
+        }
+    }
+
+    /** Admin chat: reply to a user thread */
+    public function adminChatSend() {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            $this->jsonError('Method not allowed', 405);
+        }
+        $userId = (int) ($_POST['user_id'] ?? 0);
+        $body   = trim($_POST['body'] ?? '');
+        if ($userId <= 0) {
+            $this->jsonError('Thiếu user_id.');
+        }
+
+        $attachment = null;
+        try {
+            if (!empty($_FILES['chat_file']['name'])) {
+                $attachment = ChatUpload::store($_FILES['chat_file']);
+            }
+        } catch (Throwable $e) {
+            $this->jsonError($e->getMessage());
+        }
+
+        if ($body === '' && !$attachment) {
+            $this->jsonError('Tin nhắn không được trống.');
+        }
+        if (mb_strlen($body) > 700) {
+            $this->jsonError('Tin nhắn không được quá 700 ký tự.');
+        }
+        $id = Message::send($userId, 'admin', $body !== '' ? $body : null, $attachment);
+        $this->jsonSuccess(['id' => $id]);
+    }
+
+    /** Admin chat: unread count for badge */
+    public function adminChatUnread() {
+        $this->jsonSuccess(['unread' => Message::unreadForAdmin()]);
+    }
+
     /** Telegram: test bot configuration */
     public function adminTelegramTest() {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
