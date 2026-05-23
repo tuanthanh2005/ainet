@@ -26,17 +26,43 @@ class Upload {
             throw new RuntimeException('Chưa chọn tệp.');
         }
         if ($file['error'] !== UPLOAD_ERR_OK) {
-            throw new RuntimeException('Tệp tải lên bị lỗi.');
+            $errMsgs = [
+                UPLOAD_ERR_INI_SIZE   => 'Tệp vượt quá dung lượng cho phép trong cấu hình máy chủ (upload_max_filesize).',
+                UPLOAD_ERR_FORM_SIZE  => 'Tệp vượt quá dung lượng cho phép của Form.',
+                UPLOAD_ERR_PARTIAL    => 'Tệp chỉ được tải lên một phần.',
+                UPLOAD_ERR_NO_FILE    => 'Không có tệp nào được chọn.',
+                UPLOAD_ERR_NO_TMP_DIR => 'Lỗi máy chủ: Thiếu thư mục tạm để tải tệp.',
+                UPLOAD_ERR_CANT_WRITE => 'Lỗi máy chủ: Không thể ghi tệp vào đĩa.',
+                UPLOAD_ERR_EXTENSION  => 'Lỗi máy chủ: Một phần mở rộng PHP đã dừng việc tải tệp.',
+            ];
+            $errCode = $file['error'];
+            throw new RuntimeException($errMsgs[$errCode] ?? 'Tệp tải lên bị lỗi (Mã lỗi: ' . $errCode . ').');
         }
         if (($file['size'] ?? 0) <= 0 || $file['size'] > self::MAX_BYTES) {
             throw new RuntimeException('Tệp quá lớn (giới hạn 10MB).');
         }
 
         $allowed = $allowed ?: self::IMAGE_MIMES;
-        $finfo   = new finfo(FILEINFO_MIME_TYPE);
-        $mime    = $finfo->file($file['tmp_name']) ?: 'application/octet-stream';
+
+        // Nhận diện MIME type an toàn với các phương án fallback
+        $mime = null;
+        if (class_exists('finfo')) {
+            try {
+                $finfo = new finfo(FILEINFO_MIME_TYPE);
+                $mime  = $finfo->file($file['tmp_name']);
+            } catch (Throwable $e) {
+                // finfo class initialization or file reading error
+            }
+        }
+        if (!$mime && function_exists('mime_content_type')) {
+            $mime = @mime_content_type($file['tmp_name']);
+        }
+        if (!$mime) {
+            $mime = $file['type'] ?: 'application/octet-stream';
+        }
+
         if (!in_array($mime, $allowed, true)) {
-            throw new RuntimeException('Định dạng tệp không được phép.');
+            throw new RuntimeException('Định dạng tệp không được phép (MIME: ' . htmlspecialchars($mime) . ').');
         }
 
         $extension = strtolower(pathinfo((string) ($file['name'] ?? ''), PATHINFO_EXTENSION));
@@ -49,14 +75,14 @@ class Upload {
             @mkdir($absoluteDir, 0775, true);
         }
         if (!is_dir($absoluteDir) || !is_writable($absoluteDir)) {
-            throw new RuntimeException('Không thể ghi tệp lên server.');
+            throw new RuntimeException('Không thể ghi tệp lên server. Vui lòng kiểm tra và cấp quyền ghi (chmod 755 hoặc 777) cho thư mục: ' . $absoluteDir);
         }
 
         $fname = bin2hex(random_bytes(8)) . '_' . time() . '.' . $extension;
         $dest  = $absoluteDir . DIRECTORY_SEPARATOR . $fname;
 
         if (!move_uploaded_file($file['tmp_name'], $dest)) {
-            throw new RuntimeException('Lưu tệp thất bại.');
+            throw new RuntimeException('Lưu tệp thất bại. Vui lòng kiểm tra quyền ghi tệp trong thư mục: ' . $absoluteDir);
         }
 
         $relative = $relativeDir . '/' . $fname;

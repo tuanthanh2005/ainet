@@ -45,14 +45,30 @@ class ChatController extends Controller {
         }
 
         $id = Message::send((int) $user['id'], 'user', $body !== '' ? $body : null, $attachment);
+        $this->jsonThenNotifyTelegram($id, $user, $body, $attachment);
 
-        // Notify admin via Telegram — new customer chat message
+    }
+
+    private function jsonThenNotifyTelegram(int $messageId, array $user, string $body, ?array $attachment): void {
+        http_response_code(200);
+        header('Content-Type: application/json');
+        echo json_encode(['success' => true, 'id' => $messageId]);
+
+        if (function_exists('fastcgi_finish_request')) {
+            session_write_close();
+            fastcgi_finish_request();
+        } else {
+            @ob_flush();
+            @flush();
+        }
+
         try {
             $attachmentName = $attachment ? ($attachment['name'] ?? null) : null;
             TelegramService::notifyNewChatMessage($user, $body, $attachmentName);
-        } catch (Throwable $ignored) {}
-
-        $this->json(['success' => true, 'id' => $id]);
+        } catch (Throwable $e) {
+            error_log('Telegram chat notification failed: ' . $e->getMessage());
+        }
+        exit;
     }
 
     /** GET ?action=chatUnread */

@@ -980,7 +980,7 @@
                                 </div>
                                 <div id="chat-reply-preview" class="px-3 py-2 border-top d-none" style="background:#fff;"></div>
                                 <div class="admin-chat-counter px-3 py-1 text-end text-muted" id="admin-chat-counter" style="font-size: 0.8rem; background: #f7f7f8; display: none; border-top: 1px solid var(--border-color);">0/700</div>
-                                <form id="chat-reply-form" class="d-flex gap-2 p-3 border-top align-items-end" enctype="multipart/form-data" style="display:none !important;">
+                                <form id="chat-reply-form" class="d-flex gap-2 p-3 border-top align-items-end" enctype="multipart/form-data" style="display:none;">
                                     <button type="button" class="btn btn-light border" id="btnAdminAttach" title="Đính kèm tệp"><i class="fa-solid fa-paperclip"></i></button>
                                     <input type="file" id="admin-chat-file" class="d-none" accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.zip,.txt,.csv">
                                     <textarea id="chat-reply-input" class="form-control chat-textarea" placeholder="Nhập câu trả lời... (Shift+Enter để xuống dòng)" maxlength="700" rows="1"></textarea>
@@ -2186,11 +2186,20 @@
             }
 
             if (replyForm) {
+                let adminIsSending = false;
+                const adminSendBtn = replyForm.querySelector('button[type="submit"]');
                 replyForm.addEventListener('submit', e => {
                     e.preventDefault();
                     if (!activeChatUserId) return;
+                    if (adminIsSending) return;
                     const body = adminReplyInput.value.trim();
                     if (!body && !adminPendingFile) return;
+                    
+                    adminIsSending = true;
+                    if (adminSendBtn) {
+                        adminSendBtn.disabled = true;
+                        adminSendBtn.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
+                    }
                     const fd = new FormData();
                     fd.append('user_id', activeChatUserId);
                     fd.append('body', body);
@@ -2211,6 +2220,16 @@
                             pollAdminChat();
                         } else {
                             AppNotify.error(d.message || 'Không thể gửi.', 'Lỗi gửi');
+                        }
+                    })
+                    .catch(() => {
+                        AppNotify.error('Không thể kết nối server.', 'Lỗi kết nối');
+                    })
+                    .finally(() => {
+                        adminIsSending = false;
+                        if (adminSendBtn) {
+                            adminSendBtn.disabled = false;
+                            adminSendBtn.innerHTML = '<i class="fa-solid fa-paper-plane"></i>';
                         }
                     });
                 });
