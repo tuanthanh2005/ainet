@@ -387,8 +387,8 @@
         }
         ?>
         <?php if ($zaloValue !== ''): ?>
-        <a href="<?= htmlspecialchars($zaloLink) ?>" target="_blank" class="fab-btn fab-zalo" title="Hỗ trợ Zalo" style="background-color: #0068FF !important; color: #ffffff !important; text-decoration: none;">
-            <span class="zalo-text" style="color: #ffffff !important;">Zalo</span>
+        <a href="<?= htmlspecialchars($zaloLink) ?>" target="_blank" class="fab-btn fab-zalo" title="Hỗ trợ Zalo">
+            <span class="zalo-text">Zalo</span>
         </a>
         <?php endif; ?>
         <a href="https://t.me/specademy" target="_blank" class="fab-btn fab-telegram" title="Hỗ trợ Telegram">
