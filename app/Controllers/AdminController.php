@@ -286,8 +286,13 @@ class AdminController extends Controller {
 
     /** Admin chat: list user threads */
     public function adminChatThreads() {
-        $threads = Message::threadsForAdmin();
-        $this->jsonSuccess(['threads' => $threads, 'unread' => Message::unreadForAdmin()]);
+        try {
+            $threads = Message::threadsForAdmin();
+            $this->jsonSuccess(['threads' => $threads, 'unread' => Message::unreadForAdmin()]);
+        } catch (Throwable $e) {
+            error_log('adminChatThreads error: ' . $e->getMessage());
+            $this->jsonError('Không thể tải danh sách: ' . $e->getMessage());
+        }
     }
 
     /** Admin chat: load a single thread */
@@ -297,13 +302,18 @@ class AdminController extends Controller {
             $this->jsonError('Thiếu user_id.');
         }
         $since = (int) ($_GET['since'] ?? 0);
-        $messages = Message::thread($userId, $since);
-        Message::markRead($userId, 'user');
-        $user = User::findById($userId);
-        $this->jsonSuccess([
-            'messages' => $messages,
-            'user'     => $user,
-        ]);
+        try {
+            $messages = Message::thread($userId, $since);
+            Message::markRead($userId, 'user');
+            $user = User::findById($userId);
+            $this->jsonSuccess([
+                'messages' => $messages,
+                'user'     => $user,
+            ]);
+        } catch (Throwable $e) {
+            error_log('adminChatThread error: ' . $e->getMessage());
+            $this->jsonError('Không thể tải tin nhắn: ' . $e->getMessage());
+        }
     }
 
     /** Admin chat: reply to a user thread */

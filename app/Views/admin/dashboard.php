@@ -1967,10 +1967,19 @@
 
         function loadChatThreads() {
             fetch('?action=msgThreads', { credentials: 'same-origin' })
-                .then(r => r.json())
+                .then(async r => {
+                    const text = await r.text();
+                    try { return JSON.parse(text); }
+                    catch(e) { console.error('[Chat] msgThreads raw:', text); throw new Error('Response not JSON'); }
+                })
                 .then(d => {
                     const list = document.getElementById('chat-threads');
                     list.innerHTML = '';
+                    if (!d.success) {
+                        console.error('[Chat] msgThreads error:', d.message);
+                        list.innerHTML = '<div class="text-center text-danger py-5"><i class="fa-solid fa-triangle-exclamation fs-2 mb-2 d-block"></i><p class="mb-0 small">Lỗi tải danh sách. Thử làm mới trang.</p></div>';
+                        return;
+                    }
                     if (!d.threads || d.threads.length === 0) {
                         list.innerHTML = '<div class="text-center text-muted py-5"><i class="fa-regular fa-comments fs-1 opacity-25 mb-3 d-block"></i><p class="mb-0">Chưa có cuộc trò chuyện nào.</p></div>';
                         return;
@@ -2000,6 +2009,11 @@
                         el.addEventListener('click', () => openChatThread(parseInt(el.dataset.user, 10)));
                     });
                     refreshChatBadge();
+                })
+                .catch(err => {
+                    console.error('[Chat] loadChatThreads failed:', err);
+                    const list = document.getElementById('chat-threads');
+                    if (list) list.innerHTML = '<div class="text-center text-danger py-5 small">Lỗi kết nối. Thử làm mới.</div>';
                 });
         }
 
