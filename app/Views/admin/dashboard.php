@@ -1951,7 +1951,7 @@
         }
 
         function refreshChatBadge() {
-            fetch('?action=adminChatUnread', { credentials: 'same-origin' })
+            fetch('?action=msgAdminBadge', { credentials: 'same-origin' })
                 .then(r => r.json())
                 .then(d => {
                     if (d.success) {
@@ -1966,7 +1966,7 @@
         }
 
         function loadChatThreads() {
-            fetch('?action=adminChatThreads', { credentials: 'same-origin' })
+            fetch('?action=msgThreads', { credentials: 'same-origin' })
                 .then(r => r.json())
                 .then(d => {
                     const list = document.getElementById('chat-threads');
@@ -2007,7 +2007,7 @@
             activeChatUserId = userId;
             lastAdminMsgId = 0;
             adminRenderedIds.clear();
-            fetch('?action=adminChatThread&user_id=' + userId, { credentials: 'same-origin' })
+            fetch('?action=msgThread&user_id=' + userId, { credentials: 'same-origin' })
                 .then(r => r.json())
                 .then(d => {
                     document.getElementById('chat-active-name').textContent = (d.user && d.user.name) || 'Khách';
@@ -2044,7 +2044,7 @@
 
         function renderAdminAttachment(m) {
             if (!m.attachment_path) return '';
-            const url = '?action=chatFile&id=' + m.id;
+            const url = '?action=msgFile&id=' + m.id;
             const isImage = (m.attachment_mime || '').indexOf('image/') === 0;
             if (isImage) {
                 return `<a href="${url}" target="_blank" class="chat-att-img"><img src="${url}" alt="${escHtml(m.attachment_name||'image')}"></a>`;
@@ -2081,7 +2081,7 @@
 
         function pollAdminChat() {
             // Global unread check
-            fetch('?action=adminChatUnread', { credentials: 'same-origin' })
+            fetch('?action=msgAdminBadge', { credentials: 'same-origin' })
                 .then(r => r.json())
                 .then(d => {
                     if (d.success) {
@@ -2102,7 +2102,7 @@
             if (chatView && chatView.classList.contains('active')) {
                 loadChatThreads();
                 if (activeChatUserId) {
-                    fetch('?action=adminChatThread&user_id=' + activeChatUserId + '&since=' + lastAdminMsgId, { credentials: 'same-origin' })
+                    fetch('?action=msgThread&user_id=' + activeChatUserId + '&since=' + lastAdminMsgId, { credentials: 'same-origin' })
                         .then(r => r.json())
                         .then(d => {
                             if (!d.messages || d.messages.length === 0) return;
@@ -2215,7 +2215,7 @@
                     fd.append('body', body);
                     fd.append('csrf_token', APP_STATE.csrfToken);
                     if (adminPendingFile) fd.append('chat_file', adminPendingFile);
-                    fetch('?action=adminSubmitChat', {
+                    fetch('?action=msgReply', {
                         method: 'POST',
                         headers: { 'X-Requested-With': 'XMLHttpRequest', 'X-CSRF-Token': APP_STATE.csrfToken },
                         body: fd, credentials: 'same-origin'

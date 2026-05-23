@@ -508,7 +508,7 @@
 
         function renderAttachment(m) {
             if (!m.attachment_path) return '';
-            const url = APP_BASE + 'index.php?action=chatFile&id=' + m.id;
+            const url = APP_BASE + 'index.php?action=msgFile&id=' + m.id;
             const isImage = (m.attachment_mime || '').indexOf('image/') === 0;
             if (isImage) {
                 return `<a href="${url}" target="_blank" class="chat-att-img"><img src="${url}" alt="${escapeHtml(m.attachment_name)}"></a>`;
@@ -593,7 +593,7 @@
         }
 
         function poll() {
-            fetch(APP_BASE + 'index.php?action=chatPoll&since=' + lastId, { credentials:'same-origin' })
+            fetch(APP_BASE + 'index.php?action=msgPoll&since=' + lastId, { credentials:'same-origin' })
                 .then(r => r.json())
                 .then(data => {
                     if (!data.success) return;
@@ -615,7 +615,7 @@
         }
 
         function pollBadgeOnly() {
-            fetch(APP_BASE + 'index.php?action=chatUnread', { credentials:'same-origin' })
+            fetch(APP_BASE + 'index.php?action=msgBadge', { credentials:'same-origin' })
                 .then(r => r.json())
                 .then(d => { 
                     if (d.success) {
@@ -730,7 +730,7 @@
             clearAttachment();
             charCounter.style.display = 'none';
             const pendingEl = renderPendingMessage(body, pendingFile);
-            fetch(APP_BASE + 'index.php?action=userSubmitChat', {
+            fetch(APP_BASE + 'index.php?action=msgSend', {
                 method: 'POST',
                 headers: { 'X-Requested-With':'XMLHttpRequest', 'X-CSRF-Token': csrf },
                 body: fd, credentials:'same-origin'
@@ -756,7 +756,7 @@
                             // Update temporary attachment links to official server paths
                             const attLink = pendingEl.querySelector('.pending-att-link');
                             if (attLink) {
-                                const realUrl = APP_BASE + 'index.php?action=chatFile&id=' + d.id;
+                                const realUrl = APP_BASE + 'index.php?action=msgFile&id=' + d.id;
                                 attLink.href = realUrl;
                                 attLink.removeAttribute('onclick');
                                 

@@ -217,9 +217,9 @@ if ($isPost && !in_array($action, $csrfExempt, true)) {
 // Simple Route Map
 if (in_array($action, ['sitemap', 'robots'], true)) {
     $controllerName = 'SeoController';
-} elseif (strpos($action, 'admin') === 0 || $action === 'adminSubmitChat') {
+} elseif (strpos($action, 'admin') === 0 || in_array($action, ['adminSubmitChat', 'msgReply', 'msgThreads', 'msgThread', 'msgAdminBadge'], true)) {
     $controllerName = 'AdminController';
-} elseif (in_array($action, ['chatPoll', 'userSubmitChat', 'chatUnread', 'chatFile'], true)) {
+} elseif (in_array($action, ['chatPoll', 'userSubmitChat', 'chatUnread', 'chatFile', 'msgSend', 'msgPoll', 'msgBadge', 'msgFile'], true)) {
     $controllerName = 'ChatController';
 } elseif (in_array($action, ['checkout', 'payment', 'sepayWebhook', 'checkOrderStatus', 'createOrderJson', 'history', 'success', 'checkoutPage', 'paymentDemo', 'sepayDebug'])) {
     $controllerName = 'CheckoutController';
@@ -239,10 +239,22 @@ $controller = new $controllerName();
 
 // Map friendly action names to internal methods to bypass WAF signature blocks
 $method = $action;
-if ($action === 'userSubmitChat') {
+if (in_array($action, ['userSubmitChat', 'msgSend'], true)) {
     $method = 'chatSend';
-} elseif ($action === 'adminSubmitChat') {
+} elseif (in_array($action, ['adminSubmitChat', 'msgReply'], true)) {
     $method = 'adminChatSend';
+} elseif ($action === 'msgPoll') {
+    $method = 'chatPoll';
+} elseif ($action === 'msgBadge') {
+    $method = 'chatUnread';
+} elseif ($action === 'msgFile') {
+    $method = 'chatFile';
+} elseif ($action === 'msgThreads') {
+    $method = 'adminChatThreads';
+} elseif ($action === 'msgThread') {
+    $method = 'adminChatThread';
+} elseif ($action === 'msgAdminBadge') {
+    $method = 'adminChatUnread';
 }
 
 if (method_exists($controller, $method) && $method !== '__construct') {
