@@ -2215,7 +2215,7 @@
                     fd.append('body', body);
                     fd.append('csrf_token', APP_STATE.csrfToken);
                     if (adminPendingFile) fd.append('chat_file', adminPendingFile);
-                    fetch('?action=adminChatSend', {
+                    fetch('?action=adminSubmitChat', {
                         method: 'POST',
                         headers: { 'X-Requested-With': 'XMLHttpRequest', 'X-CSRF-Token': APP_STATE.csrfToken },
                         body: fd, credentials: 'same-origin'

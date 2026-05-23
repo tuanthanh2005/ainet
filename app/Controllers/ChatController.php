@@ -20,8 +20,8 @@ class ChatController extends Controller {
         $this->json(['success' => true, 'messages' => $messages, 'unread' => $unread]);
     }
 
-    /** POST ?action=sendUserChat — user sends a message (text and/or attachment) */
-    public function sendUserChat(): void {
+    /** POST ?action=chatSend — user sends a message (text and/or attachment) */
+    public function chatSend(): void {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             $this->json(['success' => false, 'message' => 'Method not allowed'], 405);
         }
