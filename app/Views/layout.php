@@ -427,7 +427,14 @@
     </div>
     <script>
     (function () {
-        const APP_BASE = document.querySelector('meta[name="app-base"]').getAttribute('content');
+        const metaBase = document.querySelector('meta[name="app-base"]').getAttribute('content');
+        let basePathname = '/';
+        try {
+            basePathname = new URL(metaBase).pathname;
+        } catch (e) {
+            basePathname = metaBase;
+        }
+        const APP_BASE = window.location.origin + (basePathname.endsWith('/') ? basePathname : basePathname + '/');
         const csrf = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
         const box = document.getElementById('user-chatbox');
         const list = document.getElementById('user-chat-messages');
