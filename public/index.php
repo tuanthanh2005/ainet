@@ -78,7 +78,6 @@ require_once APP_ROOT . '/app/Core/Csrf.php';
 require_once APP_ROOT . '/app/Core/Auth.php';
 require_once APP_ROOT . '/app/Core/Seo.php';
 require_once APP_ROOT . '/app/Core/Url.php';
-require_once APP_ROOT . '/app/Core/ChatUpload.php';
 require_once APP_ROOT . '/app/Core/Upload.php';
 require_once APP_ROOT . '/app/Core/TelegramService.php';
 require_once APP_ROOT . '/app/Core/GoogleAuth.php';
@@ -91,7 +90,6 @@ require_once APP_ROOT . '/app/Models/Category.php';
 require_once APP_ROOT . '/app/Models/Blog.php';
 require_once APP_ROOT . '/app/Models/RecentOrder.php';
 require_once APP_ROOT . '/app/Models/Order.php';
-require_once APP_ROOT . '/app/Models/Message.php';
 require_once APP_ROOT . '/app/Models/Stock.php';
 
 // Load Controllers
@@ -99,7 +97,6 @@ require_once APP_ROOT . '/app/Controllers/HomeController.php';
 require_once APP_ROOT . '/app/Controllers/AdminController.php';
 require_once APP_ROOT . '/app/Controllers/CheckoutController.php';
 require_once APP_ROOT . '/app/Controllers/SeoController.php';
-require_once APP_ROOT . '/app/Controllers/ChatController.php';
 
 // Refresh logged-in user's session from DB on every request so role/status changes
 // take effect without requiring re-login. Silent if user no longer exists.
@@ -217,10 +214,8 @@ if ($isPost && !in_array($action, $csrfExempt, true)) {
 // Simple Route Map
 if (in_array($action, ['sitemap', 'robots'], true)) {
     $controllerName = 'SeoController';
-} elseif (strpos($action, 'admin') === 0 || in_array($action, ['adminSubmitChat', 'msgReply', 'msgThreads', 'msgThread', 'msgAdminBadge'], true)) {
+} elseif (strpos($action, 'admin') === 0) {
     $controllerName = 'AdminController';
-} elseif (in_array($action, ['chatPoll', 'userSubmitChat', 'chatUnread', 'chatFile', 'msgSend', 'msgPoll', 'msgBadge', 'msgFile'], true)) {
-    $controllerName = 'ChatController';
 } elseif (in_array($action, ['checkout', 'payment', 'sepayWebhook', 'checkOrderStatus', 'createOrderJson', 'history', 'success', 'checkoutPage', 'paymentDemo', 'sepayDebug'])) {
     $controllerName = 'CheckoutController';
 } elseif (in_array($action, ['googleLogin', 'googleCallback'], true)) {
@@ -237,25 +232,8 @@ if (!class_exists($controllerName)) {
 
 $controller = new $controllerName();
 
-// Map friendly action names to internal methods to bypass WAF signature blocks
+// Map friendly action names to internal methods
 $method = $action;
-if (in_array($action, ['userSubmitChat', 'msgSend'], true)) {
-    $method = 'chatSend';
-} elseif (in_array($action, ['adminSubmitChat', 'msgReply'], true)) {
-    $method = 'adminChatSend';
-} elseif ($action === 'msgPoll') {
-    $method = 'chatPoll';
-} elseif ($action === 'msgBadge') {
-    $method = 'chatUnread';
-} elseif ($action === 'msgFile') {
-    $method = 'chatFile';
-} elseif ($action === 'msgThreads') {
-    $method = 'adminChatThreads';
-} elseif ($action === 'msgThread') {
-    $method = 'adminChatThread';
-} elseif ($action === 'msgAdminBadge') {
-    $method = 'adminChatUnread';
-}
 
 if (method_exists($controller, $method) && $method !== '__construct') {
     $controller->$method();
