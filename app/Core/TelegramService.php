@@ -70,6 +70,12 @@ class TelegramService {
             if (!empty($order['upgrade_email'])) {
                 $lines[] = "";
                 $lines[] = "🔑 *Tài khoản nâng cấp:* " . self::esc($order['upgrade_email']);
+                if (!empty($order['upgrade_pass'])) {
+                    $lines[] = "🔒 *Mật khẩu:* " . self::esc($order['upgrade_pass']);
+                }
+                if (!empty($order['upgrade_link'])) {
+                    $lines[] = "🔗 *Liên hệ:* " . self::esc($order['upgrade_link']);
+                }
             }
 
             $lines[] = "";

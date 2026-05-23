@@ -73,6 +73,10 @@ $variantIdx = isset($_GET['variant_idx']) ? (int)$_GET['variant_idx'] : 0;
                                         <label class="form-label small fw-bold">Email tài khoản <span class="text-danger">*</span></label>
                                         <input type="email" class="form-control bg-light border-0 py-2" name="upgrade_email" placeholder="Nhập email tài khoản cần nâng cấp" required>
                                     </div>
+                                    <?php 
+                                    $requirePass = !isset($variant['require_password']) || $variant['require_password'] == 1;
+                                    if ($requirePass): 
+                                    ?>
                                     <div class="mb-3">
                                         <label class="form-label small fw-bold">Mật khẩu tài khoản <span class="text-danger">*</span></label>
                                         <div class="input-group">
@@ -80,6 +84,7 @@ $variantIdx = isset($_GET['variant_idx']) ? (int)$_GET['variant_idx'] : 0;
                                             <button class="btn btn-light border-0" type="button" onclick="togglePass()"><i class="fa-regular fa-eye text-muted"></i></button>
                                         </div>
                                     </div>
+                                    <?php endif; ?>
                                     <div class="mb-0">
                                         <label class="form-label small fw-bold">Telegram / Facebook <span class="text-danger">*</span></label>
                                         <input type="text" class="form-control bg-light border-0 py-2" name="upgrade_link" placeholder="Username Telegram hoặc link Facebook" required>

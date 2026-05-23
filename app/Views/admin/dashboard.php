@@ -914,7 +914,7 @@
                                     <div class="col-md-2">Giá bán</div>
                                     <div class="col-md-2">Giá gốc</div>
                                     <div class="col-md-1">Kho</div>
-                                    <div class="col-md-2 text-center">Up / Kho</div>
+                                    <div class="col-md-3 text-center">Up / MK / Kho</div>
                                     <div class="col-md-1"></div>
                                 </div>
                                 <div id="variant-container" class="bg-light p-3 rounded-3 border">
@@ -1108,7 +1108,7 @@
             }
         }
 
-        function addVariantRow(data = { name: '', price: '', original_price: '', stock: '', is_upgrade: 0 }) {
+        function addVariantRow(data = { name: '', price: '', original_price: '', stock: '', is_upgrade: 0, require_password: 1 }) {
             const container = document.getElementById('variant-container');
 
             // Clear placeholder if exists
@@ -1122,6 +1122,9 @@
             const row = document.createElement('div');
             row.className = 'variant-row row g-2 mb-2 pb-2 border-bottom align-items-center';
             row.dataset.variantIdx = variantIdx;
+
+            const requirePass = data.require_password === undefined ? 1 : (data.require_password == 1 ? 1 : 0);
+
             row.innerHTML = `
                 <div class="col-md-3">
                     <input type="text" class="form-control form-control-sm v-name" placeholder="Tên loại" value="${data.name}" required>
@@ -1135,10 +1138,14 @@
                 <div class="col-md-1">
                     <input type="number" class="form-control form-control-sm v-stock" placeholder="Kho" value="${data.stock}" min="0" required>
                 </div>
-                <div class="col-md-2 d-flex justify-content-center align-items-center gap-2">
+                <div class="col-md-3 d-flex justify-content-center align-items-center gap-2">
                     <div class="form-check form-switch mb-0" title="Yêu cầu nâng cấp chính chủ">
                         <input class="form-check-input v-upgrade" type="checkbox" ${data.is_upgrade == 1 ? 'checked' : ''}>
                         <label class="form-check-label smaller">Up</label>
+                    </div>
+                    <div class="form-check form-switch mb-0 ${data.is_upgrade == 1 ? '' : 'd-none'} v-pass-container" title="Yêu cầu mật khẩu khi nâng cấp">
+                        <input class="form-check-input v-require-password" type="checkbox" ${requirePass == 1 ? 'checked' : ''}>
+                        <label class="form-check-label smaller">MK</label>
                     </div>
                     <button type="button" class="btn btn-sm btn-outline-dark v-stock-btn" title="Quản lý kho" ${productId ? '' : 'disabled'}>
                         <i class="fa-solid fa-warehouse"></i>
@@ -1151,6 +1158,16 @@
                 </div>
             `;
             container.appendChild(row);
+
+            // Toggle MK switch when Up is checked/unchecked
+            row.querySelector('.v-upgrade').addEventListener('change', (e) => {
+                const passContainer = row.querySelector('.v-pass-container');
+                if (e.target.checked) {
+                    passContainer.classList.remove('d-none');
+                } else {
+                    passContainer.classList.add('d-none');
+                }
+            });
 
             // Bind stock button
             row.querySelector('.v-stock-btn').addEventListener('click', () => {
@@ -1210,12 +1227,14 @@
             document.querySelectorAll('.variant-row').forEach(row => {
                 const original = parseFloat(row.querySelector('.v-original-price').value) || 0;
                 const price    = parseFloat(row.querySelector('.v-price').value) || 0;
+                const requirePasswordCheckbox = row.querySelector('.v-require-password');
                 variants.push({
                     name: row.querySelector('.v-name').value,
                     price: price,
                     original_price: original > price ? original : 0,
                     stock: row.querySelector('.v-stock').value,
-                    is_upgrade: row.querySelector('.v-upgrade').checked ? 1 : 0
+                    is_upgrade: row.querySelector('.v-upgrade').checked ? 1 : 0,
+                    require_password: requirePasswordCheckbox ? (requirePasswordCheckbox.checked ? 1 : 0) : 1
                 });
             });
 
