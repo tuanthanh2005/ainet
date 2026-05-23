@@ -579,6 +579,22 @@ body {
     background-color: #2AABEE;
 }
 
+.fab-zalo {
+    background-color: #0068FF;
+}
+
+.zalo-text {
+    font-family: 'Inter', sans-serif;
+    font-weight: 800;
+    font-size: 0.9rem;
+    letter-spacing: -0.5px;
+}
+@media (max-width: 768px) {
+    .zalo-text {
+        font-size: 0.7rem;
+    }
+}
+
 
 
 .fab-chat {

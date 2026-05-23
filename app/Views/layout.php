@@ -374,11 +374,26 @@
         <button class="fab-btn fab-totop" id="btnScrollToTop" title="Lên đầu trang">
             <i class="fa-solid fa-arrow-up"></i>
         </button>
+        <?php
+        $zaloValue = trim($settings['zalo'] ?? '');
+        $zaloLink = '#';
+        if ($zaloValue !== '') {
+            if (strpos($zaloValue, 'http') === 0) {
+                $zaloLink = $zaloValue;
+            } else {
+                $cleanPhone = preg_replace('/[^0-9]/', '', $zaloValue);
+                $zaloLink = 'https://zalo.me/' . $cleanPhone;
+            }
+        }
+        ?>
+        <?php if ($zaloValue !== ''): ?>
+        <a href="<?= htmlspecialchars($zaloLink) ?>" target="_blank" class="fab-btn fab-zalo" title="Hỗ trợ Zalo">
+            <span class="zalo-text">Zalo</span>
+        </a>
+        <?php endif; ?>
         <a href="https://t.me/specademy" target="_blank" class="fab-btn fab-telegram" title="Hỗ trợ Telegram">
             <i class="fa-brands fa-telegram"></i>
         </a>
-
-
     </div>
 
     <!-- Bootstrap & SweetAlert2 — Load TRƯỚC các modal để data-bs-toggle hoạt động -->
