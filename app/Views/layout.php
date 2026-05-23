@@ -387,8 +387,13 @@
         }
         ?>
         <?php if ($zaloValue !== ''): ?>
-        <a href="<?= htmlspecialchars($zaloLink) ?>" target="_blank" class="fab-btn fab-zalo" title="Hỗ trợ Zalo">
-            <span class="zalo-text">Zalo</span>
+        <a href="<?= htmlspecialchars($zaloLink) ?>" target="_blank" 
+           class="btn btn-primary rounded-circle d-flex align-items-center justify-content-center shadow border-0" 
+           style="width: 50px; height: 50px; background-color: #0068FF !important; color: #ffffff !important; transition: all 0.3s; text-decoration: none;"
+           onmouseover="this.style.transform='translateY(-5px) scale(1.05)'; this.style.boxShadow='0 8px 25px rgba(0,104,255,0.45)';"
+           onmouseout="this.style.transform='translateY(0) scale(1)'; this.style.boxShadow='0 4px 15px rgba(0,0,0,0.15)';"
+           title="Hỗ trợ Zalo">
+            <span style="font-family: 'Inter', sans-serif; font-weight: 800; font-size: 0.85rem; letter-spacing: -0.5px; color: #ffffff !important;">Zalo</span>
         </a>
         <?php endif; ?>
         <a href="https://t.me/specademy" target="_blank" class="fab-btn fab-telegram" title="Hỗ trợ Telegram">
