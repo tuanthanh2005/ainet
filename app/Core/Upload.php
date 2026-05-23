@@ -4,8 +4,6 @@
  * Generic file uploader for assets that can be served publicly.
  * Files land under the configured public filesystem disk and become reachable
  * through that disk's configured URL.
- *
- * Use ChatUpload for chat attachments (private, served via ACL endpoint).
  */
 class Upload {
     private const MAX_BYTES = 10 * 1024 * 1024; // 10 MB
