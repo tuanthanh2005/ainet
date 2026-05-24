@@ -16,11 +16,27 @@ class TelegramService {
         try {
             $settings = Setting::getAll();
         } catch (Throwable $e) {
+            self::log("getConfig error: " . $e->getMessage());
             return ['', ''];
         }
         $token  = trim((string) ($settings['telegram_bot_token'] ?? ''));
         $chatId = trim((string) ($settings['telegram_chat_id'] ?? ''));
         return [$token, $chatId];
+    }
+
+    /**
+     * Ghi log Telegram vào storage/logs/telegram.log
+     */
+    public static function log(string $message): void {
+        try {
+            $root = defined('APP_ROOT') ? APP_ROOT : dirname(__DIR__, 2);
+            $dir = $root . DIRECTORY_SEPARATOR . 'storage' . DIRECTORY_SEPARATOR . 'logs';
+            if (!is_dir($dir)) {
+                @mkdir($dir, 0775, true);
+            }
+            $file = $dir . DIRECTORY_SEPARATOR . 'telegram.log';
+            @file_put_contents($file, '[' . date('Y-m-d H:i:s') . '] ' . $message . "\n", FILE_APPEND);
+        } catch (Throwable $ignored) {}
     }
 
     /**
@@ -30,6 +46,7 @@ class TelegramService {
     public static function sendRaw(string $text): bool {
         [$token, $chatId] = self::getConfig();
         if ($token === '' || $chatId === '') {
+            self::log("sendRaw failed: Token or Chat ID is empty.");
             return false;
         }
         return self::callApi($token, $chatId, $text);
@@ -84,7 +101,7 @@ class TelegramService {
 
             self::sendRaw(implode("\n", $lines));
         } catch (Throwable $e) {
-            // Silent fail — không block thanh toán
+            self::log("notifyNewOrder error: " . $e->getMessage() . "\n" . $e->getTraceAsString());
         }
     }
 
@@ -105,7 +122,7 @@ class TelegramService {
 
             $status = $order['status'] ?? 'completed';
             $title = $status === 'processing' 
-                ? "⏳ *THANH TOÁN THÀNH CÔNG - CHỜ XỬ LÝ* — `{$id}`" 
+                ? "⏳ *THANH TOÁN THÀNG CÔNG - CHỜ XỬ LÝ* — `{$id}`" 
                 : "✅ *THANH TOÁN THÀNH CÔNG* — `{$id}`";
 
             $lines = [
@@ -146,7 +163,7 @@ class TelegramService {
             $lines = array_filter($lines, fn($l) => $l !== "");
             self::sendRaw(implode("\n", array_values($lines)));
         } catch (Throwable $e) {
-            // Silent fail
+            self::log("notifyOrderCompleted error: " . $e->getMessage() . "\n" . $e->getTraceAsString());
         }
     }
 
@@ -180,10 +197,10 @@ class TelegramService {
             $lines[] = "_Trả lời tại trang admin chat_";
 
             if (!self::sendRaw(implode("\n", $lines))) {
-                error_log('Telegram new chat notification failed or is not configured.');
+                self::log('Telegram new chat notification failed or is not configured.');
             }
         } catch (Throwable $e) {
-            error_log('Telegram new chat notification error: ' . $e->getMessage());
+            self::log('Telegram new chat notification error: ' . $e->getMessage());
         }
     }
 
@@ -204,7 +221,7 @@ class TelegramService {
         $ok = self::callApi($token, $chatId, $text);
         return [
             'success' => $ok,
-            'message' => $ok ? 'Gửi test thành công! Kiểm tra Telegram của bạn.' : 'Gửi thất bại. Kiểm tra lại Bot Token và Chat ID.',
+            'message' => $ok ? 'Gửi test thành công! Kiểm tra Telegram của bạn.' : 'Gửi thất bại. Kiểm tra lại Bot Token và Chat ID (xem logs trong storage/logs/telegram.log).',
         ];
     }
 
@@ -228,6 +245,41 @@ class TelegramService {
             'disable_web_page_preview' => true,
         ]);
 
+        self::log("Sending to Telegram. Chat ID: {$chatId}, Text: " . str_replace("\n", " ", substr($text, 0, 100)) . "...");
+
+        // Try cURL first if available
+        if (function_exists('curl_init')) {
+            $ch = curl_init();
+            curl_setopt($ch, CURLOPT_URL, $url);
+            curl_setopt($ch, CURLOPT_POST, true);
+            curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
+            curl_setopt($ch, CURLOPT_HTTPHEADER, [
+                'Content-Type: application/json',
+                'Content-Length: ' . strlen($payload)
+            ]);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_TIMEOUT, 8);
+            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
+
+            $response = curl_exec($ch);
+            if ($response === false) {
+                $err = curl_error($ch);
+                self::log("Telegram cURL error: " . $err);
+                curl_close($ch);
+            } else {
+                $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+                curl_close($ch);
+                self::log("Telegram cURL response code: " . $httpCode . ", Response: " . $response);
+                $decoded = json_decode($response, true);
+                if (($decoded['ok'] ?? false) === true) {
+                    return true;
+                }
+            }
+        } else {
+            self::log("cURL is NOT available, falling back to file_get_contents.");
+        }
+
+        // Fallback to stream context file_get_contents
         $context = stream_context_create([
             'http' => [
                 'method'          => 'POST',
@@ -241,13 +293,17 @@ class TelegramService {
                 'verify_peer_name' => true,
             ],
         ]);
-
         try {
             $response = @file_get_contents($url, false, $context);
-            if ($response === false) return false;
+            if ($response === false) {
+                self::log("Telegram file_get_contents returned false.");
+                return false;
+            }
+            self::log("Telegram file_get_contents response: " . $response);
             $decoded = json_decode($response, true);
             return ($decoded['ok'] ?? false) === true;
         } catch (Throwable $e) {
+            self::log("Telegram file_get_contents error: " . $e->getMessage());
             return false;
         }
     }
