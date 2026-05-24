@@ -45,15 +45,15 @@ $missing = max(0, $qty - $got);
                         <p class="text-muted fs-6 mb-4">Giao dịch của bạn đã được xác nhận. Chi tiết sản phẩm đã mua:</p>
 
                         <?php if ($got === 0): ?>
-                            <!-- Out of stock - manual deliver -->
-                            <div class="card border-0 rounded-4 p-4 text-start bg-light" style="border-left:4px solid #ffc107 !important;">
+                            <!-- Out of stock - manual deliver / processing -->
+                            <div class="card border-0 rounded-4 p-4 text-start bg-light" style="<?= ($order['status'] ?? '') === 'processing' ? 'border-left:4px solid #0d6efd !important;' : 'border-left:4px solid #ffc107 !important;' ?>">
                                 <div class="d-flex align-items-start gap-3 mb-3">
-                                    <div class="rounded-circle bg-warning bg-opacity-25 d-flex align-items-center justify-content-center flex-shrink-0" style="width:48px;height:48px;">
-                                        <i class="fa-solid fa-circle-exclamation text-warning fs-4"></i>
+                                    <div class="rounded-circle <?= ($order['status'] ?? '') === 'processing' ? 'bg-primary bg-opacity-25 text-primary' : 'bg-warning bg-opacity-25 text-warning' ?> d-flex align-items-center justify-content-center flex-shrink-0" style="width:48px;height:48px;">
+                                        <i class="fa-solid <?= ($order['status'] ?? '') === 'processing' ? 'fa-hourglass-half' : 'fa-circle-exclamation' ?> fs-4"></i>
                                     </div>
                                     <div>
-                                        <h6 class="fw-bold mb-1 text-dark">Giao hàng thủ công</h6>
-                                        <p class="text-muted small mb-0">Hệ thống hiện tại hết gói sẵn có trong kho. Bạn hãy Coppy hàng dưới đây gửi cho Admin qua Telegram hoặc Zalo để nhận tài khoản/key lập tức.</p>
+                                        <h6 class="fw-bold mb-1 text-dark"><?= ($order['status'] ?? '') === 'processing' ? 'Đơn hàng đang xử lý' : 'Giao hàng thủ công' ?></h6>
+                                        <p class="text-muted small mb-0"><?= ($order['status'] ?? '') === 'processing' ? 'Cảm ơn bạn! Đơn hàng đã được thanh toán thành công và đang được Admin xử lý. Quá trình xử lý thường mất 5 - 15 phút. Bạn hãy sao chép mã đơn hàng bên dưới và liên hệ Admin qua Telegram để được giao hàng nhanh nhất.' : 'Hệ thống hiện tại hết gói sẵn có trong kho. Bạn hãy sao chép mã đơn dưới đây gửi cho Admin qua Telegram hoặc Zalo để nhận tài khoản/key lập tức.' ?></p>
                                     </div>
                                 </div>
                                 <div class="bg-white border rounded-3 p-3 d-flex align-items-center gap-2 mb-3">
@@ -329,7 +329,7 @@ if (timerEl && timeLeft > 0) {
         })
             .then(response => response.ok ? response.json() : null)
             .then(data => {
-                if (data && data.success && data.status === 'completed' && data.redirect) {
+                if (data && data.success && (data.status === 'completed' || data.status === 'processing') && data.redirect) {
                     window.location.href = data.redirect;
                 }
             })

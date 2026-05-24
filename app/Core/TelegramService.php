@@ -103,8 +103,13 @@ class TelegramService {
             $txId        = $order['transaction_id'] ?? '';
             $time        = date('d/m/Y H:i');
 
+            $status = $order['status'] ?? 'completed';
+            $title = $status === 'processing' 
+                ? "⏳ *THANH TOÁN THÀNH CÔNG - CHỜ XỬ LÝ* — `{$id}`" 
+                : "✅ *THANH TOÁN THÀNH CÔNG* — `{$id}`";
+
             $lines = [
-                "✅ *THANH TOÁN THÀNH CÔNG* — `{$id}`",
+                $title,
                 "",
                 "📦 *Sản phẩm:* " . self::esc($productName),
                 "🎯 *Gói:* " . self::esc($variantName ?: '—') . ($qty > 1 ? " × {$qty}" : ""),
@@ -129,7 +134,9 @@ class TelegramService {
                 }
             } else {
                 $lines[] = "";
-                $lines[] = "⏳ _Chưa giao hàng tự động \\(không có kho\\)_";
+                $lines[] = $status === 'processing'
+                    ? "⏳ _Đang chờ xử lý thủ công \\(không có kho\\)_"
+                    : "⏳ _Chưa giao hàng tự động \\(không có kho\\)_";
             }
 
             $lines[] = "";

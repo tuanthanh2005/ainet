@@ -348,6 +348,51 @@ class AdminController extends Controller {
         $this->jsonSuccess();
     }
 
+    public function adminUpdateOrderStatus() {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            $this->jsonError('Method not allowed', 405);
+        }
+
+        $id     = $_POST['id'] ?? '';
+        $status = $_POST['status'] ?? '';
+        if ($id === '' || !in_array($status, ['pending', 'completed', 'processing', 'cancelled'], true)) {
+            $this->jsonError('Dữ liệu không hợp lệ.');
+        }
+
+        if (Order::updateStatus($id, $status)) {
+            $this->jsonSuccess();
+        } else {
+            $this->jsonError('Không thể cập nhật trạng thái.');
+        }
+    }
+
+    public function adminUpdateOrderDelivery() {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            $this->jsonError('Method not allowed', 405);
+        }
+
+        $id   = $_POST['id'] ?? '';
+        $raw  = $_POST['lines'] ?? '';
+        if ($id === '') {
+            $this->jsonError('Thiếu mã đơn hàng.');
+        }
+
+        $lines = preg_split('/\r\n|\r|\n/', $raw);
+        $items = [];
+        foreach ($lines as $line) {
+            $line = trim($line);
+            if ($line !== '') {
+                $items[] = $line;
+            }
+        }
+
+        // Save delivered items and set status to completed
+        Order::setDelivered($id, $items);
+        Order::updateStatus($id, 'completed');
+
+        $this->jsonSuccess();
+    }
+
     private function jsonSuccess(array $payload = []): void {
         header('Content-Type: application/json');
         echo json_encode(array_merge(['success' => true], $payload));

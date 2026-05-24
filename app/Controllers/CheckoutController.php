@@ -156,7 +156,7 @@ class CheckoutController extends Controller {
         $this->json([
             'success' => true,
             'status' => $order['status'] ?? 'pending',
-            'redirect' => ($order['status'] ?? '') === 'completed'
+            'redirect' => in_array($order['status'] ?? '', ['completed', 'processing'], true)
                 ? url('index.php?action=success&id=' . urlencode($orderId))
                 : null,
         ]);
@@ -337,31 +337,36 @@ class CheckoutController extends Controller {
                     exit;
                 }
 
-                if (Order::updateStatus($orderId, 'completed', $transactionId)) {
-                    try {
-                        $delivered = Stock::claimForOrder(
-                            $orderId,
-                            (string) $order['product_id'],
-                            (int) ($order['variant_idx'] ?? 0),
-                            max(1, (int) ($order['quantity'] ?? 1))
-                        );
-                        if (!empty($delivered)) {
-                            Order::setDelivered($orderId, $delivered);
-                            $order['delivered_items'] = $delivered;
-                        }
-                    } catch (Throwable $e) {
-                        if (APP_DEBUG) @file_put_contents($logFile, 'Stock claim error: ' . $e->getMessage() . "\n", FILE_APPEND);
-                        $debug['stock_error'] = $e->getMessage();
+                $status = 'processing';
+                $delivered = [];
+                try {
+                    $delivered = Stock::claimForOrder(
+                        $orderId,
+                        (string) $order['product_id'],
+                        (int) ($order['variant_idx'] ?? 0),
+                        max(1, (int) ($order['quantity'] ?? 1))
+                    );
+                    if (!empty($delivered)) {
+                        Order::setDelivered($orderId, $delivered);
+                        $order['delivered_items'] = $delivered;
+                        $status = 'completed';
                     }
+                } catch (Throwable $e) {
+                    if (APP_DEBUG) @file_put_contents($logFile, 'Stock claim error: ' . $e->getMessage() . "\n", FILE_APPEND);
+                    $debug['stock_error'] = $e->getMessage();
+                }
 
-                    // Notify admin via Telegram — order completed
+                if (Order::updateStatus($orderId, $status, $transactionId)) {
+                    $order['status'] = $status;
+                    $order['transaction_id'] = $transactionId;
+
+                    // Notify admin via Telegram — order completed/processing
                     try {
-                        $order['transaction_id'] = $transactionId;
                         TelegramService::notifyOrderCompleted($order);
                     } catch (Throwable $ignored) {}
 
-                    if (APP_DEBUG) @file_put_contents($logFile, "SUCCESS: Order $orderId completed\n", FILE_APPEND);
-                    $debug['result'] = 'completed';
+                    if (APP_DEBUG) @file_put_contents($logFile, "SUCCESS: Order $orderId set to $status\n", FILE_APPEND);
+                    $debug['result'] = $status;
                     $this->writeSePayDebug($debug);
                     echo json_encode(['success' => true]);
                     exit;
@@ -540,7 +545,9 @@ class CheckoutController extends Controller {
             exit;
         }
 
-        Order::updateStatus($orderId, 'completed', 'DEMO-' . substr(uniqid(), -8));
+        $txId = 'DEMO-' . substr(uniqid(), -8);
+        $status = 'processing';
+        $delivered = [];
         try {
             $delivered = Stock::claimForOrder(
                 $orderId,
@@ -551,14 +558,18 @@ class CheckoutController extends Controller {
             if (!empty($delivered)) {
                 Order::setDelivered($orderId, $delivered);
                 $order['delivered_items'] = $delivered;
+                $status = 'completed';
             }
         } catch (Throwable $e) {
-            // Don't block: order is still completed
+            // Don't block
         }
+
+        Order::updateStatus($orderId, $status, $txId);
+        $order['status'] = $status;
+        $order['transaction_id'] = $txId;
 
         // Notify admin via Telegram — demo payment completed
         try {
-            $order['status'] = 'completed';
             TelegramService::notifyOrderCompleted($order);
         } catch (Throwable $ignored) {}
 

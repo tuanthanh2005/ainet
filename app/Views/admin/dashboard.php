@@ -347,6 +347,11 @@
                     </a>
                 </li>
                 <li class="nav-item">
+                    <a href="#" class="nav-link" onclick="switchView('orders', this)">
+                        <i class="fa-solid fa-cart-shopping"></i> Quản lý Đơn hàng
+                    </a>
+                </li>
+                <li class="nav-item">
                     <a href="#" class="nav-link" onclick="switchView('categories', this)">
                         <i class="fa-solid fa-list-ul"></i> Quản lý Danh mục
                     </a>
@@ -413,6 +418,34 @@
                                     </tr>
                                 </thead>
                                 <tbody id="product-table-body">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="view-orders" class="view-section">
+                    <div class="card-custom">
+                        <div class="card-header-custom">
+                            <div>
+                                <h6 class="mb-0 fw-bold">Danh sách Đơn hàng</h6>
+                                <small class="text-muted">Quản lý trạng thái đơn hàng và giao hàng thủ công cho khách hàng</small>
+                            </div>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-hover table-custom mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>Mã đơn</th>
+                                        <th>Khách hàng</th>
+                                        <th>Sản phẩm / Gói</th>
+                                        <th>Số tiền</th>
+                                        <th>Trạng thái</th>
+                                        <th>Ngày mua</th>
+                                        <th class="text-end">Thao tác</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="order-table-body">
                                 </tbody>
                             </table>
                         </div>
@@ -945,6 +978,7 @@
             categories: <?php echo json_encode($categories); ?>,
             settings: <?php echo json_encode($settings); ?>,
             products: <?php echo json_encode($products); ?>,
+            orders: <?php echo json_encode($orders); ?>,
             blogs: <?php echo json_encode($blogs ?? []); ?>,
             csrfToken: <?php echo json_encode(Csrf::token()); ?>
         };
@@ -974,6 +1008,7 @@
             renderCategoriesSelect();
             renderCategoriesTable();
             renderProducts();
+            renderOrders();
             renderBlogsTable();
         });
 
@@ -984,6 +1019,7 @@
             const titles = {
                 'dashboard': 'Tổng quan',
                 'products': 'Quản lý Sản phẩm',
+                'orders': 'Quản lý Đơn hàng',
                 'categories': 'Quản lý Danh mục',
                 'blogs': 'Quản lý Tin tức',
                 'settings': 'Cấu hình Website',
@@ -1901,6 +1937,182 @@
                 });
             });
         }
+
+        // ============== ADMIN ORDER MANAGEMENT ==============
+        function renderOrders() {
+            const tbody = document.getElementById('order-table-body');
+            if (!tbody) return;
+            tbody.innerHTML = '';
+
+            const sortedOrders = [...(APP_STATE.orders || [])].sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+
+            if (sortedOrders.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="7" class="text-center text-muted py-4">Chưa có đơn hàng nào.</td></tr>`;
+                return;
+            }
+
+            sortedOrders.forEach(o => {
+                let statusCls = o.status === 'completed' ? 'bg-success' 
+                              : (o.status === 'processing' ? 'bg-primary' 
+                              : (o.status === 'pending' ? 'bg-warning text-dark' : 'bg-danger'));
+                let statusText = o.status === 'completed' ? 'Thành công' 
+                               : (o.status === 'processing' ? 'Đang xử lý' 
+                               : (o.status === 'pending' ? 'Chờ thanh toán' : 'Đã hủy'));
+
+                const dateStr = o.created_at ? new Date(o.created_at.replace(' ', 'T')).toLocaleString('vi-VN') : '';
+                const details = JSON.stringify(o).replace(/'/g, "&#39;");
+
+                tbody.innerHTML += `
+                    <tr>
+                        <td><code class="fw-bold">#${o.id}</code></td>
+                        <td>
+                            <div class="fw-semibold text-dark">${o.customer_email}</div>
+                            <div class="text-muted small">${o.phone || '—'}</div>
+                        </td>
+                        <td>
+                            <div class="fw-semibold text-dark">${o.product_name}</div>
+                            <div class="text-muted small">${o.variant_name || '—'} (x${o.quantity})</div>
+                        </td>
+                        <td class="fw-bold">${formatCurrency(o.amount)}</td>
+                        <td><span class="badge ${statusCls} rounded-pill">${statusText}</span></td>
+                        <td class="small text-muted">${dateStr}</td>
+                        <td class="text-end">
+                            <div class="btn-group">
+                                <button class="btn btn-sm btn-outline-dark" onclick='viewOrderDetails(${details})' title="Chi tiết"><i class="fa-solid fa-eye"></i></button>
+                                <button class="btn btn-sm btn-outline-primary" onclick="openManualDeliver('${o.id}')" title="Giao hàng thủ công"><i class="fa-solid fa-truck"></i></button>
+                                <button class="btn btn-sm btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false" title="Đổi trạng thái"><i class="fa-solid fa-tag"></i></button>
+                                <ul class="dropdown-menu dropdown-menu-end shadow border-0">
+                                    <li><a class="dropdown-item small" href="#" onclick="updateOrderStatus('${o.id}', 'pending')">Chờ thanh toán</a></li>
+                                    <li><a class="dropdown-item small" href="#" onclick="updateOrderStatus('${o.id}', 'processing')">Đang xử lý</a></li>
+                                    <li><a class="dropdown-item small" href="#" onclick="updateOrderStatus('${o.id}', 'completed')">Thành công</a></li>
+                                    <li><a class="dropdown-item small" href="#" onclick="updateOrderStatus('${o.id}', 'cancelled')">Đã hủy</a></li>
+                                </ul>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        function viewOrderDetails(o) {
+            let itemsHtml = '';
+            let delivered = [];
+            try {
+                delivered = typeof o.delivered_items === 'string' ? JSON.parse(o.delivered_items) : (o.delivered_items || []);
+            } catch(e){}
+
+            if (delivered && delivered.length > 0) {
+                itemsHtml = `<div class="text-start mt-3"><label class="fw-bold text-dark small">Tài khoản đã giao:</label><pre class="bg-light p-2 border rounded-3 mt-1 small" style="white-space:pre-wrap;font-family:monospace;">${delivered.join('\n')}</pre></div>`;
+            }
+
+            let upgradeInfo = '';
+            if (o.upgrade_email) {
+                upgradeInfo = `
+                    <div class="row text-start mt-2 border-top pt-2">
+                        <div class="col-6"><strong>Email nâng cấp:</strong> ${o.upgrade_email}</div>
+                        <div class="col-6"><strong>Mật khẩu:</strong> ${o.upgrade_pass || '—'}</div>
+                        <div class="col-12 mt-1"><strong>Link liên hệ:</strong> ${o.upgrade_link || '—'}</div>
+                    </div>
+                `;
+            }
+
+            Swal.fire({
+                title: 'Chi tiết đơn hàng #' + o.id,
+                html: `
+                    <div class="text-start fs-6 text-muted">
+                        <div class="row">
+                            <div class="col-6 mb-2"><strong>Khách hàng:</strong> ${o.customer_email}</div>
+                            <div class="col-6 mb-2"><strong>SĐT:</strong> ${o.phone || '—'}</div>
+                            <div class="col-12 mb-2"><strong>Sản phẩm:</strong> ${o.product_name} (${o.variant_name})</div>
+                            <div class="col-6 mb-2"><strong>Số lượng:</strong> ${o.quantity}</div>
+                            <div class="col-6 mb-2"><strong>Số tiền:</strong> ${formatCurrency(o.amount)}</div>
+                            <div class="col-12 mb-2"><strong>Mã giao dịch:</strong> ${o.transaction_id || '—'}</div>
+                            <div class="col-12 mb-2"><strong>Ghi chú:</strong> ${o.note || '—'}</div>
+                        </div>
+                        ${upgradeInfo}
+                        ${itemsHtml}
+                    </div>
+                `,
+                confirmButtonColor: '#111',
+                confirmButtonText: 'Đóng'
+            });
+        }
+
+        let manualDeliverModal;
+        function getManualDeliverModal() { return manualDeliverModal ||= new bootstrap.Modal(document.getElementById('manualDeliverModal')); }
+
+        function openManualDeliver(orderId) {
+            document.getElementById('md_order_id').value = orderId;
+            document.getElementById('md_lines').value = '';
+            getManualDeliverModal().show();
+        }
+
+        function submitManualDeliver() {
+            const orderId = document.getElementById('md_order_id').value;
+            const lines = document.getElementById('md_lines').value;
+            if (!lines.trim()) {
+                AppNotify.warning('Vui lòng nhập thông tin bàn giao.', 'Trống');
+                return;
+            }
+
+            const fd = new FormData();
+            fd.append('id', orderId);
+            fd.append('lines', lines);
+            fd.append('csrf_token', APP_STATE.csrfToken);
+
+            fetch('?action=adminUpdateOrderDelivery', {
+                method: 'POST',
+                headers: { 'X-Requested-With': 'XMLHttpRequest', 'X-CSRF-Token': APP_STATE.csrfToken },
+                body: fd,
+                credentials: 'same-origin'
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    AppNotify.success('Đã giao hàng và chuyển trạng thái đơn hàng sang Thành công!');
+                    getManualDeliverModal().hide();
+                    location.reload();
+                } else {
+                    AppNotify.error(data.message || 'Lỗi bàn giao');
+                }
+            })
+            .catch(() => AppNotify.error('Không thể kết nối server.'));
+        }
+
+        function updateOrderStatus(orderId, status) {
+            Swal.fire({
+                title: 'Cập nhật trạng thái?',
+                text: `Xác nhận đổi đơn hàng sang trạng thái này?`,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#111',
+                confirmButtonText: 'Đồng ý'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    const fd = new FormData();
+                    fd.append('id', orderId);
+                    fd.append('status', status);
+                    fd.append('csrf_token', APP_STATE.csrfToken);
+
+                    fetch('?action=adminUpdateOrderStatus', {
+                        method: 'POST',
+                        headers: { 'X-Requested-With': 'XMLHttpRequest', 'X-CSRF-Token': APP_STATE.csrfToken },
+                        body: fd,
+                        credentials: 'same-origin'
+                    })
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.success) {
+                            AppNotify.success('Cập nhật trạng thái thành công!');
+                            location.reload();
+                        } else {
+                            AppNotify.error(data.message || 'Lỗi cập nhật');
+                        }
+                    })
+                    .catch(() => AppNotify.error('Không thể kết nối server.'));
+                }
+            });
+        }
     </script>
 
     <!-- Modals for Blog and Orders -->
@@ -2051,6 +2263,30 @@
                 <div class="modal-footer border-top p-4">
                     <button type="button" class="btn btn-light border" data-bs-dismiss="modal">Hủy</button>
                     <button type="button" class="btn btn-black px-4" onclick="saveCategory()">Lưu danh mục</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Manual Deliver Modal -->
+    <div class="modal fade" id="manualDeliverModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow" style="border-radius: 16px;">
+                <div class="modal-header border-bottom p-4">
+                    <h5 class="modal-title fw-bold">Giao hàng thủ công</h5>
+                    <button type="button" class="btn-close shadow-none" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <input type="hidden" id="md_order_id">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold small">Nhập tài khoản bàn giao (mỗi dòng 1 tài khoản)</label>
+                        <textarea class="form-control" id="md_lines" rows="6" placeholder="account1@gmail.com|password1&#10;account2@gmail.com|password2"></textarea>
+                        <small class="text-muted d-block mt-1">Khi bấm gửi, hệ thống sẽ lưu thông tin bàn giao vào đơn hàng và cập nhật trạng thái đơn thành <strong>Thành công (Completed)</strong>.</small>
+                    </div>
+                </div>
+                <div class="modal-footer border-top p-4">
+                    <button type="button" class="btn btn-light border" data-bs-dismiss="modal">Hủy</button>
+                    <button type="button" class="btn btn-black px-4" onclick="submitManualDeliver()">Gửi bàn giao</button>
                 </div>
             </div>
         </div>

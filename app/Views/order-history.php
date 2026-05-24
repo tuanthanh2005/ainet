@@ -76,11 +76,14 @@ foreach (($orders ?? []) as $o) {
                             $rowId     = 'oh-' . $idx;
                             $status    = $order['status'] ?? '';
                             $statusCls = $status === 'completed' ? 'oh-completed'
-                                        : ($status === 'pending' ? 'oh-pending' : 'oh-cancelled');
+                                        : ($status === 'processing' ? 'oh-processing'
+                                        : ($status === 'pending' ? 'oh-pending' : 'oh-cancelled'));
                             $statusLabel = $status === 'completed' ? 'Thành công'
-                                         : ($status === 'pending' ? 'Chờ thanh toán' : 'Đã hủy');
+                                         : ($status === 'processing' ? 'Đang xử lý'
+                                         : ($status === 'pending' ? 'Chờ thanh toán' : 'Đã hủy'));
                             $statusIcon = $status === 'completed' ? 'fa-check-circle'
-                                        : ($status === 'pending' ? 'fa-clock' : 'fa-times-circle');
+                                        : ($status === 'processing' ? 'fa-spinner fa-spin'
+                                        : ($status === 'pending' ? 'fa-clock' : 'fa-times-circle'));
                             $imageUrl   = $order['product_image'] ?? null; // optional, may not be set
                         ?>
                         <div class="oh-order <?= $statusCls ?>">
@@ -138,6 +141,14 @@ foreach (($orders ?? []) as $o) {
                                             <span>Chi tiết</span>
                                             <i class="fa-solid fa-chevron-down chev"></i>
                                         </button>
+                                    <?php elseif ($status === 'processing'): ?>
+                                        <button type="button" class="oh-cta oh-cta-primary text-white"
+                                                data-bs-toggle="collapse" data-bs-target="#<?= $rowId ?>"
+                                                aria-expanded="false" style="background:#0d6efd;">
+                                            <i class="fa-solid fa-spinner fa-spin"></i>
+                                            <span>Chi tiết</span>
+                                            <i class="fa-solid fa-chevron-down chev"></i>
+                                        </button>
                                     <?php elseif ($status === 'pending'): ?>
                                         <a href="<?= url('index.php?action=payment&id=' . urlencode($order['id'])) ?>"
                                            class="oh-cta oh-cta-warning">
@@ -160,6 +171,30 @@ foreach (($orders ?? []) as $o) {
                                             <a href="<?= url('index.php?action=payment&id=' . urlencode($order['id'])) ?>" class="btn btn-warning btn-sm fw-bold">
                                                 <i class="fa-solid fa-arrow-right me-1"></i>Tiếp tục thanh toán
                                             </a>
+                                        </div>
+                                    <?php elseif ($status === 'processing'): ?>
+                                        <div class="oh-empty-stock">
+                                            <div class="d-flex align-items-start gap-3 mb-3">
+                                                <div class="oh-empty-icon" style="background:#e7f1ff;color:#0d6efd;">
+                                                    <i class="fa-solid fa-hourglass-half"></i>
+                                                </div>
+                                                <div>
+                                                    <h6 class="fw-bold mb-1">Đơn hàng đang xử lý</h6>
+                                                    <p class="text-muted small mb-0">Đơn hàng của bạn đã thanh toán thành công và đang được Admin xử lý. Quá trình xử lý thường mất 5 - 15 phút. Bạn hãy copy mã đơn hàng bên dưới để liên hệ Admin qua Telegram hoặc Zalo nhận tài khoản nhanh nhất.</p>
+                                                </div>
+                                            </div>
+                                            <div class="oh-code-box">
+                                                <code class="flex-grow-1">#<?= htmlspecialchars($order['id']) ?></code>
+                                                <button type="button" class="btn btn-dark px-3"
+                                                        onclick="copyOrderText(this, '#<?= htmlspecialchars($order['id']) ?>')">
+                                                    <i class="fa-regular fa-copy me-1"></i>Copy
+                                                </button>
+                                            </div>
+                                            <div class="d-flex flex-wrap gap-2 mt-3">
+                                                <a href="https://t.me/specademy" target="_blank" class="btn btn-sm btn-outline-primary">
+                                                    <i class="fa-brands fa-telegram me-1"></i>Liên hệ Telegram
+                                                </a>
+                                            </div>
                                         </div>
                                     <?php elseif ($status === 'completed' && !$hasItems): ?>
                                         <div class="oh-empty-stock">
@@ -278,6 +313,7 @@ foreach (($orders ?? []) as $o) {
 }
 .oh-order:hover { box-shadow: 0 6px 24px rgba(0,0,0,0.05); transform: translateY(-1px); }
 .oh-order.oh-pending { border-left: 4px solid #f4b400; }
+.oh-order.oh-processing { border-left: 4px solid #0d6efd; }
 .oh-order.oh-completed { border-left: 4px solid #1aa260; }
 .oh-order.oh-cancelled { border-left: 4px solid #d93025; }
 
@@ -299,6 +335,7 @@ foreach (($orders ?? []) as $o) {
 }
 .oh-thumb img { width: 100%; height: 100%; object-fit: cover; }
 .oh-completed .oh-thumb { background: #e8f6ee; color: #1aa260; }
+.oh-processing .oh-thumb { background: #e7f1ff; color: #0d6efd; }
 .oh-pending .oh-thumb   { background: #fff5db; color: #d39200; }
 .oh-cancelled .oh-thumb { background: #fdecea; color: #d93025; }
 .oh-thumb i { font-size: 1.4rem; }
@@ -356,6 +393,7 @@ foreach (($orders ?? []) as $o) {
 .oh-price { font-weight: 700; font-size: 1.05rem; color: #111; }
 .oh-status { font-size: 0.78rem; }
 .oh-completed .oh-status { color: #1aa260; }
+.oh-processing .oh-status { color: #0d6efd; }
 .oh-pending .oh-status   { color: #d39200; }
 .oh-cancelled .oh-status { color: #d93025; }
 

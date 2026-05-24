@@ -12,6 +12,19 @@ class Database {
             $this->conn = new PDO($dsn, DB_USER, DB_PASS);
             $this->conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
             $this->conn->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
+
+            // One-off migration for orders status ENUM to support 'processing'
+            $logDir = __DIR__ . '/../../storage/logs';
+            if (!is_dir($logDir)) {
+                @mkdir($logDir, 0775, true);
+            }
+            $lockFile = $logDir . '/migrated_processing.lock';
+            if (!file_exists($lockFile)) {
+                try {
+                    $this->conn->exec("ALTER TABLE orders MODIFY COLUMN status ENUM('pending', 'completed', 'processing', 'cancelled') DEFAULT 'pending'");
+                    @file_put_contents($lockFile, 'done');
+                } catch (Throwable $ignored) {}
+            }
         } catch (PDOException $e) {
             die("Connection failed: " . $e->getMessage());
         }
