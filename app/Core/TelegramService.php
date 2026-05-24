@@ -130,13 +130,13 @@ class TelegramService {
                     $lines[] = "  • `" . self::esc(mb_substr((string) $item, 0, 80)) . "`";
                 }
                 if (count($delivered) > 3) {
-                    $lines[] = "  \\+ " . (count($delivered) - 3) . " mục khác...";
+                    $lines[] = "  + " . (count($delivered) - 3) . " mục khác...";
                 }
             } else {
                 $lines[] = "";
                 $lines[] = $status === 'processing'
-                    ? "⏳ _Đang chờ xử lý thủ công \\(không có kho\\)_"
-                    : "⏳ _Chưa giao hàng tự động \\(không có kho\\)_";
+                    ? "⏳ _Đang chờ xử lý thủ công (không có kho)_"
+                    : "⏳ _Chưa giao hàng tự động (không có kho)_";
             }
 
             $lines[] = "";
@@ -200,7 +200,7 @@ class TelegramService {
             return ['success' => false, 'message' => 'Chat ID chưa được cấu hình.'];
         }
 
-        $text = "🤖 *Test kết nối thành công\\!*\n\n✅ Bot Telegram đã được cấu hình đúng và sẵn sàng nhận thông báo từ website.\n\n⏰ " . date('d/m/Y H:i:s');
+        $text = "🤖 *Test kết nối thành công!*\n\n✅ Bot Telegram đã được cấu hình đúng và sẵn sàng nhận thông báo từ website.\n\n⏰ " . date('d/m/Y H:i:s');
         $ok = self::callApi($token, $chatId, $text);
         return [
             'success' => $ok,
@@ -212,8 +212,8 @@ class TelegramService {
      * Escape ký tự đặc biệt cho MarkdownV2 của Telegram.
      */
     private static function esc(string $text): string {
-        // Escape special characters for MarkdownV2
-        return preg_replace('/([_\*\[\]\(\)~`>#+\-=|{}.!\\\\])/', '\\\\$1', $text);
+        // Escape legacy Markdown special characters: *, _, `
+        return str_replace(['*', '_', '`'], ['\*', '\_', '\`'], $text);
     }
 
     /**
@@ -224,7 +224,7 @@ class TelegramService {
         $payload = json_encode([
             'chat_id'    => $chatId,
             'text'       => $text,
-            'parse_mode' => 'MarkdownV2',
+            'parse_mode' => 'Markdown',
             'disable_web_page_preview' => true,
         ]);
 
