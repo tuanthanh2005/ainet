@@ -88,17 +88,46 @@
         <?php endforeach; ?>
     </div>
 
-    <?php if ($remainingProducts > 0): ?>
+    <?php if ($totalPages > 1): ?>
         <?php
-        $newLimit = $limit + 12;
         $catParam = !empty($currentCat) ? '&category=' . urlencode($currentCat) : '';
         $sortParam = !empty($_GET['sort']) ? '&sort=' . urlencode($_GET['sort']) : '';
-        $loadMoreUrl = url('index.php?tab=products' . $catParam . $qParam . $sortParam . '&limit=' . $newLimit);
+        $qParam = !empty($searchQuery) ? '&q=' . urlencode($searchQuery) : '';
+        $pageUrl = function($p) use ($catParam, $qParam, $sortParam) {
+            return url('index.php?tab=products' . $catParam . $qParam . $sortParam . '&page=' . $p . '#products-section');
+        };
         ?>
-        <div id="product-load-more-wrap" class="text-center mt-4">
-            <a href="<?= $loadMoreUrl ?>" class="btn btn-outline-dark px-4 py-2 rounded-pill fw-bold text-decoration-none">
-                <i class="fa-solid fa-chevron-down me-2"></i>Xem thêm (còn <?= $remainingProducts ?>)
-            </a>
+        <div class="d-flex justify-content-center mt-5 mb-3">
+            <nav aria-label="Product pagination">
+                <ul class="pagination pagination-md shadow-sm border rounded-pill overflow-hidden bg-white px-2 py-1 mb-0" style="gap:4px; list-style: none;">
+                    <?php if ($page > 1): ?>
+                        <li class="page-item">
+                            <a class="page-link border-0 rounded-circle text-dark d-flex align-items-center justify-content-center" 
+                               style="width:36px;height:36px;" href="<?= $pageUrl($page - 1) ?>">
+                                <i class="fa-solid fa-chevron-left small"></i>
+                            </a>
+                        </li>
+                    <?php endif; ?>
+
+                    <?php for ($i = 1; $i <= $totalPages; $i++): ?>
+                        <li class="page-item <?= $i === $page ? 'active' : '' ?>">
+                            <a class="page-link border-0 rounded-circle d-flex align-items-center justify-content-center <?= $i === $page ? 'bg-dark text-white fw-bold' : 'text-dark' ?>" 
+                               style="width:36px;height:36px;" href="<?= $pageUrl($i) ?>">
+                                <?= $i ?>
+                            </a>
+                        </li>
+                    <?php endfor; ?>
+
+                    <?php if ($page < $totalPages): ?>
+                        <li class="page-item">
+                            <a class="page-link border-0 rounded-circle text-dark d-flex align-items-center justify-content-center" 
+                               style="width:36px;height:36px;" href="<?= $pageUrl($page + 1) ?>">
+                                <i class="fa-solid fa-chevron-right small"></i>
+                            </a>
+                        </li>
+                    <?php endif; ?>
+                </ul>
+            </nav>
         </div>
     <?php endif; ?>
 

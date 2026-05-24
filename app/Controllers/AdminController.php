@@ -11,19 +11,66 @@ class AdminController extends Controller {
     }
 
     public function adminDashboard() {
+        $db = Database::getInstance();
+        
+        // Calculate statistics via SQL aggregates (highly optimized, avoids loading all rows)
+        $totalRevenue = (float) $db->query("SELECT SUM(amount) FROM orders WHERE status = 'completed'")->fetchColumn();
+        $totalOrders = (int) $db->query("SELECT COUNT(*) FROM orders")->fetchColumn();
+        
+        // Load first page of orders (limit 10)
+        $stmt = $db->prepare("SELECT * FROM orders ORDER BY created_at DESC LIMIT 10");
+        $stmt->execute();
+        $firstPageOrders = $stmt->fetchAll();
+        foreach ($firstPageOrders as &$o) {
+            $decoded = !empty($o['delivered_items']) ? json_decode($o['delivered_items'], true) : [];
+            $o['delivered_items'] = is_array($decoded) ? $decoded : [];
+        }
+        unset($o);
+
         $settings   = Setting::getAll();
         $products   = Product::getAll();
         $categories = Category::getAll();
-        $orders     = Order::getAll();
         $blogs      = Blog::getAll();
 
         $this->view('admin/dashboard', [
-            'settings'    => $settings,
-            'products'    => $products,
-            'categories'  => $categories,
-            'orders'      => $orders,
-            'blogs'       => $blogs,
-            'currentUser' => $_SESSION['user'],
+            'settings'         => $settings,
+            'products'         => $products,
+            'categories'       => $categories,
+            'orders'           => $firstPageOrders,
+            'blogs'            => $blogs,
+            'totalRevenue'     => $totalRevenue,
+            'totalOrders'      => $totalOrders,
+            'ordersTotalPages' => max(1, ceil($totalOrders / 10)),
+            'currentUser'      => $_SESSION['user'],
+        ]);
+    }
+
+    public function adminOrdersList() {
+        $page = max(1, (int) ($_GET['page'] ?? 1));
+        $limit = 10;
+        $offset = ($page - 1) * $limit;
+
+        $db = Database::getInstance();
+        $total = (int) $db->query("SELECT COUNT(*) FROM orders")->fetchColumn();
+        $totalPages = max(1, ceil($total / $limit));
+
+        $stmt = $db->prepare("SELECT * FROM orders ORDER BY created_at DESC LIMIT ? OFFSET ?");
+        $stmt->bindValue(1, $limit, PDO::PARAM_INT);
+        $stmt->bindValue(2, $offset, PDO::PARAM_INT);
+        $stmt->execute();
+        $orders = $stmt->fetchAll();
+
+        foreach ($orders as &$o) {
+            $decoded = !empty($o['delivered_items']) ? json_decode($o['delivered_items'], true) : [];
+            $o['delivered_items'] = is_array($decoded) ? $decoded : [];
+        }
+        unset($o);
+
+        $this->jsonSuccess([
+            'orders'       => $orders,
+            'currentPage'  => $page,
+            'totalPages'   => $totalPages,
+            'totalOrders'  => $total
         ]);
     }
 

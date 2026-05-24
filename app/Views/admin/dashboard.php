@@ -445,12 +445,27 @@
                                         <th class="text-end">Thao tác</th>
                                     </tr>
                                 </thead>
-                                <tbody id="order-table-body">
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
+                        <tbody id="order-table-body">
+                        </tbody>
+                    </table>
                 </div>
+                <div class="d-flex justify-content-between align-items-center p-3 border-top bg-light">
+                    <span class="small text-muted" id="orders-pagination-info">
+                        Hiển thị trang <span id="orders-current-page" class="fw-bold text-dark">1</span> / <span id="orders-total-pages" class="fw-bold text-dark">1</span>
+                    </span>
+                    <nav aria-label="Orders navigation">
+                        <ul class="pagination pagination-sm mb-0" style="gap:4px;">
+                            <li class="page-item" id="orders-prev-li">
+                                <button class="btn btn-sm btn-outline-dark me-1 px-3" onclick="changeOrdersPage(-1)" id="orders-btn-prev">Trước</button>
+                            </li>
+                            <li class="page-item" id="orders-next-li">
+                                <button class="btn btn-sm btn-outline-dark px-3" onclick="changeOrdersPage(1)" id="orders-btn-next">Sau</button>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+            </div>
+        </div>
 
                 <div id="view-categories" class="view-section">
                     <div class="card-custom">
@@ -839,19 +854,14 @@
                             <div class="card-custom p-4">
                                 <div class="text-muted fw-bold mb-2">DOANH THU</div>
                                 <h3 class="fw-bold text-dark">
-                                    <?php
-                                    $totalRevenue = array_reduce($orders, function ($carry, $item) {
-                                        return $carry + ($item['status'] === 'completed' ? $item['amount'] : 0);
-                                    }, 0);
-                                    echo number_format($totalRevenue, 0, ',', '.') . 'đ';
-                                    ?>
+                                    <?php echo number_format($totalRevenue ?? 0, 0, ',', '.') . 'đ'; ?>
                                 </h3>
                             </div>
                         </div>
                         <div class="col-md-3">
                             <div class="card-custom p-4">
                                 <div class="text-muted fw-bold mb-2">ĐƠN HÀNG MỚI</div>
-                                <h3 class="fw-bold text-dark"><?php echo count($orders); ?></h3>
+                                <h3 class="fw-bold text-dark"><?php echo $totalOrders ?? 0; ?></h3>
                             </div>
                         </div>
                         <div class="col-md-3">
@@ -982,6 +992,9 @@
             blogs: <?php echo json_encode($blogs ?? []); ?>,
             csrfToken: <?php echo json_encode(Csrf::token()); ?>
         };
+
+        let ordersCurrentPage = 1;
+        let ordersTotalPages = <?php echo $ordersTotalPages ?? 1; ?>;
 
         function apiPost(action, formData) {
             if (!(formData instanceof FormData)) {
@@ -1960,6 +1973,7 @@
 
             if (sortedOrders.length === 0) {
                 tbody.innerHTML = `<tr><td colspan="7" class="text-center text-muted py-4">Chưa có đơn hàng nào.</td></tr>`;
+                updateOrdersPaginationUI();
                 return;
             }
 
@@ -2004,6 +2018,50 @@
                     </tr>
                 `;
             });
+
+            updateOrdersPaginationUI();
+        }
+
+        function changeOrdersPage(dir) {
+            const targetPage = ordersCurrentPage + dir;
+            if (targetPage < 1 || targetPage > ordersTotalPages) return;
+            fetchOrders(targetPage);
+        }
+
+        function fetchOrders(page) {
+            const btnPrev = document.getElementById('orders-btn-prev');
+            const btnNext = document.getElementById('orders-btn-next');
+            if (btnPrev) btnPrev.disabled = true;
+            if (btnNext) btnNext.disabled = true;
+
+            fetch(`?action=adminOrdersList&page=${page}`, {
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    APP_STATE.orders = data.orders;
+                    ordersCurrentPage = data.currentPage;
+                    ordersTotalPages = data.totalPages;
+                    renderOrders();
+                }
+            })
+            .catch(() => AppNotify.error('Không thể tải danh sách đơn hàng.', 'Lỗi kết nối'))
+            .finally(() => {
+                updateOrdersPaginationUI();
+            });
+        }
+
+        function updateOrdersPaginationUI() {
+            const curPageEl = document.getElementById('orders-current-page');
+            const totalPagesEl = document.getElementById('orders-total-pages');
+            const btnPrev = document.getElementById('orders-btn-prev');
+            const btnNext = document.getElementById('orders-btn-next');
+
+            if (curPageEl) curPageEl.innerText = ordersCurrentPage;
+            if (totalPagesEl) totalPagesEl.innerText = ordersTotalPages;
+            if (btnPrev) btnPrev.disabled = (ordersCurrentPage <= 1);
+            if (btnNext) btnNext.disabled = (ordersCurrentPage >= ordersTotalPages);
         }
 
         function viewOrderDetails(o) {

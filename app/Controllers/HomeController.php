@@ -73,13 +73,14 @@ class HomeController extends Controller {
             }
         }
 
-        // Pagination/Limit: default is 12
-        $limit = (int) ($_GET['limit'] ?? 12);
-        if ($limit < 1) $limit = 12;
+        // Pagination logic (3 rows of 4 products = 12 products per page)
+        $page = max(1, (int) ($_GET['page'] ?? 1));
+        $limit = 12;
+        $offset = ($page - 1) * $limit;
 
         $totalFilteredProducts = count($products);
-        $products = array_slice($products, 0, $limit);
-        $remainingProducts = max(0, $totalFilteredProducts - $limit);
+        $totalPages = max(1, ceil($totalFilteredProducts / $limit));
+        $products = array_slice($products, $offset, $limit);
 
         Seo::set([
             'title'       => 'Tài khoản AI Premium - Gemini Advanced, ChatGPT, Copilot',
@@ -101,8 +102,8 @@ class HomeController extends Controller {
             'categorySlug' => $categorySlug,
             'searchQuery' => $q,
             'sort' => $sort,
-            'limit' => $limit,
-            'remainingProducts' => $remainingProducts
+            'page' => $page,
+            'totalPages' => $totalPages
         ]);
     }
 
