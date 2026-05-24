@@ -229,17 +229,41 @@
                     </div>
                     
                     <div class="col-lg-6 text-center">
-                        <div class="hero-image-wrapper position-relative d-inline-block">
-                            <!-- Glowing frame background -->
-                            <div class="position-absolute w-100 h-100 rounded-4" style="background: linear-gradient(135deg, #6366f1, #a855f7); opacity: 0.2; filter: blur(20px); transform: scale(0.95); top: 10px; z-index: -1;"></div>
+                        <div class="hero-icons-scene">
+                            <!-- Glowing center orb -->
+                            <div class="center-glow-orb">
+                                <i class="fa-solid fa-brain"></i>
+                            </div>
                             
-                            <!-- Main Banner image -->
-                            <img src="<?php echo asset('images/ai_banner.png'); ?>" 
-                                 alt="AI Của Tôi Tech Banner" 
-                                 class="img-fluid rounded-4 shadow-lg"
-                                 style="max-height: 380px; width: 100%; object-fit: cover; transition: transform 0.3s ease; cursor: pointer;"
-                                 onmouseover="this.style.transform='scale(1.02)'"
-                                 onmouseout="this.style.transform='scale(1)'">
+                            <!-- Floating interactive AI/brand icons -->
+                            <div class="floating-icon icon-gpt" onclick="location.href='#products-section'">
+                                <i class="fa-solid fa-microchip"></i>
+                                <span>ChatGPT</span>
+                            </div>
+                            <div class="floating-icon icon-gemini" onclick="location.href='#products-section'">
+                                <i class="fa-brands fa-google"></i>
+                                <span>Gemini</span>
+                            </div>
+                            <div class="floating-icon icon-copilot" onclick="location.href='#products-section'">
+                                <i class="fa-solid fa-code"></i>
+                                <span>Copilot</span>
+                            </div>
+                            <div class="floating-icon icon-mj" onclick="location.href='#products-section'">
+                                <i class="fa-solid fa-wand-magic-sparkles"></i>
+                                <span>Midjourney</span>
+                            </div>
+                            <div class="floating-icon icon-claude" onclick="location.href='#products-section'">
+                                <i class="fa-solid fa-robot"></i>
+                                <span>Claude AI</span>
+                            </div>
+                            <div class="floating-icon icon-yt" onclick="location.href='#products-section'">
+                                <i class="fa-brands fa-youtube"></i>
+                                <span>YouTube</span>
+                            </div>
+                            <div class="floating-icon icon-netflix" onclick="location.href='#products-section'">
+                                <i class="fa-solid fa-film"></i>
+                                <span>Netflix</span>
+                            </div>
                         </div>
                     </div>
                 </div>
