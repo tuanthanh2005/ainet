@@ -3,15 +3,6 @@
  * Lịch sử đơn hàng cho user đã đăng nhập (action=orderHistory).
  * Controller truyền $orders (array), mỗi đơn đã decode delivered_items thành array.
  */
-
-$totalAll       = count($orders ?? []);
-$totalCompleted = 0;
-$totalPending   = 0;
-$totalSpent     = 0;
-foreach (($orders ?? []) as $o) {
-    if (($o['status'] ?? '') === 'completed') { $totalCompleted++; $totalSpent += (float) $o['amount']; }
-    elseif (($o['status'] ?? '') === 'pending') { $totalPending++; }
-}
 ?>
 <div class="oh-page py-4">
     <div class="row justify-content-center">
@@ -269,9 +260,48 @@ foreach (($orders ?? []) as $o) {
                                 </div>
                             </div>
                             <?php endif; ?>
-                        </div>
                     <?php endforeach; ?>
                 </div>
+
+                <?php if ($totalPages > 1): ?>
+                    <?php
+                    $pageUrl = function($p) {
+                        return url('index.php?action=orderHistory&page=' . $p);
+                    };
+                    ?>
+                    <div class="d-flex justify-content-center mt-4 mb-3">
+                        <nav aria-label="Order pagination">
+                            <ul class="pagination pagination-md shadow-sm border rounded-pill overflow-hidden bg-white px-2 py-1 mb-0" style="gap:4px; list-style: none;">
+                                <?php if ($page > 1): ?>
+                                    <li class="page-item">
+                                        <a class="page-link border-0 rounded-circle text-dark d-flex align-items-center justify-content-center" 
+                                           style="width:36px;height:36px;" href="<?= $pageUrl($page - 1) ?>">
+                                            <i class="fa-solid fa-chevron-left small"></i>
+                                        </a>
+                                    </li>
+                                <?php endif; ?>
+
+                                <?php for ($i = 1; $i <= $totalPages; $i++): ?>
+                                    <li class="page-item <?= $i === $page ? 'active' : '' ?>">
+                                        <a class="page-link border-0 rounded-circle d-flex align-items-center justify-content-center <?= $i === $page ? 'bg-dark text-white fw-bold' : 'text-dark' ?>" 
+                                           style="width:36px;height:36px;" href="<?= $pageUrl($i) ?>">
+                                            <?= $i ?>
+                                        </a>
+                                    </li>
+                                <?php endfor; ?>
+
+                                <?php if ($page < $totalPages): ?>
+                                    <li class="page-item">
+                                        <a class="page-link border-0 rounded-circle text-dark d-flex align-items-center justify-content-center" 
+                                           style="width:36px;height:36px;" href="<?= $pageUrl($page + 1) ?>">
+                                            <i class="fa-solid fa-chevron-right small"></i>
+                                        </a>
+                                    </li>
+                                <?php endif; ?>
+                            </ul>
+                        </nav>
+                    </div>
+                <?php endif; ?>
             <?php endif; ?>
         </div>
     </div>

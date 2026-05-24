@@ -462,11 +462,46 @@ class HomeController extends Controller {
 
         $email = $_SESSION['user']['email'] ?? '';
         $orders = [];
+        $page = max(1, (int) ($_GET['page'] ?? 1));
+        $limit = 10;
+        $offset = ($page - 1) * $limit;
+        $totalPages = 1;
+        
+        $totalAll = 0;
+        $totalCompleted = 0;
+        $totalPending = 0;
+        $totalSpent = 0;
+
         if ($email !== '') {
             $db = Database::getInstance();
-            $stmt = $db->prepare("SELECT * FROM orders WHERE customer_email = ? ORDER BY created_at DESC LIMIT 100");
-            $stmt->execute([$email]);
+
+            // Count overall stats for user (all pages)
+            $statsStmt = $db->prepare(
+                "SELECT 
+                    COUNT(*) as total_all,
+                    SUM(CASE WHEN status = 'completed' THEN 1 ELSE 0 END) as total_completed,
+                    SUM(CASE WHEN status = 'pending' THEN 1 ELSE 0 END) as total_pending,
+                    SUM(CASE WHEN status = 'completed' THEN amount ELSE 0 END) as total_spent
+                 FROM orders WHERE customer_email = ?"
+            );
+            $statsStmt->execute([$email]);
+            $stats = $statsStmt->fetch();
+            
+            $totalAll = (int) ($stats['total_all'] ?? 0);
+            $totalCompleted = (int) ($stats['total_completed'] ?? 0);
+            $totalPending = (int) ($stats['total_pending'] ?? 0);
+            $totalSpent = (float) ($stats['total_spent'] ?? 0);
+            
+            $totalPages = max(1, ceil($totalAll / $limit));
+
+            // Fetch paginated orders
+            $stmt = $db->prepare("SELECT * FROM orders WHERE customer_email = ? ORDER BY created_at DESC LIMIT ? OFFSET ?");
+            $stmt->bindValue(1, $email, PDO::PARAM_STR);
+            $stmt->bindValue(2, $limit, PDO::PARAM_INT);
+            $stmt->bindValue(3, $offset, PDO::PARAM_INT);
+            $stmt->execute();
             $orders = $stmt->fetchAll();
+
             foreach ($orders as &$o) {
                 $decoded = !empty($o['delivered_items']) ? json_decode($o['delivered_items'], true) : [];
                 $o['delivered_items'] = is_array($decoded) ? $decoded : [];
@@ -475,10 +510,16 @@ class HomeController extends Controller {
         }
 
         $this->view('layout', [
-            'view'     => 'order-history',
-            'settings' => $this->settings,
-            'user'     => $_SESSION['user'],
-            'orders'   => $orders,
+            'view'           => 'order-history',
+            'settings'       => $this->settings,
+            'user'           => $_SESSION['user'],
+            'orders'         => $orders,
+            'page'           => $page,
+            'totalPages'     => $totalPages,
+            'totalAll'       => $totalAll,
+            'totalCompleted' => $totalCompleted,
+            'totalPending'   => $totalPending,
+            'totalSpent'     => $totalSpent
         ]);
     }
 
