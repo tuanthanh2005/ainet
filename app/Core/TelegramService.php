@@ -11,16 +11,24 @@
  */
 class TelegramService {
 
-    /** Lấy settings từ DB và trả về [bot_token, chat_id] */
+    /** Lấy settings từ env hoặc DB và trả về [bot_token, chat_id] */
     private static function getConfig(): array {
+        // Try env values first
+        $token = trim((string) (getenv('TELEGRAM_BOT_TOKEN') ?: ($_ENV['TELEGRAM_BOT_TOKEN'] ?? '')));
+        $chatId = trim((string) (getenv('TELEGRAM_CHAT_ID') ?: ($_ENV['TELEGRAM_CHAT_ID'] ?? '')));
+
+        if ($token !== '' && $chatId !== '') {
+            return [$token, $chatId];
+        }
+
         try {
             $settings = Setting::getAll();
         } catch (Throwable $e) {
             self::log("getConfig error: " . $e->getMessage());
             return ['', ''];
         }
-        $token  = trim((string) ($settings['telegram_bot_token'] ?? ''));
-        $chatId = trim((string) ($settings['telegram_chat_id'] ?? ''));
+        $token  = trim((string) ($settings['telegram_bot_token'] ?? $token));
+        $chatId = trim((string) ($settings['telegram_chat_id'] ?? $chatId));
         return [$token, $chatId];
     }
 

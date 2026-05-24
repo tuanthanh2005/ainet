@@ -1417,6 +1417,12 @@
             });
             formData.append('social_links_json', JSON.stringify(socialLinks));
 
+            // Telegram Bot settings are also included in main settings
+            const botToken = document.getElementById('st_telegram_bot_token').value;
+            const chatId = document.getElementById('st_telegram_chat_id').value;
+            formData.append('telegram_bot_token', botToken);
+            formData.append('telegram_chat_id', chatId);
+
             fetch('?action=adminSaveSettings', {
                 method: 'POST',
                 headers: { 'X-Requested-With': 'XMLHttpRequest', 'X-CSRF-Token': APP_STATE.csrfToken },
@@ -1426,6 +1432,8 @@
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
+                        APP_STATE.settings['telegram_bot_token'] = botToken;
+                        APP_STATE.settings['telegram_chat_id'] = chatId;
                         AppNotify.success('Cấu hình website đã được cập nhật.', 'Lưu thành công');
                     } else {
                         AppNotify.error(data.message || 'Không thể lưu cấu hình.', 'Lỗi lưu');
@@ -1435,9 +1443,11 @@
 
         function saveTelegramSettings() {
             const fd = new FormData();
-            // Only send telegram fields (other fields use defaults from DB)
-            fd.append('telegram_bot_token', document.getElementById('st_telegram_bot_token').value);
-            fd.append('telegram_chat_id', document.getElementById('st_telegram_chat_id').value);
+            const botToken = document.getElementById('st_telegram_bot_token').value;
+            const chatId = document.getElementById('st_telegram_chat_id').value;
+            fd.append('telegram_bot_token', botToken);
+            fd.append('telegram_chat_id', chatId);
+            
             // Must include all allowed keys - send current values for everything else
             ['bannerText','zalo','footerDesc','socialLink','copyright','terms_of_service','privacy_policy',
              'sepay_active','sepay_mode','sepay_token','sepay_merchant_id','sepay_api_key',
@@ -1455,6 +1465,8 @@
                 body: fd, credentials: 'same-origin'
             }).then(r => r.json()).then(d => {
                 if (d.success) {
+                    APP_STATE.settings['telegram_bot_token'] = botToken;
+                    APP_STATE.settings['telegram_chat_id'] = chatId;
                     AppNotify.success('Cấu hình Telegram đã được lưu.', 'Lưu thành công');
                 } else {
                     AppNotify.error(d.message || 'Không thể lưu.', 'Lỗi');

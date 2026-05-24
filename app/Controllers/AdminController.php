@@ -45,26 +45,36 @@ class AdminController extends Controller {
 
         $data = [];
         foreach ($allowed as $key) {
-            $data[$key] = $_POST[$key] ?? '';
+            if (isset($_POST[$key])) {
+                $data[$key] = $_POST[$key];
+            }
         }
 
         // Validate JSON-shaped fields to avoid stored garbage
         foreach (['about_features', 'contact_methods', 'social_links_json'] as $jsonKey) {
-            if ($data[$jsonKey] === '') {
-                $data[$jsonKey] = '[]';
-                continue;
-            }
-            $decoded = json_decode($data[$jsonKey], true);
-            if (!is_array($decoded)) {
-                $data[$jsonKey] = '[]';
+            if (isset($data[$jsonKey])) {
+                if ($data[$jsonKey] === '') {
+                    $data[$jsonKey] = '[]';
+                    continue;
+                }
+                $decoded = json_decode($data[$jsonKey], true);
+                if (!is_array($decoded)) {
+                    $data[$jsonKey] = '[]';
+                }
             }
         }
 
         // Sepay flags
-        $data['sepay_active'] = ($data['sepay_active'] === '1') ? '1' : '0';
-        $data['demo_payment_active'] = ($data['demo_payment_active'] === '1') ? '1' : '0';
-        if (!in_array($data['sepay_mode'], ['production', 'sandbox'], true)) {
-            $data['sepay_mode'] = 'production';
+        if (isset($data['sepay_active'])) {
+            $data['sepay_active'] = ($data['sepay_active'] === '1') ? '1' : '0';
+        }
+        if (isset($data['demo_payment_active'])) {
+            $data['demo_payment_active'] = ($data['demo_payment_active'] === '1') ? '1' : '0';
+        }
+        if (isset($data['sepay_mode'])) {
+            if (!in_array($data['sepay_mode'], ['production', 'sandbox'], true)) {
+                $data['sepay_mode'] = 'production';
+            }
         }
 
         Setting::saveAll($data);
