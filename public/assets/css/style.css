@@ -736,57 +736,32 @@ body {
     transform: translateY(-2px);
 }
 
-/* ================= HEADER CATEGORIES ================= */
-.header-categories-wrapper {
+/* ================= HEADER NAVIGATION ================= */
+.header-nav-wrapper {
     display: flex;
-    align-items: center;
     gap: 8px;
-    overflow-x: auto;
-    white-space: nowrap;
-    scrollbar-width: none;
-    -ms-overflow-style: none;
-}
-.header-categories-wrapper::-webkit-scrollbar {
-    display: none;
+    align-items: center;
+    justify-content: center;
 }
 
-.header-cat-pill {
-    white-space: nowrap;
+.header-nav-btn {
     padding: 6px 14px;
     border-radius: 50px;
-    background: var(--light-gray);
-    border: 1px solid var(--border-color);
     color: var(--dark-gray);
-    font-weight: 500;
-    font-size: 0.85rem;
-    transition: all 0.2s ease;
-    text-decoration: none;
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.9rem;
+    transition: all 0.2s var(--smooth-curve);
+    white-space: nowrap;
 }
-.header-cat-pill:hover {
-    border-color: var(--mid-gray);
-    background: var(--border-color);
-    color: var(--pure-black);
+
+.header-nav-btn:hover {
+    color: var(--vip-primary);
+    background-color: rgba(99, 102, 241, 0.06);
 }
-.header-cat-pill.active {
-    background: var(--pure-black);
-    color: var(--pure-white);
-    border-color: var(--pure-black);
-}
-.header-cat-pill.pro-glow {
-    border: 1.5px solid transparent;
-    padding: 5px 13px;
-    background: linear-gradient(white, white) padding-box,
-                linear-gradient(90deg, #a855f7, #3b82f6, #06b6d4) border-box;
-    box-shadow: 0 2px 8px rgba(168, 85, 247, 0.15);
-    color: var(--pure-black);
-}
-.header-cat-pill.pro-glow:hover {
-    box-shadow: 0 4px 12px rgba(168, 85, 247, 0.25);
-    transform: translateY(-1px);
+
+.header-nav-btn.active {
+    color: var(--vip-primary);
+    background-color: rgba(99, 102, 241, 0.12);
 }
 
 /* ================= MOBILE RESPONSIVENESS ================= */

@@ -5,9 +5,9 @@ if (!in_array($activeTab, ['products', 'blog'])) {
     $activeTab = 'products';
 }
 ?>
-<div class="navigation-wrapper mb-4">
-    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-2 border-bottom border-light pb-2 pb-md-0">
-        <div class="tab-nav flex-grow-1 flex-md-grow-0">
+<div class="navigation-wrapper <?php echo ($currentAction === 'index' && $activeTab === 'products') ? 'mb-4 mb-lg-2' : 'mb-4 mb-lg-0'; ?>">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-2 border-bottom border-light pb-2 pb-md-0 <?php echo ($currentAction === 'index' && $activeTab === 'products') ? 'justify-content-lg-end border-lg-0 pb-lg-0 mb-lg-0' : 'd-lg-none'; ?>">
+        <div class="tab-nav flex-grow-1 flex-md-grow-0 d-lg-none">
             <a href="<?php echo url('index.php?tab=products'); ?>"
                class="tab-btn text-decoration-none <?php echo ($currentAction === 'index' && $activeTab === 'products') ? 'active' : ''; ?>">Sản Phẩm</a>
             <a href="<?php echo url('index.php?tab=blog'); ?>"

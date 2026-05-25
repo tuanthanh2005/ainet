@@ -59,28 +59,24 @@
                     </a>
                 </div>
 
-                <!-- Danh mục sản phẩm (Chỉ hiện Desktop) -->
+                <!-- Thanh điều hướng (Chỉ hiện Desktop) -->
                 <div class="col-lg-4 d-none d-lg-block">
                     <?php
-                    if (!isset($categories)) {
-                        $categories = class_exists('Category') ? Category::getAll() : [];
+                    $currentAction = $_GET['action'] ?? 'index';
+                    $activeTab = $tab ?? ($_GET['tab'] ?? 'products');
+                    if (!in_array($activeTab, ['products', 'blog'])) {
+                        $activeTab = 'products';
                     }
-                    $currentCat = $categorySlug ?? ($_GET['category'] ?? '');
-                    $qParam = !empty($searchQuery) ? '&q=' . urlencode($searchQuery) : '';
-                    $sortParam = !empty($_GET['sort']) ? '&sort=' . urlencode($_GET['sort']) : '';
                     ?>
-                    <div class="header-categories-wrapper">
-                        <a href="<?php echo url('index.php?tab=products&category=all' . $qParam . $sortParam); ?>"
-                           class="header-cat-pill text-decoration-none <?php echo (empty($currentCat) || $currentCat === 'all') ? 'active' : ''; ?>">Tất Cả</a>
-                        <?php foreach ($categories as $cat): ?>
-                            <a href="<?php echo url('index.php?tab=products&category=' . urlencode($cat['slug']) . $qParam . $sortParam); ?>"
-                               class="header-cat-pill text-decoration-none <?= $cat['is_pro'] ? 'pro-glow' : '' ?> <?php echo ($currentCat === $cat['slug']) ? 'active' : ''; ?>">
-                                <?php if ($cat['icon']): ?>
-                                    <i class="fa-solid <?= htmlspecialchars($cat['icon']) ?> <?= htmlspecialchars($cat['icon_color']) ?>"></i>
-                                <?php endif; ?>
-                                <?= htmlspecialchars($cat['name']) ?>
-                            </a>
-                        <?php endforeach; ?>
+                    <div class="header-nav-wrapper">
+                        <a href="<?php echo url('index.php?tab=products'); ?>"
+                           class="header-nav-btn text-decoration-none <?php echo ($currentAction === 'index' && $activeTab === 'products') ? 'active' : ''; ?>">Sản Phẩm</a>
+                        <a href="<?php echo url('index.php?tab=blog'); ?>"
+                           class="header-nav-btn text-decoration-none <?php echo ($currentAction === 'index' && $activeTab === 'blog') ? 'active' : ''; ?>">Tạp Chí</a>
+                        <a href="<?php echo Url::about(); ?>"
+                           class="header-nav-btn text-decoration-none <?php echo $currentAction === 'about' ? 'active' : ''; ?>">Giới Thiệu</a>
+                        <a href="<?php echo Url::contact(); ?>"
+                           class="header-nav-btn text-decoration-none <?php echo $currentAction === 'contact' ? 'active' : ''; ?>">Liên Hệ</a>
                     </div>
                 </div>
 
