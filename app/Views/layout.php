@@ -61,7 +61,6 @@
                             <i class="fa-solid fa-chevron-down ms-1" style="font-size: 0.8rem; vertical-align: middle; opacity: 0.7;"></i>
                         </a>
                         <ul class="dropdown-menu dropdown-menu-start shadow-sm mt-2" style="border-radius: 12px; padding: 8px; border: 1px solid var(--border-color); min-width: 180px; z-index: 1050;">
-                            <li><a class="dropdown-item rounded-3 py-2.5" href="<?php echo url('index.php?tab=home'); ?>"><i class="fa-solid fa-house me-2 text-muted" style="width: 16px;"></i>Trang Chủ</a></li>
                             <li><a class="dropdown-item rounded-3 py-2.5" href="<?php echo url('index.php?tab=products'); ?>"><i class="fa-solid fa-box-open me-2 text-muted" style="width: 16px;"></i>Sản Phẩm</a></li>
                             <li><a class="dropdown-item rounded-3 py-2.5" href="<?php echo url('index.php?tab=blog'); ?>"><i class="fa-solid fa-newspaper me-2 text-muted" style="width: 16px;"></i>Tạp Chí</a></li>
                             <li><hr class="dropdown-divider"></li>
