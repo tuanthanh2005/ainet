@@ -53,7 +53,25 @@
         <div class="container">
             <div class="row align-items-center">
                 <div class="col-6 col-lg-2">
-                    <a href="<?php echo url(); ?>" class="text-decoration-none text-dark fs-4 fw-bold"
+                    <!-- Logo dropdown on mobile -->
+                    <div class="dropdown logo-dropdown d-lg-none">
+                        <a href="#" class="text-decoration-none text-dark fs-4 fw-bold dropdown-toggle"
+                            data-bs-toggle="dropdown" aria-expanded="false" style="letter-spacing: -1px; white-space: nowrap;">
+                            <i class="fa-solid fa-circle-nodes me-1"></i>AI<span class="text-muted fw-light">CỦA TÔI</span>
+                            <i class="fa-solid fa-chevron-down ms-1" style="font-size: 0.8rem; vertical-align: middle; opacity: 0.7;"></i>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-start shadow-sm mt-2" style="border-radius: 12px; padding: 8px; border: 1px solid var(--border-color); min-width: 180px; z-index: 1050;">
+                            <li><a class="dropdown-item rounded-3 py-2.5" href="<?php echo url('index.php?tab=home'); ?>"><i class="fa-solid fa-house me-2 text-muted" style="width: 16px;"></i>Trang Chủ</a></li>
+                            <li><a class="dropdown-item rounded-3 py-2.5" href="<?php echo url('index.php?tab=products'); ?>"><i class="fa-solid fa-box-open me-2 text-muted" style="width: 16px;"></i>Sản Phẩm</a></li>
+                            <li><a class="dropdown-item rounded-3 py-2.5" href="<?php echo url('index.php?tab=blog'); ?>"><i class="fa-solid fa-newspaper me-2 text-muted" style="width: 16px;"></i>Tạp Chí</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item rounded-3 py-2.5" href="<?php echo Url::about(); ?>"><i class="fa-solid fa-circle-info me-2 text-muted" style="width: 16px;"></i>Giới Thiệu</a></li>
+                            <li><a class="dropdown-item rounded-3 py-2.5" href="<?php echo Url::contact(); ?>"><i class="fa-solid fa-phone me-2 text-muted" style="width: 16px;"></i>Liên Hệ</a></li>
+                        </ul>
+                    </div>
+                    
+                    <!-- Normal logo link on desktop -->
+                    <a href="<?php echo url(); ?>" class="text-decoration-none text-dark fs-4 fw-bold d-none d-lg-inline-block"
                         style="letter-spacing: -1px; white-space: nowrap;">
                         <i class="fa-solid fa-circle-nodes me-1"></i>AI<span class="text-muted fw-light">CỦA TÔI</span>
                     </a>

@@ -7,8 +7,8 @@ if (!in_array($activeTab, ['home', 'products', 'blog'])) {
 $isProductPage = $currentAction === 'index' && ($activeTab === 'products' || $activeTab === 'home');
 ?>
 <div class="navigation-wrapper <?php echo $isProductPage ? 'mb-4 mb-lg-2' : 'mb-4 mb-lg-0'; ?>">
-    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-2 border-bottom border-light pb-2 pb-md-0 <?php echo $isProductPage ? 'justify-content-lg-end border-lg-0 pb-lg-0 mb-lg-0' : 'd-lg-none'; ?>">
-        <div class="tab-nav flex-grow-1 flex-md-grow-0 d-lg-none">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-2 border-bottom border-light pb-2 pb-md-0 <?php echo $isProductPage ? 'justify-content-lg-end border-lg-0 pb-lg-0 mb-lg-0' : 'd-none'; ?>">
+        <div class="tab-nav flex-grow-1 flex-md-grow-0 d-none">
             <a href="<?php echo url('index.php?tab=home'); ?>"
                class="tab-btn text-decoration-none <?php echo ($currentAction === 'index' && $activeTab === 'home') ? 'active' : ''; ?>">Trang Chủ</a>
             <a href="<?php echo url('index.php?tab=products'); ?>"

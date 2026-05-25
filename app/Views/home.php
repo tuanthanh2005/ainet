@@ -21,7 +21,7 @@
 
     <div class="row g-4" id="product-list" data-page-size="12">
         <?php foreach ($products as $index => $product): ?>
-            <div class="col-6 col-md-4 col-lg-3 product-item"
+            <div class="col-6 col-md-4 col-lg-3 product-item <?= ($tab === 'home' && $index >= 8) ? 'product-hidden d-none' : '' ?>"
                 data-category="<?= htmlspecialchars($product['category_slug'] ?? '') ?>">
                 <div class="card product-card position-relative h-100" data-product-id="<?= htmlspecialchars($product['id'] ?? '') ?>">
                     <?php if (!empty($product['badge'])): ?>
@@ -88,7 +88,43 @@
         <?php endforeach; ?>
     </div>
 
-    <?php if ($totalPages > 1): ?>
+    <?php if ($tab === 'home' && count($products) > 8): ?>
+        <div class="text-center mt-5 mb-3" id="load-more-container">
+            <button class="btn btn-outline-dark rounded-pill px-5 py-2.5 fw-bold shadow-sm" id="btn-load-more">
+                <i class="fa-solid fa-angles-down me-2"></i>Xem thêm
+            </button>
+        </div>
+        <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const btnLoadMore = document.getElementById('btn-load-more');
+            if (btnLoadMore) {
+                btnLoadMore.addEventListener('click', () => {
+                    const hiddenProducts = document.querySelectorAll('.product-item.product-hidden');
+                    hiddenProducts.forEach((item, idx) => {
+                        if (idx < 8) {
+                            item.classList.remove('product-hidden', 'd-none');
+                            item.style.opacity = '0';
+                            item.style.transition = 'opacity 0.4s ease-in-out';
+                            setTimeout(() => {
+                                item.style.opacity = '1';
+                            }, 50 * idx);
+                        }
+                    });
+                    
+                    const remainingHidden = document.querySelectorAll('.product-item.product-hidden');
+                    if (remainingHidden.length === 0) {
+                        const container = document.getElementById('load-more-container');
+                        if (container) {
+                            container.style.display = 'none';
+                        }
+                    }
+                });
+            }
+        });
+        </script>
+    <?php endif; ?>
+
+    <?php if ($tab === 'products' && $totalPages > 1): ?>
         <?php
         $catParam = !empty($currentCat) ? '&category=' . urlencode($currentCat) : '';
         $sortParam = !empty($_GET['sort']) ? '&sort=' . urlencode($_GET['sort']) : '';

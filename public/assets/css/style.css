@@ -764,6 +764,10 @@ body {
     background-color: rgba(99, 102, 241, 0.12);
 }
 
+.logo-dropdown .dropdown-toggle::after {
+    display: none !important;
+}
+
 /* ================= MOBILE RESPONSIVENESS ================= */
 @media (max-width: 768px) {
     /* Menu Categories */

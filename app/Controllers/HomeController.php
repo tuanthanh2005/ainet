@@ -73,14 +73,20 @@ class HomeController extends Controller {
             }
         }
 
-        // Pagination logic (3 rows of 4 products = 12 products per page)
-        $page = max(1, (int) ($_GET['page'] ?? 1));
-        $limit = 12;
-        $offset = ($page - 1) * $limit;
+        if ($tab === 'home') {
+            // No pagination slicing for home tab (uses JS "Xem thêm")
+            $page = 1;
+            $totalPages = 1;
+        } else {
+            // Standard pagination for products tab: 3 rows of 4 products = 12
+            $page = max(1, (int) ($_GET['page'] ?? 1));
+            $limit = 12;
+            $offset = ($page - 1) * $limit;
 
-        $totalFilteredProducts = count($products);
-        $totalPages = max(1, ceil($totalFilteredProducts / $limit));
-        $products = array_slice($products, $offset, $limit);
+            $totalFilteredProducts = count($products);
+            $totalPages = max(1, ceil($totalFilteredProducts / $limit));
+            $products = array_slice($products, $offset, $limit);
+        }
 
         Seo::set([
             'title'       => 'Tài khoản AI Premium - Gemini Advanced, ChatGPT, Copilot',
