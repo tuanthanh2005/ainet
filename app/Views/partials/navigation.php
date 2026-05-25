@@ -1,13 +1,16 @@
 <?php
 $currentAction = $_GET['action'] ?? 'index';
-$activeTab = $tab ?? ($_GET['tab'] ?? 'products');
-if (!in_array($activeTab, ['products', 'blog'])) {
-    $activeTab = 'products';
+$activeTab = $tab ?? ($_GET['tab'] ?? 'home');
+if (!in_array($activeTab, ['home', 'products', 'blog'])) {
+    $activeTab = 'home';
 }
+$isProductPage = $currentAction === 'index' && ($activeTab === 'products' || $activeTab === 'home');
 ?>
-<div class="navigation-wrapper <?php echo ($currentAction === 'index' && $activeTab === 'products') ? 'mb-4 mb-lg-2' : 'mb-4 mb-lg-0'; ?>">
-    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-2 border-bottom border-light pb-2 pb-md-0 <?php echo ($currentAction === 'index' && $activeTab === 'products') ? 'justify-content-lg-end border-lg-0 pb-lg-0 mb-lg-0' : 'd-lg-none'; ?>">
+<div class="navigation-wrapper <?php echo $isProductPage ? 'mb-4 mb-lg-2' : 'mb-4 mb-lg-0'; ?>">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-2 border-bottom border-light pb-2 pb-md-0 <?php echo $isProductPage ? 'justify-content-lg-end border-lg-0 pb-lg-0 mb-lg-0' : 'd-lg-none'; ?>">
         <div class="tab-nav flex-grow-1 flex-md-grow-0 d-lg-none">
+            <a href="<?php echo url('index.php?tab=home'); ?>"
+               class="tab-btn text-decoration-none <?php echo ($currentAction === 'index' && $activeTab === 'home') ? 'active' : ''; ?>">Trang Chủ</a>
             <a href="<?php echo url('index.php?tab=products'); ?>"
                class="tab-btn text-decoration-none <?php echo ($currentAction === 'index' && $activeTab === 'products') ? 'active' : ''; ?>">Sản Phẩm</a>
             <a href="<?php echo url('index.php?tab=blog'); ?>"
@@ -22,7 +25,7 @@ if (!in_array($activeTab, ['products', 'blog'])) {
                 Hệ</a>
         </div>
 
-        <?php if ($currentAction === 'index' && $activeTab === 'products'): ?>
+        <?php if ($currentAction === 'index' && ($activeTab === 'products' || $activeTab === 'home')): ?>
             <?php $currentSort = $sort ?? $_GET['sort'] ?? 'newest'; ?>
             <select id="product-sort-select"
                 class="form-select w-auto border-0 bg-transparent fw-semibold shadow-none cursor-pointer ms-auto"

@@ -14,10 +14,10 @@ class HomeController extends Controller {
         $recentOrders = RecentOrder::getAll();
         $settings = $this->settings;
 
-        // Current active tab: default is products
-        $tab = $_GET['tab'] ?? 'products';
-        if (!in_array($tab, ['products', 'blog'])) {
-            $tab = 'products';
+        // Current active tab: default is home
+        $tab = $_GET['tab'] ?? 'home';
+        if (!in_array($tab, ['home', 'products', 'blog'])) {
+            $tab = 'home';
         }
 
         // Filtering by category (only applies to products tab)

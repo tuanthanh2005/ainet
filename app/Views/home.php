@@ -1,4 +1,4 @@
-<div id="products-section" style="display: <?php echo ($tab === 'products') ? 'block' : 'none'; ?>;">
+<div id="products-section" style="display: <?php echo ($tab === 'products' || $tab === 'home') ? 'block' : 'none'; ?>;">
     <!-- Category Pill Menu -->
     <div class="category-menu-wrapper fade-in-element" style="animation-delay: 0.1s;">
         <?php

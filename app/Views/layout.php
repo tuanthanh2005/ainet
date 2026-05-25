@@ -60,15 +60,17 @@
                 </div>
 
                 <!-- Thanh điều hướng (Chỉ hiện Desktop) -->
-                <div class="col-lg-4 d-none d-lg-block">
+                <div class="col-lg-5 d-none d-lg-block">
                     <?php
                     $currentAction = $_GET['action'] ?? 'index';
-                    $activeTab = $tab ?? ($_GET['tab'] ?? 'products');
-                    if (!in_array($activeTab, ['products', 'blog'])) {
-                        $activeTab = 'products';
+                    $activeTab = $tab ?? ($_GET['tab'] ?? 'home');
+                    if (!in_array($activeTab, ['home', 'products', 'blog'])) {
+                        $activeTab = 'home';
                     }
                     ?>
                     <div class="header-nav-wrapper">
+                        <a href="<?php echo url('index.php?tab=home'); ?>"
+                           class="header-nav-btn text-decoration-none <?php echo ($currentAction === 'index' && $activeTab === 'home') ? 'active' : ''; ?>">Trang Chủ</a>
                         <a href="<?php echo url('index.php?tab=products'); ?>"
                            class="header-nav-btn text-decoration-none <?php echo ($currentAction === 'index' && $activeTab === 'products') ? 'active' : ''; ?>">Sản Phẩm</a>
                         <a href="<?php echo url('index.php?tab=blog'); ?>"
@@ -81,7 +83,7 @@
                 </div>
 
                 <!-- Thanh tìm kiếm (Ẩn trên Mobile, chỉ hiện Desktop) -->
-                <div class="col-12 col-lg-3 order-3 order-lg-2 d-none d-lg-block position-relative">
+                <div class="col-12 col-lg-2 order-3 order-lg-2 d-none d-lg-block position-relative">
                     <form class="d-flex search-form" action="<?php echo url('index.php'); ?>" method="GET" role="search">
                         <input type="hidden" name="tab" value="products">
                         <input class="form-control" type="search" name="q" value="<?php echo htmlspecialchars($searchQuery ?? ($_GET['q'] ?? '')); ?>"
@@ -204,7 +206,7 @@
         $flashSuccessJs = $flashSuccess ? json_encode(htmlspecialchars($flashSuccess, ENT_QUOTES, 'UTF-8')) : 'null';
         $flashErrorJs   = $flashError   ? json_encode(htmlspecialchars($flashError,   ENT_QUOTES, 'UTF-8')) : 'null';
         ?>
-        <?php if ((!isset($view) || $view === 'home') && empty($searchQuery)): ?>
+        <?php if ((!isset($view) || $view === 'home') && empty($searchQuery) && ($tab ?? 'home') === 'home'): ?>
             <!-- Hero Section with AI Banner -->
             <div class="hero-section mb-5 rounded-4 overflow-hidden position-relative p-4 p-lg-5 shadow-sm text-white">
                 <!-- Glowing background circles -->
