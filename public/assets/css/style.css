@@ -768,6 +768,59 @@ body {
     display: none !important;
 }
 
+/* ================= MOBILE BOTTOM NAVIGATION ================= */
+.mobile-bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 60px;
+    background: var(--pure-white);
+    border-top: 1px solid var(--border-color);
+    box-shadow: 0 -4px 15px rgba(0, 0, 0, 0.05);
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    z-index: 1000;
+    padding-bottom: env(safe-area-inset-bottom);
+}
+
+.mobile-nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: var(--mid-gray);
+    text-decoration: none;
+    font-size: 0.7rem;
+    font-weight: 600;
+    flex: 1;
+    height: 100%;
+    transition: all 0.2s var(--smooth-curve);
+    gap: 3px;
+}
+
+.mobile-nav-item i {
+    font-size: 1.15rem;
+    transition: transform 0.2s var(--smooth-curve);
+}
+
+.mobile-nav-item:hover,
+.mobile-nav-item.active {
+    color: var(--vip-primary);
+}
+
+.mobile-nav-item.active i {
+    transform: translateY(-2px);
+}
+
+/* Add padding to body to prevent bottom nav from overlapping content on mobile */
+@media (max-width: 991px) {
+    body {
+        padding-bottom: 70px !important;
+    }
+}
+
 /* ================= MOBILE RESPONSIVENESS ================= */
 @media (max-width: 768px) {
     /* Menu Categories */
