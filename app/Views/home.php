@@ -1,6 +1,6 @@
 <div id="products-section" style="display: <?php echo ($tab === 'products') ? 'block' : 'none'; ?>;">
     <!-- Category Pill Menu -->
-    <div class="category-menu-wrapper fade-in-element" style="animation-delay: 0.1s;">
+    <div class="category-menu-wrapper fade-in-element d-flex d-lg-none" style="animation-delay: 0.1s;">
         <?php
         $currentCat = $categorySlug ?? ($_GET['category'] ?? '');
         $qParam = !empty($searchQuery) ? '&q=' . urlencode($searchQuery) : '';

@@ -52,26 +52,51 @@
     <header class="vibrant-header sticky-top py-3 shadow-sm">
         <div class="container">
             <div class="row align-items-center">
-                <div class="col-6 col-lg-3">
-                    <a href="<?php echo url(); ?>" class="text-decoration-none text-dark fs-3 fw-bold"
-                        style="letter-spacing: -1px;">
+                <div class="col-6 col-lg-2">
+                    <a href="<?php echo url(); ?>" class="text-decoration-none text-dark fs-4 fw-bold"
+                        style="letter-spacing: -1px; white-space: nowrap;">
                         <i class="fa-solid fa-circle-nodes me-1"></i>AI<span class="text-muted fw-light">CỦA TÔI</span>
                     </a>
                 </div>
 
+                <!-- Danh mục sản phẩm (Chỉ hiện Desktop) -->
+                <div class="col-lg-4 d-none d-lg-block">
+                    <?php
+                    if (!isset($categories)) {
+                        $categories = class_exists('Category') ? Category::getAll() : [];
+                    }
+                    $currentCat = $categorySlug ?? ($_GET['category'] ?? '');
+                    $qParam = !empty($searchQuery) ? '&q=' . urlencode($searchQuery) : '';
+                    $sortParam = !empty($_GET['sort']) ? '&sort=' . urlencode($_GET['sort']) : '';
+                    ?>
+                    <div class="header-categories-wrapper">
+                        <a href="<?php echo url('index.php?tab=products&category=all' . $qParam . $sortParam); ?>"
+                           class="header-cat-pill text-decoration-none <?php echo (empty($currentCat) || $currentCat === 'all') ? 'active' : ''; ?>">Tất Cả</a>
+                        <?php foreach ($categories as $cat): ?>
+                            <a href="<?php echo url('index.php?tab=products&category=' . urlencode($cat['slug']) . $qParam . $sortParam); ?>"
+                               class="header-cat-pill text-decoration-none <?= $cat['is_pro'] ? 'pro-glow' : '' ?> <?php echo ($currentCat === $cat['slug']) ? 'active' : ''; ?>">
+                                <?php if ($cat['icon']): ?>
+                                    <i class="fa-solid <?= htmlspecialchars($cat['icon']) ?> <?= htmlspecialchars($cat['icon_color']) ?>"></i>
+                                <?php endif; ?>
+                                <?= htmlspecialchars($cat['name']) ?>
+                            </a>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
+
                 <!-- Thanh tìm kiếm (Ẩn trên Mobile, chỉ hiện Desktop) -->
-                <div class="col-12 col-lg-5 order-3 order-lg-2 d-none d-lg-block position-relative">
+                <div class="col-12 col-lg-3 order-3 order-lg-2 d-none d-lg-block position-relative">
                     <form class="d-flex search-form" action="<?php echo url('index.php'); ?>" method="GET" role="search">
                         <input type="hidden" name="tab" value="products">
                         <input class="form-control" type="search" name="q" value="<?php echo htmlspecialchars($searchQuery ?? ($_GET['q'] ?? '')); ?>"
-                            placeholder="Tìm kiếm sản phẩm (vd: gpt, git, yt)..."
+                            placeholder="Tìm kiếm..."
                             aria-label="Search">
-                        <button class="btn px-4" type="submit"><i class="fa-solid fa-magnifying-glass"></i></button>
+                        <button class="btn px-3" type="submit"><i class="fa-solid fa-magnifying-glass"></i></button>
                     </form>
                 </div>
 
                 <!-- Cụm nút bấm phải -->
-                <div class="col-6 col-lg-4 order-2 order-lg-3 d-flex justify-content-end align-items-center gap-2">
+                <div class="col-6 col-lg-3 order-2 order-lg-3 d-flex justify-content-end align-items-center gap-2">
                     <div class="d-none d-md-flex me-3 align-items-center gap-3">
                         <?php if ($currentUser): ?>
                             <?php if (($currentUser['role'] ?? '') === 'admin'): ?>
