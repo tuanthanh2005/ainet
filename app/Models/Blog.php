@@ -23,7 +23,7 @@ class Blog {
             $id = $m[1];
         }
         
-        $stmt = $db->prepare("SELECT * FROM blogs WHERE seo_slug = ? OR id = ? OR (? !== '' AND id = ?)");
+        $stmt = $db->prepare("SELECT * FROM blogs WHERE seo_slug = ? OR id = ? OR (? != '' AND id = ?)");
         $stmt->execute([$slugOrId, $slugOrId, $id, $id]);
         $blog = $stmt->fetch();
         

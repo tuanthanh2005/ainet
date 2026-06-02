@@ -35,7 +35,7 @@ class Product {
             $id = $m[1];
         }
         
-        $stmt = $db->prepare("SELECT *, category_name AS category FROM products WHERE seo_slug = ? OR id = ? OR (? !== '' AND id = ?)");
+        $stmt = $db->prepare("SELECT *, category_name AS category FROM products WHERE seo_slug = ? OR id = ? OR (? != '' AND id = ?)");
         $stmt->execute([$slugOrId, $slugOrId, $id, $id]);
         $product = $stmt->fetch();
         
