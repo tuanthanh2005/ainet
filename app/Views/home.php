@@ -13,7 +13,7 @@
             </div>
         </div>
         <div class="col-lg-5 text-center pe-4 pe-md-5 d-none d-lg-block">
-            <img src="<?php echo url('assets/images/gemini_share.png'); ?>" class="img-fluid rounded-4 shadow-sm" alt="AI Của Tôi" style="max-height: 280px; object-fit: cover; border: 1px solid var(--border-color);">
+            <img src="<?php echo url('assets/images/gemini_share.png'); ?>" class="img-fluid rounded-4 shadow-sm" alt="AI Của Tôi" loading="eager" fetchpriority="high" decoding="async" style="max-height: 280px; object-fit: cover; border: 1px solid var(--border-color);">
         </div>
     </div>
 
@@ -187,7 +187,7 @@
                         <a href="<?= htmlspecialchars(Url::blog($blog)) ?>" class="text-decoration-none text-reset">
                             <div class="blog-card h-100 shadow-sm border bg-white" style="border-radius:12px; overflow:hidden; transition:all 0.3s ease;">
                                 <div style="height: 160px; overflow:hidden;">
-                                    <img src="<?= htmlspecialchars(image_url($blogImage)) ?>" class="w-100 h-100" style="object-fit:cover; transition:all 0.5s ease;" alt="<?= htmlspecialchars($blogTitle) ?>">
+                                    <img src="<?= htmlspecialchars(image_url($blogImage)) ?>" class="w-100 h-100" loading="lazy" decoding="async" style="object-fit:cover; transition:all 0.5s ease;" alt="<?= htmlspecialchars($blogTitle) ?>">
                                 </div>
                                 <div class="p-3">
                                     <?php if ($blogDate): ?>
@@ -235,7 +235,8 @@
                         <span class="badge-hot"><?= htmlspecialchars($product['badge'] ?? '') ?></span>
                     <?php endif; ?>
                     <img src="<?= htmlspecialchars(image_url($product['image'] ?? '')) ?>" class="card-img-top"
-                        alt="<?= htmlspecialchars($product['title'] ?? ($product['category'] ?? 'Sản phẩm')) ?>">
+                        alt="<?= htmlspecialchars($product['title'] ?? ($product['category'] ?? 'Sản phẩm')) ?>"
+                        loading="<?= $index < 4 ? 'eager' : 'lazy' ?>" <?= $index < 4 ? 'fetchpriority="high"' : '' ?> decoding="async">
                     <div class="card-body d-flex flex-column p-4">
                         <h3 class="product-title mb-1">
                             <a href="<?= htmlspecialchars(Url::product($product)) ?>" class="stretched-link text-decoration-none text-dark">
@@ -382,7 +383,7 @@
                 <div class="col-12 col-md-6 col-lg-4 fade-in-element" style="animation-delay: <?= $index * 0.1 ?>s;">
                     <a href="<?= htmlspecialchars(Url::blog($blog)) ?>" class="text-decoration-none text-reset">
                         <div class="blog-card h-100 bg-white shadow-sm border" style="border-radius:12px; overflow:hidden;">
-                            <img src="<?= htmlspecialchars(image_url($blogImage)) ?>" class="blog-img" alt="<?= htmlspecialchars($blogTitle) ?>">
+                            <img src="<?= htmlspecialchars(image_url($blogImage)) ?>" class="blog-img" loading="lazy" decoding="async" alt="<?= htmlspecialchars($blogTitle) ?>">
                             <div class="blog-content p-3">
                                 <?php if ($blogDate): ?>
                                     <div class="blog-date small text-muted mb-1"><?= htmlspecialchars($blogDate) ?></div>

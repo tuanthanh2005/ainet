@@ -119,6 +119,8 @@ class HomeController extends Controller {
             $seoSlug  = !empty($activeCategory['seo_slug']) ? $activeCategory['seo_slug'] : ($activeCategory['slug'] ?? '');
             $canonical = Url::category($seoSlug) . ($page > 1 ? '?page=' . $page : '');
             $robots = ($q !== '' || !empty($_GET['sort'])) ? 'noindex,follow' : 'index,follow';
+            $prevUrl = ($page > 1 && $q === '' && empty($_GET['sort'])) ? Url::category($seoSlug) . ($page > 2 ? '?page=' . ($page - 1) : '') : null;
+            $nextUrl = ($page < $totalPages && $q === '' && empty($_GET['sort'])) ? Url::category($seoSlug) . '?page=' . ($page + 1) : null;
             Seo::set([
                 'title'       => $seoTitle,
                 'description' => $seoDesc,
@@ -127,6 +129,8 @@ class HomeController extends Controller {
                 'canonical'   => $canonical,
                 'type'        => 'website',
                 'robots'      => $robots,
+                'prev'        => $prevUrl,
+                'next'        => $nextUrl,
                 'structured'  => $this->productItemListSchema($products, $canonical),
             ]);
         } else {
@@ -137,6 +141,12 @@ class HomeController extends Controller {
                 $canonical = url('index.php?tab=blog');
             }
             $robots = ($q !== '' || !empty($_GET['sort'])) ? 'noindex,follow' : 'index,follow';
+            $prevUrl = ($tab === 'products' && $page > 1 && $q === '' && empty($_GET['sort']))
+                ? url('index.php?tab=products' . ($page > 2 ? '&page=' . ($page - 1) : ''))
+                : null;
+            $nextUrl = ($tab === 'products' && $page < $totalPages && $q === '' && empty($_GET['sort']))
+                ? url('index.php?tab=products&page=' . ($page + 1))
+                : null;
             Seo::set([
                 'title'       => 'Tài khoản AI Premium - Gemini Advanced, ChatGPT, Copilot',
                 'description' => 'Cung cấp tài khoản Gemini Advanced (Google One AI Premium), ChatGPT Plus, YouTube Premium, GitHub Copilot giá tốt nhất. Kích hoạt tự động, bảo hành 1 đổi 1 uy tín.',
@@ -145,6 +155,8 @@ class HomeController extends Controller {
                 'canonical'   => $canonical,
                 'type'        => 'website',
                 'robots'      => $robots,
+                'prev'        => $prevUrl,
+                'next'        => $nextUrl,
                 'structured'  => $tab === 'products' ? $this->productItemListSchema($products, $canonical) : null,
             ]);
         }

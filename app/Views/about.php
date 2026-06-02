@@ -32,7 +32,7 @@
             </div>
             <div class="col-lg-6">
                 <div class="position-relative">
-                    <img src="<?php echo htmlspecialchars($settings['about_image'] ?? 'https://images.unsplash.com/photo-1677442136019-21780ecad995?auto=format&fit=crop&q=80&w=1000'); ?>" class="img-fluid rounded-4 shadow-lg" alt="About Us">
+                    <img src="<?php echo htmlspecialchars($settings['about_image'] ?? 'https://images.unsplash.com/photo-1677442136019-21780ecad995?auto=format&fit=crop&q=80&w=1000'); ?>" class="img-fluid rounded-4 shadow-lg" loading="lazy" decoding="async" alt="AI Của Tôi">
                     <div class="position-absolute bottom-0 start-0 m-4 p-4 bg-white rounded-3 shadow-sm d-none d-md-block border border-light">
                         <div class="d-flex align-items-center gap-3">
                             <div class="fs-1 fw-bold text-dark"><?php echo htmlspecialchars($settings['about_stat_value'] ?? '50K+'); ?></div>

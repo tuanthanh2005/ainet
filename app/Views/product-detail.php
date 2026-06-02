@@ -17,7 +17,7 @@
         <div class="row align-items-center">
             <div class="col-lg-6 mb-4 mb-lg-0 text-center">
                 <img src="<?= htmlspecialchars(image_url($product['image'])) ?>" class="detail-image shadow-sm w-100 rounded-4"
-                    alt="<?= htmlspecialchars($product['title'] ?? 'Sản phẩm') ?>" style="height: auto; object-fit: cover; border: 1px solid var(--border-color);">
+                    alt="<?= htmlspecialchars($product['title'] ?? 'Sản phẩm') ?>" loading="eager" fetchpriority="high" decoding="async" style="height: auto; object-fit: cover; border: 1px solid var(--border-color);">
 
                 <!-- Trust Badges Under Image -->
                 <div class="trust-badges-container">

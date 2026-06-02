@@ -94,6 +94,7 @@ $blogDesc  = $hasBlog ? ($blog['description'] ?? '') : '';
                             <?php endif; ?>
                             <img src="<?= htmlspecialchars(image_url($product['image'] ?? '')) ?>" class="card-img-top"
                                  alt="<?= htmlspecialchars($product['title'] ?? '') ?>"
+                                 loading="lazy" decoding="async"
                                  style="height: 180px; object-fit: cover; border-radius: 12px 12px 0 0;">
                             <div class="card-body p-3">
                                 <h4 class="product-title" style="font-size: 1.05rem; line-height: 1.4;">
@@ -159,6 +160,7 @@ $blogDesc  = $hasBlog ? ($blog['description'] ?? '') : '';
                     <img src="<?= htmlspecialchars(image_url($blogImage)) ?>"
                          alt="<?= htmlspecialchars($blogTitle) ?>"
                          class="img-fluid rounded-4 mb-5 w-100 shadow-sm"
+                         loading="eager" fetchpriority="high" decoding="async"
                          style="object-fit: cover; max-height: 450px;">
                 <?php endif; ?>
 
@@ -173,7 +175,7 @@ $blogDesc  = $hasBlog ? ($blog['description'] ?? '') : '';
                 <div class="mt-5 pt-4 d-flex align-items-center justify-content-between border-top">
                     <div class="d-flex align-items-center gap-3">
                         <img src="https://ui-avatars.com/api/?name=Admin&background=000&color=fff"
-                             class="rounded-circle" width="45" height="45" alt="Author">
+                             class="rounded-circle" width="45" height="45" loading="lazy" decoding="async" alt="Author">
                         <div>
                             <div class="fw-bold text-dark small">AI CỦA TÔI</div>
                             <div class="small text-muted">Editorial Team</div>

@@ -44,6 +44,8 @@ class Seo {
         $type      = self::$data['type'] ?? 'website';
         $robots    = self::$data['robots'] ?? 'index,follow';
         $structured = self::$data['structured'] ?? null;
+        $prevUrl = self::$data['prev'] ?? null;
+        $nextUrl = self::$data['next'] ?? null;
 
         $description = self::truncate(strip_tags((string) $description), 200);
         $title = $fullTitle;
@@ -59,6 +61,12 @@ class Seo {
         }
         $out .= "    <meta name=\"robots\" content=\"{$h($robots)}\">\n";
         $out .= "    <link rel=\"canonical\" href=\"{$h($canonical)}\">\n";
+        if ($prevUrl) {
+            $out .= "    <link rel=\"prev\" href=\"{$h($prevUrl)}\">\n";
+        }
+        if ($nextUrl) {
+            $out .= "    <link rel=\"next\" href=\"{$h($nextUrl)}\">\n";
+        }
 
         // Open Graph
         $out .= "    <meta property=\"og:type\" content=\"{$h($type)}\">\n";
