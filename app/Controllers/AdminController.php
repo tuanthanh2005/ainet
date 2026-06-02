@@ -32,6 +32,7 @@ class AdminController extends Controller {
         $products   = Product::getAll();
         $categories = Category::getAll();
         $blogs      = Blog::getAll();
+        $users      = User::getAll();
 
         $this->view('admin/dashboard', [
             'settings'         => $settings,
@@ -39,6 +40,7 @@ class AdminController extends Controller {
             'categories'       => $categories,
             'orders'           => $firstPageOrders,
             'blogs'            => $blogs,
+            'users'            => $users,
             'totalRevenue'     => $totalRevenue,
             'totalOrders'      => $totalOrders,
             'pendingOrders'    => $pendingOrders,
@@ -477,6 +479,96 @@ class AdminController extends Controller {
         Order::updateStatus($id, 'completed');
 
         $this->jsonSuccess();
+    }
+
+    public function adminSaveUser() {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            $this->jsonError('Method not allowed', 405);
+        }
+
+        $id = (int) ($_POST['id'] ?? 0);
+        $name = trim($_POST['name'] ?? '');
+        $email = strtolower(trim($_POST['email'] ?? ''));
+        $role = $_POST['role'] ?? 'user';
+        $status = $_POST['status'] ?? 'active';
+
+        if ($id <= 0 || $name === '' || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            $this->jsonError('Dữ liệu user không hợp lệ.');
+        }
+        if (!in_array($role, ['admin', 'user'], true) || !in_array($status, ['active', 'blocked'], true)) {
+            $this->jsonError('Quyền hoặc trạng thái không hợp lệ.');
+        }
+
+        $currentAdminId = (int) ($_SESSION['user']['id'] ?? 0);
+        if ($id === $currentAdminId && ($role !== 'admin' || $status !== 'active')) {
+            $this->jsonError('Không thể tự hạ quyền hoặc block tài khoản admin đang đăng nhập.');
+        }
+
+        $existing = User::findByEmail($email);
+        if ($existing && (int) ($existing['id'] ?? 0) !== $id) {
+            $this->jsonError('Email này đã được user khác sử dụng.');
+        }
+
+        if (!User::updateProfileByAdmin($id, $name, $email, $role, $status)) {
+            $this->jsonError('Không thể cập nhật user.');
+        }
+
+        $this->jsonSuccess(['user' => User::findById($id)]);
+    }
+
+    public function adminToggleUserStatus() {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            $this->jsonError('Method not allowed', 405);
+        }
+
+        $id = (int) ($_POST['id'] ?? 0);
+        $user = $id > 0 ? User::findById($id) : null;
+        if (!$user) {
+            $this->jsonError('User không tồn tại.');
+        }
+        if ($id === (int) ($_SESSION['user']['id'] ?? 0)) {
+            $this->jsonError('Không thể block tài khoản admin đang đăng nhập.');
+        }
+
+        $nextStatus = (($user['status'] ?? 'active') === 'active') ? 'blocked' : 'active';
+        if (!User::updateStatus($id, $nextStatus)) {
+            $this->jsonError('Không thể cập nhật trạng thái user.');
+        }
+
+        $this->jsonSuccess(['status' => $nextStatus]);
+    }
+
+    public function adminResetUserPassword() {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            $this->jsonError('Method not allowed', 405);
+        }
+
+        $id = (int) ($_POST['id'] ?? 0);
+        $user = $id > 0 ? User::findById($id) : null;
+        if (!$user) {
+            $this->jsonError('User không tồn tại.');
+        }
+
+        $password = $this->randomPassword();
+        if (!User::updatePassword($id, $password)) {
+            $this->jsonError('Không thể reset mật khẩu.');
+        }
+
+        $this->jsonSuccess([
+            'password' => $password,
+            'email'    => $user['email'] ?? '',
+            'name'     => $user['name'] ?? '',
+        ]);
+    }
+
+    private function randomPassword(int $length = 12): string {
+        $alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789@#$%';
+        $max = strlen($alphabet) - 1;
+        $password = '';
+        for ($i = 0; $i < $length; $i++) {
+            $password .= $alphabet[random_int(0, $max)];
+        }
+        return $password;
     }
 
     private function jsonSuccess(array $payload = []): void {

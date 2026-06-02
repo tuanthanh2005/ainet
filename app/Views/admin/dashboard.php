@@ -405,6 +405,11 @@
                     </a>
                 </li>
                 <li class="nav-item">
+                    <a href="#" class="nav-link" onclick="switchView('users', this)">
+                        <i class="fa-solid fa-users"></i> Quản lý User
+                    </a>
+                </li>
+                <li class="nav-item">
                     <a href="#" class="nav-link" onclick="switchView('categories', this)">
                         <i class="fa-solid fa-list-ul"></i> Quản lý Danh mục
                     </a>
@@ -544,6 +549,31 @@
                                 </thead>
                                 <tbody id="category-table-body">
                                 </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="view-users" class="view-section">
+                    <div class="card-custom">
+                        <div class="card-header-custom">
+                            <div>
+                                <h6 class="mb-0 fw-bold">Quản lý User</h6>
+                                <small class="text-muted">Sửa thông tin, block/unblock và reset mật khẩu user.</small>
+                            </div>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-hover table-custom mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>User</th>
+                                        <th>Quyền</th>
+                                        <th>Trạng thái</th>
+                                        <th>Ngày tạo</th>
+                                        <th class="text-end">Thao tác</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="user-table-body"></tbody>
                             </table>
                         </div>
                     </div>
@@ -1103,6 +1133,7 @@
             settings: <?php echo json_encode($settings); ?>,
             products: <?php echo json_encode($products); ?>,
             orders: <?php echo json_encode($orders); ?>,
+            users: <?php echo json_encode($users ?? []); ?>,
             blogs: <?php echo json_encode($blogs ?? []); ?>,
             csrfToken: <?php echo json_encode(Csrf::token()); ?>
         };
@@ -1165,6 +1196,7 @@
             renderCategoriesTable();
             renderProducts();
             renderOrders();
+            renderUsers();
             renderBlogsTable();
 
             // Auto slugification listeners
@@ -1229,6 +1261,7 @@
                 'products': 'Quản lý Sản phẩm',
                 'orders': 'Quản lý Đơn hàng',
                 'categories': 'Quản lý Danh mục',
+                'users': 'Quản lý User',
                 'blogs': 'Quản lý Tin tức',
                 'settings': 'Cấu hình Website',
                 'chat': 'Hộp thư hỗ trợ'
@@ -1267,6 +1300,148 @@
         function getCategoryName(id) {
             const cat = APP_STATE.categories.find(c => c.id === id);
             return cat ? cat.name : id;
+        }
+
+        function escapeHtml(value) {
+            return String(value ?? '').replace(/[&<>"']/g, ch => ({
+                '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+            }[ch]));
+        }
+
+        function renderUsers() {
+            const tbody = document.getElementById('user-table-body');
+            if (!tbody) return;
+            tbody.innerHTML = '';
+
+            const users = APP_STATE.users || [];
+            if (users.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted py-4">Chưa có user nào.</td></tr>';
+                return;
+            }
+
+            users.forEach(user => {
+                const isActive = (user.status || 'active') === 'active';
+                const statusBadge = isActive
+                    ? '<span class="badge bg-success rounded-pill">Active</span>'
+                    : '<span class="badge bg-danger rounded-pill">Blocked</span>';
+                const roleBadge = (user.role || 'user') === 'admin'
+                    ? '<span class="badge bg-dark rounded-pill">Admin</span>'
+                    : '<span class="badge bg-secondary rounded-pill">User</span>';
+                const createdAt = user.created_at ? new Date(String(user.created_at).replace(' ', 'T')).toLocaleString('vi-VN') : '';
+                const toggleLabel = isActive ? 'Block' : 'Mở block';
+                const toggleIcon = isActive ? 'fa-ban' : 'fa-unlock';
+                const toggleClass = isActive ? 'btn-outline-danger' : 'btn-outline-success';
+
+                tbody.innerHTML += `
+                    <tr>
+                        <td>
+                            <div class="fw-bold text-dark">${escapeHtml(user.name)}</div>
+                            <div class="text-muted small">${escapeHtml(user.email)}</div>
+                        </td>
+                        <td>${roleBadge}</td>
+                        <td>${statusBadge}</td>
+                        <td class="text-muted small">${createdAt}</td>
+                        <td class="text-end">
+                            <button class="btn btn-sm btn-outline-dark me-1" onclick="openUserModal(${Number(user.id)})" title="Sửa"><i class="fa-solid fa-pen"></i></button>
+                            <button class="btn btn-sm ${toggleClass} me-1" onclick="toggleUserStatus(${Number(user.id)})" title="${toggleLabel}"><i class="fa-solid ${toggleIcon}"></i></button>
+                            <button class="btn btn-sm btn-outline-primary" onclick="resetUserPassword(${Number(user.id)})" title="Reset mật khẩu"><i class="fa-solid fa-key"></i></button>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        function openUserModal(id) {
+            const user = (APP_STATE.users || []).find(u => Number(u.id) === Number(id));
+            if (!user) return;
+            document.getElementById('user_id').value = user.id;
+            document.getElementById('user_name').value = user.name || '';
+            document.getElementById('user_email').value = user.email || '';
+            document.getElementById('user_role').value = user.role || 'user';
+            document.getElementById('user_status').value = user.status || 'active';
+            new bootstrap.Modal(document.getElementById('userModal')).show();
+        }
+
+        function saveUser() {
+            const fd = new FormData();
+            fd.append('id', document.getElementById('user_id').value);
+            fd.append('name', document.getElementById('user_name').value);
+            fd.append('email', document.getElementById('user_email').value);
+            fd.append('role', document.getElementById('user_role').value);
+            fd.append('status', document.getElementById('user_status').value);
+
+            apiPost('adminSaveUser', fd).then(data => {
+                if (!data.success) {
+                    AppNotify.error(data.message || 'Không thể lưu user.');
+                    return;
+                }
+                const idx = APP_STATE.users.findIndex(u => Number(u.id) === Number(data.user.id));
+                if (idx >= 0) APP_STATE.users[idx] = data.user;
+                renderUsers();
+                bootstrap.Modal.getInstance(document.getElementById('userModal'))?.hide();
+                AppNotify.success('Đã lưu user.');
+            }).catch(() => AppNotify.error('Không thể kết nối server.'));
+        }
+
+        function toggleUserStatus(id) {
+            const user = (APP_STATE.users || []).find(u => Number(u.id) === Number(id));
+            if (!user) return;
+            const willBlock = (user.status || 'active') === 'active';
+            Swal.fire({
+                title: willBlock ? 'Block user này?' : 'Mở block user này?',
+                text: user.email || '',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: willBlock ? '#dc3545' : '#198754',
+                confirmButtonText: willBlock ? 'Block' : 'Mở block'
+            }).then(result => {
+                if (!result.isConfirmed) return;
+                apiPost('adminToggleUserStatus', { id }).then(data => {
+                    if (!data.success) {
+                        AppNotify.error(data.message || 'Không thể cập nhật trạng thái.');
+                        return;
+                    }
+                    user.status = data.status;
+                    renderUsers();
+                    AppNotify.success('Đã cập nhật trạng thái user.');
+                }).catch(() => AppNotify.error('Không thể kết nối server.'));
+            });
+        }
+
+        function resetUserPassword(id) {
+            const user = (APP_STATE.users || []).find(u => Number(u.id) === Number(id));
+            if (!user) return;
+            Swal.fire({
+                title: 'Reset mật khẩu user?',
+                text: user.email || '',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#111',
+                confirmButtonText: 'Reset'
+            }).then(result => {
+                if (!result.isConfirmed) return;
+                apiPost('adminResetUserPassword', { id }).then(data => {
+                    if (!data.success) {
+                        AppNotify.error(data.message || 'Không thể reset mật khẩu.');
+                        return;
+                    }
+                    document.getElementById('reset_pass_email').innerText = data.email || '';
+                    document.getElementById('reset_pass_value').value = data.password || '';
+                    new bootstrap.Modal(document.getElementById('resetPassModal')).show();
+                }).catch(() => AppNotify.error('Không thể kết nối server.'));
+            });
+        }
+
+        function copyResetPassword() {
+            const input = document.getElementById('reset_pass_value');
+            input.select();
+            input.setSelectionRange(0, input.value.length);
+            navigator.clipboard?.writeText(input.value).then(() => {
+                AppNotify.success('Đã copy mật khẩu.');
+            }).catch(() => {
+                document.execCommand('copy');
+                AppNotify.success('Đã copy mật khẩu.');
+            });
         }
 
         function formatCurrency(amount) {
@@ -2477,7 +2652,70 @@
         }
     </script>
 
-    <!-- Modals for Blog and Orders -->
+    <!-- Modals for User, Blog and Orders -->
+    <div class="modal fade" id="userModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow" style="border-radius: 16px;">
+                <div class="modal-header border-bottom p-4">
+                    <h5 class="modal-title fw-bold">Sửa user</h5>
+                    <button type="button" class="btn-close shadow-none" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <input type="hidden" id="user_id">
+                    <div class="mb-3">
+                        <label class="form-label">Tên</label>
+                        <input type="text" class="form-control" id="user_name">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Email</label>
+                        <input type="email" class="form-control" id="user_email">
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Quyền</label>
+                            <select class="form-select" id="user_role">
+                                <option value="user">User</option>
+                                <option value="admin">Admin</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Trạng thái</label>
+                            <select class="form-select" id="user_status">
+                                <option value="active">Active</option>
+                                <option value="blocked">Blocked</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer border-top p-4">
+                    <button type="button" class="btn btn-light border" data-bs-dismiss="modal">Hủy</button>
+                    <button type="button" class="btn btn-black px-4" onclick="saveUser()">Lưu user</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="resetPassModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow" style="border-radius: 16px;">
+                <div class="modal-header border-bottom p-4">
+                    <h5 class="modal-title fw-bold">Mật khẩu mới</h5>
+                    <button type="button" class="btn-close shadow-none" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <p class="text-muted mb-3">User: <span class="fw-semibold text-dark" id="reset_pass_email"></span></p>
+                    <label class="form-label">Copy mật khẩu này gửi cho user</label>
+                    <div class="input-group">
+                        <input type="text" class="form-control fw-bold" id="reset_pass_value" readonly>
+                        <button class="btn btn-black" type="button" onclick="copyResetPassword()">
+                            <i class="fa-regular fa-copy me-1"></i>Copy
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="modal fade" id="blogModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-lg modal-dialog-centered">
             <div class="modal-content border-0 shadow" style="border-radius: 16px;">

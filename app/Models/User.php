@@ -22,6 +22,35 @@ class User extends Model {
         return $stmt->fetch();
     }
 
+    public static function getAll() {
+        $db = Database::getInstance();
+        $stmt = $db->query('SELECT id, name, email, role, status, created_at FROM users ORDER BY created_at DESC, id DESC');
+        return $stmt->fetchAll();
+    }
+
+    public static function updateProfileByAdmin($id, $name, $email, $role, $status) {
+        $db = Database::getInstance();
+        $stmt = $db->prepare(
+            'UPDATE users SET name = :name, email = :email, role = :role, status = :status WHERE id = :id'
+        );
+        return $stmt->execute([
+            'id'     => $id,
+            'name'   => $name,
+            'email'  => $email,
+            'role'   => $role,
+            'status' => $status,
+        ]);
+    }
+
+    public static function updateStatus($id, $status) {
+        $db = Database::getInstance();
+        $stmt = $db->prepare('UPDATE users SET status = :status WHERE id = :id');
+        return $stmt->execute([
+            'id'     => $id,
+            'status' => $status,
+        ]);
+    }
+
     public static function create($name, $email, $password, $role = 'user') {
         $db = Database::getInstance();
         $stmt = $db->prepare(
