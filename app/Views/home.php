@@ -187,7 +187,7 @@
                         <a href="<?= htmlspecialchars(Url::blog($blog)) ?>" class="text-decoration-none text-reset">
                             <div class="blog-card h-100 shadow-sm border bg-white" style="border-radius:12px; overflow:hidden; transition:all 0.3s ease;">
                                 <div style="height: 160px; overflow:hidden;">
-                                    <img src="<?= htmlspecialchars($blogImage) ?>" class="w-100 h-100" style="object-fit:cover; transition:all 0.5s ease;" alt="<?= htmlspecialchars($blogTitle) ?>">
+                                    <img src="<?= htmlspecialchars(image_url($blogImage)) ?>" class="w-100 h-100" style="object-fit:cover; transition:all 0.5s ease;" alt="<?= htmlspecialchars($blogTitle) ?>">
                                 </div>
                                 <div class="p-3">
                                     <?php if ($blogDate): ?>
@@ -234,7 +234,7 @@
                     <?php if (!empty($product['badge'])): ?>
                         <span class="badge-hot"><?= htmlspecialchars($product['badge'] ?? '') ?></span>
                     <?php endif; ?>
-                    <img src="<?= htmlspecialchars($product['image'] ?? '') ?>" class="card-img-top"
+                    <img src="<?= htmlspecialchars(image_url($product['image'] ?? '')) ?>" class="card-img-top"
                         alt="<?= htmlspecialchars($product['category'] ?? '') ?>">
                     <div class="card-body d-flex flex-column p-4">
                         <h3 class="product-title mb-1">
@@ -363,7 +363,7 @@
                 <div class="col-12 col-md-6 col-lg-4 fade-in-element" style="animation-delay: <?= $index * 0.1 ?>s;">
                     <a href="<?= htmlspecialchars(Url::blog($blog)) ?>" class="text-decoration-none text-reset">
                         <div class="blog-card h-100 bg-white shadow-sm border" style="border-radius:12px; overflow:hidden;">
-                            <img src="<?= htmlspecialchars($blogImage) ?>" class="blog-img" alt="<?= htmlspecialchars($blogTitle) ?>">
+                            <img src="<?= htmlspecialchars(image_url($blogImage)) ?>" class="blog-img" alt="<?= htmlspecialchars($blogTitle) ?>">
                             <div class="blog-content p-3">
                                 <?php if ($blogDate): ?>
                                     <div class="blog-date small text-muted mb-1"><?= htmlspecialchars($blogDate) ?></div>

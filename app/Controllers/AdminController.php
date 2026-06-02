@@ -151,6 +151,12 @@ class AdminController extends Controller {
 
         $description = Upload::sanitizeHtml(trim((string) ($_POST['description'] ?? '')));
 
+        $imageUrl = trim($_POST['image'] ?? '');
+        if (!empty($_FILES['image_file']['name'])) {
+            $stored = Upload::store($_FILES['image_file'], 'products', Upload::IMAGE_MIMES);
+            $imageUrl = $stored['url'];
+        }
+
         $data = [
             'id'            => $id ?: 'prod_' . time(),
             'title'         => $title,
@@ -158,7 +164,7 @@ class AdminController extends Controller {
             'category'      => $_POST['category_name'] ?? '',
             'price'         => $price,
             'status'        => in_array($_POST['status'] ?? '', ['active', 'out_of_stock', 'hidden'], true) ? $_POST['status'] : 'active',
-            'image'         => $_POST['image'] ?? '',
+            'image'         => $imageUrl,
             'feature_text'  => $_POST['desc'] ?? '',
             'description'   => $description,
             'feature_icon'  => 'fa-box',

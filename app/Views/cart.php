@@ -30,7 +30,7 @@
                                         <tr>
                                             <td class="ps-4 py-4 border-0">
                                                 <div class="d-flex align-items-center gap-3">
-                                                    <img src="<?= htmlspecialchars($item['image']) ?>" class="rounded-3 shadow-sm" style="width: 60px; height: 60px; object-fit: cover;">
+                                                    <img src="<?= htmlspecialchars(image_url($item['image'])) ?>" class="rounded-3 shadow-sm" style="width: 60px; height: 60px; object-fit: cover;">
                                                     <div>
                                                         <h6 class="fw-bold mb-0"><?= htmlspecialchars($item['title']) ?></h6>
                                                         <span class="small text-muted"><?= number_format($item['price'], 0, ',', '.') ?>đ / sản phẩm</span>

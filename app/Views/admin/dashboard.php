@@ -276,6 +276,36 @@
         }
         .blog-image-placeholder i { font-size: 1.6rem; opacity: 0.6; }
 
+        /* Product image upload preview */
+        .product-image-preview-wrap {
+            width: 120px;
+            height: 120px;
+            border: 1px dashed var(--border-color);
+            border-radius: 10px;
+            background: #f9fafb;
+            position: relative;
+            flex: 0 0 auto;
+            overflow: hidden;
+        }
+        .product-image-preview {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 10px;
+        }
+        .product-image-placeholder {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            color: var(--mid-gray);
+            font-size: 0.8rem;
+        }
+        .product-image-placeholder i { font-size: 1.6rem; opacity: 0.6; }
+
         .rich-toolbar { gap: 4px; }
         .rich-toolbar .btn {
             width: 32px; height: 32px;
@@ -919,8 +949,24 @@
                                 </select>
                             </div>
                             <div class="col-12 mb-3">
-                                <label class="form-label">Đường dẫn Hình ảnh (URL)</label>
-                                <input type="url" class="form-control" id="p_image" placeholder="https://...">
+                                <input type="hidden" id="p_image">
+                                <label class="form-label">Hình ảnh sản phẩm</label>
+                                <div class="d-flex align-items-center gap-3">
+                                    <div class="product-image-preview-wrap">
+                                        <img src="" id="p_image_preview" class="product-image-preview d-none">
+                                        <div class="product-image-placeholder" id="p_image_placeholder">
+                                            <i class="fa-regular fa-image"></i>
+                                            <span>Chưa có ảnh</span>
+                                        </div>
+                                    </div>
+                                    <div class="flex-grow-1">
+                                        <input type="file" class="form-control form-control-sm" id="p_image_file" accept="image/png,image/jpeg,image/webp,image/gif">
+                                        <small class="text-muted d-block mt-1">Định dạng: JPG, PNG, WEBP, GIF. Tối đa 10MB.</small>
+                                        <button type="button" class="btn btn-sm btn-link text-danger px-0 mt-1 d-none" id="p_image_clear">
+                                            <i class="fa-solid fa-xmark me-1"></i>Bỏ ảnh
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
                             <div class="col-12 mb-3">
                                 <label class="form-label">Mô tả ngắn</label>
@@ -1123,6 +1169,10 @@
                     blogSeoSlug.dataset.manual = 'true';
                 });
             }
+
+            // Setup image pickers
+            setupProductImagePicker();
+            setupBlogModal();
         });
 
         function switchView(viewId, el) {
@@ -1210,9 +1260,54 @@
             document.getElementById('dash-total-products').innerText = APP_STATE.products.length;
         }
 
+        function setProductImagePreview(url) {
+            const img = document.getElementById('p_image_preview');
+            const placeholder = document.getElementById('p_image_placeholder');
+            const clearBtn = document.getElementById('p_image_clear');
+            if (!img || !placeholder || !clearBtn) return;
+            if (url) {
+                img.src = url;
+                img.classList.remove('d-none');
+                placeholder.classList.add('d-none');
+                clearBtn.classList.remove('d-none');
+            } else {
+                img.src = '';
+                img.classList.add('d-none');
+                placeholder.classList.remove('d-none');
+                clearBtn.classList.add('d-none');
+            }
+        }
+
+        function setupProductImagePicker() {
+            const fileInput = document.getElementById('p_image_file');
+            const clearBtn  = document.getElementById('p_image_clear');
+            if (!fileInput || !clearBtn) return;
+
+            fileInput.addEventListener('change', () => {
+                const f = fileInput.files[0];
+                if (!f) return;
+                if (f.size > 10 * 1024 * 1024) {
+                    AppNotify.warning('Tối đa 10MB mỗi tệp.', 'Tệp quá lớn');
+                    fileInput.value = '';
+                    return;
+                }
+                const reader = new FileReader();
+                reader.onload = e => setProductImagePreview(e.target.result);
+                reader.readAsDataURL(f);
+            });
+
+            clearBtn.addEventListener('click', () => {
+                fileInput.value = '';
+                document.getElementById('p_image').value = '';
+                setProductImagePreview('');
+            });
+        }
+
         function openProductModal() {
             document.getElementById('productForm').reset();
             document.getElementById('p_id').value = '';
+            document.getElementById('p_image').value = '';
+            setProductImagePreview('');
             document.getElementById('p_detail_desc').value = '';
             document.getElementById('p_detail_desc_editor').innerHTML = '';
             document.getElementById('p_seo_slug').value = '';
@@ -1249,7 +1344,8 @@
 
                 document.getElementById('p_price').value = p.price;
                 document.getElementById('p_status').value = p.status || 'active';
-                document.getElementById('p_image').value = p.image;
+                document.getElementById('p_image').value = p.image || '';
+                setProductImagePreview(p.image || '');
                 document.getElementById('p_desc').value = p.feature_text || '';
                 document.getElementById('p_detail_desc').value = p.description || '';
                 document.getElementById('p_detail_desc_editor').innerHTML = p.description || '';
@@ -1406,6 +1502,10 @@
             formData.append('price', document.getElementById('p_price').value);
             formData.append('status', document.getElementById('p_status').value);
             formData.append('image', document.getElementById('p_image').value);
+            const fileInput = document.getElementById('p_image_file');
+            if (fileInput && fileInput.files[0]) {
+                formData.append('image_file', fileInput.files[0]);
+            }
             formData.append('desc', document.getElementById('p_desc').value);
             document.getElementById('p_detail_desc').value = document.getElementById('p_detail_desc_editor').innerHTML.trim();
             formData.append('description', document.getElementById('p_detail_desc').value);

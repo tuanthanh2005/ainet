@@ -81,7 +81,7 @@
                             <div class="oh-row">
                                 <div class="oh-thumb">
                                     <?php if ($imageUrl): ?>
-                                        <img src="<?= htmlspecialchars($imageUrl) ?>" alt="">
+                                        <img src="<?= htmlspecialchars(image_url($imageUrl)) ?>" alt="">
                                     <?php else: ?>
                                         <i class="fa-solid <?= htmlspecialchars($statusIcon) ?>"></i>
                                     <?php endif; ?>

@@ -115,7 +115,7 @@ $variantIdx = isset($_GET['variant_idx']) ? (int)$_GET['variant_idx'] : 0;
                         <div class="card border-0 shadow-sm rounded-4 p-4 sticky-top" style="top: 2rem;">
                             <h5 class="fw-bold mb-4"><i class="fa-solid fa-cart-shopping me-2 text-primary"></i> Đơn Hàng</h5>
                             <div class="d-flex align-items-center mb-3 pb-3 border-bottom">
-                                <img src="<?= htmlspecialchars($product['image'] ?? '') ?>" class="rounded-3 border me-3" style="width: 55px; height: 55px; object-fit: cover;">
+                                <img src="<?= htmlspecialchars(image_url($product['image'] ?? '')) ?>" class="rounded-3 border me-3" style="width: 55px; height: 55px; object-fit: cover;">
                                 <div class="flex-grow-1">
                                     <div class="fw-bold text-dark small text-truncate-2"><?= htmlspecialchars($product['title']) ?></div>
                                     <div class="text-muted smaller"><?= htmlspecialchars($variant['name']) ?></div>
