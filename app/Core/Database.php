@@ -12,6 +12,7 @@ class Database {
             $this->conn = new PDO($dsn, DB_USER, DB_PASS);
             $this->conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
             $this->conn->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
+            $this->conn->exec("SET time_zone = " . $this->conn->quote(DB_TIMEZONE_OFFSET));
 
             // One-off migration for orders status ENUM to support 'processing'
             $logDir = __DIR__ . '/../../storage/logs';

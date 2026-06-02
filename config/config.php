@@ -27,6 +27,10 @@ define('SITENAME', getenv('APP_NAME') ?: 'AI CỦA TÔI');
 define('SESSION_LIFETIME_DAYS', (int) (getenv('SESSION_LIFETIME_DAYS') ?: 365));
 define('APP_ENV', getenv('APP_ENV') ?: 'production');
 define('APP_DEBUG', filter_var(getenv('APP_DEBUG') ?: 'false', FILTER_VALIDATE_BOOLEAN));
+define('APP_TIMEZONE', getenv('APP_TIMEZONE') ?: 'Asia/Ho_Chi_Minh');
+define('DB_TIMEZONE_OFFSET', getenv('DB_TIMEZONE_OFFSET') ?: '+07:00');
+
+date_default_timezone_set(APP_TIMEZONE);
 
 // Google OAuth Configuration
 define('GOOGLE_CLIENT_ID', getenv('GOOGLE_CLIENT_ID') ?: '');
