@@ -17,7 +17,7 @@
         <div class="row align-items-center">
             <div class="col-lg-6 mb-4 mb-lg-0 text-center">
                 <img src="<?= htmlspecialchars(image_url($product['image'])) ?>" class="detail-image shadow-sm w-100 rounded-4"
-                    alt="Product" style="height: auto; object-fit: cover; border: 1px solid var(--border-color);">
+                    alt="<?= htmlspecialchars($product['title'] ?? 'Sản phẩm') ?>" style="height: auto; object-fit: cover; border: 1px solid var(--border-color);">
 
                 <!-- Trust Badges Under Image -->
                 <div class="trust-badges-container">
@@ -241,6 +241,52 @@
                 </div>
             </div>
         </div>
+
+        <?php
+            $faqPrice = isset($basePrice) ? number_format((float) $basePrice, 0, ',', '.') . 'đ' : 'theo gói đang hiển thị';
+            $faqTitle = $product['title'] ?? 'sản phẩm';
+        ?>
+        <section class="product-faq mt-4 bg-white rounded-4 shadow-sm p-3 p-md-4 mb-5">
+            <h2 class="fw-bold text-dark mb-3" style="font-size: 1.2rem;">Câu hỏi thường gặp</h2>
+            <div class="accordion" id="productFaq">
+                <div class="accordion-item border-0 border-bottom">
+                    <h3 class="accordion-header">
+                        <button class="accordion-button bg-white px-0 fw-semibold" type="button" data-bs-toggle="collapse" data-bs-target="#faqWarranty" aria-expanded="true" aria-controls="faqWarranty">
+                            Mua <?= htmlspecialchars($faqTitle) ?> có được bảo hành không?
+                        </button>
+                    </h3>
+                    <div id="faqWarranty" class="accordion-collapse collapse show" data-bs-parent="#productFaq">
+                        <div class="accordion-body px-0 text-muted">
+                            Có. Sản phẩm được hỗ trợ bảo hành theo mô tả sản phẩm và chính sách hiển thị trên trang chi tiết.
+                        </div>
+                    </div>
+                </div>
+                <div class="accordion-item border-0 border-bottom">
+                    <h3 class="accordion-header">
+                        <button class="accordion-button collapsed bg-white px-0 fw-semibold" type="button" data-bs-toggle="collapse" data-bs-target="#faqPrice" aria-expanded="false" aria-controls="faqPrice">
+                            Giá <?= htmlspecialchars($faqTitle) ?> là bao nhiêu?
+                        </button>
+                    </h3>
+                    <div id="faqPrice" class="accordion-collapse collapse" data-bs-parent="#productFaq">
+                        <div class="accordion-body px-0 text-muted">
+                            Giá hiện tại bắt đầu từ <?= htmlspecialchars($faqPrice) ?>. Giá có thể thay đổi theo từng gói và thời hạn sử dụng.
+                        </div>
+                    </div>
+                </div>
+                <div class="accordion-item border-0">
+                    <h3 class="accordion-header">
+                        <button class="accordion-button collapsed bg-white px-0 fw-semibold" type="button" data-bs-toggle="collapse" data-bs-target="#faqDelivery" aria-expanded="false" aria-controls="faqDelivery">
+                            Sau khi thanh toán bao lâu thì nhận được sản phẩm?
+                        </button>
+                    </h3>
+                    <div id="faqDelivery" class="accordion-collapse collapse" data-bs-parent="#productFaq">
+                        <div class="accordion-body px-0 text-muted">
+                            Hệ thống xử lý đơn hàng tự động. Sau khi thanh toán thành công, bạn sẽ nhận thông tin sản phẩm theo hướng dẫn trên website.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
     </div>
 </div>
 

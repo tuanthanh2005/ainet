@@ -9,12 +9,14 @@ class SeoController extends Controller {
 
         $urls = [
             ['loc' => $base . '/',              'priority' => '1.0', 'changefreq' => 'daily',   'lastmod' => $now],
+            ['loc' => $base . '/index.php?tab=products', 'priority' => '0.9', 'changefreq' => 'daily', 'lastmod' => $now],
             ['loc' => $base . '/gioi-thieu',    'priority' => '0.6', 'changefreq' => 'monthly', 'lastmod' => $now],
             ['loc' => $base . '/lien-he',       'priority' => '0.6', 'changefreq' => 'monthly', 'lastmod' => $now],
         ];
 
         try {
             foreach (Product::getAll() as $product) {
+                if (($product['status'] ?? 'active') === 'hidden') continue;
                 $urls[] = [
                     'loc'        => Url::product($product),
                     'priority'   => '0.9',
@@ -26,8 +28,10 @@ class SeoController extends Controller {
 
         try {
             foreach (Category::getAll() as $cat) {
+                $slug = $cat['seo_slug'] ?: ($cat['slug'] ?? '');
+                if ($slug === '') continue;
                 $urls[] = [
-                    'loc'        => Url::category($cat['slug']),
+                    'loc'        => Url::category($slug),
                     'priority'   => '0.8',
                     'changefreq' => 'weekly',
                     'lastmod'    => $now,

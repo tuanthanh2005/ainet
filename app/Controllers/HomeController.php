@@ -117,22 +117,35 @@ class HomeController extends Controller {
             $seoDesc  = !empty($activeCategory['seo_description']) ? $activeCategory['seo_description'] : ('Cung cấp tài khoản ' . $catName . ' chính chủ giá rẻ nhất thị trường. Hỗ trợ kích hoạt tự động nhanh chóng, bảo hành 1 đổi 1 uy tín.');
             $seoKey   = !empty($activeCategory['seo_keywords']) ? explode(',', $activeCategory['seo_keywords']) : ['mua tài khoản ' . mb_strtolower($catName), 'tài khoản ' . mb_strtolower($catName) . ' giá rẻ', mb_strtolower($catName), SITENAME];
             $seoSlug  = !empty($activeCategory['seo_slug']) ? $activeCategory['seo_slug'] : ($activeCategory['slug'] ?? '');
+            $canonical = Url::category($seoSlug) . ($page > 1 ? '?page=' . $page : '');
+            $robots = ($q !== '' || !empty($_GET['sort'])) ? 'noindex,follow' : 'index,follow';
             Seo::set([
                 'title'       => $seoTitle,
                 'description' => $seoDesc,
                 'keywords'    => $seoKey,
                 'image'       => url('assets/images/gemini_share.png'),
-                'canonical'   => Url::category($seoSlug),
+                'canonical'   => $canonical,
                 'type'        => 'website',
+                'robots'      => $robots,
+                'structured'  => $this->productItemListSchema($products, $canonical),
             ]);
         } else {
+            $canonical = Url::home();
+            if ($tab === 'products') {
+                $canonical = url('index.php?tab=products' . ($page > 1 ? '&page=' . $page : ''));
+            } elseif ($tab === 'blog') {
+                $canonical = url('index.php?tab=blog');
+            }
+            $robots = ($q !== '' || !empty($_GET['sort'])) ? 'noindex,follow' : 'index,follow';
             Seo::set([
                 'title'       => 'Tài khoản AI Premium - Gemini Advanced, ChatGPT, Copilot',
                 'description' => 'Cung cấp tài khoản Gemini Advanced (Google One AI Premium), ChatGPT Plus, YouTube Premium, GitHub Copilot giá tốt nhất. Kích hoạt tự động, bảo hành 1 đổi 1 uy tín.',
                 'keywords'    => ['tài khoản gemini advanced', 'google gemini advanced', 'tài khoản chatgpt plus', 'youtube premium', 'github copilot', 'tài khoản ai', SITENAME],
                 'image'       => url('assets/images/gemini_share.png'),
-                'canonical'   => Url::home() . ($tab === 'products' ? '?tab=products' : ''),
+                'canonical'   => $canonical,
                 'type'        => 'website',
+                'robots'      => $robots,
+                'structured'  => $tab === 'products' ? $this->productItemListSchema($products, $canonical) : null,
             ]);
         }
 
@@ -240,7 +253,7 @@ class HomeController extends Controller {
         Seo::set([
             'title'       => $seoTitle,
             'description' => $seoDesc,
-            'image'       => $product['image'] ?? '',
+            'image'       => image_url($product['image'] ?? ''),
             'canonical'   => Url::product($product),
             'type'        => 'product',
             'keywords'    => $seoKey,
@@ -248,7 +261,7 @@ class HomeController extends Controller {
                 '@context'    => 'https://schema.org',
                 '@type'       => 'Product',
                 'name'        => $product['title'] ?? '',
-                'image'       => $product['image'] ?? '',
+                'image'       => image_url($product['image'] ?? ''),
                 'description' => $seoDesc,
                 'sku'         => 'prod_' . ($product['id'] ?? ''),
                 'mpn'         => 'mpn_' . ($product['id'] ?? ''),
@@ -256,17 +269,7 @@ class HomeController extends Controller {
                     '@type' => 'Brand',
                     'name'  => SITENAME
                 ],
-                'offers'      => [
-                    '@type'         => 'Offer',
-                    'priceCurrency' => 'VND',
-                    'price'         => (string) ($product['price'] ?? 0),
-                    'priceValidUntil'=> date('Y-12-31'),
-                    'valueAddedTaxIncluded' => 'true',
-                    'availability'  => ($product['status'] ?? 'active') === 'active'
-                        ? 'https://schema.org/InStock'
-                        : 'https://schema.org/OutOfStock',
-                    'url'           => Url::product($product),
-                ],
+                'offers'      => $this->productPriceData($product)['offer'],
                 'aggregateRating' => [
                     '@type'       => 'AggregateRating',
                     'ratingValue' => (string) ($product['rating'] ?? 5),
@@ -848,6 +851,73 @@ class HomeController extends Controller {
             $refreshed[] = $this->buildCartItem($product, (int) ($item['variant_idx'] ?? 0), $quantity);
         }
         return $refreshed;
+    }
+
+    private function productPriceData(array $product): array {
+        $options = is_array($product['options'] ?? null) ? $product['options'] : [];
+        $prices = [];
+        foreach ($options as $option) {
+            $price = (float) ($option['price'] ?? 0);
+            if ($price > 0) {
+                $prices[] = $price;
+            }
+        }
+        if (empty($prices)) {
+            $prices[] = (float) ($product['price'] ?? 0);
+        }
+
+        $lowPrice = min($prices);
+        $highPrice = max($prices);
+        $availability = ($product['status'] ?? 'active') === 'active'
+            ? 'https://schema.org/InStock'
+            : 'https://schema.org/OutOfStock';
+        $url = Url::product($product);
+
+        $offer = count($prices) > 1 ? [
+            '@type'         => 'AggregateOffer',
+            'priceCurrency' => 'VND',
+            'lowPrice'      => (string) $lowPrice,
+            'highPrice'     => (string) $highPrice,
+            'offerCount'    => (string) count($prices),
+            'availability'  => $availability,
+            'url'           => $url,
+        ] : [
+            '@type'         => 'Offer',
+            'priceCurrency' => 'VND',
+            'price'         => (string) $lowPrice,
+            'priceValidUntil'=> date('Y-12-31'),
+            'valueAddedTaxIncluded' => 'true',
+            'availability'  => $availability,
+            'url'           => $url,
+        ];
+
+        return [
+            'price' => $lowPrice,
+            'offer' => $offer,
+        ];
+    }
+
+    private function productItemListSchema(array $products, string $url): array {
+        $items = [];
+        $position = 1;
+        foreach ($products as $product) {
+            if (($product['status'] ?? 'active') === 'hidden') {
+                continue;
+            }
+            $items[] = [
+                '@type' => 'ListItem',
+                'position' => $position++,
+                'url' => Url::product($product),
+                'name' => $product['title'] ?? '',
+            ];
+        }
+
+        return [
+            '@context' => 'https://schema.org',
+            '@type' => 'ItemList',
+            'url' => $url,
+            'itemListElement' => $items,
+        ];
     }
 
     // Search Helper Logic

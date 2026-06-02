@@ -235,7 +235,7 @@
                         <span class="badge-hot"><?= htmlspecialchars($product['badge'] ?? '') ?></span>
                     <?php endif; ?>
                     <img src="<?= htmlspecialchars(image_url($product['image'] ?? '')) ?>" class="card-img-top"
-                        alt="<?= htmlspecialchars($product['category'] ?? '') ?>">
+                        alt="<?= htmlspecialchars($product['title'] ?? ($product['category'] ?? 'Sản phẩm')) ?>">
                     <div class="card-body d-flex flex-column p-4">
                         <h3 class="product-title mb-1">
                             <a href="<?= htmlspecialchars(Url::product($product)) ?>" class="stretched-link text-decoration-none text-dark">

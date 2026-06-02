@@ -81,15 +81,31 @@ class Seo {
 
         // JSON-LD
         $schemas = [];
+        $sameAs = [];
+        if (!empty($settings['social_links_json'])) {
+            $socialLinks = json_decode((string) $settings['social_links_json'], true);
+            if (is_array($socialLinks)) {
+                foreach ($socialLinks as $link) {
+                    $url = trim((string) ($link['url'] ?? ''));
+                    if ($url !== '' && preg_match('/^https?:\/\//i', $url)) {
+                        $sameAs[] = $url;
+                    }
+                }
+            }
+        }
 
         // Site-wide Organization + WebSite (always included)
-        $schemas[] = [
+        $organization = [
             '@context' => 'https://schema.org',
             '@type'    => 'Organization',
             'name'     => $siteName,
             'url'      => rtrim(URLROOT, '/'),
             'logo'     => $image ?: rtrim(URLROOT, '/') . '/assets/logo.png',
         ];
+        if (!empty($sameAs)) {
+            $organization['sameAs'] = array_values(array_unique($sameAs));
+        }
+        $schemas[] = $organization;
         $schemas[] = [
             '@context' => 'https://schema.org',
             '@type'    => 'WebSite',
@@ -105,6 +121,14 @@ class Seo {
         if ($structured) {
             if (isset($structured['@type'])) {
                 $schemas[] = $structured;
+                if (($structured['@type'] ?? '') === 'Product') {
+                    $schemas[] = self::productFaqSchema($structured, $siteName);
+                    $schemas[] = self::breadcrumbSchema([
+                        ['name' => 'Trang chủ', 'url' => rtrim(URLROOT, '/') . '/'],
+                        ['name' => 'Sản phẩm', 'url' => rtrim(URLROOT, '/') . '/?tab=products'],
+                        ['name' => $structured['name'] ?? $title, 'url' => $canonical],
+                    ]);
+                }
             } else {
                 foreach ($structured as $s) {
                     if (is_array($s)) $schemas[] = $s;
@@ -117,6 +141,61 @@ class Seo {
         $out .= "\n    </script>\n";
 
         return $out;
+    }
+
+    private static function productFaqSchema(array $product, string $siteName): array {
+        $name = trim((string) ($product['name'] ?? 'sản phẩm'));
+        $offers = $product['offers'] ?? [];
+        $price = $offers['price'] ?? $offers['lowPrice'] ?? null;
+        $priceText = $price !== null ? number_format((float) $price, 0, ',', '.') . 'đ' : 'theo gói đang hiển thị trên website';
+
+        return [
+            '@context' => 'https://schema.org',
+            '@type' => 'FAQPage',
+            'mainEntity' => [
+                [
+                    '@type' => 'Question',
+                    'name' => 'Mua ' . $name . ' tại ' . $siteName . ' có được bảo hành không?',
+                    'acceptedAnswer' => [
+                        '@type' => 'Answer',
+                        'text' => $siteName . ' hỗ trợ bảo hành theo mô tả sản phẩm và chính sách hiển thị trên trang chi tiết.'
+                    ],
+                ],
+                [
+                    '@type' => 'Question',
+                    'name' => 'Giá ' . $name . ' là bao nhiêu?',
+                    'acceptedAnswer' => [
+                        '@type' => 'Answer',
+                        'text' => 'Giá hiện tại của ' . $name . ' bắt đầu từ ' . $priceText . '. Giá có thể thay đổi theo từng gói và thời hạn sử dụng.'
+                    ],
+                ],
+                [
+                    '@type' => 'Question',
+                    'name' => 'Sau khi thanh toán bao lâu thì nhận được sản phẩm?',
+                    'acceptedAnswer' => [
+                        '@type' => 'Answer',
+                        'text' => 'Hệ thống xử lý đơn hàng tự động. Sau khi thanh toán thành công, khách hàng sẽ nhận thông tin sản phẩm theo hướng dẫn trên website.'
+                    ],
+                ],
+            ],
+        ];
+    }
+
+    private static function breadcrumbSchema(array $items): array {
+        $list = [];
+        foreach (array_values($items) as $idx => $item) {
+            $list[] = [
+                '@type' => 'ListItem',
+                'position' => $idx + 1,
+                'name' => $item['name'] ?? '',
+                'item' => $item['url'] ?? '',
+            ];
+        }
+        return [
+            '@context' => 'https://schema.org',
+            '@type' => 'BreadcrumbList',
+            'itemListElement' => $list,
+        ];
     }
 
     public static function currentUrl(): string {
