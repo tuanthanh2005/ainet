@@ -137,6 +137,7 @@ class AdminController extends Controller {
         $id       = trim($_POST['id'] ?? '');
         $title    = trim($_POST['title'] ?? '');
         $price    = (float) ($_POST['price'] ?? 0);
+        $originalPrice = (float) ($_POST['original_price'] ?? 0);
 
         if ($title === '' || $price < 0) {
             $this->jsonError('Dữ liệu sản phẩm không hợp lệ.');
@@ -163,6 +164,7 @@ class AdminController extends Controller {
             'category_slug' => $_POST['category'] ?? '',
             'category'      => $_POST['category_name'] ?? '',
             'price'         => $price,
+            'original_price'=> $originalPrice > $price ? $originalPrice : 0,
             'status'        => in_array($_POST['status'] ?? '', ['active', 'out_of_stock', 'hidden'], true) ? $_POST['status'] : 'active',
             'image'         => $imageUrl,
             'feature_text'  => $_POST['desc'] ?? '',

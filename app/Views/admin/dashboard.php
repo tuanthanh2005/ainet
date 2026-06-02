@@ -936,11 +936,15 @@
                                 <select class="form-select" id="p_category" required>
                                 </select>
                             </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">Giá bán (VNĐ)</label>
-                                <input type="number" class="form-control" id="p_price" required>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">Giá giảm / Giá bán (VNĐ)</label>
+                                <input type="number" class="form-control" id="p_price" min="0" required>
                             </div>
-                            <div class="col-md-6 mb-3">
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">Giá gốc (VNĐ)</label>
+                                <input type="number" class="form-control" id="p_original_price" min="0" placeholder="Để trống nếu không giảm giá">
+                            </div>
+                            <div class="col-md-4 mb-3">
                                 <label class="form-label">Trạng thái</label>
                                 <select class="form-select" id="p_status">
                                     <option value="active">Đang bán</option>
@@ -1325,6 +1329,7 @@
             document.getElementById('productForm').reset();
             document.getElementById('p_id').value = '';
             document.getElementById('p_image').value = '';
+            document.getElementById('p_original_price').value = '';
             setProductImagePreview('');
             document.querySelectorAll('.card-feature-input').forEach(input => input.value = '');
             document.getElementById('p_detail_desc').value = '';
@@ -1362,6 +1367,7 @@
                 if (!found) catSelect.value = p.category_slug || p.category;
 
                 document.getElementById('p_price').value = p.price;
+                document.getElementById('p_original_price').value = p.original_price || '';
                 document.getElementById('p_status').value = p.status || 'active';
                 document.getElementById('p_image').value = p.image || '';
                 setProductImagePreview(p.image || '');
@@ -1523,6 +1529,7 @@
             formData.append('category', categorySelect.value);
             formData.append('category_name', categoryName);
             formData.append('price', document.getElementById('p_price').value);
+            formData.append('original_price', document.getElementById('p_original_price').value);
             formData.append('status', document.getElementById('p_status').value);
             formData.append('image', document.getElementById('p_image').value);
             const fileInput = document.getElementById('p_image_file');

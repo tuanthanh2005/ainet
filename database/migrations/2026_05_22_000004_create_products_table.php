@@ -9,6 +9,7 @@ return new class {
                 category_slug VARCHAR(255) NULL,
                 category_name VARCHAR(255) NULL,
                 price DECIMAL(15, 2) DEFAULT 0.00,
+                original_price DECIMAL(15, 2) DEFAULT 0.00,
                 status VARCHAR(50) DEFAULT 'active',
                 image TEXT NULL,
                 feature_text VARCHAR(255) NULL,
