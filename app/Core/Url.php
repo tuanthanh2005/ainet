@@ -2,14 +2,20 @@
 
 class Url {
     public static function product(array $product): string {
-        $slug = Seo::slugify($product['title'] ?? 'san-pham');
+        $slug = trim($product['seo_slug'] ?? '');
+        if ($slug === '') {
+            $slug = Seo::slugify($product['title'] ?? 'san-pham');
+        }
         $id   = $product['id'] ?? '';
         $tail = $slug ? ($slug . '-' . $id) : $id;
         return url('san-pham/' . $tail);
     }
 
     public static function blog(array $blog): string {
-        $slug = Seo::slugify($blog['title'] ?? 'bai-viet');
+        $slug = trim($blog['seo_slug'] ?? '');
+        if ($slug === '') {
+            $slug = Seo::slugify($blog['title'] ?? 'bai-viet');
+        }
         $id   = $blog['id'] ?? '';
         $tail = $slug ? ($slug . '-' . $id) : $id;
         return url('tap-chi/' . $tail);

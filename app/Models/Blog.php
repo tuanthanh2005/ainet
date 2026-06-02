@@ -17,12 +17,16 @@ class Blog {
     public static function saveAll($blogs) {
         $db = Database::getInstance();
         $db->exec("TRUNCATE TABLE blogs");
-        $stmt = $db->prepare("INSERT INTO blogs (title, image, description) VALUES (?, ?, ?)");
+        $stmt = $db->prepare("INSERT INTO blogs (title, image, description, seo_title, seo_description, seo_keywords, seo_slug) VALUES (?, ?, ?, ?, ?, ?, ?)");
         foreach ($blogs as $blog) {
             $stmt->execute([
                 $blog['title'],
                 $blog['image'],
-                $blog['desc'] ?? ($blog['description'] ?? '')
+                $blog['desc'] ?? ($blog['description'] ?? ''),
+                $blog['seo_title'] ?? null,
+                $blog['seo_description'] ?? null,
+                $blog['seo_keywords'] ?? null,
+                $blog['seo_slug'] ?? null
             ]);
         }
     }
