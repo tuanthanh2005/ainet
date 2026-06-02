@@ -259,14 +259,22 @@
                             </div>
                             <span class="text-muted sold-text">Đã bán <?= number_format($product['sold_count'] ?? 0, 0, ',', '.') ?></span>
                         </div>
-                        <?php $cardFeatures = array_values(array_filter((array) ($product['card_features'] ?? []), 'strlen')); ?>
+                        <?php
+                            $shortFeatureText = trim((string) ($product['feature_text'] ?? ''));
+                            $cardFeatures = array_values(array_filter((array) ($product['card_features'] ?? []), 'strlen'));
+                        ?>
+                        <?php if ($shortFeatureText !== ''): ?>
+                            <p class="text-muted small mb-2"><i
+                                    class="fa-solid <?= htmlspecialchars($product['feature_icon'] ?? 'fa-circle-check') ?> me-1"></i>
+                                <?= htmlspecialchars($shortFeatureText) ?></p>
+                        <?php endif; ?>
                         <?php if (!empty($cardFeatures)): ?>
                             <ul class="product-card-features list-unstyled text-muted small mb-3">
                                 <?php foreach (array_slice($cardFeatures, 0, 4) as $feature): ?>
                                     <li><i class="fa-solid fa-check me-2"></i><?= htmlspecialchars($feature) ?></li>
                                 <?php endforeach; ?>
                             </ul>
-                        <?php else: ?>
+                        <?php elseif ($shortFeatureText === ''): ?>
                             <p class="text-muted small mb-3"><i
                                     class="fa-solid <?= htmlspecialchars($product['feature_icon'] ?? 'fa-circle-check') ?> me-1"></i>
                                 <?= htmlspecialchars($product['feature_text'] ?? '') ?></p>
