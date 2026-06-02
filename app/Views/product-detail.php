@@ -1,4 +1,4 @@
-<div class="py-lg-4 pb-5">
+﻿<div class="py-lg-4 pb-5">
     <a href="<?php echo url(); ?>" class="back-link mb-4 d-inline-block text-decoration-none text-dark fw-bold">
         <i class="fa-solid fa-arrow-left me-2"></i> Trở về danh sách
     </a>
@@ -6,8 +6,8 @@
     <div class="product-detail-container">
         <div class="row align-items-center">
             <div class="col-lg-6 mb-4 mb-lg-0 text-center">
-                <img src="<?= htmlspecialchars(image_url($product['image'])) ?>" class="detail-image shadow-sm w-100 rounded-4"
-                    alt="Product" style="height: auto; object-fit: cover; border: 1px solid var(--border-color);">
+                <img src="<?= htmlspecialchars($product['image'] ?? '') ?>" class="detail-image shadow-sm w-100 rounded-4"
+                    alt="<?= htmlspecialchars($product['title'] ?? 'Product') ?>" style="height: auto; object-fit: cover; border: 1px solid var(--border-color);">
 
                 <!-- Trust Badges Under Image -->
                 <div class="trust-badges-container">
