@@ -974,6 +974,24 @@
                                     placeholder="Ví dụ: Cấp tốc 5 phút, Bảo hành trọn đời...">
                             </div>
                             <div class="col-12 mb-3">
+                                <label class="form-label">4 dòng hiển thị trên card sản phẩm</label>
+                                <div class="row g-2">
+                                    <div class="col-md-6">
+                                        <input type="text" class="form-control card-feature-input" id="p_card_feature_1" placeholder="VD: Gateway và Proxy">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <input type="text" class="form-control card-feature-input" id="p_card_feature_2" placeholder="VD: Trí thông minh 1:1">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <input type="text" class="form-control card-feature-input" id="p_card_feature_3" placeholder="VD: Nạp bao nhiêu dùng bấy nhiêu">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <input type="text" class="form-control card-feature-input" id="p_card_feature_4" placeholder="VD: Model Opus 4.7, Sonnet 4.6">
+                                    </div>
+                                </div>
+                                <small class="text-muted d-block mt-1">Chỉ hiển thị ở danh sách sản phẩm. Trang chi tiết không dùng 4 dòng này.</small>
+                            </div>
+                            <div class="col-12 mb-3">
                                 <label class="form-label">Mô tả chi tiết / Nội dung bộ công cụ</label>
                                 <div class="product-detail-toolbar btn-group flex-wrap mb-1" role="toolbar" aria-label="Công cụ định dạng mô tả sản phẩm">
                                     <button type="button" class="btn btn-sm btn-light border icon-only" data-cmd="bold" title="Đậm"><i class="fa-solid fa-bold"></i></button>
@@ -1308,6 +1326,7 @@
             document.getElementById('p_id').value = '';
             document.getElementById('p_image').value = '';
             setProductImagePreview('');
+            document.querySelectorAll('.card-feature-input').forEach(input => input.value = '');
             document.getElementById('p_detail_desc').value = '';
             document.getElementById('p_detail_desc_editor').innerHTML = '';
             document.getElementById('p_seo_slug').value = '';
@@ -1347,6 +1366,10 @@
                 document.getElementById('p_image').value = p.image || '';
                 setProductImagePreview(p.image || '');
                 document.getElementById('p_desc').value = p.feature_text || '';
+                const cardFeatures = Array.isArray(p.card_features) ? p.card_features : [];
+                document.querySelectorAll('.card-feature-input').forEach((input, idx) => {
+                    input.value = cardFeatures[idx] || '';
+                });
                 document.getElementById('p_detail_desc').value = p.description || '';
                 document.getElementById('p_detail_desc_editor').innerHTML = p.description || '';
                 document.getElementById('p_seo_slug').value = p.seo_slug || '';
@@ -1507,6 +1530,9 @@
                 formData.append('image_file', fileInput.files[0]);
             }
             formData.append('desc', document.getElementById('p_desc').value);
+            document.querySelectorAll('.card-feature-input').forEach((input, idx) => {
+                formData.append('card_feature_' + (idx + 1), input.value);
+            });
             document.getElementById('p_detail_desc').value = document.getElementById('p_detail_desc_editor').innerHTML.trim();
             formData.append('description', document.getElementById('p_detail_desc').value);
             formData.append('variants', JSON.stringify(variants));

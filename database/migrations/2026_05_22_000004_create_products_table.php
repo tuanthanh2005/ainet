@@ -12,6 +12,7 @@ return new class {
                 status VARCHAR(50) DEFAULT 'active',
                 image TEXT NULL,
                 feature_text VARCHAR(255) NULL,
+                card_features TEXT NULL,
                 feature_icon VARCHAR(100) NULL,
                 rating DECIMAL(2, 1) DEFAULT 5.0,
                 sold_count INT DEFAULT 0,

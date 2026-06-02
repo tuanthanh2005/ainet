@@ -65,6 +65,6 @@ function image_url($path = '') {
 function asset($path = '') {
     // Dùng đường dẫn gốc từ tên miền để đảm bảo luôn đúng ở mọi trang con
     // Thêm ?v= để xóa cache trình duyệt khi bạn cập nhật code mới
-    $version = '1.3.2'; // Bump khi update CSS/JS để bypass cache trình duyệt
+    $version = '1.3.3'; // Bump khi update CSS/JS để bypass cache trình duyệt
     return url('assets/' . ltrim($path, '/') . '?v=' . $version);
 }

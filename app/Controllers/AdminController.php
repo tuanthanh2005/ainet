@@ -166,6 +166,12 @@ class AdminController extends Controller {
             'status'        => in_array($_POST['status'] ?? '', ['active', 'out_of_stock', 'hidden'], true) ? $_POST['status'] : 'active',
             'image'         => $imageUrl,
             'feature_text'  => $_POST['desc'] ?? '',
+            'card_features' => array_values(array_filter(array_map('trim', [
+                $_POST['card_feature_1'] ?? '',
+                $_POST['card_feature_2'] ?? '',
+                $_POST['card_feature_3'] ?? '',
+                $_POST['card_feature_4'] ?? '',
+            ]), 'strlen')),
             'description'   => $description,
             'feature_icon'  => 'fa-box',
             'rating'        => 5,

@@ -178,6 +178,22 @@ body {
 .sold-text {
     color: var(--mid-gray) !important;
 }
+.product-card-features {
+    display: grid;
+    gap: 4px;
+    line-height: 1.35;
+}
+.product-card-features li {
+    display: flex;
+    align-items: flex-start;
+    min-width: 0;
+}
+.product-card-features i {
+    color: #ec4899;
+    font-size: 0.68rem;
+    line-height: 1.35rem;
+    flex: 0 0 auto;
+}
 
 /* Buttons */
 .btn-buy {

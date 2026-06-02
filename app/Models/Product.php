@@ -1,47 +1,71 @@
 <?php
 
 class Product {
+    private static function ensureCardFeaturesColumn(PDO $db): void {
+        static $done = false;
+        if ($done) return;
+        $done = true;
+
+        try {
+            $db->exec("ALTER TABLE products ADD COLUMN card_features TEXT NULL AFTER feature_text");
+        } catch (Throwable $ignored) {
+        }
+    }
+
+    private static function decodeProduct(&$product): void {
+        if (isset($product['options']) && is_string($product['options'])) {
+            $decoded = json_decode($product['options'], true);
+            $product['options'] = is_array($decoded) ? $decoded : [];
+        }
+
+        if (isset($product['card_features']) && is_string($product['card_features'])) {
+            $decoded = json_decode($product['card_features'], true);
+            $product['card_features'] = is_array($decoded) ? array_values(array_filter($decoded, 'strlen')) : [];
+        } elseif (!isset($product['card_features']) || !is_array($product['card_features'])) {
+            $product['card_features'] = [];
+        }
+    }
+
     public static function getAll() {
         $db = Database::getInstance();
+        self::ensureCardFeaturesColumn($db);
         $stmt = $db->query("SELECT *, category_name AS category FROM products ORDER BY created_at DESC");
         $products = $stmt->fetchAll();
-        
+
         foreach ($products as &$product) {
-            if (isset($product['options'])) {
-                $product['options'] = json_decode($product['options'], true);
-            }
+            self::decodeProduct($product);
         }
+        unset($product);
         return $products;
     }
 
     public static function getById($id) {
         $db = Database::getInstance();
+        self::ensureCardFeaturesColumn($db);
         $stmt = $db->prepare("SELECT *, category_name AS category FROM products WHERE id = ?");
         $stmt->execute([$id]);
         $product = $stmt->fetch();
-        
-        if ($product && isset($product['options'])) {
-            $product['options'] = json_decode($product['options'], true);
+
+        if ($product) {
+            self::decodeProduct($product);
         }
         return $product;
     }
 
     public static function getBySlugOrId($slugOrId) {
         $db = Database::getInstance();
+        self::ensureCardFeaturesColumn($db);
         $slugOrId = trim(rawurldecode((string) $slugOrId));
-        
-        // Backward compatibility: check if it ends with legacy id format e.g. -prod_123
+
         $id = '';
         if (preg_match('/-(prod_[A-Za-z0-9_]+|\d+)$/', $slugOrId, $m)) {
             $id = $m[1];
         }
-        
+
         $stmt = $db->prepare("SELECT *, category_name AS category FROM products WHERE seo_slug = ? OR id = ? OR (? != '' AND id = ?)");
         $stmt->execute([$slugOrId, $slugOrId, $id, $id]);
         $product = $stmt->fetch();
-        
-        // Fallback to generated URL slugs. This supports old URLs without ids and
-        // new stable URLs where the product id is appended after the SEO/title slug.
+
         if (!$product) {
             $products = self::getAll();
             foreach ($products as $p) {
@@ -56,21 +80,20 @@ class Product {
                 }
             }
         }
-        
-        if ($product && isset($product['options'])) {
-            if (is_string($product['options'])) {
-                $product['options'] = json_decode($product['options'], true);
-            }
+
+        if ($product) {
+            self::decodeProduct($product);
         }
         return $product ?: null;
     }
 
     public static function saveAll($products) {
         $db = Database::getInstance();
-        $db->exec("DELETE FROM products"); // Đơn giản cho dashboard hiện tại
-        
-        $stmt = $db->prepare("INSERT INTO products (id, title, category_slug, category_name, price, status, image, feature_text, feature_icon, rating, sold_count, badge, description, options, is_upgrade, seo_title, seo_description, seo_keywords, seo_slug) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
-        
+        self::ensureCardFeaturesColumn($db);
+        $db->exec("DELETE FROM products");
+
+        $stmt = $db->prepare("INSERT INTO products (id, title, category_slug, category_name, price, status, image, feature_text, card_features, feature_icon, rating, sold_count, badge, description, options, is_upgrade, seo_title, seo_description, seo_keywords, seo_slug) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+
         foreach ($products as $p) {
             $stmt->execute([
                 $p['id'],
@@ -81,6 +104,7 @@ class Product {
                 $p['status'] ?? 'active',
                 $p['image'] ?? '',
                 $p['feature_text'] ?? '',
+                isset($p['card_features']) ? json_encode(array_values(array_filter((array) $p['card_features'], 'strlen')), JSON_UNESCAPED_UNICODE) : '[]',
                 $p['feature_icon'] ?? 'fa-box',
                 $p['rating'] ?? 5,
                 $p['sold_count'] ?? 0,
