@@ -281,8 +281,10 @@
                         <?php endif; ?>
                         <div class="mt-auto">
                             <?php
-                                $cardOrig = (float) ($product['options'][0]['original_price'] ?? $product['original_price'] ?? 0);
                                 $cardPrice = (float) ($product['options'][0]['price'] ?? $product['price'] ?? 0);
+                                $variantOrig = (float) ($product['options'][0]['original_price'] ?? 0);
+                                $productOrig = (float) ($product['original_price'] ?? 0);
+                                $cardOrig = $variantOrig > $cardPrice ? $variantOrig : $productOrig;
                                 $cardHasDiscount = $cardOrig > $cardPrice && $cardPrice > 0;
                                 $cardOff = $cardHasDiscount ? round((1 - $cardPrice / $cardOrig) * 100) : 0;
                             ?>
