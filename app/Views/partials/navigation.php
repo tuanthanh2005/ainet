@@ -4,9 +4,9 @@ $activeTab = $tab ?? ($_GET['tab'] ?? 'home');
 if (!in_array($activeTab, ['home', 'products', 'blog'])) {
     $activeTab = 'home';
 }
-$isProductPage = $currentAction === 'index' && ($activeTab === 'products' || $activeTab === 'home');
+$isProductPage = $currentAction === 'index' && $activeTab === 'products';
 ?>
-<div class="navigation-wrapper <?php echo $isProductPage ? 'mb-4 mb-lg-2' : 'mb-4 mb-lg-0'; ?>">
+<div class="navigation-wrapper <?php echo $isProductPage ? 'mb-4 mb-lg-2' : 'mb-0 d-none'; ?>">
     <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-2 border-bottom border-light pb-2 pb-md-0 <?php echo $isProductPage ? 'justify-content-lg-end border-lg-0 pb-lg-0 mb-lg-0' : 'd-none'; ?>">
         <div class="tab-nav flex-grow-1 flex-md-grow-0 d-none">
             <a href="<?php echo url('index.php?tab=home'); ?>"
@@ -25,7 +25,7 @@ $isProductPage = $currentAction === 'index' && ($activeTab === 'products' || $ac
                 Hệ</a>
         </div>
 
-        <?php if ($currentAction === 'index' && ($activeTab === 'products' || $activeTab === 'home')): ?>
+        <?php if ($currentAction === 'index' && $activeTab === 'products'): ?>
             <?php $currentSort = $sort ?? $_GET['sort'] ?? 'newest'; ?>
             <select id="product-sort-select"
                 class="form-select w-auto border-0 bg-transparent fw-semibold shadow-none cursor-pointer ms-auto"
