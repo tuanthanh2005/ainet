@@ -14,6 +14,33 @@ class Blog {
         return $stmt->fetch() ?: null;
     }
 
+    public static function getBySlugOrId($slugOrId) {
+        $db = Database::getInstance();
+        
+        // Backward compatibility: check if it ends with legacy id format e.g. -123
+        $id = '';
+        if (preg_match('/-([A-Za-z0-9_]+)$/', $slugOrId, $m)) {
+            $id = $m[1];
+        }
+        
+        $stmt = $db->prepare("SELECT * FROM blogs WHERE seo_slug = ? OR id = ? OR (? !== '' AND id = ?)");
+        $stmt->execute([$slugOrId, $slugOrId, $id, $id]);
+        $blog = $stmt->fetch();
+        
+        // Fallback to title-based slug
+        if (!$blog) {
+            $blogs = self::getAll();
+            foreach ($blogs as $b) {
+                $titleSlug = Seo::slugify($b['title'] ?? '');
+                if ($titleSlug === $slugOrId) {
+                    return $b;
+                }
+            }
+        }
+        
+        return $blog ?: null;
+    }
+
     public static function saveAll($blogs) {
         $db = Database::getInstance();
         $db->exec("TRUNCATE TABLE blogs");

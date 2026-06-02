@@ -150,7 +150,7 @@ if ($rawUrl !== '' && empty($_GET['action'])) {
         case 'san-pham':
             if ($second !== '') {
                 $_GET['action'] = 'productDetail';
-                $_GET['id']     = Url::extractId($second);
+                $_GET['id']     = $second;
             }
             break;
         case 'danh-muc':
@@ -163,7 +163,7 @@ if ($rawUrl !== '' && empty($_GET['action'])) {
         case 'tap-chi':
             if ($second !== '') {
                 $_GET['action'] = 'blogDetail';
-                $_GET['id']     = Url::extractId($second);
+                $_GET['id']     = $second;
             } else {
                 $_GET['action'] = 'index';
                 $_GET['tab']    = 'blog';

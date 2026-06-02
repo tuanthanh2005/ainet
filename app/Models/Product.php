@@ -26,6 +26,38 @@ class Product {
         return $product;
     }
 
+    public static function getBySlugOrId($slugOrId) {
+        $db = Database::getInstance();
+        
+        // Backward compatibility: check if it ends with legacy id format e.g. -prod_123
+        $id = '';
+        if (preg_match('/-([A-Za-z0-9_]+)$/', $slugOrId, $m)) {
+            $id = $m[1];
+        }
+        
+        $stmt = $db->prepare("SELECT *, category_name AS category FROM products WHERE seo_slug = ? OR id = ? OR (? !== '' AND id = ?)");
+        $stmt->execute([$slugOrId, $slugOrId, $id, $id]);
+        $product = $stmt->fetch();
+        
+        // Fallback to title-based slug
+        if (!$product) {
+            $products = self::getAll();
+            foreach ($products as $p) {
+                $titleSlug = Seo::slugify($p['title'] ?? '');
+                if ($titleSlug === $slugOrId) {
+                    return $p;
+                }
+            }
+        }
+        
+        if ($product && isset($product['options'])) {
+            if (is_string($product['options'])) {
+                $product['options'] = json_decode($product['options'], true);
+            }
+        }
+        return $product ?: null;
+    }
+
     public static function saveAll($products) {
         $db = Database::getInstance();
         $db->exec("DELETE FROM products"); // Đơn giản cho dashboard hiện tại

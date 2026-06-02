@@ -6,9 +6,7 @@ class Url {
         if ($slug === '') {
             $slug = Seo::slugify($product['title'] ?? 'san-pham');
         }
-        $id   = $product['id'] ?? '';
-        $tail = $slug ? ($slug . '-' . $id) : $id;
-        return url('san-pham/' . $tail);
+        return url('san-pham/' . $slug);
     }
 
     public static function blog(array $blog): string {
@@ -16,9 +14,7 @@ class Url {
         if ($slug === '') {
             $slug = Seo::slugify($blog['title'] ?? 'bai-viet');
         }
-        $id   = $blog['id'] ?? '';
-        $tail = $slug ? ($slug . '-' . $id) : $id;
-        return url('tap-chi/' . $tail);
+        return url('tap-chi/' . $slug);
     }
 
     public static function category(string $slug): string {

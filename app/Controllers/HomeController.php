@@ -154,7 +154,7 @@ class HomeController extends Controller {
 
     public function blogDetail() {
         $id = $_GET['id'] ?? null;
-        $blog = $id ? Blog::getById($id) : null;
+        $blog = $id ? Blog::getBySlugOrId($id) : null;
 
         if (!$blog) {
             http_response_code(404);
@@ -215,7 +215,7 @@ class HomeController extends Controller {
             exit;
         }
 
-        $product = Product::getById($id);
+        $product = Product::getBySlugOrId($id);
         $settings = $this->settings;
 
         if (!$product) {
