@@ -1,6 +1,7 @@
 # Database & Sensitive
 config/config.php
 data/*.json
+.env
 
 # Logs
 *.log
