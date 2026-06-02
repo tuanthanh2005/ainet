@@ -676,22 +676,19 @@ class HomeController extends Controller {
         if (!isset($_SESSION['cart'])) {
             $_SESSION['cart'] = [];
         }
+        $cartItem = $this->buildCartItem($product, $variantIdx, 1);
         $found = false;
         foreach ($_SESSION['cart'] as &$item) {
-            if ($item['id'] == $productId) {
+            if (($item['id'] ?? '') == $productId && (int) ($item['variant_idx'] ?? 0) === $cartItem['variant_idx']) {
                 $item['quantity']++;
+                $item = array_merge($item, array_diff_key($cartItem, ['quantity' => true]));
                 $found = true;
                 break;
             }
         }
+        unset($item);
         if (!$found) {
-            $_SESSION['cart'][] = [
-                'id' => $product['id'],
-                'title' => $product['title'],
-                'price' => $product['price'],
-                'image' => $product['image'],
-                'quantity' => 1
-            ];
+            $_SESSION['cart'][] = $cartItem;
         }
         $_SESSION['flash_success'] = "Đã thêm " . $product['title'] . " vào giỏ hàng.";
         header('Location: ' . url('index.php?action=cart'));
@@ -700,6 +697,7 @@ class HomeController extends Controller {
 
     public function addToCart() {
         $productId = $_GET['id'] ?? '';
+        $variantIdx = (int) ($_GET['variant_idx'] ?? 0);
         if (!$productId) {
             $_SESSION['flash_error'] = 'Sản phẩm không hợp lệ.';
             header('Location: ' . (empty($_SERVER['HTTP_REFERER']) ? url() : $_SERVER['HTTP_REFERER']));
@@ -717,23 +715,20 @@ class HomeController extends Controller {
             $_SESSION['cart'] = [];
         }
 
+        $cartItem = $this->buildCartItem($product, $variantIdx, 1);
         $found = false;
         foreach ($_SESSION['cart'] as &$item) {
-            if ($item['id'] == $productId) {
+            if (($item['id'] ?? '') == $productId && (int) ($item['variant_idx'] ?? 0) === $cartItem['variant_idx']) {
                 $item['quantity']++;
+                $item = array_merge($item, array_diff_key($cartItem, ['quantity' => true]));
                 $found = true;
                 break;
             }
         }
+        unset($item);
 
         if (!$found) {
-            $_SESSION['cart'][] = [
-                'id' => $product['id'],
-                'title' => $product['title'],
-                'price' => $product['price'],
-                'image' => $product['image'],
-                'quantity' => 1
-            ];
+            $_SESSION['cart'][] = $cartItem;
         }
 
         $_SESSION['flash_success'] = "Đã thêm " . $product['title'] . " vào giỏ hàng.";
@@ -742,7 +737,8 @@ class HomeController extends Controller {
     }
 
     public function cart() {
-        $cart = $_SESSION['cart'] ?? [];
+        $cart = $this->refreshCartPrices($_SESSION['cart'] ?? []);
+        $_SESSION['cart'] = $cart;
         $total = 0;
         foreach ($cart as $item) {
             $total += $item['price'] * $item['quantity'];
@@ -765,10 +761,12 @@ class HomeController extends Controller {
 
     public function removeFromCart() {
         $productId = $_GET['id'] ?? '';
+        $variantIdx = isset($_GET['variant_idx']) ? (int) $_GET['variant_idx'] : null;
         if (isset($_SESSION['cart'])) {
             $found = false;
             foreach ($_SESSION['cart'] as $key => $item) {
-                if ($item['id'] == $productId) {
+                $sameVariant = $variantIdx === null || (int) ($item['variant_idx'] ?? 0) === $variantIdx;
+                if (($item['id'] ?? '') == $productId && $sameVariant) {
                     $found = true;
                     $_SESSION['flash_success'] = 'Đã xóa "' . $item['title'] . '" khỏi giỏ hàng.';
                     unset($_SESSION['cart'][$key]);
@@ -788,12 +786,14 @@ class HomeController extends Controller {
 
     public function updateCartQuantity() {
         $productId = $_GET['id'] ?? '';
+        $variantIdx = isset($_GET['variant_idx']) ? (int) $_GET['variant_idx'] : null;
         $change = (int)($_GET['change'] ?? 0);
         
         if (isset($_SESSION['cart']) && $productId !== '') {
             $found = false;
             foreach ($_SESSION['cart'] as $key => &$item) {
-                if ($item['id'] == $productId) {
+                $sameVariant = $variantIdx === null || (int) ($item['variant_idx'] ?? 0) === $variantIdx;
+                if (($item['id'] ?? '') == $productId && $sameVariant) {
                     $found = true;
                     $item['quantity'] += $change;
                     if ($item['quantity'] <= 0) {
@@ -815,6 +815,39 @@ class HomeController extends Controller {
 
         header('Location: ' . url('index.php?action=cart'));
         exit;
+    }
+
+    private function buildCartItem(array $product, int $variantIdx = 0, int $quantity = 1): array {
+        $options = is_array($product['options'] ?? null) ? $product['options'] : [];
+        if (!isset($options[$variantIdx])) {
+            $variantIdx = 0;
+        }
+        $variant = $options[$variantIdx] ?? [];
+        $price = (float) ($variant['price'] ?? $product['price'] ?? 0);
+        $variantName = trim((string) ($variant['name'] ?? ''));
+
+        return [
+            'id' => $product['id'],
+            'variant_idx' => $variantIdx,
+            'variant_name' => $variantName,
+            'title' => $product['title'],
+            'price' => $price,
+            'image' => $product['image'],
+            'quantity' => max(1, $quantity)
+        ];
+    }
+
+    private function refreshCartPrices(array $cart): array {
+        $refreshed = [];
+        foreach ($cart as $item) {
+            $product = Product::getById($item['id'] ?? '');
+            if (!$product) {
+                continue;
+            }
+            $quantity = max(1, (int) ($item['quantity'] ?? 1));
+            $refreshed[] = $this->buildCartItem($product, (int) ($item['variant_idx'] ?? 0), $quantity);
+        }
+        return $refreshed;
     }
 
     // Search Helper Logic

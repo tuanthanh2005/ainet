@@ -27,6 +27,7 @@
                                 </thead>
                                 <tbody>
                                     <?php foreach ($cart as $item): ?>
+                                        <?php $variantIdx = (int) ($item['variant_idx'] ?? 0); ?>
                                         <tr>
                                             <td class="ps-4 py-4 border-0">
                                                 <div class="d-flex align-items-center gap-3">
@@ -39,11 +40,11 @@
                                             </td>
                                             <td class="py-4 border-0 text-center">
                                                 <div class="d-inline-flex align-items-center bg-light rounded-pill p-1">
-                                                    <a class="btn btn-sm btn-light rounded-circle p-0 d-flex align-items-center justify-content-center" style="width: 28px; height: 28px; text-decoration: none;" href="<?= url('index.php?action=updateCartQuantity&id=' . urlencode($item['id']) . '&change=-1') ?>">
+                                                    <a class="btn btn-sm btn-light rounded-circle p-0 d-flex align-items-center justify-content-center" style="width: 28px; height: 28px; text-decoration: none;" href="<?= url('index.php?action=updateCartQuantity&id=' . urlencode($item['id']) . '&variant_idx=' . $variantIdx . '&change=-1') ?>">
                                                         <i class="fa-solid fa-minus fs-xs"></i>
                                                     </a>
                                                     <span class="px-3 fw-bold"><?= $item['quantity'] ?></span>
-                                                    <a class="btn btn-sm btn-light rounded-circle p-0 d-flex align-items-center justify-content-center" style="width: 28px; height: 28px; text-decoration: none;" href="<?= url('index.php?action=updateCartQuantity&id=' . urlencode($item['id']) . '&change=1') ?>">
+                                                    <a class="btn btn-sm btn-light rounded-circle p-0 d-flex align-items-center justify-content-center" style="width: 28px; height: 28px; text-decoration: none;" href="<?= url('index.php?action=updateCartQuantity&id=' . urlencode($item['id']) . '&variant_idx=' . $variantIdx . '&change=1') ?>">
                                                         <i class="fa-solid fa-plus fs-xs"></i>
                                                     </a>
                                                 </div>
@@ -52,7 +53,7 @@
                                                 <?= number_format($item['price'] * $item['quantity'], 0, ',', '.') ?>đ
                                             </td>
                                             <td class="py-4 border-0 text-end pe-4">
-                                                <a href="<?= url('index.php?action=removeFromCart&id=' . $item['id']) ?>" class="text-danger opacity-50 hover-opacity-100 transition-all">
+                                                <a href="<?= url('index.php?action=removeFromCart&id=' . urlencode($item['id']) . '&variant_idx=' . $variantIdx) ?>" class="text-danger opacity-50 hover-opacity-100 transition-all">
                                                     <i class="fa-solid fa-trash-can"></i>
                                                 </a>
                                             </td>
@@ -78,7 +79,7 @@
                         
                         <div class="d-grid gap-2">
                             <?php foreach ($cart as $item): ?>
-                                <a href="<?= url('index.php?action=checkoutPage&product_id=' . $item['id'] . '&variant_idx=0') ?>" class="btn btn-dark py-3 rounded-3 d-flex justify-content-between align-items-center px-4" data-auth-required="true">
+                                <a href="<?= url('index.php?action=checkoutPage&product_id=' . urlencode($item['id']) . '&variant_idx=' . (int) ($item['variant_idx'] ?? 0)) ?>" class="btn btn-dark py-3 rounded-3 d-flex justify-content-between align-items-center px-4" data-auth-required="true">
                                     <span>Mua ngay <?= htmlspecialchars($item['title']) ?></span>
                                     <i class="fa-solid fa-chevron-right fs-small"></i>
                                 </a>
