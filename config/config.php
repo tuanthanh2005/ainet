@@ -28,6 +28,11 @@ define('SESSION_LIFETIME_DAYS', (int) (getenv('SESSION_LIFETIME_DAYS') ?: 365));
 define('APP_ENV', getenv('APP_ENV') ?: 'production');
 define('APP_DEBUG', filter_var(getenv('APP_DEBUG') ?: 'false', FILTER_VALIDATE_BOOLEAN));
 
+// Google OAuth Configuration
+define('GOOGLE_CLIENT_ID', getenv('GOOGLE_CLIENT_ID') ?: '');
+define('GOOGLE_CLIENT_SECRET', getenv('GOOGLE_CLIENT_SECRET') ?: '');
+define('GOOGLE_REDIRECT_URI', getenv('GOOGLE_REDIRECT_URI') ?: '');
+
 // Path Helpers
 function base_path($path = '') {
     return __DIR__ . '/../' . ltrim($path, '/');
