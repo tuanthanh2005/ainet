@@ -53,7 +53,7 @@
         <div class="container">
             <div class="row align-items-center">
                 <div class="col-6 col-lg-2">
-                    <a href="<?php echo url(); ?>" class="text-decoration-none text-dark fs-4 fw-bold logo-premium"
+                    <a href="<?php echo url(); ?>" class="text-decoration-none text-dark fs-4 fw-bold"
                         style="letter-spacing: -1px; white-space: nowrap;">
                         <i class="fa-solid fa-circle-nodes me-1"></i>AI<span class="text-muted fw-light">CỦA TÔI</span>
                     </a>
@@ -133,7 +133,7 @@
                                 </ul>
                             </div>
                         <?php else: ?>
-                            <button type="button" class="header-link btn btn-link p-0 border-0 shadow-none text-secondary" style="text-decoration:none;" data-bs-toggle="modal" data-bs-target="#loginModal">Đăng nhập</button>
+                            <button type="button" class="header-link btn btn-link p-0 border-0 shadow-none" style="text-decoration:none;" data-bs-toggle="modal" data-bs-target="#loginModal">Đăng nhập</button>
                             <button type="button" class="header-link fw-bold text-dark btn btn-link p-0 border-0 shadow-none" style="text-decoration:none;" data-bs-toggle="modal" data-bs-target="#registerModal">Đăng ký</button>
                         <?php endif; ?>
                     </div>
@@ -206,7 +206,92 @@
         $flashSuccessJs = $flashSuccess ? json_encode(htmlspecialchars($flashSuccess, ENT_QUOTES, 'UTF-8')) : 'null';
         $flashErrorJs   = $flashError   ? json_encode(htmlspecialchars($flashError,   ENT_QUOTES, 'UTF-8')) : 'null';
         ?>
-        
+        <?php if ((!isset($view) || $view === 'home') && empty($searchQuery) && ($tab ?? 'home') === 'home'): ?>
+            <!-- Hero Section with AI Banner -->
+            <div class="hero-section mb-5 rounded-4 overflow-hidden position-relative p-4 p-lg-5 shadow-sm text-white">
+                <!-- Glowing background circles -->
+                <div class="position-absolute rounded-circle" style="width: 250px; height: 250px; background: rgba(99, 102, 241, 0.15); filter: blur(50px); top: -50px; right: -50px; pointer-events: none;"></div>
+                <div class="position-absolute rounded-circle" style="width: 300px; height: 300px; background: rgba(168, 85, 247, 0.15); filter: blur(60px); bottom: -100px; left: -100px; pointer-events: none;"></div>
+                
+                <div class="row align-items-center position-relative" style="z-index: 1;">
+                    <div class="col-lg-6 mb-4 mb-lg-0">
+                        <div class="d-inline-flex align-items-center gap-2 px-3 py-1.5 rounded-pill mb-3" style="background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); font-size: 0.8rem;">
+                            <span class="d-inline-block rounded-circle bg-success" style="width: 8px; height: 8px; animation: pulse-green 2s infinite;"></span>
+                            <span class="fw-medium text-light" style="letter-spacing: 0.5px;">CỬA HÀNG AI & PREMIUM TỰ ĐỘNG 24/7</span>
+                        </div>
+                        <h1 class="display-5 fw-bold mb-3 lh-sm header-gradient">
+                            Nâng tầm hiệu suất với <span style="background: linear-gradient(to right, #6366f1, #a855f7); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Công nghệ AI</span>
+                        </h1>
+                        <p class="lead text-light opacity-75 mb-4 fs-6" style="max-width: 520px; line-height: 1.6;">
+                            Cung cấp tài khoản ChatGPT Plus, Gemini Advanced, API Keys, Copilot, Youtube Premium, Canva Pro chính hãng giá rẻ nhất thị trường. Giao hàng tự động, bảo hành 1 đổi 1 nhanh chóng.
+                        </p>
+                        <div class="d-flex flex-wrap gap-3">
+                            <a href="#products-section" class="btn btn-primary rounded-pill px-4 py-2.5 fw-bold shadow-sm border-0" style="background: linear-gradient(135deg, #6366f1, #a855f7);">
+                                <i class="fa-solid fa-fire me-2"></i>Mua ngay
+                            </a>
+                            <a href="https://t.me/specademy" target="_blank" class="btn btn-outline-light rounded-pill px-4 py-2.5 fw-bold border-secondary">
+                                <i class="fa-brands fa-telegram me-2 text-info"></i>Liên hệ Admin
+                            </a>
+                        </div>
+                        
+                        <!-- Mini features list -->
+                        <div class="row g-2 mt-4 pt-3 border-top border-secondary border-opacity-25 text-start">
+                            <div class="col-6 col-sm-4 d-flex align-items-center gap-2">
+                                <i class="fa-solid fa-bolt text-warning"></i>
+                                <span class="small text-light opacity-75">Tự động 5s</span>
+                            </div>
+                            <div class="col-6 col-sm-4 d-flex align-items-center gap-2">
+                                <i class="fa-solid fa-shield-halved text-success"></i>
+                                <span class="small text-light opacity-75">Bảo hành 1:1</span>
+                            </div>
+                            <div class="col-12 col-sm-4 d-flex align-items-center gap-2">
+                                <i class="fa-solid fa-headset text-info"></i>
+                                <span class="small text-light opacity-75">Hỗ trợ 24/7</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-lg-6 text-center">
+                        <div class="hero-icons-scene">
+                            <!-- Glowing center orb -->
+                            <div class="center-glow-orb">
+                                <i class="fa-solid fa-brain"></i>
+                            </div>
+                            
+                            <!-- Floating interactive AI/brand icons -->
+                            <div class="floating-icon icon-gpt" onclick="location.href='#products-section'">
+                                <i class="fa-solid fa-microchip"></i>
+                                <span>ChatGPT</span>
+                            </div>
+                            <div class="floating-icon icon-gemini" onclick="location.href='#products-section'">
+                                <i class="fa-brands fa-google"></i>
+                                <span>Gemini</span>
+                            </div>
+                            <div class="floating-icon icon-copilot" onclick="location.href='#products-section'">
+                                <i class="fa-solid fa-code"></i>
+                                <span>Copilot</span>
+                            </div>
+                            <div class="floating-icon icon-mj" onclick="location.href='#products-section'">
+                                <i class="fa-solid fa-wand-magic-sparkles"></i>
+                                <span>Midjourney</span>
+                            </div>
+                            <div class="floating-icon icon-claude" onclick="location.href='#products-section'">
+                                <i class="fa-solid fa-robot"></i>
+                                <span>Claude AI</span>
+                            </div>
+                            <div class="floating-icon icon-yt" onclick="location.href='#products-section'">
+                                <i class="fa-brands fa-youtube"></i>
+                                <span>YouTube</span>
+                            </div>
+                            <div class="floating-icon icon-netflix" onclick="location.href='#products-section'">
+                                <i class="fa-solid fa-film"></i>
+                                <span>Netflix</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        <?php endif; ?>
         <?php
         // Navigation Tab Component
         require_once 'partials/navigation.php';
