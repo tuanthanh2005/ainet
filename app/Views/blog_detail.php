@@ -92,7 +92,7 @@ $blogDesc  = $hasBlog ? ($blog['description'] ?? '') : '';
                                     <?= htmlspecialchars($product['badge']) ?>
                                 </span>
                             <?php endif; ?>
-                            <img src="<?= htmlspecialchars($product['image'] ?? '') ?>" class="card-img-top"
+                            <img src="<?= htmlspecialchars(image_url($product['image'] ?? '')) ?>" class="card-img-top"
                                  alt="<?= htmlspecialchars($product['title'] ?? '') ?>"
                                  style="height: 180px; object-fit: cover; border-radius: 12px 12px 0 0;">
                             <div class="card-body p-3">
@@ -156,7 +156,7 @@ $blogDesc  = $hasBlog ? ($blog['description'] ?? '') : '';
                 </h1>
 
                 <?php if ($blogImage): ?>
-                    <img src="<?= htmlspecialchars($blogImage) ?>"
+                    <img src="<?= htmlspecialchars(image_url($blogImage)) ?>"
                          alt="<?= htmlspecialchars($blogTitle) ?>"
                          class="img-fluid rounded-4 mb-5 w-100 shadow-sm"
                          style="object-fit: cover; max-height: 450px;">
