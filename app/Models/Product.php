@@ -30,7 +30,7 @@ class Product {
         $db = Database::getInstance();
         $db->exec("DELETE FROM products"); // Đơn giản cho dashboard hiện tại
         
-        $stmt = $db->prepare("INSERT INTO products (id, title, category_slug, category_name, price, status, image, feature_text, feature_icon, rating, sold_count, badge, description, options, is_upgrade, seo_title, seo_description, seo_keywords, seo_slug) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        $stmt = $db->prepare("INSERT INTO products (id, title, category_slug, category_name, price, status, image, feature_text, feature_icon, rating, sold_count, badge, description, options, is_upgrade) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
         
         foreach ($products as $p) {
             $stmt->execute([
@@ -48,11 +48,7 @@ class Product {
                 $p['badge'] ?? null,
                 $p['description'] ?? '',
                 isset($p['options']) ? json_encode($p['options'], JSON_UNESCAPED_UNICODE) : '[]',
-                $p['is_upgrade'] ?? 0,
-                $p['seo_title'] ?? null,
-                $p['seo_description'] ?? null,
-                $p['seo_keywords'] ?? null,
-                $p['seo_slug'] ?? null
+                $p['is_upgrade'] ?? 0
             ]);
         }
     }
