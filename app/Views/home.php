@@ -289,13 +289,13 @@
                                 $cardOff = $cardHasDiscount ? round((1 - $cardPrice / $cardOrig) * 100) : 0;
                             ?>
                             <?php if ($cardHasDiscount): ?>
-                                <div class="d-flex align-items-baseline gap-2 mb-1">
+                                <div class="d-flex align-items-baseline flex-wrap gap-2 mb-3">
                                     <p class="product-price mb-0"><?= number_format($cardPrice, 0, ',', '.') ?>đ</p>
                                     <span class="badge bg-danger"><?= '-' . $cardOff . '%' ?></span>
+                                    <span class="text-muted text-decoration-line-through small" style="line-height:1;">
+                                        <?= number_format($cardOrig, 0, ',', '.') ?>đ
+                                    </span>
                                 </div>
-                                <p class="text-muted text-decoration-line-through small mb-3" style="line-height:1;">
-                                    <?= number_format($cardOrig, 0, ',', '.') ?>đ
-                                </p>
                             <?php else: ?>
                                 <p class="product-price mb-3"><?= number_format($cardPrice, 0, ',', '.') ?>đ</p>
                             <?php endif; ?>
