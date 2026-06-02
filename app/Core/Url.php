@@ -6,7 +6,11 @@ class Url {
         if ($slug === '') {
             $slug = Seo::slugify($product['title'] ?? 'san-pham');
         }
-        return url('san-pham/' . $slug);
+        $id = trim((string) ($product['id'] ?? ''));
+        if ($id !== '' && substr($slug, -strlen('-' . $id)) !== '-' . $id) {
+            $slug .= '-' . $id;
+        }
+        return url('san-pham/' . rawurlencode($slug));
     }
 
     public static function blog(array $blog): string {

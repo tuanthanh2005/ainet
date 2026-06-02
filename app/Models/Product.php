@@ -28,10 +28,11 @@ class Product {
 
     public static function getBySlugOrId($slugOrId) {
         $db = Database::getInstance();
+        $slugOrId = trim(rawurldecode((string) $slugOrId));
         
         // Backward compatibility: check if it ends with legacy id format e.g. -prod_123
         $id = '';
-        if (preg_match('/-([A-Za-z0-9_]+)$/', $slugOrId, $m)) {
+        if (preg_match('/-(prod_[A-Za-z0-9_]+|\d+)$/', $slugOrId, $m)) {
             $id = $m[1];
         }
         
@@ -39,12 +40,18 @@ class Product {
         $stmt->execute([$slugOrId, $slugOrId, $id, $id]);
         $product = $stmt->fetch();
         
-        // Fallback to title-based slug
+        // Fallback to generated URL slugs. This supports old URLs without ids and
+        // new stable URLs where the product id is appended after the SEO/title slug.
         if (!$product) {
             $products = self::getAll();
             foreach ($products as $p) {
                 $titleSlug = Seo::slugify($p['title'] ?? '');
-                if ($titleSlug === $slugOrId) {
+                $seoSlug = trim((string) ($p['seo_slug'] ?? ''));
+                $baseSlug = $seoSlug !== '' ? $seoSlug : $titleSlug;
+                $productId = trim((string) ($p['id'] ?? ''));
+                $stableSlug = $productId !== '' ? ($baseSlug . '-' . $productId) : $baseSlug;
+
+                if ($titleSlug === $slugOrId || $seoSlug === $slugOrId || $stableSlug === $slugOrId) {
                     return $p;
                 }
             }

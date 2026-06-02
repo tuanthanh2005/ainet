@@ -3,6 +3,16 @@
         <i class="fa-solid fa-arrow-left me-2"></i> Trở về danh sách
     </a>
 
+    <?php if (empty($product)): ?>
+        <div class="product-detail-container text-center py-5">
+            <h1 class="fw-bold text-dark mb-3" style="font-size: 1.7rem;">Sản phẩm không tồn tại</h1>
+            <p class="text-muted mb-4">Sản phẩm này có thể đã bị xóa, đổi đường dẫn hoặc đang bị ẩn.</p>
+            <a href="<?php echo url('index.php?tab=products'); ?>" class="btn btn-buy px-4 py-3 rounded-pill">
+                Xem danh sách sản phẩm
+            </a>
+        </div>
+    <?php return; endif; ?>
+
     <div class="product-detail-container">
         <div class="row align-items-center">
             <div class="col-lg-6 mb-4 mb-lg-0 text-center">
