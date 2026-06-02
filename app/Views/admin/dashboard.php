@@ -945,6 +945,29 @@
                                 <textarea class="d-none" id="p_detail_desc"></textarea>
                             </div>
 
+                            <div class="col-12 mb-3 border-top pt-3">
+                                <h6 class="fw-bold text-primary mb-3"><i class="fa-solid fa-magnifying-glass me-1"></i> Cấu hình SEO tối ưu Google</h6>
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">SEO Slug (Đường dẫn thân thiện)</label>
+                                        <input type="text" class="form-control" id="p_seo_slug" placeholder="VD: mua-tai-khoan-chatgpt-plus">
+                                        <small class="text-muted">Để trống để tự động tạo từ tên sản phẩm.</small>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">SEO Title (Tiêu đề Google)</label>
+                                        <input type="text" class="form-control" id="p_seo_title" placeholder="Từ 50-60 ký tự">
+                                    </div>
+                                    <div class="col-12 mb-3">
+                                        <label class="form-label">SEO Description (Mô tả Google)</label>
+                                        <textarea class="form-control" id="p_seo_description" rows="2" placeholder="Tóm tắt nội dung khi tìm kiếm trên Google (từ 150-160 ký tự)"></textarea>
+                                    </div>
+                                    <div class="col-12 mb-3">
+                                        <label class="form-label">SEO Keywords (Từ khóa Google)</label>
+                                        <input type="text" class="form-control" id="p_seo_keywords" placeholder="Ví dụ: mua chatgpt, tai khoan gpt gia re (cách nhau bằng dấu phẩy)">
+                                    </div>
+                                </div>
+                            </div>
+
                             <div class="col-12">
                                 <div class="d-flex justify-content-between align-items-center mb-2">
                                     <label class="form-label mb-0">Các loại / Gói dịch vụ (Variants)</label>
@@ -1017,12 +1040,89 @@
         function getBlogModal()    { return blogModal    ||= new bootstrap.Modal(document.getElementById('blogModal')); }
         function getStockModal()   { return stockModal   ||= new bootstrap.Modal(document.getElementById('stockModal')); }
 
+        function slugifyVietnamese(text) {
+            text = String(text);
+            const map = [
+                'á','à','ả','ã','ạ','ă','ắ','ằ','ẳ','ẵ','ặ','â','ấ','ầ','ẩ','ẫ','ậ',
+                'đ',
+                'é','è','ẻ','ẽ','ẹ','ê','ế','ề','ể','ễ','ệ',
+                'í','ì','ỉ','ĩ','ị',
+                'ó','ò','ỏ','õ','ọ','ô','ố','ồ','ổ','ỗ','ộ','ơ','ớ','ờ','ở','ỡ','ợ',
+                'ú','ù','ủ','ũ','ụ','ư','ứ','ừ','ử','ữ','ự',
+                'ý','ỳ','ỷ','ỹ','ỵ'
+            ];
+            const rep = [
+                'a','a','a','a','a','a','a','a','a','a','a','a','a','a','a','a','a',
+                'd',
+                'e','e','e','e','e','e','e','e','e','e','e',
+                'i','i','i','i','i',
+                'o','o','o','o','o','o','o','o','o','o','o','o','o','o','o','o','o',
+                'u','u','u','u','u','u','u','u','u','u','u',
+                'y','y','y','y','y'
+            ];
+            text = text.toLowerCase();
+            for (let i = 0; i < map.length; i++) {
+                text = text.replace(new RegExp(map[i], 'g'), rep[i]);
+            }
+            return text.replace(/[^a-z0-9\-]+/g, '-')
+                       .replace(/-+/g, '-')
+                       .replace(/^-|-$/g, '');
+        }
+
         document.addEventListener("DOMContentLoaded", () => {
             renderCategoriesSelect();
             renderCategoriesTable();
             renderProducts();
             renderOrders();
             renderBlogsTable();
+
+            // Auto slugification listeners
+            const pTitle = document.getElementById('p_title');
+            const pSeoSlug = document.getElementById('p_seo_slug');
+            if (pTitle && pSeoSlug) {
+                pTitle.addEventListener('input', () => {
+                    const id = document.getElementById('p_id').value;
+                    if (!id && !pSeoSlug.dataset.manual) {
+                        pSeoSlug.value = slugifyVietnamese(pTitle.value);
+                    }
+                });
+                pSeoSlug.addEventListener('input', () => {
+                    pSeoSlug.dataset.manual = 'true';
+                });
+            }
+
+            const catName = document.getElementById('cat_name');
+            const catSlug = document.getElementById('cat_slug');
+            const catSeoSlug = document.getElementById('cat_seo_slug');
+            if (catName && catSlug && catSeoSlug) {
+                catName.addEventListener('input', () => {
+                    const id = document.getElementById('cat_id').value;
+                    if (!id) {
+                        const slug = slugifyVietnamese(catName.value);
+                        catSlug.value = slug;
+                        if (!catSeoSlug.dataset.manual) {
+                            catSeoSlug.value = slug;
+                        }
+                    }
+                });
+                catSeoSlug.addEventListener('input', () => {
+                    catSeoSlug.dataset.manual = 'true';
+                });
+            }
+
+            const blogTitle = document.getElementById('blog_title');
+            const blogSeoSlug = document.getElementById('blog_seo_slug');
+            if (blogTitle && blogSeoSlug) {
+                blogTitle.addEventListener('input', () => {
+                    const id = document.getElementById('blog_id').value;
+                    if (!id && !blogSeoSlug.dataset.manual) {
+                        blogSeoSlug.value = slugifyVietnamese(blogTitle.value);
+                    }
+                });
+                blogSeoSlug.addEventListener('input', () => {
+                    blogSeoSlug.dataset.manual = 'true';
+                });
+            }
         });
 
         function switchView(viewId, el) {
@@ -1115,6 +1215,10 @@
             document.getElementById('p_id').value = '';
             document.getElementById('p_detail_desc').value = '';
             document.getElementById('p_detail_desc_editor').innerHTML = '';
+            document.getElementById('p_seo_slug').value = '';
+            document.getElementById('p_seo_title').value = '';
+            document.getElementById('p_seo_description').value = '';
+            document.getElementById('p_seo_keywords').value = '';
             document.getElementById('modalTitle').innerText = "Thêm Sản phẩm mới";
             renderVariants([]);
             getProductModal().show();
@@ -1149,6 +1253,10 @@
                 document.getElementById('p_desc').value = p.feature_text || '';
                 document.getElementById('p_detail_desc').value = p.description || '';
                 document.getElementById('p_detail_desc_editor').innerHTML = p.description || '';
+                document.getElementById('p_seo_slug').value = p.seo_slug || '';
+                document.getElementById('p_seo_title').value = p.seo_title || '';
+                document.getElementById('p_seo_description').value = p.seo_description || '';
+                document.getElementById('p_seo_keywords').value = p.seo_keywords || '';
 
                 renderVariants(p.options || []);
 
@@ -1302,6 +1410,10 @@
             document.getElementById('p_detail_desc').value = document.getElementById('p_detail_desc_editor').innerHTML.trim();
             formData.append('description', document.getElementById('p_detail_desc').value);
             formData.append('variants', JSON.stringify(variants));
+            formData.append('seo_slug', document.getElementById('p_seo_slug').value);
+            formData.append('seo_title', document.getElementById('p_seo_title').value);
+            formData.append('seo_description', document.getElementById('p_seo_description').value);
+            formData.append('seo_keywords', document.getElementById('p_seo_keywords').value);
 
             fetch('?action=adminSaveProduct', {
                 method: 'POST',
@@ -1602,6 +1714,10 @@
         function openCategoryModal() {
             document.getElementById('categoryForm').reset();
             document.getElementById('cat_id').value = '';
+            document.getElementById('cat_seo_slug').value = '';
+            document.getElementById('cat_seo_title').value = '';
+            document.getElementById('cat_seo_description').value = '';
+            document.getElementById('cat_seo_keywords').value = '';
             document.getElementById('catModalTitle').innerText = "Thêm Danh mục mới";
             getCategoryModal().show();
         }
@@ -1615,6 +1731,10 @@
                 document.getElementById('cat_is_pro').value = cat.is_pro ? '1' : '0';
                 document.getElementById('cat_icon').value = cat.icon || '';
                 document.getElementById('cat_icon_color').value = cat.icon_color || '';
+                document.getElementById('cat_seo_slug').value = cat.seo_slug || '';
+                document.getElementById('cat_seo_title').value = cat.seo_title || '';
+                document.getElementById('cat_seo_description').value = cat.seo_description || '';
+                document.getElementById('cat_seo_keywords').value = cat.seo_keywords || '';
 
                 document.getElementById('catModalTitle').innerText = "Chỉnh sửa Danh mục";
                 getCategoryModal().show();
@@ -1629,6 +1749,10 @@
             formData.append('is_pro', document.getElementById('cat_is_pro').value);
             formData.append('icon', document.getElementById('cat_icon').value);
             formData.append('icon_color', document.getElementById('cat_icon_color').value);
+            formData.append('seo_slug', document.getElementById('cat_seo_slug').value);
+            formData.append('seo_title', document.getElementById('cat_seo_title').value);
+            formData.append('seo_description', document.getElementById('cat_seo_description').value);
+            formData.append('seo_keywords', document.getElementById('cat_seo_keywords').value);
 
             fetch('?action=adminSaveCategory', {
                 method: 'POST',
@@ -1708,6 +1832,10 @@
             document.getElementById('blog_image_url').value = '';
             document.getElementById('blog_desc').value = '';
             document.getElementById('blog_desc_editor').innerHTML = '';
+            document.getElementById('blog_seo_slug').value = '';
+            document.getElementById('blog_seo_title').value = '';
+            document.getElementById('blog_seo_description').value = '';
+            document.getElementById('blog_seo_keywords').value = '';
             setBlogImagePreview('');
             document.querySelector('#blogModal .modal-title').innerText = 'Thêm bài viết mới';
             getBlogModal().show();
@@ -1721,6 +1849,10 @@
             document.getElementById('blog_image_url').value = blog.image || '';
             document.getElementById('blog_desc_editor').innerHTML = blog.description || '';
             document.getElementById('blog_desc').value = blog.description || '';
+            document.getElementById('blog_seo_slug').value = blog.seo_slug || '';
+            document.getElementById('blog_seo_title').value = blog.seo_title || '';
+            document.getElementById('blog_seo_description').value = blog.seo_description || '';
+            document.getElementById('blog_seo_keywords').value = blog.seo_keywords || '';
             setBlogImagePreview(blog.image || '');
             document.querySelector('#blogModal .modal-title').innerText = 'Chỉnh sửa bài viết';
             getBlogModal().show();
@@ -1797,6 +1929,10 @@
             formData.append('title', document.getElementById('blog_title').value);
             formData.append('image', document.getElementById('blog_image_url').value);
             formData.append('description', document.getElementById('blog_desc').value);
+            formData.append('seo_slug', document.getElementById('blog_seo_slug').value);
+            formData.append('seo_title', document.getElementById('blog_seo_title').value);
+            formData.append('seo_description', document.getElementById('blog_seo_description').value);
+            formData.append('seo_keywords', document.getElementById('blog_seo_keywords').value);
             const fileInput = document.getElementById('blog_image_file');
             if (fileInput.files[0]) {
                 formData.append('image_file', fileInput.files[0]);
@@ -2243,6 +2379,29 @@
                             <textarea id="blog_desc" class="d-none"></textarea>
                             <small class="text-muted d-block mt-1">Mẹo: bôi đen text rồi chọn nút trên thanh công cụ để định dạng.</small>
                         </div>
+
+                        <div class="mt-4 border-top pt-3">
+                            <h6 class="fw-bold text-primary mb-3"><i class="fa-solid fa-magnifying-glass me-1"></i> Cấu hình SEO tối ưu Google</h6>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">SEO Slug (Đường dẫn thân thiện)</label>
+                                    <input type="text" class="form-control" id="blog_seo_slug" placeholder="VD: huong-dan-dang-ky-claude">
+                                    <small class="text-muted">Để trống để tự động tạo từ tiêu đề.</small>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">SEO Title (Tiêu đề Google)</label>
+                                    <input type="text" class="form-control" id="blog_seo_title" placeholder="Tiêu đề hiển thị trên Google">
+                                </div>
+                                <div class="col-12 mb-3">
+                                    <label class="form-label">SEO Description (Mô tả Google)</label>
+                                    <textarea class="form-control" id="blog_seo_description" rows="2" placeholder="Mô tả tóm tắt bài viết hiển thị trên Google"></textarea>
+                                </div>
+                                <div class="col-12 mb-3">
+                                    <label class="form-label">SEO Keywords (Từ khóa Google)</label>
+                                    <input type="text" class="form-control" id="blog_seo_keywords" placeholder="Cách nhau bằng dấu phẩy">
+                                </div>
+                            </div>
+                        </div>
                     </form>
                 </div>
                 <div class="modal-footer border-top p-4">
@@ -2326,6 +2485,27 @@
                             <div class="col-6 mb-3">
                                 <label class="form-label">Màu Icon (Class)</label>
                                 <input type="text" class="form-control" id="cat_icon_color" placeholder="text-primary">
+                            </div>
+                        </div>
+
+                        <div class="mt-4 border-top pt-3">
+                            <h6 class="fw-bold text-primary mb-3"><i class="fa-solid fa-magnifying-glass me-1"></i> Cấu hình SEO tối ưu Google</h6>
+                            <div class="mb-3">
+                                <label class="form-label">SEO Slug (Đường dẫn thân thiện)</label>
+                                <input type="text" class="form-control" id="cat_seo_slug" placeholder="VD: tai-khoan-chatgpt">
+                                <small class="text-muted">Để trống để lấy theo slug lọc.</small>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">SEO Title (Tiêu đề Google)</label>
+                                <input type="text" class="form-control" id="cat_seo_title" placeholder="Tiêu đề hiển thị trên Google">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">SEO Description (Mô tả Google)</label>
+                                <textarea class="form-control" id="cat_seo_description" rows="2" placeholder="Mô tả danh mục hiển thị trên Google"></textarea>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">SEO Keywords (Từ khóa Google)</label>
+                                <input type="text" class="form-control" id="cat_seo_keywords" placeholder="Cách nhau bằng dấu phẩy">
                             </div>
                         </div>
                     </form>

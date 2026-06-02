@@ -1,4 +1,210 @@
-<div id="products-section" style="display: <?php echo ($tab === 'products' || $tab === 'home') ? 'block' : 'none'; ?>;">
+<div id="home-section" style="display: <?php echo ($tab === 'home') ? 'block' : 'none'; ?>;">
+    <!-- Hero / Intro Section -->
+    <div class="row align-items-center g-5 py-5 mb-5 rounded-4 position-relative overflow-hidden fade-in-element" style="background: rgba(255,255,255,0.45); border: 1px solid var(--border-color); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); margin-left: 0; margin-right: 0;">
+        <div class="col-lg-7 text-start ps-4 ps-md-5">
+            <span class="badge bg-primary bg-opacity-10 text-primary mb-3 px-3 py-2 rounded-pill fw-bold" style="letter-spacing:1px; font-size:0.75rem;"><i class="fa-solid fa-sparkles me-1"></i> HỆ SINH THÁI TÀI KHOẢN PREMIUM</span>
+            <h1 class="display-5 fw-bold text-dark mb-3 lh-sm">Sở Hữu Tài Khoản AI <br><span class="text-gradient fw-extrabold" style="background: var(--vip-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Chính Hãng, Giá Rẻ</span></h1>
+            <p class="lead text-muted mb-4 fs-6" style="line-height:1.7;">
+                Chào mừng bạn đến với <strong>AI CỦA TÔI</strong> - nền tảng hàng đầu cung cấp các tài khoản Premium (ChatGPT Plus, Claude Pro, Midjourney, YouTube Premium, GitHub Copilot...) tự động 24/7. Uy tín, an toàn, kích hoạt ngay lập tức với chế độ bảo hành 1 đổi 1 trọn gói.
+            </p>
+            <div class="d-flex flex-wrap gap-3">
+                <a href="<?php echo url('index.php?tab=products'); ?>" class="btn btn-buy px-4 py-2.5 fs-6 shadow-sm"><i class="fa-solid fa-store me-2"></i>Xem sản phẩm</a>
+                <a href="<?php echo Url::about(); ?>" class="btn btn-outline-dark px-4 py-2.5 fs-6" style="border-radius: 8px;"><i class="fa-solid fa-circle-info me-2"></i>Về chúng tôi</a>
+            </div>
+        </div>
+        <div class="col-lg-5 text-center pe-4 pe-md-5 d-none d-lg-block">
+            <img src="<?php echo url('assets/images/gemini_share.png'); ?>" class="img-fluid rounded-4 shadow-sm" alt="AI Của Tôi" style="max-height: 280px; object-fit: cover; border: 1px solid var(--border-color);">
+        </div>
+    </div>
+
+    <!-- Stats Counter Section -->
+    <div class="row g-4 mb-5 text-center fade-in-element" style="animation-delay: 0.1s;">
+        <div class="col-6 col-md-3">
+            <div class="p-4 rounded-4" style="background: rgba(255,255,255,0.6); border: 1px solid var(--border-color); backdrop-filter: blur(8px);">
+                <div class="fs-2 fw-extrabold text-primary" style="background: var(--vip-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 800;">50,000+</div>
+                <div class="small text-muted fw-bold mt-1">Khách Hàng Tin Dùng</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="p-4 rounded-4" style="background: rgba(255,255,255,0.6); border: 1px solid var(--border-color); backdrop-filter: blur(8px);">
+                <div class="fs-2 fw-extrabold text-primary" style="background: var(--vip-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 800;">120,000+</div>
+                <div class="small text-muted fw-bold mt-1">Đơn Hàng Thành Công</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="p-4 rounded-4" style="background: rgba(255,255,255,0.6); border: 1px solid var(--border-color); backdrop-filter: blur(8px);">
+                <div class="fs-2 fw-extrabold text-primary" style="background: var(--vip-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 800;">99.9%</div>
+                <div class="small text-muted fw-bold mt-1">Xử Lý Tự Động 24/7</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="p-4 rounded-4" style="background: rgba(255,255,255,0.6); border: 1px solid var(--border-color); backdrop-filter: blur(8px);">
+                <div class="fs-2 fw-extrabold text-primary" style="background: var(--vip-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 800;">4.9/5 ★</div>
+                <div class="small text-muted fw-bold mt-1">Đánh Giá Hài Lòng</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Outstanding Features Section -->
+    <div class="mb-5 text-center fade-in-element" style="animation-delay: 0.2s;">
+        <h2 class="fw-bold mb-2">Cam Kết Vàng Tại AI CỦA TÔI</h2>
+        <p class="text-muted small mb-4">Sự hài lòng và độ tin cậy của khách hàng là ưu tiên hàng đầu của chúng tôi</p>
+        <div class="row g-4">
+            <div class="col-md-6 col-lg-3">
+                <div class="p-4 rounded-4 h-100 text-start bg-white" style="border: 1px solid var(--border-color); transition: all 0.3s ease;">
+                    <div class="d-flex align-items-center justify-content-center bg-primary bg-opacity-10 text-primary rounded-3 mb-3" style="width: 48px; height: 48px;">
+                        <i class="fa-solid fa-bolt fs-5"></i>
+                    </div>
+                    <h5 class="fw-bold mb-2">Giao Hàng 5 Giây</h5>
+                    <p class="text-muted small mb-0">Hệ thống xử lý thanh toán tự động, gửi tài khoản qua email/màn hình ngay sau khi giao dịch thành công.</p>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-3">
+                <div class="p-4 rounded-4 h-100 text-start bg-white" style="border: 1px solid var(--border-color); transition: all 0.3s ease;">
+                    <div class="d-flex align-items-center justify-content-center bg-success bg-opacity-10 text-success rounded-3 mb-3" style="width: 48px; height: 48px;">
+                        <i class="fa-solid fa-shield-halved fs-5"></i>
+                    </div>
+                    <h5 class="fw-bold mb-2">Bảo Hành Uy Tín</h5>
+                    <p class="text-muted small mb-0">Cam kết bảo hành 1 đổi 1 hoặc hoàn tiền tương ứng nếu xảy ra lỗi trong suốt thời gian sử dụng gói dịch vụ.</p>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-3">
+                <div class="p-4 rounded-4 h-100 text-start bg-white" style="border: 1px solid var(--border-color); transition: all 0.3s ease;">
+                    <div class="d-flex align-items-center justify-content-center bg-warning bg-opacity-10 text-warning rounded-3 mb-3" style="width: 48px; height: 48px;">
+                        <i class="fa-solid fa-tags fs-5"></i>
+                    </div>
+                    <h5 class="fw-bold mb-2">Giá Tốt Nhất</h5>
+                    <p class="text-muted small mb-0">Chúng tôi tối ưu hóa chi phí để mang lại mức giá rẻ hơn đến 70% so với việc mua trực tiếp từ nhà phát triển.</p>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-3">
+                <div class="p-4 rounded-4 h-100 text-start bg-white" style="border: 1px solid var(--border-color); transition: all 0.3s ease;">
+                    <div class="d-flex align-items-center justify-content-center bg-danger bg-opacity-10 text-danger rounded-3 mb-3" style="width: 48px; height: 48px;">
+                        <i class="fa-solid fa-headset fs-5"></i>
+                    </div>
+                    <h5 class="fw-bold mb-2">Hỗ Trợ Tận Tâm</h5>
+                    <p class="text-muted small mb-0">Đội ngũ kỹ thuật viên am hiểu công nghệ sẵn sàng tư vấn và sửa lỗi trực tuyến qua Zalo / Telegram.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Highlights Brands Section -->
+    <div class="mb-5 text-center fade-in-element" style="animation-delay: 0.3s;">
+        <h2 class="fw-bold mb-2">Đối Tác & Dịch Vụ Phổ Biến</h2>
+        <p class="text-muted small mb-4">Các bộ công cụ AI hàng đầu thế giới được nhiều doanh nghiệp sử dụng</p>
+        <div class="d-flex flex-wrap justify-content-center gap-3">
+            <?php foreach ($categories as $cat): ?>
+                <a href="<?php echo Url::category($cat['seo_slug'] ?: $cat['slug']); ?>" class="text-decoration-none d-flex align-items-center gap-2 px-4 py-3 rounded-4 shadow-sm border border-light bg-white hover-up" style="transition: all 0.3s ease;">
+                    <?php if ($cat['icon']): ?>
+                        <i class="fa-solid <?= htmlspecialchars($cat['icon']) ?> <?= htmlspecialchars($cat['icon_color'] ?: 'text-primary') ?> fs-5"></i>
+                    <?php endif; ?>
+                    <span class="fw-bold text-dark"><?= htmlspecialchars($cat['name']) ?></span>
+                </a>
+            <?php endforeach; ?>
+        </div>
+    </div>
+
+    <!-- Testimonials Section -->
+    <div class="mb-5 fade-in-element" style="animation-delay: 0.4s;">
+        <div class="text-center mb-4">
+            <h2 class="fw-bold mb-2">Khách Hàng Nói Về Chúng Tôi</h2>
+            <p class="text-muted small">Ý kiến đóng góp thực tế từ những chuyên gia, lập trình viên sử dụng dịch vụ</p>
+        </div>
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="p-4 rounded-4 h-100 d-flex flex-column justify-content-between" style="background: rgba(255,255,255,0.7); border: 1px solid var(--border-color); backdrop-filter: blur(8px);">
+                    <div>
+                        <div class="text-warning mb-3">
+                            <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+                        </div>
+                        <p class="text-muted small italic mb-3">"Hệ thống mua hàng rất thông minh. Tôi thanh toán QR ngân hàng xong chỉ sau đúng 5 giây là email đã nhận được tài khoản ChatGPT Plus. Tiết kiệm thời gian mà giá lại rất rẻ so với tự nâng cấp bằng thẻ ngoại."</p>
+                    </div>
+                    <div class="d-flex align-items-center mt-3 border-top pt-3">
+                        <img src="https://ui-avatars.com/api/?name=Nguyen+Tuan&background=6366f1&color=fff" class="rounded-circle me-3" width="40" height="40" alt="Avatar">
+                        <div>
+                            <div class="fw-bold text-dark small">Nguyễn Anh Tuấn</div>
+                            <div class="text-muted smaller">Lập trình viên Fullstack</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="p-4 rounded-4 h-100 d-flex flex-column justify-content-between" style="background: rgba(255,255,255,0.7); border: 1px solid var(--border-color); backdrop-filter: blur(8px);">
+                    <div>
+                        <div class="text-warning mb-3">
+                            <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+                        </div>
+                        <p class="text-muted small italic mb-3">"Làm Content Creator rất cần Claude Pro và Midjourney để lên bài và thiết kế ảnh. Nhờ AI CỦA TÔI, tôi đã đăng ký gói combo rất mượt mà. Support hỗ trợ nhiệt tình qua Zalo ngay cả nửa đêm."</p>
+                    </div>
+                    <div class="d-flex align-items-center mt-3 border-top pt-3">
+                        <img src="https://ui-avatars.com/api/?name=Phan+Linh&background=a855f7&color=fff" class="rounded-circle me-3" width="40" height="40" alt="Avatar">
+                        <div>
+                            <div class="fw-bold text-dark small">Phan Khánh Linh</div>
+                            <div class="text-muted smaller">Content Team Lead</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="p-4 rounded-4 h-100 d-flex flex-column justify-content-between" style="background: rgba(255,255,255,0.7); border: 1px solid var(--border-color); backdrop-filter: blur(8px);">
+                    <div>
+                        <div class="text-warning mb-3">
+                            <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+                        </div>
+                        <p class="text-muted small italic mb-3">"Đã sử dụng ở đây hơn 6 tháng, gia hạn tài khoản YouTube Premium và Github Copilot định kỳ. Chưa bao giờ bị lỗi mất gói giữa chừng, nếu có vấn đề gì được đổi tài khoản mới ngay lập tức."</p>
+                    </div>
+                    <div class="d-flex align-items-center mt-3 border-top pt-3">
+                        <img src="https://ui-avatars.com/api/?name=Tran+Minh&background=0ea5e9&color=fff" class="rounded-circle me-3" width="40" height="40" alt="Avatar">
+                        <div>
+                            <div class="fw-bold text-dark small">Trần Đức Minh</div>
+                            <div class="text-muted smaller">Sinh viên Kỹ thuật</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Blog posts for home tab credibility -->
+    <?php if (!empty($blogs)): ?>
+        <div class="mb-5 fade-in-element" style="animation-delay: 0.5s;">
+            <div class="d-flex justify-content-between align-items-end mb-4">
+                <div>
+                    <h2 class="fw-bold mb-1">Cập Nhật Tin Tức & Hướng Dẫn</h2>
+                    <p class="text-muted small mb-0">Các kiến thức hữu ích và mẹo sử dụng công cụ AI hiệu quả</p>
+                </div>
+                <a href="<?php echo url('index.php?tab=blog'); ?>" class="btn btn-outline-dark btn-sm rounded-pill px-3">Xem tất cả <i class="fa-solid fa-arrow-right ms-1"></i></a>
+            </div>
+            <div class="row g-4">
+                <?php foreach (array_slice($blogs, 0, 3) as $blog): ?>
+                    <?php
+                        $blogDate  = !empty($blog['created_at']) ? date('d/m/Y', strtotime($blog['created_at'])) : '';
+                        $blogTitle = $blog['title'] ?? '';
+                        $blogImage = $blog['image'] ?? '';
+                    ?>
+                    <div class="col-12 col-md-4">
+                        <a href="<?= htmlspecialchars(Url::blog($blog)) ?>" class="text-decoration-none text-reset">
+                            <div class="blog-card h-100 shadow-sm border bg-white" style="border-radius:12px; overflow:hidden; transition:all 0.3s ease;">
+                                <div style="height: 160px; overflow:hidden;">
+                                    <img src="<?= htmlspecialchars($blogImage) ?>" class="w-100 h-100" style="object-fit:cover; transition:all 0.5s ease;" alt="<?= htmlspecialchars($blogTitle) ?>">
+                                </div>
+                                <div class="p-3">
+                                    <?php if ($blogDate): ?>
+                                        <div class="text-muted small mb-1"><i class="fa-regular fa-clock me-1"></i><?= htmlspecialchars($blogDate) ?></div>
+                                    <?php endif; ?>
+                                    <h3 class="fw-bold mb-0 text-dark" style="font-size:1rem; line-height:1.4; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; height:2.8rem;"><?= htmlspecialchars($blogTitle) ?></h3>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                <?php endforeach; ?>
+            </div>
+        </div>
+    <?php endif; ?>
+</div>
+
+<div id="products-section" style="display: <?php echo ($tab === 'products') ? 'block' : 'none'; ?>;">
     <!-- Category Pill Menu -->
     <div class="category-menu-wrapper fade-in-element" style="animation-delay: 0.1s;">
         <?php
@@ -6,13 +212,14 @@
         $qParam = !empty($searchQuery) ? '&q=' . urlencode($searchQuery) : '';
         $sortParam = !empty($_GET['sort']) ? '&sort=' . urlencode($_GET['sort']) : '';
         ?>
-        <a href="<?php echo url('index.php?tab=products&category=all' . $qParam . $sortParam); ?>"
+        <a href="<?php echo url('index.php?tab=products' . $qParam . $sortParam); ?>"
            class="cat-pill text-decoration-none <?php echo (empty($currentCat) || $currentCat === 'all') ? 'active' : ''; ?>">Tất Cả</a>
         <?php foreach ($categories as $cat): ?>
-            <a href="<?php echo url('index.php?tab=products&category=' . urlencode($cat['slug']) . $qParam . $sortParam); ?>"
-               class="cat-pill text-decoration-none <?= $cat['is_pro'] ? 'pro-glow' : '' ?> <?php echo ($currentCat === $cat['slug']) ? 'active' : ''; ?>">
+            <?php $activeSlug = $cat['seo_slug'] ?: $cat['slug']; ?>
+            <a href="<?php echo Url::category($activeSlug) . ($qParam || $sortParam ? '?' . ltrim($qParam . $sortParam, '&') : ''); ?>"
+               class="cat-pill text-decoration-none <?= $cat['is_pro'] ? 'pro-glow' : '' ?> <?php echo ($currentCat === $cat['slug'] || $currentCat === $cat['seo_slug']) ? 'active' : ''; ?>">
                 <?php if ($cat['icon']): ?>
-                    <i class="fa-solid <?= htmlspecialchars($cat['icon']) ?> <?= htmlspecialchars($cat['icon_color']) ?>"></i>
+                    <i class="fa-solid <?= htmlspecialchars($cat['icon']) ?> <?= htmlspecialchars($cat['icon_color'] ?: 'text-primary') ?>"></i>
                 <?php endif; ?>
                 <?= htmlspecialchars($cat['name']) ?>
             </a>
@@ -21,8 +228,8 @@
 
     <div class="row g-4" id="product-list" data-page-size="12">
         <?php foreach ($products as $index => $product): ?>
-            <div class="col-6 col-md-4 col-lg-3 product-item <?= ($tab === 'home' && $index >= 8) ? 'product-hidden d-none' : '' ?>"
-                data-category="<?= htmlspecialchars($product['category_slug'] ?? '') ?>">
+            <div class="col-6 col-md-4 col-lg-3 product-item"
+                 data-category="<?= htmlspecialchars($product['category_slug'] ?? '') ?>">
                 <div class="card product-card position-relative h-100" data-product-id="<?= htmlspecialchars($product['id'] ?? '') ?>">
                     <?php if (!empty($product['badge'])): ?>
                         <span class="badge-hot"><?= htmlspecialchars($product['badge'] ?? '') ?></span>
@@ -88,43 +295,7 @@
         <?php endforeach; ?>
     </div>
 
-    <?php if ($tab === 'home' && count($products) > 8): ?>
-        <div class="text-center mt-5 mb-3" id="load-more-container">
-            <button class="btn btn-outline-dark rounded-pill px-5 py-2.5 fw-bold shadow-sm" id="btn-load-more">
-                <i class="fa-solid fa-angles-down me-2"></i>Xem thêm
-            </button>
-        </div>
-        <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const btnLoadMore = document.getElementById('btn-load-more');
-            if (btnLoadMore) {
-                btnLoadMore.addEventListener('click', () => {
-                    const hiddenProducts = document.querySelectorAll('.product-item.product-hidden');
-                    hiddenProducts.forEach((item, idx) => {
-                        if (idx < 8) {
-                            item.classList.remove('product-hidden', 'd-none');
-                            item.style.opacity = '0';
-                            item.style.transition = 'opacity 0.4s ease-in-out';
-                            setTimeout(() => {
-                                item.style.opacity = '1';
-                            }, 50 * idx);
-                        }
-                    });
-                    
-                    const remainingHidden = document.querySelectorAll('.product-item.product-hidden');
-                    if (remainingHidden.length === 0) {
-                        const container = document.getElementById('load-more-container');
-                        if (container) {
-                            container.style.display = 'none';
-                        }
-                    }
-                });
-            }
-        });
-        </script>
-    <?php endif; ?>
-
-    <?php if ($tab === 'products' && $totalPages > 1): ?>
+    <?php if ($totalPages > 1): ?>
         <?php
         $catParam = !empty($currentCat) ? '&category=' . urlencode($currentCat) : '';
         $sortParam = !empty($_GET['sort']) ? '&sort=' . urlencode($_GET['sort']) : '';
@@ -188,17 +359,16 @@
                     $blogDate  = !empty($blog['created_at']) ? date('d/m/Y', strtotime($blog['created_at'])) : '';
                     $blogTitle = $blog['title'] ?? '';
                     $blogImage = $blog['image'] ?? '';
-                    $blogId    = $blog['id'] ?? '';
                 ?>
                 <div class="col-12 col-md-6 col-lg-4 fade-in-element" style="animation-delay: <?= $index * 0.1 ?>s;">
                     <a href="<?= htmlspecialchars(Url::blog($blog)) ?>" class="text-decoration-none text-reset">
-                        <div class="blog-card h-100">
+                        <div class="blog-card h-100 bg-white shadow-sm border" style="border-radius:12px; overflow:hidden;">
                             <img src="<?= htmlspecialchars($blogImage) ?>" class="blog-img" alt="<?= htmlspecialchars($blogTitle) ?>">
-                            <div class="blog-content">
+                            <div class="blog-content p-3">
                                 <?php if ($blogDate): ?>
-                                    <div class="blog-date"><?= htmlspecialchars($blogDate) ?></div>
+                                    <div class="blog-date small text-muted mb-1"><?= htmlspecialchars($blogDate) ?></div>
                                 <?php endif; ?>
-                                <h3 class="blog-title mb-0"><?= htmlspecialchars($blogTitle) ?></h3>
+                                <h3 class="blog-title mb-0 fw-bold fs-6 text-dark"><?= htmlspecialchars($blogTitle) ?></h3>
                             </div>
                         </div>
                     </a>

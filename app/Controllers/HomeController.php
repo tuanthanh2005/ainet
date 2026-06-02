@@ -27,9 +27,25 @@ class HomeController extends Controller {
             $tab = $isMobile ? 'products' : 'home';
         }
 
-        // Filtering by category (only applies to products tab)
+        // Look up active category by slug or seo_slug
         $categorySlug = $_GET['category'] ?? '';
+        $activeCategory = null;
         if ($categorySlug !== '' && $categorySlug !== 'all') {
+            foreach ($categories as $cat) {
+                if (($cat['slug'] ?? '') === $categorySlug || ($cat['seo_slug'] ?? '') === $categorySlug) {
+                    $activeCategory = $cat;
+                    break;
+                }
+            }
+        }
+
+        // Filtering by category (only applies to products tab)
+        if ($activeCategory) {
+            $filterSlug = $activeCategory['slug'] ?? '';
+            $products = array_filter($products, function($p) use ($filterSlug) {
+                return ($p['category_slug'] ?? '') === $filterSlug;
+            });
+        } elseif ($categorySlug !== '' && $categorySlug !== 'all') {
             $products = array_filter($products, function($p) use ($categorySlug) {
                 return ($p['category_slug'] ?? '') === $categorySlug;
             });
@@ -95,14 +111,30 @@ class HomeController extends Controller {
             $products = array_slice($products, $offset, $limit);
         }
 
-        Seo::set([
-            'title'       => 'Tài khoản AI Premium - Gemini Advanced, ChatGPT, Copilot',
-            'description' => 'Cung cấp tài khoản Gemini Advanced (Google One AI Premium), ChatGPT Plus, YouTube Premium, GitHub Copilot giá tốt nhất. Kích hoạt tự động, bảo hành 1 đổi 1 uy tín.',
-            'keywords'    => ['tài khoản gemini advanced', 'google gemini advanced', 'tài khoản chatgpt plus', 'youtube premium', 'github copilot', 'tài khoản ai', SITENAME],
-            'image'       => url('assets/images/gemini_share.png'),
-            'canonical'   => Url::home(),
-            'type'        => 'website',
-        ]);
+        if ($activeCategory) {
+            $catName = $activeCategory['name'] ?? '';
+            $seoTitle = !empty($activeCategory['seo_title']) ? $activeCategory['seo_title'] : ($catName . ' - Mua tài khoản ' . $catName . ' giá rẻ');
+            $seoDesc  = !empty($activeCategory['seo_description']) ? $activeCategory['seo_description'] : ('Cung cấp tài khoản ' . $catName . ' chính chủ giá rẻ nhất thị trường. Hỗ trợ kích hoạt tự động nhanh chóng, bảo hành 1 đổi 1 uy tín.');
+            $seoKey   = !empty($activeCategory['seo_keywords']) ? explode(',', $activeCategory['seo_keywords']) : ['mua tài khoản ' . mb_strtolower($catName), 'tài khoản ' . mb_strtolower($catName) . ' giá rẻ', mb_strtolower($catName), SITENAME];
+            $seoSlug  = !empty($activeCategory['seo_slug']) ? $activeCategory['seo_slug'] : ($activeCategory['slug'] ?? '');
+            Seo::set([
+                'title'       => $seoTitle,
+                'description' => $seoDesc,
+                'keywords'    => $seoKey,
+                'image'       => url('assets/images/gemini_share.png'),
+                'canonical'   => Url::category($seoSlug),
+                'type'        => 'website',
+            ]);
+        } else {
+            Seo::set([
+                'title'       => 'Tài khoản AI Premium - Gemini Advanced, ChatGPT, Copilot',
+                'description' => 'Cung cấp tài khoản Gemini Advanced (Google One AI Premium), ChatGPT Plus, YouTube Premium, GitHub Copilot giá tốt nhất. Kích hoạt tự động, bảo hành 1 đổi 1 uy tín.',
+                'keywords'    => ['tài khoản gemini advanced', 'google gemini advanced', 'tài khoản chatgpt plus', 'youtube premium', 'github copilot', 'tài khoản ai', SITENAME],
+                'image'       => url('assets/images/gemini_share.png'),
+                'canonical'   => Url::home() . ($tab === 'products' ? '?tab=products' : ''),
+                'type'        => 'website',
+            ]);
+        }
 
         $this->view('layout', [
             'view' => 'home',
@@ -145,9 +177,13 @@ class HomeController extends Controller {
         $sidebarProducts = array_slice($allProducts, 0, 3);
 
         $excerpt = Seo::truncate(strip_tags($blog['description'] ?? ''), 200);
+        $seoTitle = !empty($blog['seo_title']) ? $blog['seo_title'] : ($blog['title'] ?? 'Bài viết');
+        $seoDesc  = !empty($blog['seo_description']) ? $blog['seo_description'] : $excerpt;
+        $seoKey   = !empty($blog['seo_keywords']) ? explode(',', $blog['seo_keywords']) : [$blog['title'] ?? '', SITENAME];
         Seo::set([
-            'title'       => $blog['title'] ?? 'Bài viết',
-            'description' => $excerpt,
+            'title'       => $seoTitle,
+            'description' => $seoDesc,
+            'keywords'    => $seoKey,
             'image'       => $blog['image'] ?? '',
             'canonical'   => Url::blog($blog),
             'type'        => 'article',
@@ -160,7 +196,7 @@ class HomeController extends Controller {
                 'author'        => ['@type' => 'Organization', 'name' => SITENAME],
                 'publisher'     => ['@type' => 'Organization', 'name' => SITENAME],
                 'mainEntityOfPage' => Url::blog($blog),
-                'description'   => $excerpt,
+                'description'   => $seoDesc,
             ],
         ]);
 
@@ -198,19 +234,22 @@ class HomeController extends Controller {
         }
 
         $excerpt = Seo::truncate(strip_tags($product['description'] ?? ($product['feature_text'] ?? '')), 200);
+        $seoTitle = !empty($product['seo_title']) ? $product['seo_title'] : ($product['title'] ?? 'Sản phẩm');
+        $seoDesc  = !empty($product['seo_description']) ? $product['seo_description'] : ($excerpt ?: 'Mua ' . ($product['title'] ?? 'sản phẩm') . ' chính chủ, bảo hành 1 đổi 1.');
+        $seoKey   = !empty($product['seo_keywords']) ? explode(',', $product['seo_keywords']) : [$product['title'] ?? '', $product['category'] ?? '', SITENAME];
         Seo::set([
-            'title'       => $product['title'] ?? 'Sản phẩm',
-            'description' => $excerpt ?: 'Mua ' . ($product['title'] ?? 'sản phẩm') . ' chính chủ, bảo hành 1 đổi 1.',
+            'title'       => $seoTitle,
+            'description' => $seoDesc,
             'image'       => $product['image'] ?? '',
             'canonical'   => Url::product($product),
             'type'        => 'product',
-            'keywords'    => [$product['title'] ?? '', $product['category'] ?? '', SITENAME],
+            'keywords'    => $seoKey,
             'structured'  => [
                 '@context'    => 'https://schema.org',
                 '@type'       => 'Product',
                 'name'        => $product['title'] ?? '',
                 'image'       => $product['image'] ?? '',
-                'description' => $excerpt,
+                'description' => $seoDesc,
                 'sku'         => 'prod_' . ($product['id'] ?? ''),
                 'mpn'         => 'mpn_' . ($product['id'] ?? ''),
                 'brand'       => [

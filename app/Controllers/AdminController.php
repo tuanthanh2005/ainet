@@ -166,6 +166,10 @@ class AdminController extends Controller {
             'sold_count'    => 0,
             'options'       => $variants,
             'is_upgrade'    => isset($_POST['is_upgrade']) ? (int) $_POST['is_upgrade'] : 0,
+            'seo_title'       => trim($_POST['seo_title'] ?? ''),
+            'seo_description' => trim($_POST['seo_description'] ?? ''),
+            'seo_keywords'    => trim($_POST['seo_keywords'] ?? ''),
+            'seo_slug'        => trim($_POST['seo_slug'] ?? ''),
         ];
 
         if ($id) {
@@ -240,6 +244,10 @@ class AdminController extends Controller {
             'is_pro'     => ($_POST['is_pro'] ?? '0') === '1',
             'icon'       => $_POST['icon'] ?? '',
             'icon_color' => $_POST['icon_color'] ?? '',
+            'seo_title'       => trim($_POST['seo_title'] ?? ''),
+            'seo_description' => trim($_POST['seo_description'] ?? ''),
+            'seo_keywords'    => trim($_POST['seo_keywords'] ?? ''),
+            'seo_slug'        => trim($_POST['seo_slug'] ?? ''),
         ];
 
         if ($id) {
@@ -312,13 +320,18 @@ class AdminController extends Controller {
 
         $description = Upload::sanitizeHtml($description);
 
+        $seoTitle       = trim($_POST['seo_title'] ?? '');
+        $seoDescription = trim($_POST['seo_description'] ?? '');
+        $seoKeywords    = trim($_POST['seo_keywords'] ?? '');
+        $seoSlug        = trim($_POST['seo_slug'] ?? '');
+
         $db = Database::getInstance();
         if ($id !== '') {
-            $stmt = $db->prepare('UPDATE blogs SET title = ?, image = ?, description = ? WHERE id = ?');
-            $stmt->execute([$title, $imageUrl, $description, (int) $id]);
+            $stmt = $db->prepare('UPDATE blogs SET title = ?, image = ?, description = ?, seo_title = ?, seo_description = ?, seo_keywords = ?, seo_slug = ? WHERE id = ?');
+            $stmt->execute([$title, $imageUrl, $description, $seoTitle ?: null, $seoDescription ?: null, $seoKeywords ?: null, $seoSlug ?: null, (int) $id]);
         } else {
-            $stmt = $db->prepare('INSERT INTO blogs (title, image, description) VALUES (?, ?, ?)');
-            $stmt->execute([$title, $imageUrl, $description]);
+            $stmt = $db->prepare('INSERT INTO blogs (title, image, description, seo_title, seo_description, seo_keywords, seo_slug) VALUES (?, ?, ?, ?, ?, ?, ?)');
+            $stmt->execute([$title, $imageUrl, $description, $seoTitle ?: null, $seoDescription ?: null, $seoKeywords ?: null, $seoSlug ?: null]);
         }
 
         $this->jsonSuccess(['image' => $imageUrl]);
