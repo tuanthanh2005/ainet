@@ -78,6 +78,25 @@
             transition: all 0.2s;
             font-weight: 500;
         }
+        .nav-label {
+            flex: 1;
+            min-width: 0;
+        }
+        .nav-count-badge {
+            min-width: 24px;
+            height: 24px;
+            padding: 0 7px;
+            border-radius: 999px;
+            background: #f59e0b;
+            color: #111;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            font-weight: 800;
+            line-height: 1;
+            box-shadow: 0 0 0 2px rgba(255,255,255,0.08);
+        }
 
         .nav-link i {
             width: 24px;
@@ -378,7 +397,11 @@
                 </li>
                 <li class="nav-item">
                     <a href="#" class="nav-link" onclick="switchView('orders', this)">
-                        <i class="fa-solid fa-cart-shopping"></i> Quản lý Đơn hàng
+                        <i class="fa-solid fa-cart-shopping"></i>
+                        <span class="nav-label">Quản lý Đơn hàng</span>
+                        <?php if (!empty($pendingOrders)): ?>
+                            <span class="nav-count-badge" title="Đơn cần xử lý"><?php echo (int) $pendingOrders; ?></span>
+                        <?php endif; ?>
                     </a>
                 </li>
                 <li class="nav-item">
@@ -890,8 +913,8 @@
                         </div>
                         <div class="col-md-3">
                             <div class="card-custom p-4">
-                                <div class="text-muted fw-bold mb-2">ĐƠN HÀNG MỚI</div>
-                                <h3 class="fw-bold text-dark"><?php echo $totalOrders ?? 0; ?></h3>
+                                <div class="text-muted fw-bold mb-2">ĐƠN CẦN XỬ LÝ</div>
+                                <h3 class="fw-bold text-dark"><?php echo $pendingOrders ?? 0; ?></h3>
                             </div>
                         </div>
                         <div class="col-md-3">

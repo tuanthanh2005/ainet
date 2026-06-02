@@ -16,6 +16,7 @@ class AdminController extends Controller {
         // Calculate statistics via SQL aggregates (highly optimized, avoids loading all rows)
         $totalRevenue = (float) $db->query("SELECT SUM(amount) FROM orders WHERE status = 'completed'")->fetchColumn();
         $totalOrders = (int) $db->query("SELECT COUNT(*) FROM orders")->fetchColumn();
+        $pendingOrders = (int) $db->query("SELECT COUNT(*) FROM orders WHERE status IN ('pending', 'processing')")->fetchColumn();
         
         // Load first page of orders (limit 10)
         $stmt = $db->prepare("SELECT * FROM orders ORDER BY created_at DESC LIMIT 10");
@@ -40,6 +41,7 @@ class AdminController extends Controller {
             'blogs'            => $blogs,
             'totalRevenue'     => $totalRevenue,
             'totalOrders'      => $totalOrders,
+            'pendingOrders'    => $pendingOrders,
             'ordersTotalPages' => max(1, ceil($totalOrders / 10)),
             'currentUser'      => $_SESSION['user'],
         ]);
