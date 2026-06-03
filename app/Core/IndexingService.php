@@ -8,7 +8,13 @@ class IndexingService {
         $url = trim($url);
         $type = $type === 'URL_DELETED' ? 'URL_DELETED' : 'URL_UPDATED';
 
-        if ($url === '' || !self::enabled()) {
+        if ($url === '') {
+            self::log('Skipped indexing request: empty URL.');
+            return ['success' => false, 'message' => 'Empty URL.'];
+        }
+
+        if (!self::enabled()) {
+            self::log('Skipped indexing request because GOOGLE_INDEXING_ENABLED is false: ' . $url);
             return ['success' => false, 'message' => 'Indexing API is disabled.'];
         }
 
@@ -23,6 +29,7 @@ class IndexingService {
             ]);
 
             if (($result['status'] ?? 0) >= 200 && ($result['status'] ?? 0) < 300) {
+                self::log('Indexing API submitted ' . $type . ': ' . $url);
                 return ['success' => true, 'message' => 'Submitted', 'response' => $result['body'] ?? null];
             }
 
@@ -93,17 +100,38 @@ class IndexingService {
         if ($path === '') {
             throw new RuntimeException('Missing GOOGLE_INDEXING_CREDENTIALS path.');
         }
-        if (!preg_match('/^[A-Za-z]:[\/\\\\]|^\//', $path)) {
-            $path = base_path($path);
+        $path = self::resolveCredentialsPath($path);
+        if ($path === null) {
+            throw new RuntimeException('Google credentials file is not readable. Tried: ' . trim((string) (getenv('GOOGLE_INDEXING_CREDENTIALS') ?: '')));
         }
-        if (!is_file($path) || !is_readable($path)) {
-            throw new RuntimeException('Google credentials file is not readable: ' . $path);
-        }
+
         $data = json_decode((string) file_get_contents($path), true);
         if (!is_array($data) || empty($data['client_email']) || empty($data['private_key']) || empty($data['token_uri'])) {
             throw new RuntimeException('Invalid Google service account JSON.');
         }
         return $data;
+    }
+
+    private static function resolveCredentialsPath(string $path): ?string {
+        $path = str_replace(['/', '\\'], DIRECTORY_SEPARATOR, trim($path));
+        $isAbsolute = preg_match('/^[A-Za-z]:[\/\\\\]|^\//', $path);
+        $withoutPublicHtml = preg_replace('/^public_html[\/\\\\]/', '', $path);
+
+        $candidates = $isAbsolute ? [$path] : [
+            base_path($path),
+            public_path($path),
+            public_path($withoutPublicHtml),
+            dirname(public_path()) . DIRECTORY_SEPARATOR . $path,
+        ];
+
+        foreach (array_unique($candidates) as $candidate) {
+            if (is_file($candidate) && is_readable($candidate)) {
+                return $candidate;
+            }
+        }
+
+        self::log('Credentials path not found. Configured: ' . $path . ' Tried: ' . implode(' | ', $candidates));
+        return null;
     }
 
     private static function accessToken(): string {
