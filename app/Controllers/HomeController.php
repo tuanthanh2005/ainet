@@ -136,16 +136,16 @@ class HomeController extends Controller {
         } else {
             $canonical = Url::home();
             if ($tab === 'products') {
-                $canonical = url('index.php?tab=products' . ($page > 1 ? '&page=' . $page : ''));
+                $canonical = Url::products() . ($page > 1 ? '?page=' . $page : '');
             } elseif ($tab === 'blog') {
-                $canonical = url('index.php?tab=blog');
+                $canonical = Url::blogs();
             }
             $robots = ($q !== '' || !empty($_GET['sort'])) ? 'noindex,follow' : 'index,follow';
             $prevUrl = ($tab === 'products' && $page > 1 && $q === '' && empty($_GET['sort']))
-                ? url('index.php?tab=products' . ($page > 2 ? '&page=' . ($page - 1) : ''))
+                ? Url::products() . ($page > 2 ? '?page=' . ($page - 1) : '')
                 : null;
             $nextUrl = ($tab === 'products' && $page < $totalPages && $q === '' && empty($_GET['sort']))
-                ? url('index.php?tab=products&page=' . ($page + 1))
+                ? Url::products() . '?page=' . ($page + 1)
                 : null;
             Seo::set([
                 'title'       => 'Tài khoản AI Premium - Gemini Advanced, ChatGPT, Copilot',

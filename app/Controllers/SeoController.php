@@ -18,7 +18,8 @@ class SeoController extends Controller {
 
         $urls = [
             ['loc' => $base . '/',              'priority' => '1.0', 'changefreq' => 'daily',   'lastmod' => $now],
-            ['loc' => $base . '/index.php?tab=products', 'priority' => '0.9', 'changefreq' => 'daily', 'lastmod' => $now],
+            ['loc' => Url::products(),          'priority' => '0.9', 'changefreq' => 'daily',   'lastmod' => $now],
+            ['loc' => Url::blogs(),             'priority' => '0.8', 'changefreq' => 'daily',   'lastmod' => $now],
             ['loc' => $base . '/gioi-thieu',    'priority' => '0.6', 'changefreq' => 'monthly', 'lastmod' => $now],
             ['loc' => $base . '/lien-he',       'priority' => '0.6', 'changefreq' => 'monthly', 'lastmod' => $now],
         ];

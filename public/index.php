@@ -152,6 +152,9 @@ if ($rawUrl !== '' && empty($_GET['action'])) {
             if ($second !== '') {
                 $_GET['action'] = 'productDetail';
                 $_GET['id']     = $second;
+            } else {
+                $_GET['action'] = 'index';
+                $_GET['tab']    = 'products';
             }
             break;
         case 'danh-muc':

@@ -29,6 +29,8 @@ class Url {
     public static function contact(): string { return url('lien-he'); }
     public static function cart(): string    { return url('gio-hang'); }
     public static function home(): string    { return url(); }
+    public static function products(): string { return url('san-pham'); }
+    public static function blogs(): string    { return url('tap-chi'); }
 
     /**
      * Extract the trailing id from a "slug-id" path segment.
