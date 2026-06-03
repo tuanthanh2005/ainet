@@ -1,8 +1,17 @@
 <?php
 
 class SeoController extends Controller {
+    private function botFriendlyHeaders(string $contentType): void {
+        header_remove('Set-Cookie');
+        header_remove('Expires');
+        header_remove('Cache-Control');
+        header_remove('Pragma');
+        header('Content-Type: ' . $contentType . '; charset=UTF-8');
+        header('Cache-Control: public, max-age=900');
+    }
+
     public function sitemap(): void {
-        header('Content-Type: application/xml; charset=UTF-8');
+        $this->botFriendlyHeaders('application/xml');
 
         $base = rtrim(URLROOT, '/');
         $now  = date('c');
@@ -64,7 +73,7 @@ class SeoController extends Controller {
     }
 
     public function robots(): void {
-        header('Content-Type: text/plain; charset=UTF-8');
+        $this->botFriendlyHeaders('text/plain');
 
         $base = rtrim(URLROOT, '/');
         $isProd = APP_ENV === 'production';
