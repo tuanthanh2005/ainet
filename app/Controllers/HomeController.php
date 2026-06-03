@@ -670,6 +670,37 @@ class HomeController extends Controller {
         ]);
     }
 
+    public function submitContact() {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            header('Location: ' . Url::contact());
+            exit;
+        }
+
+        $name = trim($_POST['name'] ?? '');
+        $email = strtolower(trim($_POST['email'] ?? ''));
+        $subject = trim($_POST['subject'] ?? '');
+        $message = trim($_POST['message'] ?? '');
+
+        if ($name === '' || !filter_var($email, FILTER_VALIDATE_EMAIL) || $subject === '' || $message === '') {
+            $_SESSION['flash_error'] = 'Vui lòng nhập đầy đủ thông tin liên hệ hợp lệ.';
+            header('Location: ' . Url::contact());
+            exit;
+        }
+
+        ContactMessage::create([
+            'name' => mb_substr($name, 0, 190),
+            'email' => mb_substr($email, 0, 190),
+            'subject' => mb_substr($subject, 0, 255),
+            'message' => $message,
+            'ip_address' => $_SERVER['REMOTE_ADDR'] ?? null,
+            'user_agent' => mb_substr($_SERVER['HTTP_USER_AGENT'] ?? '', 0, 255),
+        ]);
+
+        $_SESSION['flash_success'] = 'Đã gửi yêu cầu hỗ trợ. Admin sẽ kiểm tra và phản hồi sớm.';
+        header('Location: ' . Url::contact());
+        exit;
+    }
+
     public function productAction() {
         $productId = $_POST['product_id'] ?? '';
         $variantIdx = (int)($_POST['variant_idx'] ?? 0);

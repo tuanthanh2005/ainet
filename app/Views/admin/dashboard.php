@@ -405,6 +405,17 @@
                     </a>
                 </li>
                 <li class="nav-item">
+                    <a href="#" class="nav-link" onclick="switchView('contacts', this)">
+                        <i class="fa-solid fa-envelope"></i>
+                        <span class="nav-label">Quản lý Liên hệ</span>
+                        <?php if (!empty($unreadContacts)): ?>
+                            <span class="nav-count-badge" id="contact-unread-badge" title="Tin liên hệ mới"><?php echo (int) $unreadContacts; ?></span>
+                        <?php else: ?>
+                            <span class="nav-count-badge d-none" id="contact-unread-badge" title="Tin liên hệ mới">0</span>
+                        <?php endif; ?>
+                    </a>
+                </li>
+                <li class="nav-item">
                     <a href="#" class="nav-link" onclick="switchView('users', this)">
                         <i class="fa-solid fa-users"></i> Quản lý User
                     </a>
@@ -524,6 +535,32 @@
                 </div>
             </div>
         </div>
+
+                <div id="view-contacts" class="view-section">
+                    <div class="card-custom">
+                        <div class="card-header-custom">
+                            <div>
+                                <h6 class="mb-0 fw-bold">Tin nhắn liên hệ</h6>
+                                <small class="text-muted">Các yêu cầu khách gửi từ trang Liên hệ</small>
+                            </div>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-hover table-custom mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>Khách gửi</th>
+                                        <th>Chủ đề</th>
+                                        <th>Nội dung</th>
+                                        <th>Trạng thái</th>
+                                        <th>Ngày gửi</th>
+                                        <th class="text-end">Thao tác</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="contact-table-body"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
 
                 <div id="view-categories" class="view-section">
                     <div class="card-custom">
@@ -1135,6 +1172,7 @@
             orders: <?php echo json_encode($orders); ?>,
             users: <?php echo json_encode($users ?? []); ?>,
             blogs: <?php echo json_encode($blogs ?? []); ?>,
+            contactMessages: <?php echo json_encode($contactMessages ?? []); ?>,
             csrfToken: <?php echo json_encode(Csrf::token()); ?>
         };
 
@@ -1198,6 +1236,7 @@
             renderOrders();
             renderUsers();
             renderBlogsTable();
+            renderContacts();
 
             // Auto slugification listeners
             const pTitle = document.getElementById('p_title');
@@ -1260,6 +1299,7 @@
                 'dashboard': 'Tổng quan',
                 'products': 'Quản lý Sản phẩm',
                 'orders': 'Quản lý Đơn hàng',
+                'contacts': 'Quản lý Liên hệ',
                 'categories': 'Quản lý Danh mục',
                 'users': 'Quản lý User',
                 'blogs': 'Quản lý Tin tức',
@@ -2306,6 +2346,73 @@
         // ============== ADMIN CHAT HELPERS ==============
         function escHtml(s) {
             return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+        }
+
+        function renderContacts() {
+            const tbody = document.getElementById('contact-table-body');
+            if (!tbody) return;
+            const messages = [...(APP_STATE.contactMessages || [])].sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+
+            if (messages.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" class="text-center text-muted py-4">Chưa có tin liên hệ nào.</td></tr>`;
+                updateContactBadge();
+                return;
+            }
+
+            tbody.innerHTML = messages.map(msg => {
+                const isNew = msg.status === 'new';
+                const statusBadge = isNew
+                    ? '<span class="badge bg-warning text-dark rounded-pill">Mới</span>'
+                    : (msg.status === 'archived'
+                        ? '<span class="badge bg-secondary rounded-pill">Lưu trữ</span>'
+                        : '<span class="badge bg-success rounded-pill">Đã đọc</span>');
+                const dateStr = msg.created_at ? new Date(String(msg.created_at).replace(' ', 'T')).toLocaleString('vi-VN') : '';
+                return `
+                    <tr class="${isNew ? 'table-warning' : ''}">
+                        <td>
+                            <div class="fw-semibold text-dark">${escHtml(msg.name || '')}</div>
+                            <a class="small text-muted" href="mailto:${escHtml(msg.email || '')}">${escHtml(msg.email || '')}</a>
+                        </td>
+                        <td class="fw-semibold text-dark">${escHtml(msg.subject || '')}</td>
+                        <td style="max-width: 420px;">
+                            <div class="text-muted small" style="white-space: pre-wrap;">${escHtml(msg.message || '')}</div>
+                        </td>
+                        <td>${statusBadge}</td>
+                        <td class="small text-muted">${dateStr}</td>
+                        <td class="text-end">
+                            <div class="btn-group">
+                                <button class="btn btn-sm btn-outline-dark" onclick="setContactStatus(${Number(msg.id)}, 'read')" title="Đánh dấu đã đọc"><i class="fa-solid fa-check"></i></button>
+                                <button class="btn btn-sm btn-outline-secondary" onclick="setContactStatus(${Number(msg.id)}, 'archived')" title="Lưu trữ"><i class="fa-solid fa-box-archive"></i></button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+            updateContactBadge();
+        }
+
+        function updateContactBadge(count) {
+            const badge = document.getElementById('contact-unread-badge');
+            if (!badge) return;
+            const unread = typeof count === 'number'
+                ? count
+                : (APP_STATE.contactMessages || []).filter(msg => msg.status === 'new').length;
+            badge.textContent = unread;
+            badge.classList.toggle('d-none', unread <= 0);
+        }
+
+        function setContactStatus(id, status) {
+            apiPost('adminUpdateContactStatus', { id, status }).then(data => {
+                if (!data.success) {
+                    AppNotify.error(data.message || 'Không thể cập nhật tin liên hệ.', 'Lỗi');
+                    return;
+                }
+                const msg = (APP_STATE.contactMessages || []).find(item => Number(item.id) === Number(id));
+                if (msg) msg.status = status;
+                renderContacts();
+                updateContactBadge(Number(data.unreadContacts || 0));
+                AppNotify.success('Đã cập nhật tin liên hệ.', 'Thành công');
+            }).catch(() => AppNotify.error('Không thể cập nhật tin liên hệ.', 'Lỗi kết nối'));
         }
         // ============== STOCK MANAGER ==============
         var stockCtx = { productId: '', variantIdx: 0 };

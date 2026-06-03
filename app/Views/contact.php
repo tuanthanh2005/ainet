@@ -57,24 +57,25 @@
             <div class="col-lg-7">
                 <div class="contact-form-wrapper bg-white p-4 p-md-5 rounded-4 shadow-sm border">
                     <h3 class="fw-bold mb-4 text-dark">Gửi tin nhắn cho chúng tôi</h3>
-                    <form id="contactForm">
+                    <form id="contactForm" method="POST" action="<?php echo url('index.php?action=submitContact'); ?>">
+                        <?php echo Csrf::field(); ?>
                         <div class="row g-4">
                             <div class="col-md-6">
                                 <label class="form-label small fw-bold">Họ tên</label>
-                                <input type="text" class="form-control" placeholder="Nguyễn Văn A" required>
+                                <input type="text" name="name" class="form-control" placeholder="Nguyễn Văn A" required>
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label small fw-bold">Email</label>
-                                <input type="email" class="form-control" placeholder="name@example.com" required>
+                                <input type="email" name="email" class="form-control" placeholder="name@example.com" required>
                             </div>
                             <div class="col-12">
                                 <label class="form-label small fw-bold">Chủ đề</label>
-                                <input type="text" class="form-control" placeholder="Tôi cần hỗ trợ về dịch vụ..."
+                                <input type="text" name="subject" class="form-control" placeholder="Tôi cần hỗ trợ về dịch vụ..."
                                     required>
                             </div>
                             <div class="col-12">
                                 <label class="form-label small fw-bold">Nội dung</label>
-                                <textarea class="form-control" rows="5" placeholder="Mô tả chi tiết vấn đề của bạn..."
+                                <textarea name="message" class="form-control" rows="5" placeholder="Mô tả chi tiết vấn đề của bạn..."
                                     required></textarea>
                             </div>
                             <div class="col-12">

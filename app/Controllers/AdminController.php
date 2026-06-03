@@ -33,6 +33,8 @@ class AdminController extends Controller {
         $categories = Category::getAll();
         $blogs      = Blog::getAll();
         $users      = User::getAll();
+        $contactMessages = ContactMessage::getAll();
+        $unreadContacts = ContactMessage::countUnread();
 
         $this->view('admin/dashboard', [
             'settings'         => $settings,
@@ -41,12 +43,28 @@ class AdminController extends Controller {
             'orders'           => $firstPageOrders,
             'blogs'            => $blogs,
             'users'            => $users,
+            'contactMessages'  => $contactMessages,
+            'unreadContacts'   => $unreadContacts,
             'totalRevenue'     => $totalRevenue,
             'totalOrders'      => $totalOrders,
             'pendingOrders'    => $pendingOrders,
             'ordersTotalPages' => max(1, ceil($totalOrders / 10)),
             'currentUser'      => $_SESSION['user'],
         ]);
+    }
+
+    public function adminUpdateContactStatus() {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            $this->jsonError('Method not allowed', 405);
+        }
+
+        $id = (int) ($_POST['id'] ?? 0);
+        $status = $_POST['status'] ?? '';
+        if ($id <= 0 || !ContactMessage::updateStatus($id, $status)) {
+            $this->jsonError('Không thể cập nhật tin liên hệ.');
+        }
+
+        $this->jsonSuccess(['unreadContacts' => ContactMessage::countUnread()]);
     }
 
     public function adminOrdersList() {

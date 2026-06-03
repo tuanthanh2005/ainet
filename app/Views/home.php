@@ -21,13 +21,13 @@
     <div class="row g-4 mb-5 text-center fade-in-element" style="animation-delay: 0.1s;">
         <div class="col-6 col-md-3">
             <div class="p-4 rounded-4" style="background: rgba(255,255,255,0.6); border: 1px solid var(--border-color); backdrop-filter: blur(8px);">
-                <div class="fs-2 fw-extrabold text-primary" style="background: var(--vip-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 800;">50,000+</div>
+                <div class="fs-2 fw-extrabold text-primary" style="background: var(--vip-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 800;">500+</div>
                 <div class="small text-muted fw-bold mt-1">Khách Hàng Tin Dùng</div>
             </div>
         </div>
         <div class="col-6 col-md-3">
             <div class="p-4 rounded-4" style="background: rgba(255,255,255,0.6); border: 1px solid var(--border-color); backdrop-filter: blur(8px);">
-                <div class="fs-2 fw-extrabold text-primary" style="background: var(--vip-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 800;">120,000+</div>
+                <div class="fs-2 fw-extrabold text-primary" style="background: var(--vip-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 800;">120+</div>
                 <div class="small text-muted fw-bold mt-1">Đơn Hàng Thành Công</div>
             </div>
         </div>
