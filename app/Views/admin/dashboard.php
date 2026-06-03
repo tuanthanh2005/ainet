@@ -364,8 +364,10 @@
             outline: none;
         }
         .rich-editor:focus { border-color: #aaa; box-shadow: 0 0 0 0.15rem rgba(0,0,0,0.05); }
-        .rich-editor h2 { font-size: 1.4rem; font-weight: 700; margin: 12px 0 6px; }
-        .rich-editor h3 { font-size: 1.15rem; font-weight: 700; margin: 10px 0 6px; }
+        .rich-editor h1 { font-size: 1.25rem; font-weight: 800; margin: 12px 0 6px; }
+        .rich-editor h2 { font-size: 1.12rem; font-weight: 750; margin: 12px 0 6px; }
+        .rich-editor h3 { font-size: 1rem; font-weight: 700; margin: 10px 0 6px; }
+        .rich-editor p { margin: 0 0 10px; }
         .rich-editor table {
             width: 100%;
             border-collapse: collapse;
@@ -1783,6 +1785,8 @@
             });
         });
 
+        document.getElementById('p_detail_desc_editor')?.addEventListener('paste', handleRichEditorPaste);
+
         function saveProduct() {
             const variants = [];
             document.querySelectorAll('.variant-row').forEach(row => {
@@ -2381,6 +2385,23 @@
                 + '</tbody></table><p><br></p>';
         }
 
+        function cleanPastedHtml(html) {
+            const template = document.createElement('template');
+            template.innerHTML = html;
+            const allowed = new Set(['P', 'BR', 'STRONG', 'B', 'EM', 'I', 'U', 'S', 'H1', 'H2', 'H3', 'H4', 'UL', 'OL', 'LI', 'BLOCKQUOTE', 'A', 'TABLE', 'THEAD', 'TBODY', 'TR', 'TH', 'TD']);
+            template.content.querySelectorAll('*').forEach(node => {
+                if (!allowed.has(node.tagName)) {
+                    node.replaceWith(...Array.from(node.childNodes));
+                    return;
+                }
+                Array.from(node.attributes).forEach(attr => {
+                    const keepHref = node.tagName === 'A' && attr.name === 'href' && !/^\s*(javascript|data):/i.test(attr.value);
+                    if (!keepHref) node.removeAttribute(attr.name);
+                });
+            });
+            return template.innerHTML;
+        }
+
         function handleRichEditorPaste(event) {
             const clipboard = event.clipboardData || window.clipboardData;
             if (!clipboard) return;
@@ -2388,7 +2409,7 @@
             const html = clipboard.getData('text/html');
             const text = clipboard.getData('text/plain');
             const markdownTable = markdownTableToHtml(text);
-            const content = html && /<table[\s>]/i.test(html) ? html : markdownTable;
+            const content = html ? cleanPastedHtml(html) : markdownTable;
             if (!content) return;
 
             event.preventDefault();

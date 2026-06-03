@@ -1,3 +1,23 @@
+<?php
+function render_product_detail_description(string $raw): string {
+    $raw = trim($raw);
+    if ($raw === '') {
+        return '';
+    }
+
+    $tags = 'p|h[1-6]|ul|ol|li|blockquote|strong|em|br|a|img|span|b|i|u|table|thead|tbody|tr|th|td';
+    if (preg_match('/&lt;\s*(' . $tags . ')\b/i', $raw)) {
+        $raw = html_entity_decode($raw, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+    }
+
+    if (preg_match('/<\s*(' . $tags . ')\b/i', $raw)) {
+        $allowed = '<p><br><strong><b><em><i><u><s><h1><h2><h3><h4><ul><ol><li><blockquote><a><img><span><table><thead><tbody><tr><th><td>';
+        return strip_tags($raw, $allowed);
+    }
+
+    return nl2br(htmlspecialchars($raw));
+}
+?>
 <div class="py-lg-4 pb-5">
     <a href="<?php echo url(); ?>" class="back-link mb-4 d-inline-block text-decoration-none text-dark fw-bold">
         <i class="fa-solid fa-arrow-left me-2"></i> Trở về danh sách
@@ -199,11 +219,7 @@
                         <?php $detailDescription = trim((string) ($product['description'] ?? '')) ?: $shortDescription; ?>
                         <?php if ($detailDescription !== ''): ?>
                             <div class="product-detail-description">
-                                <?php if ($detailDescription !== strip_tags($detailDescription)): ?>
-                                    <?= $detailDescription ?>
-                                <?php else: ?>
-                                    <?= nl2br(htmlspecialchars($detailDescription)) ?>
-                                <?php endif; ?>
+                                <?= render_product_detail_description($detailDescription) ?>
                             </div>
                         <?php else: ?>
                             <p>Thông tin chi tiết đang được cập nhật.</p>
@@ -295,12 +311,26 @@
 .product-detail-description h2,
 .product-detail-description h3 {
     color: #111;
-    font-weight: 800;
-    margin: 1.25rem 0 0.65rem;
+    font-weight: 750;
+    line-height: 1.35;
+    margin: 1.15rem 0 0.55rem;
 }
-.product-detail-description h1 { font-size: 1.45rem; }
-.product-detail-description h2 { font-size: 1.25rem; }
-.product-detail-description h3 { font-size: 1.08rem; }
+.product-detail-description {
+    color: #444;
+    font-size: 1rem;
+    line-height: 1.75;
+}
+.product-detail-description p {
+    margin: 0 0 0.85rem;
+    font-size: 1rem;
+}
+.product-detail-description h1 { font-size: 1.25rem; }
+.product-detail-description h2 { font-size: 1.13rem; }
+.product-detail-description h3 { font-size: 1.03rem; }
+.product-detail-description strong,
+.product-detail-description b {
+    font-weight: 700;
+}
 .product-detail-description ul,
 .product-detail-description ol {
     padding-left: 1.35rem;

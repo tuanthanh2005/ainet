@@ -169,7 +169,7 @@ $blogDesc  = $hasBlog ? (($blog['content'] ?? '') ?: ($blog['description'] ?? ''
                          style="object-fit: cover; max-height: 450px;">
                 <?php endif; ?>
 
-                <div class="blog-content-formatted" style="font-size: 1.1rem; line-height: 1.85; color: #444;">
+                <div class="blog-content-formatted">
                     <?php if ($blogDesc !== ''): ?>
                         <?= render_blog_body($blogDesc) ?>
                     <?php else: ?>
@@ -200,12 +200,26 @@ $blogDesc  = $hasBlog ? (($blog['content'] ?? '') ?: ($blog['description'] ?? ''
 .blog-content-formatted h2,
 .blog-content-formatted h3 {
     color: #111;
-    font-weight: 800;
-    margin: 1.25rem 0 0.65rem;
+    font-weight: 750;
+    line-height: 1.35;
+    margin: 1.15rem 0 0.55rem;
 }
-.blog-content-formatted h1 { font-size: 1.45rem; }
-.blog-content-formatted h2 { font-size: 1.25rem; }
-.blog-content-formatted h3 { font-size: 1.08rem; }
+.blog-content-formatted {
+    color: #444;
+    font-size: 1rem;
+    line-height: 1.75;
+}
+.blog-content-formatted p {
+    margin: 0 0 0.85rem;
+    font-size: 1rem;
+}
+.blog-content-formatted h1 { font-size: 1.25rem; }
+.blog-content-formatted h2 { font-size: 1.13rem; }
+.blog-content-formatted h3 { font-size: 1.03rem; }
+.blog-content-formatted strong,
+.blog-content-formatted b {
+    font-weight: 700;
+}
 .blog-content-formatted ul,
 .blog-content-formatted ol {
     padding-left: 1.35rem;
