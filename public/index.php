@@ -79,6 +79,7 @@ require_once APP_ROOT . '/app/Core/Auth.php';
 require_once APP_ROOT . '/app/Core/Seo.php';
 require_once APP_ROOT . '/app/Core/Url.php';
 require_once APP_ROOT . '/app/Core/Upload.php';
+require_once APP_ROOT . '/app/Core/IndexingService.php';
 require_once APP_ROOT . '/app/Core/TelegramService.php';
 require_once APP_ROOT . '/app/Core/GoogleAuth.php';
 

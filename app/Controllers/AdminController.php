@@ -228,7 +228,8 @@ class AdminController extends Controller {
         }
 
         Product::saveAll($products);
-        $this->jsonSuccess();
+        $indexing = IndexingService::submitUrl(Url::product($data), ($data['status'] ?? 'active') === 'hidden' ? 'URL_DELETED' : 'URL_UPDATED');
+        $this->jsonSuccess(['indexing' => $indexing]);
     }
 
     public function adminDeleteProduct() {
@@ -242,12 +243,20 @@ class AdminController extends Controller {
         }
 
         $products = Product::getAll();
+        $deletedUrl = '';
+        foreach ($products as $p) {
+            if (($p['id'] ?? '') === $id) {
+                $deletedUrl = Url::product($p);
+                break;
+            }
+        }
         $products = array_values(array_filter($products, function ($p) use ($id) {
             return ($p['id'] ?? '') !== $id;
         }));
         Product::saveAll($products);
 
-        $this->jsonSuccess();
+        $indexing = $deletedUrl !== '' ? IndexingService::submitUrl($deletedUrl, 'URL_DELETED') : null;
+        $this->jsonSuccess(['indexing' => $indexing]);
     }
 
     public function adminSaveCategory() {
@@ -308,7 +317,9 @@ class AdminController extends Controller {
         } catch (Throwable $e) {
             $this->jsonError('Không thể lưu danh mục: ' . $e->getMessage());
         }
-        $this->jsonSuccess();
+        $categorySlug = trim((string) ($data['seo_slug'] ?: ($data['slug'] ?? '')));
+        $indexing = $categorySlug !== '' ? IndexingService::submitUrl(Url::category($categorySlug), 'URL_UPDATED') : null;
+        $this->jsonSuccess(['indexing' => $indexing]);
     }
 
     public function adminDeleteCategory() {
@@ -322,12 +333,21 @@ class AdminController extends Controller {
         }
 
         $categories = Category::getAll();
+        $deletedUrl = '';
+        foreach ($categories as $cat) {
+            if ((int) ($cat['id'] ?? 0) === (int) $id) {
+                $slug = trim((string) ($cat['seo_slug'] ?: ($cat['slug'] ?? '')));
+                $deletedUrl = $slug !== '' ? Url::category($slug) : '';
+                break;
+            }
+        }
         $categories = array_values(array_filter($categories, function ($c) use ($id) {
             return (int) ($c['id'] ?? 0) !== (int) $id;
         }));
         Category::saveAll($categories);
 
-        $this->jsonSuccess();
+        $indexing = $deletedUrl !== '' ? IndexingService::submitUrl($deletedUrl, 'URL_DELETED') : null;
+        $this->jsonSuccess(['indexing' => $indexing]);
     }
 
     public function adminSaveBlog() {
@@ -367,12 +387,19 @@ class AdminController extends Controller {
         if ($id !== '') {
             $stmt = $db->prepare('UPDATE blogs SET title = ?, image = ?, description = ?, content = ?, seo_title = ?, seo_description = ?, seo_keywords = ?, seo_slug = ? WHERE id = ?');
             $stmt->execute([$title, $imageUrl, $description, $content, $seoTitle ?: null, $seoDescription ?: null, $seoKeywords ?: null, $seoSlug ?: null, (int) $id]);
+            $blogId = (int) $id;
         } else {
             $stmt = $db->prepare('INSERT INTO blogs (title, image, description, content, seo_title, seo_description, seo_keywords, seo_slug) VALUES (?, ?, ?, ?, ?, ?, ?, ?)');
             $stmt->execute([$title, $imageUrl, $description, $content, $seoTitle ?: null, $seoDescription ?: null, $seoKeywords ?: null, $seoSlug ?: null]);
+            $blogId = (int) $db->lastInsertId();
         }
 
-        $this->jsonSuccess(['image' => $imageUrl]);
+        $indexing = IndexingService::submitUrl(Url::blog([
+            'id' => $blogId,
+            'title' => $title,
+            'seo_slug' => $seoSlug,
+        ]), 'URL_UPDATED');
+        $this->jsonSuccess(['image' => $imageUrl, 'indexing' => $indexing]);
     }
 
     public function adminDeleteBlog() {
@@ -385,11 +412,34 @@ class AdminController extends Controller {
             $this->jsonError('Thiếu ID bài viết.');
         }
 
+        $blog = Blog::getById($id);
+        $deletedUrl = $blog ? Url::blog($blog) : '';
         $db = Database::getInstance();
         $stmt = $db->prepare('DELETE FROM blogs WHERE id = ?');
         $stmt->execute([$id]);
 
-        $this->jsonSuccess();
+        $indexing = $deletedUrl !== '' ? IndexingService::submitUrl($deletedUrl, 'URL_DELETED') : null;
+        $this->jsonSuccess(['indexing' => $indexing]);
+    }
+
+    public function adminPushIndexAll() {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            $this->jsonError('Method not allowed', 405);
+        }
+
+        $results = IndexingService::submitAllPublicUrls();
+        $submitted = 0;
+        foreach ($results as $result) {
+            if (!empty($result['success'])) {
+                $submitted++;
+            }
+        }
+
+        $this->jsonSuccess([
+            'submitted' => $submitted,
+            'total' => count($results),
+            'results' => $results,
+        ]);
     }
 
 

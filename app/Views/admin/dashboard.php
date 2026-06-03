@@ -514,9 +514,14 @@
                                 <h6 class="mb-0 fw-bold">Danh sách Dịch vụ / Sản phẩm</h6>
                                 <small class="text-muted">Quản lý các sản phẩm hiển thị trên trang chủ</small>
                             </div>
-                            <button class="btn btn-black" onclick="openProductModal()">
+                            <div class="d-flex gap-2">
+                                <button class="btn btn-light border" onclick="pushIndexAll()">
+                                    <i class="fa-solid fa-cloud-arrow-up me-1"></i> Push index
+                                </button>
+                                <button class="btn btn-black" onclick="openProductModal()">
                                 <i class="fa-solid fa-plus me-1"></i> Thêm mới
-                            </button>
+                                </button>
+                            </div>
                         </div>
                         <div class="table-responsive">
                             <table class="table table-hover table-custom mb-0">
@@ -1235,6 +1240,19 @@
                 body: formData,
                 credentials: 'same-origin'
             }).then(res => res.json());
+        }
+
+        function pushIndexAll() {
+            AppNotify.info('Đang gửi toàn bộ URL public lên Google Indexing API...', 'Push index');
+            apiPost('adminPushIndexAll', {})
+                .then(data => {
+                    if (data.success) {
+                        AppNotify.success(`Đã gửi ${data.submitted || 0}/${data.total || 0} URL.`, 'Push index');
+                    } else {
+                        AppNotify.error(data.message || 'Không thể push index.', 'Lỗi indexing');
+                    }
+                })
+                .catch(() => AppNotify.error('Không thể kết nối API push index.', 'Lỗi indexing'));
         }
 
         let productModal, categoryModal, blogModal, stockModal;
