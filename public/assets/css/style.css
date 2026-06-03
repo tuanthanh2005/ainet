@@ -1105,9 +1105,10 @@ body {
 
     /* Floating Action Buttons */
     .fab-wrapper {
-        bottom: 16px;
+        bottom: calc(78px + env(safe-area-inset-bottom));
         right: 12px;
         gap: 8px;
+        z-index: 1001;
     }
     .fab-btn {
         width: 38px;
