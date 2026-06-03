@@ -73,7 +73,7 @@ $hasBlog = !empty($blog);
 $blogTitle = $hasBlog ? ($blog['title'] ?? '') : 'Bài viết không tồn tại';
 $blogImage = $hasBlog ? ($blog['image'] ?? '') : '';
 $blogDate  = ($hasBlog && !empty($blog['created_at'])) ? date('d/m/Y', strtotime($blog['created_at'])) : '';
-$blogDesc  = $hasBlog ? ($blog['description'] ?? '') : '';
+$blogDesc  = $hasBlog ? (($blog['content'] ?? '') ?: ($blog['description'] ?? '')) : '';
 ?>
 <div class="row g-5">
     <!-- Sidebar -->

@@ -201,7 +201,8 @@ class HomeController extends Controller {
         shuffle($allProducts);
         $sidebarProducts = array_slice($allProducts, 0, 3);
 
-        $excerpt = Seo::truncate(strip_tags($blog['description'] ?? ''), 200);
+        $excerptSource = trim((string) ($blog['description'] ?? '')) ?: (string) ($blog['content'] ?? '');
+        $excerpt = Seo::truncate(strip_tags($excerptSource), 200);
         $seoTitle = !empty($blog['seo_title']) ? $blog['seo_title'] : ($blog['title'] ?? 'Bài viết');
         $seoDesc  = !empty($blog['seo_description']) ? $blog['seo_description'] : $excerpt;
         $seoKey   = !empty($blog['seo_keywords']) ? explode(',', $blog['seo_keywords']) : [$blog['title'] ?? '', SITENAME];

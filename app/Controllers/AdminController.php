@@ -339,6 +339,7 @@ class AdminController extends Controller {
         $title       = trim($_POST['title'] ?? '');
         $imageUrl    = trim($_POST['image'] ?? '');
         $description = trim($_POST['description'] ?? '');
+        $content     = trim($_POST['content'] ?? '');
 
         if ($title === '') {
             $this->jsonError('Tiêu đề bài viết không được trống.');
@@ -354,7 +355,8 @@ class AdminController extends Controller {
             $this->jsonError($e->getMessage());
         }
 
-        $description = Upload::sanitizeHtml($description);
+        $description = trim(strip_tags($description));
+        $content = Upload::sanitizeHtml($content);
 
         $seoTitle       = trim($_POST['seo_title'] ?? '');
         $seoDescription = trim($_POST['seo_description'] ?? '');
@@ -363,11 +365,11 @@ class AdminController extends Controller {
 
         $db = Database::getInstance();
         if ($id !== '') {
-            $stmt = $db->prepare('UPDATE blogs SET title = ?, image = ?, description = ?, seo_title = ?, seo_description = ?, seo_keywords = ?, seo_slug = ? WHERE id = ?');
-            $stmt->execute([$title, $imageUrl, $description, $seoTitle ?: null, $seoDescription ?: null, $seoKeywords ?: null, $seoSlug ?: null, (int) $id]);
+            $stmt = $db->prepare('UPDATE blogs SET title = ?, image = ?, description = ?, content = ?, seo_title = ?, seo_description = ?, seo_keywords = ?, seo_slug = ? WHERE id = ?');
+            $stmt->execute([$title, $imageUrl, $description, $content, $seoTitle ?: null, $seoDescription ?: null, $seoKeywords ?: null, $seoSlug ?: null, (int) $id]);
         } else {
-            $stmt = $db->prepare('INSERT INTO blogs (title, image, description, seo_title, seo_description, seo_keywords, seo_slug) VALUES (?, ?, ?, ?, ?, ?, ?)');
-            $stmt->execute([$title, $imageUrl, $description, $seoTitle ?: null, $seoDescription ?: null, $seoKeywords ?: null, $seoSlug ?: null]);
+            $stmt = $db->prepare('INSERT INTO blogs (title, image, description, content, seo_title, seo_description, seo_keywords, seo_slug) VALUES (?, ?, ?, ?, ?, ?, ?, ?)');
+            $stmt->execute([$title, $imageUrl, $description, $content, $seoTitle ?: null, $seoDescription ?: null, $seoKeywords ?: null, $seoSlug ?: null]);
         }
 
         $this->jsonSuccess(['image' => $imageUrl]);

@@ -374,6 +374,30 @@
             margin: 8px 0;
         }
         .rich-editor ul, .rich-editor ol { padding-left: 22px; }
+        .seo-quality-box {
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            background: #f8fafc;
+            padding: 12px 14px;
+        }
+        .seo-quality-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: grid;
+            gap: 6px;
+        }
+        .seo-quality-list li {
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+            color: #6b7280;
+            font-size: 0.82rem;
+            line-height: 1.35;
+        }
+        .seo-quality-list li.ok { color: #15803d; }
+        .seo-quality-list li.warn { color: #b45309; }
+        .seo-quality-list i { margin-top: 2px; }
     </style>
 </head>
 
@@ -2202,12 +2226,14 @@
             document.getElementById('blog_id').value = '';
             document.getElementById('blog_image_url').value = '';
             document.getElementById('blog_desc').value = '';
-            document.getElementById('blog_desc_editor').innerHTML = '';
+            document.getElementById('blog_content').value = '';
+            document.getElementById('blog_content_editor').innerHTML = '';
             document.getElementById('blog_seo_slug').value = '';
             document.getElementById('blog_seo_title').value = '';
             document.getElementById('blog_seo_description').value = '';
             document.getElementById('blog_seo_keywords').value = '';
             setBlogImagePreview('');
+            updateBlogSeoChecklist();
             document.querySelector('#blogModal .modal-title').innerText = 'Thêm bài viết mới';
             getBlogModal().show();
         }
@@ -2218,13 +2244,15 @@
             document.getElementById('blog_id').value = blog.id;
             document.getElementById('blog_title').value = blog.title || '';
             document.getElementById('blog_image_url').value = blog.image || '';
-            document.getElementById('blog_desc_editor').innerHTML = blog.description || '';
             document.getElementById('blog_desc').value = blog.description || '';
+            document.getElementById('blog_content_editor').innerHTML = blog.content || blog.description || '';
+            document.getElementById('blog_content').value = blog.content || blog.description || '';
             document.getElementById('blog_seo_slug').value = blog.seo_slug || '';
             document.getElementById('blog_seo_title').value = blog.seo_title || '';
             document.getElementById('blog_seo_description').value = blog.seo_description || '';
             document.getElementById('blog_seo_keywords').value = blog.seo_keywords || '';
             setBlogImagePreview(blog.image || '');
+            updateBlogSeoChecklist();
             document.querySelector('#blogModal .modal-title').innerText = 'Chỉnh sửa bài viết';
             getBlogModal().show();
         }
@@ -2272,7 +2300,7 @@
             });
 
             // Rich text toolbar -> contenteditable
-            const editor = document.getElementById('blog_desc_editor');
+            const editor = document.getElementById('blog_content_editor');
             if (editor) {
                 document.querySelectorAll('#blogModal .rich-toolbar [data-cmd]').forEach(btn => {
                     btn.addEventListener('mousedown', e => e.preventDefault()); // keep selection
@@ -2286,20 +2314,70 @@
                         }
                         editor.focus();
                         document.execCommand(cmd, false, arg);
+                        updateBlogSeoChecklist();
                     });
                 });
             }
+
+            ['blog_title', 'blog_desc', 'blog_content_editor', 'blog_seo_slug', 'blog_seo_title', 'blog_seo_description', 'blog_seo_keywords'].forEach(id => {
+                const el = document.getElementById(id);
+                if (!el) return;
+                el.addEventListener('input', updateBlogSeoChecklist);
+                el.addEventListener('keyup', updateBlogSeoChecklist);
+            });
+        }
+
+        function getBlogSeoIssues() {
+            const title = document.getElementById('blog_title').value.trim();
+            const summary = document.getElementById('blog_desc').value.trim();
+            const contentText = document.getElementById('blog_content_editor').innerText.trim();
+            const seoSlug = document.getElementById('blog_seo_slug').value.trim();
+            const seoTitle = document.getElementById('blog_seo_title').value.trim();
+            const seoDescription = document.getElementById('blog_seo_description').value.trim();
+            const keywords = document.getElementById('blog_seo_keywords').value.split(',').map(k => k.trim()).filter(Boolean);
+            return [
+                { ok: title.length >= 20 && title.length <= 70, text: 'Tiêu đề bài viết nên từ 20-70 ký tự.' },
+                { ok: summary.length >= 80 && summary.length <= 180, text: 'Mô tả ngắn nên từ 80-180 ký tự.' },
+                { ok: contentText.length >= 600, text: 'Nội dung chi tiết nên tối thiểu 600 ký tự.' },
+                { ok: seoSlug === '' || /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(seoSlug), text: 'SEO slug dùng chữ thường, số và dấu gạch ngang.' },
+                { ok: seoTitle.length >= 45 && seoTitle.length <= 65, text: 'SEO title nên từ 45-65 ký tự.' },
+                { ok: seoDescription.length >= 120 && seoDescription.length <= 165, text: 'SEO description nên từ 120-165 ký tự.' },
+                { ok: keywords.length >= 2, text: 'SEO keywords nên có ít nhất 2 từ khóa, cách nhau bằng dấu phẩy.' },
+            ];
+        }
+
+        function updateBlogSeoChecklist() {
+            const list = document.getElementById('blog_seo_checklist');
+            const badge = document.getElementById('blog_seo_score');
+            if (!list || !badge) return;
+            const issues = getBlogSeoIssues();
+            const okCount = issues.filter(item => item.ok).length;
+            badge.textContent = `${okCount}/${issues.length}`;
+            badge.className = 'badge ' + (okCount === issues.length ? 'bg-success' : okCount >= 5 ? 'bg-warning text-dark' : 'bg-danger');
+            list.innerHTML = issues.map(item => `
+                <li class="${item.ok ? 'ok' : 'warn'}">
+                    <i class="fa-solid ${item.ok ? 'fa-circle-check' : 'fa-triangle-exclamation'}"></i>
+                    <span>${item.text}</span>
+                </li>
+            `).join('');
         }
 
         function saveBlog() {
-            const editor = document.getElementById('blog_desc_editor');
-            document.getElementById('blog_desc').value = editor.innerHTML.trim();
+            const editor = document.getElementById('blog_content_editor');
+            document.getElementById('blog_content').value = editor.innerHTML.trim();
+
+            const missing = getBlogSeoIssues().filter(item => !item.ok).map(item => item.text);
+            if (missing.length) {
+                AppNotify.warning('Bài viết chưa chuẩn SEO: ' + missing.join(' '), 'Cần bổ sung');
+                return;
+            }
 
             const formData = new FormData();
             formData.append('id', document.getElementById('blog_id').value);
             formData.append('title', document.getElementById('blog_title').value);
             formData.append('image', document.getElementById('blog_image_url').value);
             formData.append('description', document.getElementById('blog_desc').value);
+            formData.append('content', document.getElementById('blog_content').value);
             formData.append('seo_slug', document.getElementById('blog_seo_slug').value);
             formData.append('seo_title', document.getElementById('blog_seo_title').value);
             formData.append('seo_description', document.getElementById('blog_seo_description').value);
@@ -2862,6 +2940,12 @@
 
                         <div class="mb-3">
                             <label class="form-label">Mô tả ngắn</label>
+                            <textarea id="blog_desc" class="form-control" rows="3" maxlength="220" placeholder="Tóm tắt 1-2 câu có từ khóa chính, hiển thị ở Google và danh sách bài viết."></textarea>
+                            <small class="text-muted d-block mt-1">Nên viết 80-180 ký tự, rõ nội dung chính của bài.</small>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Nội dung chi tiết bài viết</label>
                             <div class="rich-toolbar btn-group flex-wrap mb-1" role="toolbar">
                                 <button type="button" class="btn btn-sm btn-light border" data-cmd="bold" title="Đậm"><i class="fa-solid fa-bold"></i></button>
                                 <button type="button" class="btn btn-sm btn-light border" data-cmd="italic" title="Nghiêng"><i class="fa-solid fa-italic"></i></button>
@@ -2876,8 +2960,8 @@
                                 <button type="button" class="btn btn-sm btn-light border" data-cmd="createLink" title="Chèn liên kết"><i class="fa-solid fa-link"></i></button>
                                 <button type="button" class="btn btn-sm btn-light border" data-cmd="removeFormat" title="Xoá định dạng"><i class="fa-solid fa-eraser"></i></button>
                             </div>
-                            <div id="blog_desc_editor" class="rich-editor" contenteditable="true"></div>
-                            <textarea id="blog_desc" class="d-none"></textarea>
+                            <div id="blog_content_editor" class="rich-editor" contenteditable="true"></div>
+                            <textarea id="blog_content" class="d-none"></textarea>
                             <small class="text-muted d-block mt-1">Mẹo: bôi đen text rồi chọn nút trên thanh công cụ để định dạng.</small>
                         </div>
 
@@ -2900,6 +2984,15 @@
                                 <div class="col-12 mb-3">
                                     <label class="form-label">SEO Keywords (Từ khóa Google)</label>
                                     <input type="text" class="form-control" id="blog_seo_keywords" placeholder="Cách nhau bằng dấu phẩy">
+                                </div>
+                                <div class="col-12">
+                                    <div class="seo-quality-box">
+                                        <div class="d-flex align-items-center justify-content-between mb-2">
+                                            <div class="fw-semibold text-dark"><i class="fa-solid fa-list-check me-1"></i> Kiểm tra chuẩn SEO</div>
+                                            <span class="badge bg-danger" id="blog_seo_score">0/7</span>
+                                        </div>
+                                        <ul class="seo-quality-list" id="blog_seo_checklist"></ul>
+                                    </div>
                                 </div>
                             </div>
                         </div>
