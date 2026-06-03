@@ -82,7 +82,7 @@ $blogDesc  = $hasBlog ? (($blog['content'] ?? '') ?: ($blog['description'] ?? ''
 ?>
 <div class="row g-5">
     <!-- Sidebar -->
-    <div class="col-lg-4 col-md-5 d-none d-md-block">
+    <div class="d-none">
         <h4 class="fw-bold mb-4 border-bottom pb-3" style="letter-spacing: -0.5px;">
             <i class="fa-solid fa-fire text-danger me-2"></i>Sản phẩm HOT
         </h4>
@@ -123,7 +123,7 @@ $blogDesc  = $hasBlog ? (($blog['content'] ?? '') ?: ($blog['description'] ?? ''
     </div>
 
     <!-- Article -->
-    <div class="col-lg-8 col-md-7">
+    <div class="col-lg-8 col-md-10 mx-auto">
         <nav aria-label="breadcrumb" class="mb-4 fade-in-element">
             <ol class="breadcrumb">
                 <li class="breadcrumb-item">
