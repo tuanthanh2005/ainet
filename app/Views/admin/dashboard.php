@@ -694,6 +694,40 @@
                 <div id="view-settings" class="view-section">
                     <div class="row">
                         <div class="col-12">
+                            <div class="card-custom p-4 mb-4 border-success border-top" style="border-width: 4px !important;">
+                                <div class="d-flex align-items-center justify-content-between flex-wrap gap-3 mb-3">
+                                    <div>
+                                        <h5 class="fw-bold mb-1">Google Indexing API</h5>
+                                        <small class="text-muted">Gửi yêu cầu index toàn hệ thống hoặc từng URL riêng lẻ.</small>
+                                    </div>
+                                    <button type="button" class="btn btn-black" onclick="pushIndexAll()">
+                                        <i class="fa-solid fa-cloud-arrow-up me-1"></i> Index toàn hệ thống
+                                    </button>
+                                </div>
+
+                                <div id="index-url-rows" class="d-grid gap-2 mb-3">
+                                    <div class="input-group index-url-row">
+                                        <input type="url" class="form-control index-url-input" placeholder="https://aicuatoi.net/san-pham/slug-hoac-duong-dan-can-index">
+                                        <button class="btn btn-light border" type="button" onclick="removeIndexUrlRow(this)" title="Xóa hàng">
+                                            <i class="fa-solid fa-xmark"></i>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div class="d-flex align-items-center gap-2 flex-wrap">
+                                    <button type="button" class="btn btn-light border" onclick="addIndexUrlRow()">
+                                        <i class="fa-solid fa-plus me-1"></i> Thêm hàng
+                                    </button>
+                                    <button type="button" class="btn btn-success" onclick="pushIndexUrls()">
+                                        <i class="fa-solid fa-paper-plane me-1"></i> Index các URL này
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-12">
                             <div class="card-custom p-4 mb-4 border-primary border-top"
                                 style="border-width: 4px !important;">
                                 <div class="d-flex align-items-center mb-4">
@@ -1253,6 +1287,51 @@
                     }
                 })
                 .catch(() => AppNotify.error('Không thể kết nối API push index.', 'Lỗi indexing'));
+        }
+
+        function addIndexUrlRow(value = '') {
+            const wrap = document.getElementById('index-url-rows');
+            if (!wrap) return;
+            const row = document.createElement('div');
+            row.className = 'input-group index-url-row';
+            row.innerHTML = `
+                <input type="url" class="form-control index-url-input" placeholder="https://aicuatoi.net/duong-dan-can-index" value="${String(value).replace(/"/g, '&quot;')}">
+                <button class="btn btn-light border" type="button" onclick="removeIndexUrlRow(this)" title="Xóa hàng">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            `;
+            wrap.appendChild(row);
+        }
+
+        function removeIndexUrlRow(btn) {
+            const wrap = document.getElementById('index-url-rows');
+            const rows = wrap ? wrap.querySelectorAll('.index-url-row') : [];
+            if (rows.length <= 1) {
+                const input = rows[0]?.querySelector('.index-url-input');
+                if (input) input.value = '';
+                return;
+            }
+            btn.closest('.index-url-row')?.remove();
+        }
+
+        function pushIndexUrls() {
+            const urls = Array.from(document.querySelectorAll('.index-url-input'))
+                .map(input => input.value.trim())
+                .filter(Boolean);
+            if (!urls.length) {
+                AppNotify.warning('Nhập ít nhất 1 URL cần index.', 'Thiếu URL');
+                return;
+            }
+            AppNotify.info('Đang gửi URL riêng lẻ lên Google Indexing API...', 'Push index');
+            apiPost('adminPushIndexUrls', { urls: JSON.stringify(urls) })
+                .then(data => {
+                    if (data.success) {
+                        AppNotify.success(`Đã gửi ${data.submitted || 0}/${data.total || 0} URL.`, 'Push index');
+                    } else {
+                        AppNotify.error(data.message || 'Không thể index URL.', 'Lỗi indexing');
+                    }
+                })
+                .catch(() => AppNotify.error('Không thể kết nối API index URL.', 'Lỗi indexing'));
         }
 
         let productModal, categoryModal, blogModal, stockModal;

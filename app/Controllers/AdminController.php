@@ -442,6 +442,57 @@ class AdminController extends Controller {
         ]);
     }
 
+    public function adminPushIndexUrls() {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            $this->jsonError('Method not allowed', 405);
+        }
+
+        $rawUrls = $_POST['urls'] ?? '[]';
+        $urls = json_decode((string) $rawUrls, true);
+        if (!is_array($urls)) {
+            $urls = preg_split('/\r\n|\r|\n/', (string) $rawUrls);
+        }
+
+        $siteHost = parse_url(URLROOT, PHP_URL_HOST);
+        $cleanUrls = [];
+        foreach ($urls as $url) {
+            $url = trim((string) $url);
+            if ($url === '') {
+                continue;
+            }
+            if (strpos($url, '/') === 0) {
+                $url = url($url);
+            }
+            if (!filter_var($url, FILTER_VALIDATE_URL)) {
+                continue;
+            }
+            $host = parse_url($url, PHP_URL_HOST);
+            if ($siteHost && $host !== $siteHost) {
+                continue;
+            }
+            $cleanUrls[] = $url;
+        }
+
+        $cleanUrls = array_values(array_unique($cleanUrls));
+        if (empty($cleanUrls)) {
+            $this->jsonError('Không có URL hợp lệ để index.');
+        }
+
+        $results = IndexingService::submitUrls($cleanUrls, 'URL_UPDATED');
+        $submitted = 0;
+        foreach ($results as $result) {
+            if (!empty($result['success'])) {
+                $submitted++;
+            }
+        }
+
+        $this->jsonSuccess([
+            'submitted' => $submitted,
+            'total' => count($results),
+            'results' => $results,
+        ]);
+    }
+
 
 
     /** Telegram: test bot configuration */
