@@ -366,6 +366,23 @@
         .rich-editor:focus { border-color: #aaa; box-shadow: 0 0 0 0.15rem rgba(0,0,0,0.05); }
         .rich-editor h2 { font-size: 1.4rem; font-weight: 700; margin: 12px 0 6px; }
         .rich-editor h3 { font-size: 1.15rem; font-weight: 700; margin: 10px 0 6px; }
+        .rich-editor table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 12px 0;
+            background: #fff;
+        }
+        .rich-editor th,
+        .rich-editor td {
+            border: 1px solid #e5e7eb;
+            padding: 8px 10px;
+            vertical-align: top;
+        }
+        .rich-editor th {
+            background: #f8fafc;
+            color: #111;
+            font-weight: 700;
+        }
         .rich-editor blockquote {
             border-left: 3px solid #111;
             padding: 4px 12px;
@@ -2325,6 +2342,58 @@
                 el.addEventListener('input', updateBlogSeoChecklist);
                 el.addEventListener('keyup', updateBlogSeoChecklist);
             });
+
+            editor?.addEventListener('paste', handleRichEditorPaste);
+        }
+
+        function escapeHtml(value) {
+            return String(value)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+
+        function markdownTableToHtml(text) {
+            const lines = text.replace(/\r\n/g, '\n').split('\n').map(line => line.trim()).filter(Boolean);
+            const tableStart = lines.findIndex((line, index) => {
+                return line.includes('|') && lines[index + 1] && /^\|?\s*:?-{3,}:?\s*(\|\s*:?-{3,}:?\s*)+\|?$/.test(lines[index + 1]);
+            });
+            if (tableStart === -1) return '';
+
+            const tableLines = [];
+            for (let i = tableStart; i < lines.length; i++) {
+                if (!lines[i].includes('|')) break;
+                tableLines.push(lines[i]);
+            }
+            if (tableLines.length < 3) return '';
+
+            const parseRow = line => line.replace(/^\|/, '').replace(/\|$/, '').split('|').map(cell => cell.trim());
+            const headers = parseRow(tableLines[0]);
+            const rows = tableLines.slice(2).map(parseRow).filter(row => row.length === headers.length);
+            if (!headers.length || !rows.length) return '';
+
+            return '<table><thead><tr>'
+                + headers.map(cell => `<th>${escapeHtml(cell)}</th>`).join('')
+                + '</tr></thead><tbody>'
+                + rows.map(row => '<tr>' + row.map(cell => `<td>${escapeHtml(cell)}</td>`).join('') + '</tr>').join('')
+                + '</tbody></table><p><br></p>';
+        }
+
+        function handleRichEditorPaste(event) {
+            const clipboard = event.clipboardData || window.clipboardData;
+            if (!clipboard) return;
+
+            const html = clipboard.getData('text/html');
+            const text = clipboard.getData('text/plain');
+            const markdownTable = markdownTableToHtml(text);
+            const content = html && /<table[\s>]/i.test(html) ? html : markdownTable;
+            if (!content) return;
+
+            event.preventDefault();
+            document.execCommand('insertHTML', false, content);
+            updateBlogSeoChecklist();
         }
 
         function getBlogSeoIssues() {

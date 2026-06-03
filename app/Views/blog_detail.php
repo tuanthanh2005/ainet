@@ -11,10 +11,15 @@ function render_blog_body(string $raw): string {
         return '';
     }
 
+    if (preg_match('/&lt;\s*(p|h[1-6]|ul|ol|li|blockquote|strong|em|br|a|img|span|b|i|u|table|thead|tbody|tr|th|td)\b/i', $raw)) {
+        $raw = html_entity_decode($raw, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+    }
+
     // Heuristic: if the content already contains any HTML tag it was saved by
     // the rich editor — render as-is.
-    if (preg_match('/<\s*(p|h[1-6]|ul|ol|li|blockquote|strong|em|br|a|img|span|b|i|u)\b/i', $raw)) {
-        return $raw;
+    if (preg_match('/<\s*(p|h[1-6]|ul|ol|li|blockquote|strong|em|br|a|img|span|b|i|u|table|thead|tbody|tr|th|td)\b/i', $raw)) {
+        $allowed = '<p><br><strong><b><em><i><u><s><h1><h2><h3><h4><ul><ol><li><blockquote><a><img><span><table><thead><tbody><tr><th><td>';
+        return strip_tags($raw, $allowed);
     }
 
     // Plaintext fallback (legacy rows): minimal markdown style
@@ -189,3 +194,39 @@ $blogDesc  = $hasBlog ? (($blog['content'] ?? '') ?: ($blog['description'] ?? ''
         <?php endif; ?>
     </div>
 </div>
+
+<style>
+.blog-content-formatted h1,
+.blog-content-formatted h2,
+.blog-content-formatted h3 {
+    color: #111;
+    font-weight: 800;
+    margin: 1.25rem 0 0.65rem;
+}
+.blog-content-formatted h1 { font-size: 1.45rem; }
+.blog-content-formatted h2 { font-size: 1.25rem; }
+.blog-content-formatted h3 { font-size: 1.08rem; }
+.blog-content-formatted ul,
+.blog-content-formatted ol {
+    padding-left: 1.35rem;
+    margin-bottom: 1rem;
+}
+.blog-content-formatted li { margin-bottom: 0.35rem; }
+.blog-content-formatted table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1rem 0;
+    background: #fff;
+}
+.blog-content-formatted th,
+.blog-content-formatted td {
+    border: 1px solid #e5e7eb;
+    padding: 0.65rem 0.75rem;
+    vertical-align: top;
+}
+.blog-content-formatted th {
+    color: #111;
+    background: #f8fafc;
+    font-weight: 700;
+}
+</style>
