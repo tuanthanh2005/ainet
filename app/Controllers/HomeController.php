@@ -1142,5 +1142,45 @@ class HomeController extends Controller {
         header("Location: $referer");
         exit;
     }
+
+    public function submitReviewReply() {
+        $this->requireLogin();
+
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            header('Location: ' . url());
+            exit;
+        }
+
+        $reviewId = (int) ($_POST['review_id'] ?? 0);
+        $content = trim($_POST['content'] ?? '');
+        $currentUser = $_SESSION['user'] ?? null;
+
+        if (!$reviewId || $content === '') {
+            $_SESSION['flash_error'] = 'Dữ liệu không hợp lệ.';
+            $referer = $_SERVER['HTTP_REFERER'] ?? url();
+            header("Location: $referer");
+            exit;
+        }
+
+        // Check if user is allowed to reply
+        require_once APP_ROOT . '/app/Models/Review.php';
+        if (!Review::canReply($reviewId, $currentUser)) {
+            $_SESSION['flash_error'] = 'Bạn không có quyền trả lời đánh giá này hoặc đang chờ admin phản hồi.';
+            $referer = $_SERVER['HTTP_REFERER'] ?? url();
+            header("Location: $referer");
+            exit;
+        }
+
+        // Add the reply
+        if (Review::createReply($reviewId, $currentUser['id'], $content)) {
+            $_SESSION['flash_success'] = 'Gửi phản hồi thành công!';
+        } else {
+            $_SESSION['flash_error'] = 'Có lỗi xảy ra, vui lòng thử lại sau.';
+        }
+
+        $referer = $_SERVER['HTTP_REFERER'] ?? url();
+        header("Location: $referer");
+        exit;
+    }
 }
 ?>

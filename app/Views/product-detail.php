@@ -261,6 +261,44 @@ $reviewCount = count($reviews);
                                         <?php if (!empty($rev['content'])): ?>
                                             <p class="mb-0 text-secondary" style="font-size: 0.95rem; line-height: 1.6;"><?= nl2br(htmlspecialchars($rev['content'])) ?></p>
                                         <?php endif; ?>
+
+                                        <!-- Review Replies -->
+                                        <?php $replies = Review::getRepliesByReviewId((int)$rev['id']); ?>
+                                        <?php if (!empty($replies)): ?>
+                                            <div class="review-replies-list mt-3 ps-3 border-start border-2 border-light-subtle">
+                                                <?php foreach ($replies as $reply): ?>
+                                                    <div class="reply-item mb-2 p-2 rounded-3 <?php echo ($reply['user_role'] ?? '') === 'admin' ? 'reply-admin' : 'reply-user'; ?>">
+                                                        <div class="d-flex align-items-center justify-content-between mb-1">
+                                                            <div>
+                                                                <strong class="text-dark small"><?= htmlspecialchars($reply['user_name'] ?? 'Người dùng') ?></strong>
+                                                                <?php if (($reply['user_role'] ?? '') === 'admin'): ?>
+                                                                    <span class="badge bg-primary ms-1" style="font-size: 0.7rem; background: linear-gradient(135deg, #6366f1, #a855f7) !important;">QTV</span>
+                                                                <?php endif; ?>
+                                                            </div>
+                                                            <small class="text-muted" style="font-size: 0.75rem;"><?= date('d/m/Y H:i', strtotime($reply['created_at'])) ?></small>
+                                                        </div>
+                                                        <p class="mb-0 text-secondary small" style="line-height: 1.5;"><?= nl2br(htmlspecialchars($reply['content'])) ?></p>
+                                                    </div>
+                                                <?php endforeach; ?>
+                                            </div>
+                                        <?php endif; ?>
+
+                                        <!-- Reply Form (if allowed) -->
+                                        <?php if (Review::canReply((int)$rev['id'], $currentUser)): ?>
+                                            <div class="reply-form-wrapper mt-2">
+                                                <button class="btn btn-sm btn-link text-decoration-none p-0 text-primary fw-semibold toggle-reply-btn" onclick="toggleReplyForm(<?= $rev['id'] ?>)">
+                                                    <i class="fa-regular fa-comment me-1"></i> Phản hồi
+                                                </button>
+                                                <form id="reply-form-<?= $rev['id'] ?>" action="<?= url('index.php?action=submitReviewReply') ?>" method="POST" class="mt-2 d-none reply-submit-form">
+                                                    <?= Csrf::field() ?>
+                                                    <input type="hidden" name="review_id" value="<?= $rev['id'] ?>">
+                                                    <div class="input-group">
+                                                        <input type="text" name="content" class="form-control form-control-sm rounded-start-3" placeholder="Nhập câu trả lời của bạn..." required>
+                                                        <button class="btn btn-sm btn-primary rounded-end-3" type="submit" style="background: linear-gradient(135deg, #6366f1, #a855f7); border: none;">Gửi</button>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        <?php endif; ?>
                                     </div>
                                 </div>
                             <?php endforeach; ?>
@@ -389,4 +427,40 @@ $reviewCount = count($reviews);
     background: #f8fafc;
     font-weight: 700;
 }
+
+/* Review Replies Custom Styling */
+.review-replies-list {
+    margin-left: 10px;
+}
+.reply-item {
+    background-color: #f8fafc;
+    border: 1px solid #f1f5f9;
+    transition: all 0.2s ease-in-out;
+}
+.reply-item.reply-admin {
+    background-color: #faf5ff;
+    border-left: 3px solid #a855f7;
+    border-top: 1px solid #f3e8ff;
+    border-right: 1px solid #f3e8ff;
+    border-bottom: 1px solid #f3e8ff;
+}
+.reply-item:hover {
+    background-color: #f1f5f9;
+}
+.reply-item.reply-admin:hover {
+    background-color: #f3e8ff;
+}
 </style>
+
+<script>
+function toggleReplyForm(reviewId) {
+    const form = document.getElementById('reply-form-' + reviewId);
+    if (form) {
+        form.classList.toggle('d-none');
+        const input = form.querySelector('input[name="content"]');
+        if (input && !form.classList.contains('d-none')) {
+            input.focus();
+        }
+    }
+}
+</script>

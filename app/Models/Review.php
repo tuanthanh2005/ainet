@@ -65,4 +65,87 @@ class Review {
         $stmt->execute([$orderId, $productId]);
         return (bool) $stmt->fetch();
     }
+
+    private static function ensureReviewRepliesTable(PDO $db): void {
+        static $done = false;
+        if ($done) return;
+        $done = true;
+
+        try {
+            $db->exec("CREATE TABLE IF NOT EXISTS review_replies (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                review_id INT NOT NULL,
+                user_id INT NOT NULL,
+                content TEXT NOT NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                INDEX idx_review_id (review_id),
+                INDEX idx_user_id (user_id),
+                FOREIGN KEY (review_id) REFERENCES reviews(id) ON DELETE CASCADE
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;");
+        } catch (Throwable $ignored) {}
+    }
+
+    public static function getById(int $id): ?array {
+        $db = Database::getInstance();
+        self::ensureReviewTable($db);
+        
+        $stmt = $db->prepare("SELECT * FROM reviews WHERE id = ?");
+        $stmt->execute([$id]);
+        $row = $stmt->fetch();
+        return $row ?: null;
+    }
+
+    public static function getRepliesByReviewId(int $reviewId): array {
+        $db = Database::getInstance();
+        self::ensureReviewRepliesTable($db);
+        
+        $stmt = $db->prepare("
+            SELECT rp.*, u.name as user_name, u.avatar as user_avatar, u.role as user_role
+            FROM review_replies rp
+            LEFT JOIN users u ON rp.user_id = u.id
+            WHERE rp.review_id = ?
+            ORDER BY rp.created_at ASC
+        ");
+        $stmt->execute([$reviewId]);
+        return $stmt->fetchAll();
+    }
+
+    public static function createReply(int $reviewId, int $userId, string $content): bool {
+        $db = Database::getInstance();
+        self::ensureReviewRepliesTable($db);
+        
+        $stmt = $db->prepare("INSERT INTO review_replies (review_id, user_id, content, created_at) VALUES (?, ?, ?, NOW())");
+        return $stmt->execute([$reviewId, $userId, $content]);
+    }
+
+    public static function canReply(int $reviewId, ?array $currentUser): bool {
+        if (!$currentUser) {
+            return false;
+        }
+
+        if (($currentUser['role'] ?? 'user') === 'admin') {
+            return true;
+        }
+
+        $review = self::getById($reviewId);
+        if (!$review) {
+            return false;
+        }
+
+        // Only the author of the review can reply
+        if ((int)$review['user_id'] !== (int)$currentUser['id']) {
+            return false;
+        }
+
+        // Check the replies
+        $replies = self::getRepliesByReviewId($reviewId);
+        if (empty($replies)) {
+            // No replies yet, user cannot reply (must wait for admin)
+            return false;
+        }
+
+        $lastReply = end($replies);
+        // The last reply must be from an admin
+        return ($lastReply['user_role'] ?? 'user') === 'admin';
+    }
 }

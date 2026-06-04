@@ -125,9 +125,27 @@ class Product {
         }
     }
 
-    public static function incrementSoldCount(string $id, int $qty = 1): void {
+    public static function incrementSoldCount(string $id, int $qty = 1, int $variantIdx = -1): void {
         $db = Database::getInstance();
         $stmt = $db->prepare("UPDATE products SET sold_count = sold_count + ? WHERE id = ?");
         $stmt->execute([$qty, $id]);
+
+        if ($variantIdx >= 0) {
+            $stmt = $db->prepare("SELECT options FROM products WHERE id = ?");
+            $stmt->execute([$id]);
+            $optionsJson = $stmt->fetchColumn();
+            
+            if ($optionsJson) {
+                $options = json_decode($optionsJson, true);
+                if (is_array($options) && isset($options[$variantIdx])) {
+                    $currentStock = (int)($options[$variantIdx]['stock'] ?? 0);
+                    $newStock = max(0, $currentStock - $qty);
+                    $options[$variantIdx]['stock'] = $newStock;
+                    
+                    $updateStmt = $db->prepare("UPDATE products SET options = ? WHERE id = ?");
+                    $updateStmt->execute([json_encode($options, JSON_UNESCAPED_UNICODE), $id]);
+                }
+            }
+        }
     }
 }
