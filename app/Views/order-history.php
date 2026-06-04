@@ -331,6 +331,7 @@
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content rounded-4 border-0 shadow">
             <form action="<?= url('index.php?action=submitReview') ?>" method="POST">
+                <?php echo Csrf::field(); ?>
                 <div class="modal-header border-bottom-0 pb-0">
                     <h5 class="modal-title fw-bold" id="reviewModalLabel">Đánh giá sản phẩm</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
