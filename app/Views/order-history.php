@@ -62,6 +62,7 @@
                 <div class="d-flex flex-column gap-3">
                     <?php foreach ($orders as $idx => $order): ?>
                         <?php
+                            require_once APP_ROOT . '/app/Models/Review.php';
                             $items     = $order['delivered_items'] ?? [];
                             $hasItems  = is_array($items) && count($items) > 0;
                             $rowId     = 'oh-' . $idx;
@@ -76,6 +77,11 @@
                                         : ($status === 'processing' ? 'fa-spinner fa-spin'
                                         : ($status === 'pending' ? 'fa-clock' : 'fa-times-circle'));
                             $imageUrl   = $order['product_image'] ?? null; // optional, may not be set
+                            
+                            $hasReviewed = false;
+                            if ($status === 'completed') {
+                                $hasReviewed = Review::hasReviewed($order['id'], $order['product_id']);
+                            }
                         ?>
                         <div class="oh-order <?= $statusCls ?>">
                             <div class="oh-row">
@@ -124,6 +130,12 @@
                                             <span class="oh-cta-badge"><?= count($items) ?></span>
                                             <i class="fa-solid fa-chevron-down chev"></i>
                                         </button>
+                                        <?php if (!$hasReviewed): ?>
+                                            <button type="button" class="oh-cta oh-cta-warning mt-1 btn-review" data-order="<?= htmlspecialchars($order['id']) ?>" data-product="<?= htmlspecialchars($order['product_id']) ?>" data-name="<?= htmlspecialchars($order['product_name']) ?>">
+                                                <i class="fa-solid fa-star"></i>
+                                                <span>Đánh giá</span>
+                                            </button>
+                                        <?php endif; ?>
                                     <?php elseif ($status === 'completed'): ?>
                                         <button type="button" class="oh-cta oh-cta-warning"
                                                 data-bs-toggle="collapse" data-bs-target="#<?= $rowId ?>"
@@ -132,6 +144,12 @@
                                             <span>Chi tiết</span>
                                             <i class="fa-solid fa-chevron-down chev"></i>
                                         </button>
+                                        <?php if (!$hasReviewed): ?>
+                                            <button type="button" class="oh-cta oh-cta-warning mt-1 btn-review" data-order="<?= htmlspecialchars($order['id']) ?>" data-product="<?= htmlspecialchars($order['product_id']) ?>" data-name="<?= htmlspecialchars($order['product_name']) ?>">
+                                                <i class="fa-solid fa-star"></i>
+                                                <span>Đánh giá</span>
+                                            </button>
+                                        <?php endif; ?>
                                     <?php elseif ($status === 'processing'): ?>
                                         <button type="button" class="oh-cta oh-cta-primary text-white"
                                                 data-bs-toggle="collapse" data-bs-target="#<?= $rowId ?>"
@@ -304,6 +322,40 @@
                     </div>
                 <?php endif; ?>
             <?php endif; ?>
+        </div>
+    </div>
+</div>
+
+<!-- Generic Review Modal -->
+<div class="modal fade" id="reviewModal" tabindex="-1" aria-labelledby="reviewModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content rounded-4 border-0 shadow">
+            <form action="<?= url('index.php?action=submitReview') ?>" method="POST">
+                <div class="modal-header border-bottom-0 pb-0">
+                    <h5 class="modal-title fw-bold" id="reviewModalLabel">Đánh giá sản phẩm</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body text-center pt-2">
+                    <p class="text-muted small mb-4">Bạn cảm thấy sản phẩm <strong id="reviewProductName">...</strong> như thế nào?</p>
+                    
+                    <input type="hidden" name="order_id" id="reviewOrderId" value="">
+                    <input type="hidden" name="product_id" id="reviewProductId" value="">
+                    
+                    <div class="rating-stars mb-4" dir="rtl">
+                        <input type="radio" id="oh_star5" name="rating" value="5" checked><label for="oh_star5" class="fs-1 text-warning mx-1" style="cursor:pointer;"><i class="fa-solid fa-star"></i></label>
+                        <input type="radio" id="oh_star4" name="rating" value="4"><label for="oh_star4" class="fs-1 text-warning mx-1" style="cursor:pointer;"><i class="fa-solid fa-star"></i></label>
+                        <input type="radio" id="oh_star3" name="rating" value="3"><label for="oh_star3" class="fs-1 text-warning mx-1" style="cursor:pointer;"><i class="fa-solid fa-star"></i></label>
+                        <input type="radio" id="oh_star2" name="rating" value="2"><label for="oh_star2" class="fs-1 text-warning mx-1" style="cursor:pointer;"><i class="fa-solid fa-star"></i></label>
+                        <input type="radio" id="oh_star1" name="rating" value="1"><label for="oh_star1" class="fs-1 text-warning mx-1" style="cursor:pointer;"><i class="fa-solid fa-star"></i></label>
+                    </div>
+                    
+                    <textarea name="content" class="form-control rounded-3" rows="3" placeholder="Chia sẻ thêm cảm nhận của bạn (không bắt buộc)..."></textarea>
+                </div>
+                <div class="modal-footer border-top-0 pt-0">
+                    <button type="button" class="btn btn-light rounded-3" data-bs-dismiss="modal">Để sau</button>
+                    <button type="submit" class="btn btn-primary rounded-3 px-4">Gửi đánh giá</button>
+                </div>
+            </form>
         </div>
     </div>
 </div>
@@ -548,6 +600,12 @@
     .oh-date { margin-left: 0; }
 }
 </style>
+<style>
+.rating-stars { display: inline-flex; flex-direction: row-reverse; }
+.rating-stars input { display: none; }
+.rating-stars label { color: #ddd !important; transition: color 0.2s; }
+.rating-stars input:checked ~ label, .rating-stars label:hover, .rating-stars label:hover ~ label { color: #ffc107 !important; }
+</style>
 
 <script>
 function copyOrderText(btn, value) {
@@ -568,5 +626,17 @@ function copyAllItems(btn) {
     });
 }
 
+document.addEventListener('DOMContentLoaded', function() {
+    const reviewBtns = document.querySelectorAll('.btn-review');
+    const reviewModal = new bootstrap.Modal(document.getElementById('reviewModal'));
+    reviewBtns.forEach(btn => {
+        btn.addEventListener('click', function() {
+            document.getElementById('reviewOrderId').value = this.dataset.order;
+            document.getElementById('reviewProductId').value = this.dataset.product;
+            document.getElementById('reviewProductName').innerText = this.dataset.name;
+            reviewModal.show();
+        });
+    });
+});
 
 </script>

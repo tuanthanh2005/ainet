@@ -1087,12 +1087,60 @@ class HomeController extends Controller {
         return $best;
     }
 
+
     private function loginUser($user) {
         Auth::login($user);
     }
 
     private function requireLogin() {
         Auth::requireLogin();
+    }
+
+    public function submitReview() {
+        $this->requireLogin();
+
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            header('Location: ' . url());
+            exit;
+        }
+
+        $orderId = $_POST['order_id'] ?? '';
+        $productId = $_POST['product_id'] ?? '';
+        $rating = (int) ($_POST['rating'] ?? 5);
+        $content = trim($_POST['content'] ?? '');
+        $userId = $_SESSION['user']['id'];
+
+        if (!$orderId || !$productId || $rating < 1 || $rating > 5) {
+            $_SESSION['flash_error'] = 'Thông tin đánh giá không hợp lệ.';
+            header('Location: ' . url('index.php?action=orderHistory'));
+            exit;
+        }
+
+        // Verify order belongs to user and is completed
+        $order = Order::getById($orderId);
+        if (!$order || $order['customer_email'] !== $_SESSION['user']['email'] || $order['status'] !== 'completed') {
+            $_SESSION['flash_error'] = 'Bạn không thể đánh giá đơn hàng này.';
+            header('Location: ' . url('index.php?action=orderHistory'));
+            exit;
+        }
+
+        // Check if already reviewed
+        if (Review::hasReviewed($orderId, $productId)) {
+            $_SESSION['flash_error'] = 'Bạn đã đánh giá sản phẩm này trong đơn hàng này rồi.';
+            header('Location: ' . url('index.php?action=orderHistory'));
+            exit;
+        }
+
+        if (Review::create($orderId, $productId, $userId, $rating, $content)) {
+            $_SESSION['flash_success'] = 'Cảm ơn bạn đã gửi đánh giá!';
+        } else {
+            $_SESSION['flash_error'] = 'Có lỗi xảy ra, vui lòng thử lại sau.';
+        }
+
+        // Redirect back to referring page (order history or payment success)
+        $referer = $_SERVER['HTTP_REFERER'] ?? url('index.php?action=orderHistory');
+        header("Location: $referer");
+        exit;
     }
 }
 ?>

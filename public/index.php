@@ -85,6 +85,7 @@ require_once APP_ROOT . '/app/Core/GoogleAuth.php';
 
 // Load Models
 require_once APP_ROOT . '/app/Models/Product.php';
+require_once APP_ROOT . '/app/Models/Review.php';
 require_once APP_ROOT . '/app/Models/Setting.php';
 require_once APP_ROOT . '/app/Models/User.php';
 require_once APP_ROOT . '/app/Models/Category.php';

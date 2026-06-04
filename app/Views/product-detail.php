@@ -17,6 +17,10 @@ function render_product_detail_description(string $raw): string {
 
     return nl2br(htmlspecialchars($raw));
 }
+
+require_once APP_ROOT . '/app/Models/Review.php';
+$reviews = Review::getByProductId($product['id'] ?? '');
+$reviewCount = count($reviews);
 ?>
 <div class="py-lg-4 pb-5">
     <a href="<?php echo url(); ?>" class="back-link mb-4 d-inline-block text-decoration-none text-dark fw-bold">
@@ -74,9 +78,12 @@ function render_product_detail_description(string $raw): string {
 
                 <div class="d-flex align-items-center gap-3 mb-4 pb-3 border-bottom border-light">
                     <div style="color: var(--pure-black);">
-                        <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i
-                            class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i
-                            class="fa-solid fa-star"></i>
+                        <?php
+                            $avgRating = round($product['rating'] ?? 5);
+                            for ($i = 1; $i <= 5; $i++) {
+                                echo $i <= $avgRating ? '<i class="fa-solid fa-star text-warning"></i>' : '<i class="fa-regular fa-star text-warning"></i>';
+                            }
+                        ?>
                     </div>
                     <small class="text-muted"><span id="sold-count">Đã bán
                             <?= number_format($product['sold_count'] ?? 0, 0, ',', '.') ?></span> | <span
@@ -197,7 +204,7 @@ function render_product_detail_description(string $raw): string {
                     <button class="nav-link custom-tab-btn" id="reviews-tab" data-bs-toggle="tab"
                         data-bs-target="#reviews" type="button" role="tab" aria-controls="reviews"
                         aria-selected="false">
-                        <i class="fa-solid fa-star me-1"></i>Đánh giá (0)
+                        <i class="fa-solid fa-star me-1"></i>Đánh giá (<?= $reviewCount ?>)
                     </button>
                 </div>
 
@@ -227,10 +234,38 @@ function render_product_detail_description(string $raw): string {
                     </div>
                 </div>
                 <div class="tab-pane fade" id="reviews" role="tabpanel" aria-labelledby="reviews-tab">
-                    <div class="text-center py-5 text-muted">
-                        <i class="fa-regular fa-comment-dots fs-1 mb-3 text-light-gray"></i>
-                        <p>Chưa có đánh giá nào cho sản phẩm này.</p>
-                    </div>
+                    <?php if (empty($reviews)): ?>
+                        <div class="text-center py-5 text-muted">
+                            <i class="fa-regular fa-comment-dots fs-1 mb-3 text-light-gray"></i>
+                            <p>Chưa có đánh giá nào cho sản phẩm này.</p>
+                        </div>
+                    <?php else: ?>
+                        <div class="reviews-list mt-3">
+                            <?php foreach ($reviews as $rev): ?>
+                                <div class="review-item d-flex gap-3 mb-4 pb-4 border-bottom">
+                                    <div class="review-avatar">
+                                        <div class="rounded-circle bg-light d-flex align-items-center justify-content-center text-secondary fw-bold" style="width: 48px; height: 48px; font-size: 1.2rem;">
+                                            <?= strtoupper(substr($rev['user_name'] ?? 'U', 0, 1)) ?>
+                                        </div>
+                                    </div>
+                                    <div class="review-content flex-grow-1">
+                                        <div class="d-flex align-items-center justify-content-between mb-1">
+                                            <strong class="text-dark"><?= htmlspecialchars($rev['user_name'] ?? 'Khách hàng') ?></strong>
+                                            <small class="text-muted"><?= date('d/m/Y H:i', strtotime($rev['created_at'])) ?></small>
+                                        </div>
+                                        <div class="mb-2">
+                                            <?php for ($i = 1; $i <= 5; $i++): ?>
+                                                <?= $i <= (int)$rev['rating'] ? '<i class="fa-solid fa-star text-warning" style="font-size:0.85rem;"></i>' : '<i class="fa-regular fa-star text-warning" style="font-size:0.85rem;"></i>' ?>
+                                            <?php endfor; ?>
+                                        </div>
+                                        <?php if (!empty($rev['content'])): ?>
+                                            <p class="mb-0 text-secondary" style="font-size: 0.95rem; line-height: 1.6;"><?= nl2br(htmlspecialchars($rev['content'])) ?></p>
+                                        <?php endif; ?>
+                                    </div>
+                                </div>
+                            <?php endforeach; ?>
+                        </div>
+                    <?php endif; ?>
                 </div>
                 <div class="tab-pane fade" id="warranty" role="tabpanel" aria-labelledby="warranty-tab">
                     <div class="warranty-content" style="font-size: 0.95rem;">

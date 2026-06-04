@@ -4,6 +4,11 @@ $deliveredItems = $order['delivered_items'] ?? [];
 $qty = $order['quantity'] ?? 1;
 $got = count($deliveredItems);
 $missing = max(0, $qty - $got);
+
+$hasReviewed = false;
+if ($isSuccess && !empty($_SESSION['user']['id'])) {
+    $hasReviewed = Review::hasReviewed($order['id'], $order['product_id']);
+}
 ?>
 <div class="bg-light min-vh-100 py-5">
     <div class="container">
@@ -105,7 +110,12 @@ $missing = max(0, $qty - $got);
                             </div>
                         <?php endif; ?>
 
-                        <div class="d-flex gap-3 justify-content-center mt-5">
+                        <div class="d-flex gap-3 justify-content-center mt-5 flex-wrap">
+                            <?php if (!$hasReviewed && !empty($_SESSION['user']['id'])): ?>
+                                <button type="button" class="btn btn-warning px-4 py-3 rounded-4 fw-bold shadow" data-bs-toggle="modal" data-bs-target="#reviewModal">
+                                    <i class="fa-solid fa-star me-2"></i> ĐÁNH GIÁ SẢN PHẨM
+                                </button>
+                            <?php endif; ?>
                             <a href="<?= url('index.php?action=orderHistory') ?>" class="btn btn-black px-4 py-3 rounded-4 fw-bold shadow">
                                 <i class="fa-solid fa-clock-rotate-left me-2"></i> LỊCH SỬ ĐƠN HÀNG
                             </a>
@@ -114,6 +124,50 @@ $missing = max(0, $qty - $got);
                     </div>
                 </div>
             </div>
+
+            <!-- Review Modal -->
+            <?php if (!$hasReviewed && !empty($_SESSION['user']['id'])): ?>
+            <div class="modal fade" id="reviewModal" tabindex="-1" aria-labelledby="reviewModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content rounded-4 border-0 shadow">
+                        <form action="<?= url('index.php?action=submitReview') ?>" method="POST">
+                            <div class="modal-header border-bottom-0 pb-0">
+                                <h5 class="modal-title fw-bold" id="reviewModalLabel">Đánh giá sản phẩm</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body text-center pt-2">
+                                <p class="text-muted small mb-4">Bạn cảm thấy sản phẩm <strong><?= htmlspecialchars($order['product_name']) ?></strong> như thế nào?</p>
+                                
+                                <input type="hidden" name="order_id" value="<?= htmlspecialchars($order['id']) ?>">
+                                <input type="hidden" name="product_id" value="<?= htmlspecialchars($order['product_id']) ?>">
+                                
+                                <div class="rating-stars mb-4" dir="rtl">
+                                    <input type="radio" id="star5" name="rating" value="5" checked><label for="star5" class="fs-1 text-warning mx-1" style="cursor:pointer;"><i class="fa-solid fa-star"></i></label>
+                                    <input type="radio" id="star4" name="rating" value="4"><label for="star4" class="fs-1 text-warning mx-1" style="cursor:pointer;"><i class="fa-solid fa-star"></i></label>
+                                    <input type="radio" id="star3" name="rating" value="3"><label for="star3" class="fs-1 text-warning mx-1" style="cursor:pointer;"><i class="fa-solid fa-star"></i></label>
+                                    <input type="radio" id="star2" name="rating" value="2"><label for="star2" class="fs-1 text-warning mx-1" style="cursor:pointer;"><i class="fa-solid fa-star"></i></label>
+                                    <input type="radio" id="star1" name="rating" value="1"><label for="star1" class="fs-1 text-warning mx-1" style="cursor:pointer;"><i class="fa-solid fa-star"></i></label>
+                                </div>
+                                <style>
+                                .rating-stars { display: inline-flex; flex-direction: row-reverse; }
+                                .rating-stars input { display: none; }
+                                .rating-stars label { color: #ddd !important; transition: color 0.2s; }
+                                .rating-stars input:checked ~ label, .rating-stars label:hover, .rating-stars label:hover ~ label { color: #ffc107 !important; }
+                                </style>
+                                
+                                <textarea name="content" class="form-control rounded-3" rows="3" placeholder="Chia sẻ thêm cảm nhận của bạn (không bắt buộc)..."></textarea>
+                            </div>
+                            <div class="modal-footer border-top-0 pt-0">
+                                <button type="button" class="btn btn-light rounded-3" data-bs-dismiss="modal">Để sau</button>
+                                <button type="submit" class="btn btn-primary rounded-3 px-4">Gửi đánh giá</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <?php endif; ?>
+
+
 
         <?php else: ?>
             <!-- STEP 2: PENDING PAYMENT (QR & COUNTDOWN) -->
