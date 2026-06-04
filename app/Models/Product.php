@@ -124,4 +124,10 @@ class Product {
             ]);
         }
     }
+
+    public static function incrementSoldCount(string $id, int $qty = 1): void {
+        $db = Database::getInstance();
+        $stmt = $db->prepare("UPDATE products SET sold_count = sold_count + ? WHERE id = ?");
+        $stmt->execute([$qty, $id]);
+    }
 }

@@ -206,7 +206,6 @@ class CheckoutController extends Controller {
             if ($order && $order['status'] === 'pending') {
                 $transactionId = $data['id'] ?? null;
                 if (Order::updateStatus($orderId, 'completed', $transactionId)) {
-                    // Auto-deliver from stock
                     try {
                         $delivered = Stock::claimForOrder(
                             $orderId,
@@ -217,6 +216,7 @@ class CheckoutController extends Controller {
                         if (!empty($delivered)) {
                             Order::setDelivered($orderId, $delivered);
                         }
+                        Product::incrementSoldCount((string) $order['product_id'], max(1, (int) ($order['quantity'] ?? 1)));
                     } catch (Throwable $e) {
                         if (APP_DEBUG) @file_put_contents($logFile, 'Stock claim error: ' . $e->getMessage() . "\n", FILE_APPEND);
                     }
@@ -359,6 +359,10 @@ class CheckoutController extends Controller {
                 if (Order::updateStatus($orderId, $status, $transactionId)) {
                     $order['status'] = $status;
                     $order['transaction_id'] = $transactionId;
+                    
+                    try {
+                        Product::incrementSoldCount((string) $order['product_id'], max(1, (int) ($order['quantity'] ?? 1)));
+                    } catch (Throwable $e) {}
 
                     // Notify admin via Telegram — order completed/processing
                     try {
@@ -567,6 +571,10 @@ class CheckoutController extends Controller {
         Order::updateStatus($orderId, $status, $txId);
         $order['status'] = $status;
         $order['transaction_id'] = $txId;
+        
+        try {
+            Product::incrementSoldCount((string) $order['product_id'], max(1, (int) ($order['quantity'] ?? 1)));
+        } catch (Throwable $e) {}
 
         // Notify admin via Telegram — demo payment completed
         try {
