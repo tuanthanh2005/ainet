@@ -69,64 +69,6 @@
         }
     </style>
 
-    <!-- Live System Operations Dashboard -->
-    <div class="mb-5 fade-in-element" style="animation-delay: 0.1s;">
-        <div class="d-flex align-items-center justify-content-center gap-2 mb-4">
-            <span class="pulse-green"></span>
-            <span class="text-uppercase fw-extrabold text-muted small" style="letter-spacing: 1.5px; font-size: 0.7rem;">Hệ thống giám sát trạng thái & vận hành trực tuyến</span>
-        </div>
-        
-        <div class="row g-4 text-center">
-            <div class="col-6 col-md-3">
-                <div class="p-4 system-monitor-card h-100 d-flex flex-column justify-content-between">
-                    <div>
-                        <span class="live-label mb-2"><i class="fa-solid fa-server"></i> Máy Chủ</span>
-                        <div class="fs-2 fw-extrabold text-success" style="font-weight: 800; display: inline-flex; align-items: center; gap: 6px;">
-                            <span class="pulse-green"></span> ONLINE
-                        </div>
-                    </div>
-                    <div class="small text-muted mt-2 fw-medium">Tự động bàn giao 24/7/365</div>
-                </div>
-            </div>
-            
-            <div class="col-6 col-md-3">
-                <div class="p-4 system-monitor-card h-100 d-flex flex-column justify-content-between">
-                    <div>
-                        <span class="live-label mb-2"><i class="fa-solid fa-bolt"></i> Phản Hồi</span>
-                        <div class="fs-2 fw-extrabold text-primary" style="background: var(--vip-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 800;">
-                            ~5 Giây
-                        </div>
-                    </div>
-                    <div class="small text-muted mt-2 fw-medium">Kích hoạt qua API SePay tức thì</div>
-                </div>
-            </div>
-            
-            <div class="col-6 col-md-3">
-                <div class="p-4 system-monitor-card h-100 d-flex flex-column justify-content-between">
-                    <div>
-                        <span class="live-label mb-2"><i class="fa-solid fa-cart-shopping"></i> Đơn Tự Động</span>
-                        <div class="fs-2 fw-extrabold text-primary" style="background: var(--vip-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 800;">
-                            <?= number_format($systemStats['completed_orders'], 0, ',', '.') ?>
-                        </div>
-                    </div>
-                    <div class="small text-muted mt-2 fw-medium">Tổng giao dịch được xử lý thành công</div>
-                </div>
-            </div>
-            
-            <div class="col-6 col-md-3">
-                <div class="p-4 system-monitor-card h-100 d-flex flex-column justify-content-between">
-                    <div>
-                        <span class="live-label mb-2"><i class="fa-solid fa-star"></i> Đánh Giá Hài Lòng</span>
-                        <div class="fs-2 fw-extrabold text-primary" style="background: var(--vip-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 800;">
-                            <?= number_format($systemStats['average_rating'], 1) ?>/5 ★
-                        </div>
-                    </div>
-                    <div class="small text-muted mt-2 fw-medium">Chỉ số phản hồi thực tế từ người dùng</div>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <!-- Product Showcase Section -->
     <?php
     $renderProductList = function($productList) {
@@ -268,6 +210,64 @@
             color: white !important;
         }
     </style>
+
+    <!-- Live System Operations Dashboard -->
+    <div class="mb-5 fade-in-element" style="animation-delay: 0.1s;">
+        <div class="d-flex align-items-center justify-content-center gap-2 mb-4">
+            <span class="pulse-green"></span>
+            <span class="text-uppercase fw-extrabold text-muted small" style="letter-spacing: 1.5px; font-size: 0.7rem;">Hệ thống giám sát trạng thái & vận hành trực tuyến</span>
+        </div>
+        
+        <div class="row g-4 text-center">
+            <div class="col-6 col-md-3">
+                <div class="p-4 system-monitor-card h-100 d-flex flex-column justify-content-between">
+                    <div>
+                        <span class="live-label mb-2"><i class="fa-solid fa-server"></i> Máy Chủ</span>
+                        <div class="fs-2 fw-extrabold text-success" style="font-weight: 800; display: inline-flex; align-items: center; gap: 6px;">
+                            <span class="pulse-green"></span> ONLINE
+                        </div>
+                    </div>
+                    <div class="small text-muted mt-2 fw-medium">Tự động bàn giao 24/7/365</div>
+                </div>
+            </div>
+            
+            <div class="col-6 col-md-3">
+                <div class="p-4 system-monitor-card h-100 d-flex flex-column justify-content-between">
+                    <div>
+                        <span class="live-label mb-2"><i class="fa-solid fa-bolt"></i> Phản Hồi</span>
+                        <div class="fs-2 fw-extrabold text-primary" style="background: var(--vip-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 800;">
+                            ~5 Giây
+                        </div>
+                    </div>
+                    <div class="small text-muted mt-2 fw-medium">Kích hoạt qua API SePay tức thì</div>
+                </div>
+            </div>
+            
+            <div class="col-6 col-md-3">
+                <div class="p-4 system-monitor-card h-100 d-flex flex-column justify-content-between">
+                    <div>
+                        <span class="live-label mb-2"><i class="fa-solid fa-cart-shopping"></i> Đơn Tự Động</span>
+                        <div class="fs-2 fw-extrabold text-primary" style="background: var(--vip-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 800;">
+                            <?= number_format($systemStats['completed_orders'], 0, ',', '.') ?>
+                        </div>
+                    </div>
+                    <div class="small text-muted mt-2 fw-medium">Tổng giao dịch được xử lý thành công</div>
+                </div>
+            </div>
+            
+            <div class="col-6 col-md-3">
+                <div class="p-4 system-monitor-card h-100 d-flex flex-column justify-content-between">
+                    <div>
+                        <span class="live-label mb-2"><i class="fa-solid fa-star"></i> Đánh Giá Hài Lòng</span>
+                        <div class="fs-2 fw-extrabold text-primary" style="background: var(--vip-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 800;">
+                            <?= number_format($systemStats['average_rating'], 1) ?>/5 ★
+                        </div>
+                    </div>
+                    <div class="small text-muted mt-2 fw-medium">Chỉ số phản hồi thực tế từ người dùng</div>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- Highlights Brands Section -->
     <div class="mb-5 text-center fade-in-element" style="animation-delay: 0.3s;">
