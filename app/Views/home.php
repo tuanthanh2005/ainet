@@ -127,49 +127,147 @@
         </div>
     </div>
 
-    <!-- Outstanding Features Section -->
-    <div class="mb-5 text-center fade-in-element" style="animation-delay: 0.2s;">
-        <h2 class="fw-bold mb-2">Cam Kết Vàng Tại AI CỦA TÔI</h2>
-        <p class="text-muted small mb-4">Sự hài lòng và độ tin cậy của khách hàng là ưu tiên hàng đầu của chúng tôi</p>
-        <div class="row g-4">
-            <div class="col-md-6 col-lg-3">
-                <div class="p-4 rounded-4 h-100 text-start bg-white" style="border: 1px solid var(--border-color); transition: all 0.3s ease;">
-                    <div class="d-flex align-items-center justify-content-center bg-primary bg-opacity-10 text-primary rounded-3 mb-3" style="width: 48px; height: 48px;">
-                        <i class="fa-solid fa-bolt fs-5"></i>
+    <!-- Product Showcase Section -->
+    <?php
+    $renderProductList = function($productList) {
+        if (empty($productList)) {
+            echo '<p class="text-center text-muted py-4">Chưa có sản phẩm.</p>';
+            return;
+        }
+        echo '<div class="row g-4">';
+        foreach ($productList as $index => $product):
+        ?>
+        <div class="col-6 col-md-4 col-lg-3 product-item" data-category="<?= htmlspecialchars($product['category_slug'] ?? '') ?>">
+            <div class="card product-card position-relative h-100" data-product-id="<?= htmlspecialchars($product['id'] ?? '') ?>">
+                <?php if (!empty($product['badge'])): ?>
+                    <span class="badge-hot"><?= htmlspecialchars($product['badge'] ?? '') ?></span>
+                <?php endif; ?>
+                <img src="<?= htmlspecialchars(image_url($product['image'] ?? '')) ?>" class="card-img-top"
+                    alt="<?= htmlspecialchars($product['title'] ?? ($product['category'] ?? 'Sản phẩm')) ?>"
+                    loading="lazy" decoding="async">
+                <div class="card-body d-flex flex-column p-4">
+                    <h3 class="product-title mb-1">
+                        <a href="<?= htmlspecialchars(Url::product($product)) ?>" class="stretched-link text-decoration-none text-dark">
+                            <?= htmlspecialchars($product['title'] ?? '') ?>
+                        </a>
+                    </h3>
+                    <div class="d-flex align-items-center gap-2 mb-2" style="font-size: 0.75rem;">
+                        <div class="text-warning">
+                            <?php 
+                                $rating = (float)($product['rating'] ?? 0);
+                                for ($i = 1; $i <= 5; $i++) {
+                                    if ($rating > 0 && $i <= floor($rating)) echo '<i class="fa-solid fa-star"></i>';
+                                    elseif ($rating > 0 && $i - 0.5 == $rating) echo '<i class="fa-solid fa-star-half-stroke"></i>';
+                                    else echo '<i class="fa-regular fa-star text-secondary opacity-50"></i>';
+                                }
+                            ?>
+                        </div>
+                        <span class="text-muted sold-text">Đã bán <?= number_format($product['sold_count'] ?? 0, 0, ',', '.') ?></span>
                     </div>
-                    <h5 class="fw-bold mb-2">Giao Hàng 5 Giây</h5>
-                    <p class="text-muted small mb-0">Hệ thống xử lý thanh toán tự động, gửi tài khoản qua email/màn hình ngay sau khi giao dịch thành công.</p>
-                </div>
-            </div>
-            <div class="col-md-6 col-lg-3">
-                <div class="p-4 rounded-4 h-100 text-start bg-white" style="border: 1px solid var(--border-color); transition: all 0.3s ease;">
-                    <div class="d-flex align-items-center justify-content-center bg-success bg-opacity-10 text-success rounded-3 mb-3" style="width: 48px; height: 48px;">
-                        <i class="fa-solid fa-shield-halved fs-5"></i>
+                    <?php
+                        $shortFeatureText = trim((string) ($product['feature_text'] ?? ''));
+                        $cardFeatures = array_values(array_filter((array) ($product['card_features'] ?? []), 'strlen'));
+                    ?>
+                    <?php if ($shortFeatureText !== ''): ?>
+                        <p class="text-muted small mb-2"><i class="fa-solid <?= htmlspecialchars($product['feature_icon'] ?? 'fa-circle-check') ?> me-1"></i><?= htmlspecialchars($shortFeatureText) ?></p>
+                    <?php endif; ?>
+                    <div class="mt-auto">
+                        <?php
+                            $cardPrice = (float) ($product['options'][0]['price'] ?? $product['price'] ?? 0);
+                            $variantOrig = (float) ($product['options'][0]['original_price'] ?? 0);
+                            $productOrig = (float) ($product['original_price'] ?? 0);
+                            $cardOrig = $variantOrig > $cardPrice ? $variantOrig : $productOrig;
+                            $cardHasDiscount = $cardOrig > $cardPrice && $cardPrice > 0;
+                            $cardOff = $cardHasDiscount ? round((1 - $cardPrice / $cardOrig) * 100) : 0;
+                        ?>
+                        <?php if ($cardHasDiscount): ?>
+                            <div class="d-flex align-items-baseline flex-wrap gap-2 mb-3">
+                                <p class="product-price mb-0"><?= number_format($cardPrice, 0, ',', '.') ?>đ</p>
+                                <span class="badge bg-danger"><?= '-' . $cardOff . '%' ?></span>
+                                <span class="text-muted text-decoration-line-through small" style="line-height:1;"><?= number_format($cardOrig, 0, ',', '.') ?>đ</span>
+                            </div>
+                        <?php else: ?>
+                            <p class="product-price mb-3"><?= number_format($cardPrice, 0, ',', '.') ?>đ</p>
+                        <?php endif; ?>
+                        <div class="product-actions position-relative" style="z-index: 2;">
+                            <a href="<?= url('index.php?action=checkoutPage&product_id=' . urlencode($product['id']) . '&variant_idx=0') ?>" class="btn btn-buy shadow-sm" data-auth-required="true">Mua ngay</a>
+                            <a href="<?= url('index.php?action=addToCart&id=' . urlencode($product['id'])) ?>" class="btn btn-cart-icon shadow-sm" title="Thêm"><i class="fa-solid fa-plus"></i></a>
+                        </div>
                     </div>
-                    <h5 class="fw-bold mb-2">Bảo Hành Uy Tín</h5>
-                    <p class="text-muted small mb-0">Cam kết bảo hành 1 đổi 1 hoặc hoàn tiền tương ứng nếu xảy ra lỗi trong suốt thời gian sử dụng gói dịch vụ.</p>
-                </div>
-            </div>
-            <div class="col-md-6 col-lg-3">
-                <div class="p-4 rounded-4 h-100 text-start bg-white" style="border: 1px solid var(--border-color); transition: all 0.3s ease;">
-                    <div class="d-flex align-items-center justify-content-center bg-warning bg-opacity-10 text-warning rounded-3 mb-3" style="width: 48px; height: 48px;">
-                        <i class="fa-solid fa-tags fs-5"></i>
-                    </div>
-                    <h5 class="fw-bold mb-2">Giá Tốt Nhất</h5>
-                    <p class="text-muted small mb-0">Chúng tôi tối ưu hóa chi phí để mang lại mức giá rẻ hơn đến 70% so với việc mua trực tiếp từ nhà phát triển.</p>
-                </div>
-            </div>
-            <div class="col-md-6 col-lg-3">
-                <div class="p-4 rounded-4 h-100 text-start bg-white" style="border: 1px solid var(--border-color); transition: all 0.3s ease;">
-                    <div class="d-flex align-items-center justify-content-center bg-danger bg-opacity-10 text-danger rounded-3 mb-3" style="width: 48px; height: 48px;">
-                        <i class="fa-solid fa-headset fs-5"></i>
-                    </div>
-                    <h5 class="fw-bold mb-2">Hỗ Trợ Tận Tâm</h5>
-                    <p class="text-muted small mb-0">Đội ngũ kỹ thuật viên am hiểu công nghệ sẵn sàng tư vấn và sửa lỗi trực tuyến qua Zalo / Telegram.</p>
                 </div>
             </div>
         </div>
+        <?php
+        endforeach;
+        echo '</div>';
+    };
+    ?>
+
+    <div class="mb-5 fade-in-element" style="animation-delay: 0.2s;">
+        <div class="text-center mb-4">
+            <span class="badge bg-primary bg-opacity-10 text-primary mb-3 px-3 py-2 rounded-pill fw-bold" style="letter-spacing:1px; font-size:0.75rem;"><i class="fa-solid fa-crown me-1 text-warning"></i> SẢN PHẨM NỔI BẬT</span>
+            <h2 class="display-6 fw-extrabold mb-2" style="background: linear-gradient(135deg, #1e293b, #4338ca); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Khám Phá Sản Phẩm</h2>
+            <p class="text-muted small">Lựa chọn các dịch vụ AI phù hợp nhất với nhu cầu của bạn</p>
+        </div>
+
+        <ul class="nav nav-pills justify-content-center mb-4 gap-2 showcase-tabs" id="productShowcaseTab" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active rounded-pill px-4 fw-bold shadow-sm" id="best-selling-tab" data-bs-toggle="pill" data-bs-target="#best-selling" type="button" role="tab" aria-controls="best-selling" aria-selected="true">
+                    <i class="fa-solid fa-fire text-danger me-1"></i> Bán chạy nhất
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link rounded-pill px-4 fw-bold shadow-sm" id="highest-rated-tab" data-bs-toggle="pill" data-bs-target="#highest-rated" type="button" role="tab" aria-controls="highest-rated" aria-selected="false">
+                    <i class="fa-solid fa-star text-warning me-1"></i> Đánh giá cao
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link rounded-pill px-4 fw-bold shadow-sm" id="newest-tab" data-bs-toggle="pill" data-bs-target="#newest" type="button" role="tab" aria-controls="newest" aria-selected="false">
+                    <i class="fa-solid fa-sparkles text-primary me-1"></i> Mới ra mắt
+                </button>
+            </li>
+        </ul>
+
+        <div class="tab-content" id="productShowcaseTabContent">
+            <div class="tab-pane fade show active" id="best-selling" role="tabpanel" aria-labelledby="best-selling-tab">
+                <?php $renderProductList($bestSellingProducts ?? []); ?>
+            </div>
+            <div class="tab-pane fade" id="highest-rated" role="tabpanel" aria-labelledby="highest-rated-tab">
+                <?php $renderProductList($highestRatedProducts ?? []); ?>
+            </div>
+            <div class="tab-pane fade" id="newest" role="tabpanel" aria-labelledby="newest-tab">
+                <?php $renderProductList($newestProducts ?? []); ?>
+            </div>
+        </div>
+        
+        <div class="text-center mt-4 pt-2">
+            <a href="<?php echo url('index.php?tab=products'); ?>" class="btn btn-outline-dark rounded-pill px-4 py-2 fw-bold shadow-sm" style="transition: all 0.3s ease;">
+                Xem tất cả sản phẩm <i class="fa-solid fa-arrow-right ms-2"></i>
+            </a>
+        </div>
     </div>
+    
+    <style>
+        .showcase-tabs .nav-link {
+            background-color: rgba(255, 255, 255, 0.8);
+            border: 1px solid var(--border-color);
+            color: #4b5563;
+            transition: all 0.3s ease;
+        }
+        .showcase-tabs .nav-link:hover {
+            background-color: #f3f4f6;
+            transform: translateY(-2px);
+        }
+        .showcase-tabs .nav-link.active {
+            background: var(--vip-gradient);
+            color: white;
+            border-color: transparent;
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3) !important;
+        }
+        .showcase-tabs .nav-link.active i {
+            color: white !important;
+        }
+    </style>
 
     <!-- Highlights Brands Section -->
     <div class="mb-5 text-center fade-in-element" style="animation-delay: 0.3s;">

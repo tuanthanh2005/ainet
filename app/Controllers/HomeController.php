@@ -195,6 +195,30 @@ class HomeController extends Controller {
                 'structured'  => $tab === 'products' ? $this->productItemListSchema($products, $canonical) : null,
             ]);
         }
+        $allProds = Product::getAll();
+        
+        $bestSellingProducts = $allProds;
+        usort($bestSellingProducts, function($a, $b) {
+            return $b['sold_count'] <=> $a['sold_count'];
+        });
+        $bestSellingProducts = array_slice($bestSellingProducts, 0, 8);
+
+        $highestRatedProducts = $allProds;
+        usort($highestRatedProducts, function($a, $b) {
+            $ratingA = (float)($a['rating'] ?? 0);
+            $ratingB = (float)($b['rating'] ?? 0);
+            if ($ratingA == $ratingB) {
+                return $b['sold_count'] <=> $a['sold_count'];
+            }
+            return $ratingB <=> $ratingA;
+        });
+        $highestRatedProducts = array_slice($highestRatedProducts, 0, 8);
+
+        $newestProducts = $allProds;
+        usort($newestProducts, function($a, $b) {
+            return strtotime($b['created_at']) <=> strtotime($a['created_at']);
+        });
+        $newestProducts = array_slice($newestProducts, 0, 8);
 
         $this->view('layout', [
             'view' => 'home',
@@ -210,7 +234,10 @@ class HomeController extends Controller {
             'page' => $page,
             'totalPages' => $totalPages,
             'systemStats' => $systemStats,
-            'recentReviews' => $recentReviews
+            'recentReviews' => $recentReviews,
+            'bestSellingProducts' => $bestSellingProducts,
+            'highestRatedProducts' => $highestRatedProducts,
+            'newestProducts' => $newestProducts
         ]);
     }
 
