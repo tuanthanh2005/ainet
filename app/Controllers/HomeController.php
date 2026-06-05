@@ -16,7 +16,7 @@ class HomeController extends Controller {
 
         // Query system statistics dynamically
         $db = Database::getInstance();
-        $completedCount = (int)$db->query("SELECT COUNT(*) FROM orders WHERE status = 'completed'")->fetchColumn();
+        $completedCount = (int)$db->query("SELECT COUNT(*) FROM orders WHERE status IN ('completed', 'processing')")->fetchColumn();
         $userCount = (int)$db->query("SELECT COUNT(*) FROM users WHERE status = 'active'")->fetchColumn();
         
         // Count rating distribution
@@ -584,9 +584,9 @@ class HomeController extends Controller {
             $statsStmt = $db->prepare(
                 "SELECT 
                     COUNT(*) as total_all,
-                    SUM(CASE WHEN status = 'completed' THEN 1 ELSE 0 END) as total_completed,
+                    SUM(CASE WHEN status IN ('completed', 'processing') THEN 1 ELSE 0 END) as total_completed,
                     SUM(CASE WHEN status = 'pending' THEN 1 ELSE 0 END) as total_pending,
-                    SUM(CASE WHEN status = 'completed' THEN amount ELSE 0 END) as total_spent
+                    SUM(CASE WHEN status IN ('completed', 'processing') THEN amount ELSE 0 END) as total_spent
                  FROM orders WHERE customer_email = ?"
             );
             $statsStmt->execute([$email]);

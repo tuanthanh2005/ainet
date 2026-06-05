@@ -92,7 +92,7 @@ class CheckoutController extends Controller {
         $order = Order::getById($orderId);
         if (!$order) die("Đơn hàng không tồn tại.");
 
-        if ($order['status'] === 'completed') {
+        if (in_array($order['status'] ?? '', ['completed', 'processing'], true)) {
             header('Location: ' . url('index.php?action=success&id=' . $orderId));
             exit;
         }

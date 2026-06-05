@@ -7,7 +7,7 @@ class RecentOrder {
             $stmt = $db->query(
                 "SELECT product_name, amount, customer_email, created_at
                  FROM orders
-                 WHERE status = 'completed'
+                 WHERE status IN ('completed', 'processing')
                  ORDER BY updated_at DESC, created_at DESC
                  LIMIT 20"
             );

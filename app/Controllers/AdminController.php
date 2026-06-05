@@ -14,7 +14,7 @@ class AdminController extends Controller {
         $db = Database::getInstance();
         
         // Calculate statistics via SQL aggregates (highly optimized, avoids loading all rows)
-        $totalRevenue = (float) $db->query("SELECT SUM(amount) FROM orders WHERE status = 'completed'")->fetchColumn();
+        $totalRevenue = (float) $db->query("SELECT SUM(amount) FROM orders WHERE status IN ('completed', 'processing')")->fetchColumn();
         $totalOrders = (int) $db->query("SELECT COUNT(*) FROM orders")->fetchColumn();
         $pendingOrders = (int) $db->query("SELECT COUNT(*) FROM orders WHERE status IN ('pending', 'processing')")->fetchColumn();
         
