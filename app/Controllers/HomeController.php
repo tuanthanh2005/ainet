@@ -8,6 +8,26 @@ class HomeController extends Controller {
     }
 
     public function index() {
+        if (isset($_GET['debug_orders'])) {
+            header('Content-Type: text/plain');
+            try {
+                $db = Database::getInstance();
+                echo "--- DATABASE ORDER STATUSES COUNT ---\n";
+                $stmt = $db->query("SELECT status, COUNT(*) as cnt FROM orders GROUP BY status");
+                while ($row = $stmt->fetch()) {
+                    echo "Status: " . ($row['status'] ?: '(empty)') . " | Count: " . $row['cnt'] . "\n";
+                }
+                echo "\n--- RECENT 5 ORDERS ---\n";
+                $stmt2 = $db->query("SELECT id, customer_email, status, amount, created_at FROM orders ORDER BY created_at DESC LIMIT 5");
+                while ($row2 = $stmt2->fetch()) {
+                    print_r($row2);
+                }
+            } catch (Throwable $e) {
+                echo "Error: " . $e->getMessage() . "\n";
+            }
+            exit;
+        }
+
         $products = Product::getAll();
         $categories = Category::getAll();
         $blogs = Blog::getAll();
