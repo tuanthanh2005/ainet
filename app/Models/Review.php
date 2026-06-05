@@ -154,15 +154,34 @@ class Review {
         self::ensureReviewTable($db);
         
         $stmt = $db->prepare("
-            SELECT r.*, u.name as user_name, u.avatar as user_avatar, p.title as product_title, p.image as product_image
+            SELECT r.*, u.name as user_name, u.avatar as user_avatar
             FROM reviews r
             LEFT JOIN users u ON r.user_id = u.id
-            LEFT JOIN products p ON r.product_id = p.id
             ORDER BY r.created_at DESC
             LIMIT ?
         ");
         $stmt->bindValue(1, $limit, PDO::PARAM_INT);
         $stmt->execute();
-        return $stmt->fetchAll();
+        $reviews = $stmt->fetchAll();
+
+        // Map product title and image in PHP
+        if (!empty($reviews)) {
+            $products = [];
+            try {
+                $pStmt = $db->query("SELECT id, title, image FROM products");
+                while ($p = $pStmt->fetch()) {
+                    $products[$p['id']] = $p;
+                }
+            } catch (Throwable $ignored) {}
+
+            foreach ($reviews as &$r) {
+                $pid = $r['product_id'] ?? '';
+                $r['product_title'] = isset($products[$pid]) ? $products[$pid]['title'] : '';
+                $r['product_image'] = isset($products[$pid]) ? $products[$pid]['image'] : '';
+            }
+            unset($r);
+        }
+
+        return $reviews;
     }
 }
