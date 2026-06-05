@@ -925,6 +925,10 @@
                                 <h5 class="fw-bold mb-4 border-bottom pb-2">Header & Mini Banner</h5>
                                 <form id="headerSettingsForm">
                                     <div class="mb-3">
+                                        <label class="form-label">Mô tả ngắn trang chủ (Hero)</label>
+                                        <textarea class="form-control" id="st_heroDesc" rows="3"><?php echo htmlspecialchars($settings['heroDesc'] ?? 'Chào mừng bạn đến với AI CỦA TÔI - nền tảng hàng đầu cung cấp các tài khoản Premium (ChatGPT Plus, Claude Pro, Midjourney, YouTube Premium, GitHub Copilot...) tự động 24/7. Uy tín, an toàn, kích hoạt ngay lập tức với chế độ bảo hành 1 đổi 1 trọn gói.'); ?></textarea>
+                                    </div>
+                                    <div class="mb-3">
                                         <label class="form-label">Dòng chữ Mini Banner</label>
                                         <input type="text" class="form-control" id="st_bannerText"
                                             value="<?php echo htmlspecialchars($settings['bannerText'] ?? ''); ?>">
@@ -1997,6 +2001,7 @@
 
         function saveSettings() {
             const formData = new FormData();
+            formData.append('heroDesc', document.getElementById('st_heroDesc').value);
             formData.append('bannerText', document.getElementById('st_bannerText').value);
             formData.append('zalo', document.getElementById('st_zalo').value);
             formData.append('footerDesc', document.getElementById('st_footerDesc').value);
@@ -2087,7 +2092,7 @@
             fd.append('telegram_chat_id', chatId);
             
             // Must include all allowed keys - send current values for everything else
-            ['bannerText','zalo','footerDesc','socialLink','copyright','terms_of_service','privacy_policy',
+            ['bannerText','zalo','footerDesc','heroDesc','socialLink','copyright','terms_of_service','privacy_policy',
              'sepay_active','sepay_mode','sepay_token','sepay_merchant_id','sepay_api_key',
              'bank_id','bank_account','bank_name','about_title','about_desc','about_image',
              'about_stat_value','about_stat_label','about_features','contact_title','contact_desc',

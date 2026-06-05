@@ -5,7 +5,7 @@
             <span class="badge bg-primary bg-opacity-10 text-primary mb-3 px-3 py-2 rounded-pill fw-bold" style="letter-spacing:1px; font-size:0.75rem;"><i class="fa-solid fa-sparkles me-1"></i> HỆ SINH THÁI TÀI KHOẢN PREMIUM</span>
             <h1 class="display-5 fw-bold text-dark mb-3 lh-sm">Sở Hữu Tài Khoản AI <br><span class="text-gradient fw-extrabold" style="background: var(--vip-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Chính Hãng, Giá Rẻ</span></h1>
             <p class="lead text-muted mb-4 fs-6" style="line-height:1.7;">
-                Chào mừng bạn đến với <strong>AI CỦA TÔI</strong> - nền tảng hàng đầu cung cấp các tài khoản Premium (ChatGPT Plus, Claude Pro, Midjourney, YouTube Premium, GitHub Copilot...) tự động 24/7. Uy tín, an toàn, kích hoạt ngay lập tức với chế độ bảo hành 1 đổi 1 trọn gói.
+                <?php echo nl2br(htmlspecialchars($settings['heroDesc'] ?? 'Chào mừng bạn đến với AI CỦA TÔI - nền tảng hàng đầu cung cấp các tài khoản Premium (ChatGPT Plus, Claude Pro, Midjourney, YouTube Premium, GitHub Copilot...) tự động 24/7. Uy tín, an toàn, kích hoạt ngay lập tức với chế độ bảo hành 1 đổi 1 trọn gói.')); ?>
             </p>
             <div class="d-flex gap-2 gap-md-3">
                 <a href="<?php echo url('index.php?tab=products'); ?>" class="btn btn-buy flex-fill px-2 px-md-4 py-2.5 fs-6 shadow-sm text-center" style="white-space: nowrap;"><i class="fa-solid fa-store me-1 me-md-2"></i>Xem sản phẩm</a>

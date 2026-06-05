@@ -102,7 +102,7 @@ class AdminController extends Controller {
         }
 
         $allowed = [
-            'bannerText', 'zalo', 'footerDesc', 'socialLink', 'copyright',
+            'bannerText', 'zalo', 'footerDesc', 'heroDesc', 'socialLink', 'copyright',
             'sepay_active', 'sepay_mode', 'sepay_token', 'sepay_merchant_id',
             'sepay_api_key', 'bank_id', 'bank_account', 'bank_name',
             'about_title', 'about_desc', 'about_image', 'about_stat_value',
