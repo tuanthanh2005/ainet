@@ -149,7 +149,6 @@
         <div class="text-center mb-4">
             <span class="badge bg-primary bg-opacity-10 text-primary mb-3 px-3 py-2 rounded-pill fw-bold" style="letter-spacing:1px; font-size:0.75rem;"><i class="fa-solid fa-crown me-1 text-warning"></i> SẢN PHẨM NỔI BẬT</span>
             <h2 class="display-6 fw-extrabold mb-2" style="background: linear-gradient(135deg, #1e293b, #4338ca); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Khám Phá Sản Phẩm</h2>
-            <p class="text-muted small">Lựa chọn các dịch vụ AI phù hợp nhất với nhu cầu của bạn</p>
         </div>
 
         <ul class="nav nav-pills justify-content-center mb-4 gap-2 showcase-tabs" id="productShowcaseTab" role="tablist">
