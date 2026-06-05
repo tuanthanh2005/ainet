@@ -79,9 +79,9 @@ $reviewCount = count($reviews);
                 <div class="d-flex align-items-center gap-3 mb-4 pb-3 border-bottom border-light">
                     <div style="color: var(--pure-black);">
                         <?php
-                            $avgRating = round($product['rating'] ?? 5);
+                            $avgRating = round((float)($product['rating'] ?? 0));
                             for ($i = 1; $i <= 5; $i++) {
-                                echo $i <= $avgRating ? '<i class="fa-solid fa-star text-warning"></i>' : '<i class="fa-regular fa-star text-warning"></i>';
+                                echo ($avgRating > 0 && $i <= $avgRating) ? '<i class="fa-solid fa-star text-warning"></i>' : '<i class="fa-regular fa-star text-secondary opacity-50"></i>';
                             }
                         ?>
                     </div>
@@ -255,7 +255,7 @@ $reviewCount = count($reviews);
                                         </div>
                                         <div class="mb-2">
                                             <?php for ($i = 1; $i <= 5; $i++): ?>
-                                                <?= $i <= (int)$rev['rating'] ? '<i class="fa-solid fa-star text-warning" style="font-size:0.85rem;"></i>' : '<i class="fa-regular fa-star text-warning" style="font-size:0.85rem;"></i>' ?>
+                                                <?= $i <= (int)$rev['rating'] ? '<i class="fa-solid fa-star text-warning" style="font-size:0.85rem;"></i>' : '<i class="fa-regular fa-star text-secondary opacity-50" style="font-size:0.85rem;"></i>' ?>
                                             <?php endfor; ?>
                                         </div>
                                         <?php if (!empty($rev['content'])): ?>

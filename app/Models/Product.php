@@ -33,7 +33,15 @@ class Product {
     public static function getAll() {
         $db = Database::getInstance();
         self::ensureProductColumns($db);
-        $stmt = $db->query("SELECT *, category_name AS category FROM products ORDER BY created_at DESC");
+        $stmt = $db->query("
+            SELECT p.*, p.category_name AS category, 
+                   COALESCE(AVG(r.rating), 0) AS rating,
+                   COUNT(r.id) AS review_real_count
+            FROM products p
+            LEFT JOIN reviews r ON p.id = r.product_id
+            GROUP BY p.id
+            ORDER BY p.created_at DESC
+        ");
         $products = $stmt->fetchAll();
 
         foreach ($products as &$product) {
@@ -46,7 +54,15 @@ class Product {
     public static function getById($id) {
         $db = Database::getInstance();
         self::ensureProductColumns($db);
-        $stmt = $db->prepare("SELECT *, category_name AS category FROM products WHERE id = ?");
+        $stmt = $db->prepare("
+            SELECT p.*, p.category_name AS category,
+                   COALESCE(AVG(r.rating), 0) AS rating,
+                   COUNT(r.id) AS review_real_count
+            FROM products p
+            LEFT JOIN reviews r ON p.id = r.product_id
+            WHERE p.id = ?
+            GROUP BY p.id
+        ");
         $stmt->execute([$id]);
         $product = $stmt->fetch();
 
@@ -66,7 +82,15 @@ class Product {
             $id = $m[1];
         }
 
-        $stmt = $db->prepare("SELECT *, category_name AS category FROM products WHERE seo_slug = ? OR id = ? OR (? != '' AND id = ?)");
+        $stmt = $db->prepare("
+            SELECT p.*, p.category_name AS category,
+                   COALESCE(AVG(r.rating), 0) AS rating,
+                   COUNT(r.id) AS review_real_count
+            FROM products p
+            LEFT JOIN reviews r ON p.id = r.product_id
+            WHERE p.seo_slug = ? OR p.id = ? OR (? != '' AND p.id = ?)
+            GROUP BY p.id
+        ");
         $stmt->execute([$slugOrId, $slugOrId, $id, $id]);
         $product = $stmt->fetch();
 

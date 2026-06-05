@@ -14,6 +14,41 @@ class HomeController extends Controller {
         $recentOrders = RecentOrder::getAll();
         $settings = $this->settings;
 
+        // Query system statistics dynamically
+        $db = Database::getInstance();
+        $completedCount = (int)$db->query("SELECT COUNT(*) FROM orders WHERE status = 'completed'")->fetchColumn();
+        $userCount = (int)$db->query("SELECT COUNT(*) FROM users WHERE status = 'active'")->fetchColumn();
+        
+        // Count rating distribution
+        $ratingsCount = [5 => 0, 4 => 0, 3 => 0, 2 => 0, 1 => 0];
+        try {
+            $distStmt = $db->query("SELECT rating, COUNT(*) as cnt FROM reviews GROUP BY rating");
+            while ($row = $distStmt->fetch()) {
+                $r = (int)$row['rating'];
+                $ratingsCount[$r] = (int)$row['cnt'];
+            }
+        } catch (Throwable $ignored) {}
+        
+        $totalReviews = array_sum($ratingsCount);
+        $pct5 = $totalReviews > 0 ? round(($ratingsCount[5] / $totalReviews) * 100) : 100;
+        $pct4 = $totalReviews > 0 ? round(($ratingsCount[4] / $totalReviews) * 100) : 0;
+        $pct1_3 = $totalReviews > 0 ? round((($ratingsCount[3] + $ratingsCount[2] + $ratingsCount[1]) / $totalReviews) * 100) : 0;
+
+        $avgRating = $db->query("SELECT AVG(rating) FROM reviews")->fetchColumn();
+        $avgRating = $avgRating ? round((float)$avgRating, 1) : 5.0;
+
+        $systemStats = [
+            'completed_orders' => $completedCount,
+            'total_users'      => $userCount,
+            'average_rating'   => $avgRating,
+            'pct_5'            => $pct5,
+            'pct_4'            => $pct4,
+            'pct_1_3'          => $pct1_3
+        ];
+
+        // Fetch latest reviews
+        $recentReviews = Review::getRecentReviews(6);
+
         // Detect if mobile browser
         $isMobile = false;
         $userAgent = $_SERVER['HTTP_USER_AGENT'] ?? '';
@@ -173,7 +208,9 @@ class HomeController extends Controller {
             'searchQuery' => $q,
             'sort' => $sort,
             'page' => $page,
-            'totalPages' => $totalPages
+            'totalPages' => $totalPages,
+            'systemStats' => $systemStats,
+            'recentReviews' => $recentReviews
         ]);
     }
 

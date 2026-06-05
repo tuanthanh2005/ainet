@@ -17,7 +17,7 @@ class Review {
                 created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
                 INDEX (product_id),
                 INDEX (order_id)
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;");
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;");
         } catch (Throwable $ignored) {}
     }
 
@@ -147,5 +147,22 @@ class Review {
         $lastReply = end($replies);
         // The last reply must be from an admin
         return ($lastReply['user_role'] ?? 'user') === 'admin';
+    }
+
+    public static function getRecentReviews(int $limit = 6): array {
+        $db = Database::getInstance();
+        self::ensureReviewTable($db);
+        
+        $stmt = $db->prepare("
+            SELECT r.*, u.name as user_name, u.avatar as user_avatar, p.title as product_title, p.image as product_image
+            FROM reviews r
+            LEFT JOIN users u ON r.user_id = u.id
+            LEFT JOIN products p ON r.product_id = p.id
+            ORDER BY r.created_at DESC
+            LIMIT ?
+        ");
+        $stmt->bindValue(1, $limit, PDO::PARAM_INT);
+        $stmt->execute();
+        return $stmt->fetchAll();
     }
 }

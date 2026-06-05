@@ -17,30 +17,112 @@
         </div>
     </div>
 
-    <!-- Stats Counter Section -->
-    <div class="row g-4 mb-5 text-center fade-in-element" style="animation-delay: 0.1s;">
-        <div class="col-6 col-md-3">
-            <div class="p-4 rounded-4" style="background: rgba(255,255,255,0.6); border: 1px solid var(--border-color); backdrop-filter: blur(8px);">
-                <div class="fs-2 fw-extrabold text-primary" style="background: var(--vip-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 800;">500+</div>
-                <div class="small text-muted fw-bold mt-1">Khách Hàng Tin Dùng</div>
-            </div>
+    <style>
+        .pulse-green {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #10b981;
+            box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+            animation: pulse-green-anim 1.8s infinite;
+            vertical-align: middle;
+        }
+        @keyframes pulse-green-anim {
+            0% {
+                transform: scale(0.95);
+                box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+            }
+            70% {
+                transform: scale(1);
+                box-shadow: 0 0 0 8px rgba(16, 185, 129, 0);
+            }
+            100% {
+                transform: scale(0.95);
+                box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+            }
+        }
+        .system-monitor-card {
+            background: rgba(255, 255, 255, 0.45);
+            border: 1px solid var(--border-color);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.03);
+            border-radius: 16px;
+        }
+        .system-monitor-card:hover {
+            transform: translateY(-5px);
+            background: rgba(255, 255, 255, 0.85);
+            border-color: rgba(99, 102, 241, 0.3);
+            box-shadow: 0 10px 30px rgba(99, 102, 241, 0.1);
+        }
+        .live-label {
+            font-size: 0.65rem;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            font-weight: 700;
+            color: rgba(99, 102, 241, 0.8);
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+    </style>
+
+    <!-- Live System Operations Dashboard -->
+    <div class="mb-5 fade-in-element" style="animation-delay: 0.1s;">
+        <div class="d-flex align-items-center justify-content-center gap-2 mb-4">
+            <span class="pulse-green"></span>
+            <span class="text-uppercase fw-extrabold text-muted small" style="letter-spacing: 1.5px; font-size: 0.7rem;">Hệ thống giám sát trạng thái & vận hành trực tuyến</span>
         </div>
-        <div class="col-6 col-md-3">
-            <div class="p-4 rounded-4" style="background: rgba(255,255,255,0.6); border: 1px solid var(--border-color); backdrop-filter: blur(8px);">
-                <div class="fs-2 fw-extrabold text-primary" style="background: var(--vip-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 800;">120+</div>
-                <div class="small text-muted fw-bold mt-1">Đơn Hàng Thành Công</div>
+        
+        <div class="row g-4 text-center">
+            <div class="col-6 col-md-3">
+                <div class="p-4 system-monitor-card h-100 d-flex flex-column justify-content-between">
+                    <div>
+                        <span class="live-label mb-2"><i class="fa-solid fa-server"></i> Máy Chủ</span>
+                        <div class="fs-2 fw-extrabold text-success" style="font-weight: 800; display: inline-flex; align-items: center; gap: 6px;">
+                            <span class="pulse-green"></span> ONLINE
+                        </div>
+                    </div>
+                    <div class="small text-muted mt-2 fw-medium">Tự động bàn giao 24/7/365</div>
+                </div>
             </div>
-        </div>
-        <div class="col-6 col-md-3">
-            <div class="p-4 rounded-4" style="background: rgba(255,255,255,0.6); border: 1px solid var(--border-color); backdrop-filter: blur(8px);">
-                <div class="fs-2 fw-extrabold text-primary" style="background: var(--vip-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 800;">99.9%</div>
-                <div class="small text-muted fw-bold mt-1">Xử Lý Tự Động 24/7</div>
+            
+            <div class="col-6 col-md-3">
+                <div class="p-4 system-monitor-card h-100 d-flex flex-column justify-content-between">
+                    <div>
+                        <span class="live-label mb-2"><i class="fa-solid fa-bolt"></i> Phản Hồi</span>
+                        <div class="fs-2 fw-extrabold text-primary" style="background: var(--vip-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 800;">
+                            ~5 Giây
+                        </div>
+                    </div>
+                    <div class="small text-muted mt-2 fw-medium">Kích hoạt qua API SePay tức thì</div>
+                </div>
             </div>
-        </div>
-        <div class="col-6 col-md-3">
-            <div class="p-4 rounded-4" style="background: rgba(255,255,255,0.6); border: 1px solid var(--border-color); backdrop-filter: blur(8px);">
-                <div class="fs-2 fw-extrabold text-primary" style="background: var(--vip-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 800;">4.9/5 ★</div>
-                <div class="small text-muted fw-bold mt-1">Đánh Giá Hài Lòng</div>
+            
+            <div class="col-6 col-md-3">
+                <div class="p-4 system-monitor-card h-100 d-flex flex-column justify-content-between">
+                    <div>
+                        <span class="live-label mb-2"><i class="fa-solid fa-cart-shopping"></i> Đơn Tự Động</span>
+                        <div class="fs-2 fw-extrabold text-primary" style="background: var(--vip-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 800;">
+                            <?= number_format($systemStats['completed_orders'], 0, ',', '.') ?>
+                        </div>
+                    </div>
+                    <div class="small text-muted mt-2 fw-medium">Tổng giao dịch được xử lý thành công</div>
+                </div>
+            </div>
+            
+            <div class="col-6 col-md-3">
+                <div class="p-4 system-monitor-card h-100 d-flex flex-column justify-content-between">
+                    <div>
+                        <span class="live-label mb-2"><i class="fa-solid fa-star"></i> Đánh Giá Hài Lòng</span>
+                        <div class="fs-2 fw-extrabold text-primary" style="background: var(--vip-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 800;">
+                            <?= number_format($systemStats['average_rating'], 1) ?>/5 ★
+                        </div>
+                    </div>
+                    <div class="small text-muted mt-2 fw-medium">Chỉ số phản hồi thực tế từ người dùng</div>
+                </div>
             </div>
         </div>
     </div>
@@ -105,66 +187,117 @@
         </div>
     </div>
 
-    <!-- Testimonials Section -->
+    <!-- Dynamic Reviews & Testimonials Section -->
+    <?php if (!empty($recentReviews)): ?>
     <div class="mb-5 fade-in-element" style="animation-delay: 0.4s;">
-        <div class="text-center mb-4">
-            <h2 class="fw-bold mb-2">Khách Hàng Nói Về Chúng Tôi</h2>
-            <p class="text-muted small">Ý kiến đóng góp thực tế từ những chuyên gia, lập trình viên sử dụng dịch vụ</p>
-        </div>
-        <div class="row g-4">
-            <div class="col-md-4">
-                <div class="p-4 rounded-4 h-100 d-flex flex-column justify-content-between" style="background: rgba(255,255,255,0.7); border: 1px solid var(--border-color); backdrop-filter: blur(8px);">
+        <div class="row g-4 align-items-stretch">
+            <!-- Left Side: Summary Card -->
+            <div class="col-lg-4">
+                <div class="p-4 rounded-4 h-100 d-flex flex-column justify-content-between system-monitor-card" style="background: rgba(255,255,255,0.6);">
                     <div>
-                        <div class="text-warning mb-3">
-                            <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+                        <span class="live-label mb-2"><i class="fa-solid fa-shield-heart"></i> Đánh Giá Xác Thực</span>
+                        <h2 class="fw-bold text-dark mb-3">Ý Kiến Khách Hàng</h2>
+                        
+                        <div class="d-flex align-items-center gap-3 my-4">
+                            <span class="display-4 fw-extrabold text-primary" style="background: var(--vip-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 800;">
+                                <?= number_format($systemStats['average_rating'], 1) ?>
+                            </span>
+                            <div>
+                                <div class="text-warning fs-5">
+                                    <?php
+                                    $stars = round($systemStats['average_rating']);
+                                    for ($i = 1; $i <= 5; $i++) {
+                                        echo $i <= $stars ? '<i class="fa-solid fa-star"></i>' : '<i class="fa-regular fa-star"></i>';
+                                    }
+                                    ?>
+                                </div>
+                                <div class="small text-muted mt-1">Trung bình cộng đánh giá</div>
+                            </div>
                         </div>
-                        <p class="text-muted small italic mb-3">"Hệ thống mua hàng rất thông minh. Tôi thanh toán QR ngân hàng xong chỉ sau đúng 5 giây là email đã nhận được tài khoản ChatGPT Plus. Tiết kiệm thời gian mà giá lại rất rẻ so với tự nâng cấp bằng thẻ ngoại."</p>
+                        
+                        <div class="mt-4 pt-3 border-top">
+                            <div class="d-flex align-items-center justify-content-between mb-2">
+                                <span class="small text-muted" style="min-width: 60px;">5 ★</span>
+                                <div class="progress flex-grow-1 mx-3" style="height: 6px;">
+                                    <div class="progress-bar bg-warning" role="progressbar" style="width: <?= $systemStats['pct_5'] ?>%;" aria-valuenow="<?= $systemStats['pct_5'] ?>" aria-valuemin="0" aria-valuemax="100"></div>
+                                </div>
+                                <span class="small text-muted font-monospace"><?= $systemStats['pct_5'] ?>%</span>
+                            </div>
+                            <div class="d-flex align-items-center justify-content-between mb-2">
+                                <span class="small text-muted" style="min-width: 60px;">4 ★</span>
+                                <div class="progress flex-grow-1 mx-3" style="height: 6px;">
+                                    <div class="progress-bar bg-warning" role="progressbar" style="width: <?= $systemStats['pct_4'] ?>%;" aria-valuenow="<?= $systemStats['pct_4'] ?>" aria-valuemin="0" aria-valuemax="100"></div>
+                                </div>
+                                <span class="small text-muted font-monospace"><?= $systemStats['pct_4'] ?>%</span>
+                            </div>
+                            <div class="d-flex align-items-center justify-content-between">
+                                <span class="small text-muted" style="min-width: 60px;">1-3 ★</span>
+                                <div class="progress flex-grow-1 mx-3" style="height: 6px;">
+                                    <div class="progress-bar bg-warning" role="progressbar" style="width: <?= $systemStats['pct_1_3'] ?>%;" aria-valuenow="<?= $systemStats['pct_1_3'] ?>" aria-valuemin="0" aria-valuemax="100"></div>
+                                </div>
+                                <span class="small text-muted font-monospace"><?= $systemStats['pct_1_3'] ?>%</span>
+                            </div>
+                        </div>
                     </div>
-                    <div class="d-flex align-items-center mt-3 border-top pt-3">
-                        <img src="https://ui-avatars.com/api/?name=Nguyen+Tuan&background=6366f1&color=fff" class="rounded-circle me-3" width="40" height="40" alt="Avatar">
-                        <div>
-                            <div class="fw-bold text-dark small">Nguyễn Anh Tuấn</div>
-                            <div class="text-muted smaller">Lập trình viên Fullstack</div>
-                        </div>
+                    
+                    <div class="mt-4">
+                        <p class="text-muted small mb-3">Mọi ý kiến đóng góp được hệ thống tự động ghi nhận từ tài khoản người dùng thực tế sau khi mua sản phẩm thành công.</p>
+                        <a href="<?php echo url('index.php?tab=products'); ?>" class="btn btn-sm btn-outline-dark w-100 rounded-pill py-2.5 fw-bold" style="border-radius: 8px;"><i class="fa-solid fa-pen-nib me-2"></i>Xem sản phẩm & Trải nghiệm</a>
                     </div>
                 </div>
             </div>
-            <div class="col-md-4">
-                <div class="p-4 rounded-4 h-100 d-flex flex-column justify-content-between" style="background: rgba(255,255,255,0.7); border: 1px solid var(--border-color); backdrop-filter: blur(8px);">
-                    <div>
-                        <div class="text-warning mb-3">
-                            <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+            
+            <!-- Right Side: Reviews Feed -->
+            <div class="col-lg-8">
+                <div class="row g-3">
+                    <?php if (!empty($recentReviews)): ?>
+                        <?php foreach (array_slice($recentReviews, 0, 4) as $rev): ?>
+                            <div class="col-md-6">
+                                <div class="p-4 rounded-4 h-100 d-flex flex-column justify-content-between system-monitor-card" style="background: rgba(255,255,255,0.75);">
+                                    <div>
+                                        <div class="d-flex align-items-center justify-content-between mb-2">
+                                            <div class="text-warning">
+                                                <?php
+                                                for ($i = 1; $i <= 5; $i++) {
+                                                    echo $i <= (int)$rev['rating'] ? '<i class="fa-solid fa-star fs-6"></i>' : '<i class="fa-regular fa-star fs-6"></i>';
+                                                }
+                                                ?>
+                                            </div>
+                                            <span class="text-muted smaller"><i class="fa-regular fa-clock me-1"></i><?= date('d/m/Y', strtotime($rev['created_at'])) ?></span>
+                                        </div>
+                                        <p class="text-dark small italic mb-3" style="line-height: 1.6;">"<?= htmlspecialchars($rev['content']) ?>"</p>
+                                    </div>
+                                    <div class="d-flex align-items-center justify-content-between mt-3 border-top pt-3">
+                                        <div class="d-flex align-items-center">
+                                            <?php 
+                                            $reviewerAvatar = !empty($rev['user_avatar']) ? htmlspecialchars($rev['user_avatar']) : 'https://ui-avatars.com/api/?name=' . urlencode($rev['user_name'] ?? 'Khách') . '&background=6366f1&color=fff';
+                                            ?>
+                                            <img src="<?= $reviewerAvatar ?>" class="rounded-circle me-3 border border-2 border-white shadow-sm" width="38" height="38" alt="Avatar">
+                                            <div>
+                                                <div class="fw-bold text-dark small" style="font-size: 0.85rem;"><?= htmlspecialchars($rev['user_name'] ?? 'Khách Hàng') ?></div>
+                                                <div class="text-muted smaller" style="font-size: 0.75rem;">Người mua hàng</div>
+                                            </div>
+                                        </div>
+                                        <?php if (!empty($rev['product_title'])): ?>
+                                            <span class="badge bg-light text-dark border small fw-normal py-1.5 px-2.5 rounded-pill" style="font-size: 0.7rem; max-width: 140px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="<?= htmlspecialchars($rev['product_title']) ?>">
+                                                <i class="fa-solid fa-shopping-bag text-primary me-1"></i><?= htmlspecialchars($rev['product_title']) ?>
+                                            </span>
+                                        <?php endif; ?>
+                                    </div>
+                                </div>
+                            </div>
+                        <?php endforeach; ?>
+                    <?php else: ?>
+                        <div class="col-12 text-center py-5 text-muted">
+                            <i class="fa-regular fa-comments fs-2 opacity-50 mb-3 d-block"></i>
+                            <p class="mb-0">Chưa có đánh giá nào từ khách hàng.</p>
                         </div>
-                        <p class="text-muted small italic mb-3">"Làm Content Creator rất cần Claude Pro và Midjourney để lên bài và thiết kế ảnh. Nhờ AI CỦA TÔI, tôi đã đăng ký gói combo rất mượt mà. Support hỗ trợ nhiệt tình qua Zalo ngay cả nửa đêm."</p>
-                    </div>
-                    <div class="d-flex align-items-center mt-3 border-top pt-3">
-                        <img src="https://ui-avatars.com/api/?name=Phan+Linh&background=a855f7&color=fff" class="rounded-circle me-3" width="40" height="40" alt="Avatar">
-                        <div>
-                            <div class="fw-bold text-dark small">Phan Khánh Linh</div>
-                            <div class="text-muted smaller">Content Team Lead</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="p-4 rounded-4 h-100 d-flex flex-column justify-content-between" style="background: rgba(255,255,255,0.7); border: 1px solid var(--border-color); backdrop-filter: blur(8px);">
-                    <div>
-                        <div class="text-warning mb-3">
-                            <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
-                        </div>
-                        <p class="text-muted small italic mb-3">"Đã sử dụng ở đây hơn 6 tháng, gia hạn tài khoản YouTube Premium và Github Copilot định kỳ. Chưa bao giờ bị lỗi mất gói giữa chừng, nếu có vấn đề gì được đổi tài khoản mới ngay lập tức."</p>
-                    </div>
-                    <div class="d-flex align-items-center mt-3 border-top pt-3">
-                        <img src="https://ui-avatars.com/api/?name=Tran+Minh&background=0ea5e9&color=fff" class="rounded-circle me-3" width="40" height="40" alt="Avatar">
-                        <div>
-                            <div class="fw-bold text-dark small">Trần Đức Minh</div>
-                            <div class="text-muted smaller">Sinh viên Kỹ thuật</div>
-                        </div>
-                    </div>
+                    <?php endif; ?>
                 </div>
             </div>
         </div>
     </div>
+    <?php endif; ?>
 
     <!-- Recent Blog posts for home tab credibility -->
     <?php if (!empty($blogs)): ?>
@@ -246,14 +379,14 @@
                         <div class="d-flex align-items-center gap-2 mb-2" style="font-size: 0.75rem;">
                             <div class="text-warning">
                                 <?php 
-                                    $rating = $product['rating'] ?? 5;
+                                    $rating = (float)($product['rating'] ?? 0);
                                     for ($i = 1; $i <= 5; $i++) {
-                                        if ($i <= floor($rating)) {
+                                        if ($rating > 0 && $i <= floor($rating)) {
                                             echo '<i class="fa-solid fa-star"></i>';
-                                        } elseif ($i - 0.5 == $rating) {
+                                        } elseif ($rating > 0 && $i - 0.5 == $rating) {
                                             echo '<i class="fa-solid fa-star-half-stroke"></i>';
                                         } else {
-                                            echo '<i class="fa-regular fa-star"></i>';
+                                            echo '<i class="fa-regular fa-star text-secondary opacity-50"></i>';
                                         }
                                     }
                                 ?>
