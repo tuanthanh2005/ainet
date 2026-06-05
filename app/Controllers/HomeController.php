@@ -8,63 +8,6 @@ class HomeController extends Controller {
     }
 
     public function index() {
-        if (isset($_GET['debug_orders'])) {
-            header('Content-Type: text/plain; charset=utf-8');
-            try {
-                $db = Database::getInstance();
-
-                if (isset($_GET['reset_sold'])) {
-                    $db->exec("UPDATE products SET sold_count = 0");
-                    echo "--- SUCCESS: Reset all products sold_count to 0 ---\n\n";
-                }
-
-                echo "--- DATABASE ORDER STATUSES COUNT ---\n";
-                $stmt = $db->query("SELECT status, COUNT(*) as cnt FROM orders GROUP BY status");
-                while ($row = $stmt->fetch()) {
-                    echo "Status: " . ($row['status'] ?: '(empty)') . " | Count: " . $row['cnt'] . "\n";
-                }
-                echo "\n--- RECENT 5 ORDERS ---\n";
-                $stmt2 = $db->query("SELECT id, customer_email, status, amount, created_at FROM orders ORDER BY created_at DESC LIMIT 5");
-                while ($row2 = $stmt2->fetch()) {
-                    print_r($row2);
-                }
-
-                // Read SePay Webhook Logs
-                echo "\n--- SEPAY LOGS ---\n";
-                $root = defined('APP_ROOT') ? APP_ROOT : dirname(__DIR__, 2);
-                $logFile = $root . DIRECTORY_SEPARATOR . 'storage' . DIRECTORY_SEPARATOR . 'logs' . DIRECTORY_SEPARATOR . 'sepay_webhook.log';
-                if (is_file($logFile)) {
-                    echo "Last 50 lines of storage/logs/sepay_webhook.log:\n";
-                    $lines = file($logFile);
-                    $lastLines = array_slice($lines, -50);
-                    echo implode("", $lastLines);
-                } else {
-                    echo "storage/logs/sepay_webhook.log does not exist.\n";
-                }
-                
-                $lastJsonFile = $root . DIRECTORY_SEPARATOR . 'storage' . DIRECTORY_SEPARATOR . 'logs' . DIRECTORY_SEPARATOR . 'sepay_last_webhook.json';
-                if (is_file($lastJsonFile)) {
-                    echo "\nLast JSON webhook payload:\n";
-                    echo file_get_contents($lastJsonFile) . "\n";
-                } else {
-                    echo "\nstorage/logs/sepay_last_webhook.json does not exist.\n";
-                }
-
-                $tempLog = rtrim(sys_get_temp_dir(), '/\\') . DIRECTORY_SEPARATOR . 'aicualtoi_sepay_webhook.log';
-                if (is_file($tempLog)) {
-                    echo "\nLast 50 lines of temporary SePay webhook log:\n";
-                    $lines = file($tempLog);
-                    $lastLines = array_slice($lines, -50);
-                    echo implode("", $lastLines);
-                } else {
-                    echo "\nTemporary SePay log does not exist.\n";
-                }
-            } catch (Throwable $e) {
-                echo "Error: " . $e->getMessage() . "\n";
-            }
-            exit;
-        }
-
         $products = Product::getAll();
         $categories = Category::getAll();
         $blogs = Blog::getAll();
