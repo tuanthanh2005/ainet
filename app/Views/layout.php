@@ -478,6 +478,10 @@
 
     <!-- Mobile Bottom Navigation Bar -->
     <div class="mobile-bottom-nav d-lg-none">
+        <a href="<?php echo url('index.php?tab=home'); ?>" class="mobile-nav-item <?php echo ($currentAction === 'index' && $activeTab === 'home') ? 'active' : ''; ?>">
+            <i class="fa-solid fa-house"></i>
+            <span>Trang Chủ</span>
+        </a>
         <a href="<?php echo url('index.php?tab=products'); ?>" class="mobile-nav-item <?php echo ($currentAction === 'index' && $activeTab === 'products') ? 'active' : ''; ?>">
             <i class="fa-solid fa-box-open"></i>
             <span>Sản Phẩm</span>
