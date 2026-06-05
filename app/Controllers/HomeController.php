@@ -12,6 +12,12 @@ class HomeController extends Controller {
             header('Content-Type: text/plain; charset=utf-8');
             try {
                 $db = Database::getInstance();
+
+                if (isset($_GET['reset_sold'])) {
+                    $db->exec("UPDATE products SET sold_count = 0");
+                    echo "--- SUCCESS: Reset all products sold_count to 0 ---\n\n";
+                }
+
                 echo "--- DATABASE ORDER STATUSES COUNT ---\n";
                 $stmt = $db->query("SELECT status, COUNT(*) as cnt FROM orders GROUP BY status");
                 while ($row = $stmt->fetch()) {
