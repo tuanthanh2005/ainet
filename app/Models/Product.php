@@ -33,19 +33,26 @@ class Product {
     public static function getAll() {
         $db = Database::getInstance();
         self::ensureProductColumns($db);
-        $stmt = $db->query("
-            SELECT p.*, p.category_name AS category, 
-                   COALESCE(AVG(r.rating), 0) AS rating,
-                   COUNT(r.id) AS review_real_count
-            FROM products p
-            LEFT JOIN reviews r ON p.id = r.product_id
-            GROUP BY p.id
-            ORDER BY p.created_at DESC
-        ");
+        $stmt = $db->query("SELECT *, category_name AS category FROM products ORDER BY created_at DESC");
         $products = $stmt->fetchAll();
+
+        // Fetch average ratings and counts from reviews dynamically
+        $ratings = [];
+        try {
+            $stmtRatings = $db->query("SELECT product_id, AVG(rating) as avg_rating, COUNT(*) as cnt FROM reviews GROUP BY product_id");
+            while ($row = $stmtRatings->fetch()) {
+                $ratings[$row['product_id']] = [
+                    'rating' => round((float)$row['avg_rating'], 1),
+                    'count'  => (int)$row['cnt']
+                ];
+            }
+        } catch (Throwable $ignored) {}
 
         foreach ($products as &$product) {
             self::decodeProduct($product);
+            $pid = $product['id'] ?? '';
+            $product['rating'] = isset($ratings[$pid]) ? $ratings[$pid]['rating'] : 0;
+            $product['review_real_count'] = isset($ratings[$pid]) ? $ratings[$pid]['count'] : 0;
         }
         unset($product);
         return $products;
@@ -54,20 +61,25 @@ class Product {
     public static function getById($id) {
         $db = Database::getInstance();
         self::ensureProductColumns($db);
-        $stmt = $db->prepare("
-            SELECT p.*, p.category_name AS category,
-                   COALESCE(AVG(r.rating), 0) AS rating,
-                   COUNT(r.id) AS review_real_count
-            FROM products p
-            LEFT JOIN reviews r ON p.id = r.product_id
-            WHERE p.id = ?
-            GROUP BY p.id
-        ");
+        $stmt = $db->prepare("SELECT *, category_name AS category FROM products WHERE id = ?");
         $stmt->execute([$id]);
         $product = $stmt->fetch();
 
         if ($product) {
             self::decodeProduct($product);
+            
+            // Get rating dynamically
+            $product['rating'] = 0;
+            $product['review_real_count'] = 0;
+            try {
+                $stmtRating = $db->prepare("SELECT AVG(rating) as avg_rating, COUNT(*) as cnt FROM reviews WHERE product_id = ?");
+                $stmtRating->execute([$id]);
+                $row = $stmtRating->fetch();
+                if ($row && $row['avg_rating'] !== null) {
+                    $product['rating'] = round((float)$row['avg_rating'], 1);
+                    $product['review_real_count'] = (int)$row['cnt'];
+                }
+            } catch (Throwable $ignored) {}
         }
         return $product;
     }
@@ -82,15 +94,7 @@ class Product {
             $id = $m[1];
         }
 
-        $stmt = $db->prepare("
-            SELECT p.*, p.category_name AS category,
-                   COALESCE(AVG(r.rating), 0) AS rating,
-                   COUNT(r.id) AS review_real_count
-            FROM products p
-            LEFT JOIN reviews r ON p.id = r.product_id
-            WHERE p.seo_slug = ? OR p.id = ? OR (? != '' AND p.id = ?)
-            GROUP BY p.id
-        ");
+        $stmt = $db->prepare("SELECT *, category_name AS category FROM products WHERE seo_slug = ? OR id = ? OR (? != '' AND id = ?)");
         $stmt->execute([$slugOrId, $slugOrId, $id, $id]);
         $product = $stmt->fetch();
 
@@ -111,6 +115,20 @@ class Product {
 
         if ($product) {
             self::decodeProduct($product);
+            
+            // Get rating dynamically
+            $pid = $product['id'] ?? '';
+            $product['rating'] = 0;
+            $product['review_real_count'] = 0;
+            try {
+                $stmtRating = $db->prepare("SELECT AVG(rating) as avg_rating, COUNT(*) as cnt FROM reviews WHERE product_id = ?");
+                $stmtRating->execute([$pid]);
+                $row = $stmtRating->fetch();
+                if ($row && $row['avg_rating'] !== null) {
+                    $product['rating'] = round((float)$row['avg_rating'], 1);
+                    $product['review_real_count'] = (int)$row['cnt'];
+                }
+            } catch (Throwable $ignored) {}
         }
         return $product ?: null;
     }
