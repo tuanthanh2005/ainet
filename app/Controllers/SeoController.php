@@ -60,6 +60,21 @@ class SeoController extends Controller {
             }
         } catch (Throwable $e) { /* ignore */ }
 
+        // Add static SEO search landing pages to sitemap
+        $staticKeywords = [
+            'gpt', 'gemini', 'ai', 'copilot', 'canva', 'netflix', 'youtube',
+            'claude', 'midjourney', 'suno', 'runway', 'luma', 'elevenlabs',
+            'perplexity', 'poe', 'capcut', 'freepik', 'adobe', 'cursor', 'gamma'
+        ];
+        foreach ($staticKeywords as $kw) {
+            $urls[] = [
+                'loc'        => Url::search($kw),
+                'priority'   => '0.8',
+                'changefreq' => 'weekly',
+                'lastmod'    => $now,
+            ];
+        }
+
         echo '<?xml version="1.0" encoding="UTF-8"?>' . "\n";
         echo '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' . "\n";
         foreach ($urls as $u) {
@@ -75,8 +90,6 @@ class SeoController extends Controller {
 
     public function robots(): void {
         $this->botFriendlyHeaders('text/plain');
-
-        $base = rtrim(URLROOT, '/');
         $isProd = APP_ENV === 'production';
 
         echo "User-agent: *\n";

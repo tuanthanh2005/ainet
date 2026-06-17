@@ -1,0 +1,493 @@
+{
+  "keywords": {
+    "gpt": {
+      "display_name": "ChatGPT Plus",
+      "title": "Tài khoản GPT giá rẻ - ChatGPT Plus chính chủ 24/7",
+      "description": "Cung cấp tài khoản ChatGPT Plus giá rẻ, API OpenAI chính chủ uy tín. Nâng cấp tự động nhanh chóng, hỗ trợ bảo hành 1 đổi 1.",
+      "keywords": ["tài khoản gpt giá rẻ", "chatgpt plus giá rẻ", "mua tài khoản gpt", "chatgpt", "openai", "gpt giá rẻ"]
+    },
+    "gemini": {
+      "display_name": "Gemini Advanced",
+      "title": "Tài khoản Gemini Pro giá rẻ - Gemini Advanced uy tín",
+      "description": "Mua tài khoản Google Gemini Advanced (AI Premium) giá tốt nhất. Hỗ trợ kích hoạt tự động 24/7, bảo hành dài hạn uy tín.",
+      "keywords": ["tài khoản gemini pro giá rẻ", "gemini advanced giá rẻ", "google one ai premium", "gemini pro", "gemini"]
+    },
+    "ai": {
+      "display_name": "Tài khoản AI",
+      "title": "Tài khoản AI giá rẻ - ChatGPT, Gemini, Claude, Copilot",
+      "description": "Tổng hợp các loại tài khoản trí tuệ nhân tạo (AI) giá rẻ nhất thị trường. Nâng cấp tự động, kích hoạt nhanh chóng.",
+      "keywords": ["tài khoản ai giá rẻ", "mua tài khoản ai", "chatgpt giá rẻ", "claude pro", "copilot pro"]
+    },
+    "copilot": {
+      "display_name": "GitHub Copilot",
+      "title": "Mua tài khoản GitHub Copilot giá rẻ - Copilot Pro tự động",
+      "description": "Cung cấp tài khoản GitHub Copilot, Copilot Pro giá rẻ cho lập trình viên. Kích hoạt tự động, bảo hành 1 đổi 1.",
+      "keywords": ["github copilot giá rẻ", "copilot pro giá rẻ", "tài khoản copilot"]
+    },
+    "canva": {
+      "display_name": "Canva Pro",
+      "title": "Tài khoản Canva Pro giá rẻ - Thiết kế không giới hạn",
+      "description": "Nâng cấp tài khoản Canva Pro giá rẻ chính chủ. Đầy đủ tính năng Premium, bảo hành suốt thời gian sử dụng.",
+      "keywords": ["canva pro giá rẻ", "tài khoản canva pro", "mua tài khoản canva"]
+    },
+    "netflix": {
+      "display_name": "Netflix Premium",
+      "title": "Tài khoản Netflix Premium giá rẻ - Xem phim 4K ổn định",
+      "description": "Bán tài khoản Netflix Premium giá rẻ, xem phim chất lượng 4K UHD. Slot Netflix chính chủ ổn định, bảo hành 1 đổi 1.",
+      "keywords": ["tài khoản netflix giá rẻ", "netflix premium giá rẻ", "mua netflix"]
+    },
+    "youtube": {
+      "display_name": "YouTube Premium",
+      "title": "Tài khoản YouTube Premium giá rẻ - Không quảng cáo",
+      "description": "Nâng cấp YouTube Premium giá rẻ chính chủ trên email cá nhân. Xem video không quảng cáo, nghe nhạc background cực mượt.",
+      "keywords": ["tài khoản youtube premium giá rẻ", "youtube premium giá rẻ", "mua youtube premium"]
+    },
+    "claude": {
+      "display_name": "Claude Pro",
+      "title": "Tài khoản Claude Pro giá rẻ - Claude Opus chính chủ",
+      "description": "Mua tài khoản Claude Pro, Claude Opus giá rẻ nhất. Hỗ trợ kích hoạt nhanh chóng, bảo hành 1 đổi 1 uy tín.",
+      "keywords": ["tài khoản claude pro giá rẻ", "mua claude pro", "claude opus", "claude pro", "claude ai"]
+    },
+    "midjourney": {
+      "display_name": "Midjourney",
+      "title": "Tài khoản Midjourney giá rẻ - Vẽ tranh AI chuyên nghiệp",
+      "description": "Bán tài khoản Midjourney Premium giá rẻ cho nhà thiết kế. Sáng tạo hình ảnh AI không giới hạn, hỗ trợ bảo hành trọn gói.",
+      "keywords": ["tài khoản midjourney giá rẻ", "mua midjourney", "midjourney premium", "vẽ tranh ai"]
+    },
+    "suno": {
+      "display_name": "Suno AI",
+      "title": "Tài khoản Suno AI giá rẻ - Tạo nhạc AI chất lượng cao",
+      "description": "Mua tài khoản Suno AI Premium giá rẻ, tạo bài hát chất lượng phòng thu. Kích hoạt tự động, bảo hành uy tín.",
+      "keywords": ["tài khoản suno ai giá rẻ", "mua suno ai", "suno premium", "tạo nhạc ai"]
+    },
+    "runway": {
+      "display_name": "Runway Gen-3",
+      "title": "Tài khoản Runway Gen-3 giá rẻ - Tạo video AI đỉnh cao",
+      "description": "Cung cấp tài khoản Runway Pro, Gen-3 Alpha giá rẻ. Sáng tạo video từ văn bản và hình ảnh chuyên nghiệp.",
+      "keywords": ["tài khoản runway gen3", "runway pro giá rẻ", "runway ai", "tạo video ai"]
+    },
+    "luma": {
+      "display_name": "Luma Dream Machine",
+      "title": "Tài khoản Luma Dream Machine giá rẻ - Luma AI chính chủ",
+      "description": "Mua tài khoản Luma Dream Machine giá tốt nhất. Trải nghiệm công nghệ sinh video AI siêu thực, kích hoạt ngay.",
+      "keywords": ["luma dream machine giá rẻ", "tài khoản luma ai", "luma video ai"]
+    },
+    "elevenlabs": {
+      "display_name": "ElevenLabs",
+      "title": "Tài khoản ElevenLabs giá rẻ - Chuyển văn bản thành giọng nói AI",
+      "description": "Nâng cấp tài khoản ElevenLabs giá rẻ chính chủ. Đọc văn bản bằng giọng nói AI cảm xúc chân thực nhất.",
+      "keywords": ["tài khoản elevenlabs giá rẻ", "mua elevenlabs", "elevenlabs premium", "giọng nói ai"]
+    },
+    "perplexity": {
+      "display_name": "Perplexity Pro",
+      "title": "Tài khoản Perplexity Pro giá rẻ - Công cụ tìm kiếm AI",
+      "description": "Mua tài khoản Perplexity Pro giá rẻ nhất. Tra cứu thông tin thông minh với GPT-4o và Claude 3.5, bảo hành 1 đổi 1.",
+      "keywords": ["tài khoản perplexity pro", "perplexity pro giá rẻ", "perplexity ai"]
+    },
+    "poe": {
+      "display_name": "Poe AI",
+      "title": "Tài khoản Poe AI Pro giá rẻ - Trò chuyện với mọi Chatbot AI",
+      "description": "Cung cấp tài khoản Poe AI Pro giá rẻ. Kết nối không giới hạn tới GPT-4, Claude, Gemini Pro trên cùng một ứng dụng.",
+      "keywords": ["tài khoản poe ai pro", "poe pro giá rẻ", "poe ai premium"]
+    },
+    "capcut": {
+      "display_name": "CapCut Pro",
+      "title": "Tài khoản CapCut Pro giá rẻ - Edit video chuyên nghiệp",
+      "description": "Nâng cấp tài khoản CapCut Pro giá rẻ trên tài khoản cá nhân. Đầy đủ hiệu ứng Pro, template độc quyền, bảo hành uy tín.",
+      "keywords": ["tài khoản capcut pro", "capcut pro giá rẻ", "mua capcut pro"]
+    },
+    "freepik": {
+      "display_name": "Freepik Premium",
+      "title": "Tài khoản Freepik Premium giá rẻ - Download vector, photo",
+      "description": "Bán tài khoản Freepik Premium giá rẻ cho designer. Download tài nguyên thiết kế không giới hạn, kích hoạt tự động.",
+      "keywords": ["tài khoản freepik giá rẻ", "freepik premium giá rẻ", "mua freepik"]
+    },
+    "adobe": {
+      "display_name": "Adobe CC bản quyền",
+      "title": "Tài khoản Adobe Creative Cloud bản quyền giá rẻ",
+      "description": "Nâng cấp tài khoản Adobe Creative Cloud bản quyền giá rẻ (Photoshop, Illustrator, Premiere Pro). Bảo hành trọn khóa học/sử dụng.",
+      "keywords": ["tài khoản adobe giá rẻ", "adobe creative cloud giá rẻ", "adobe bản quyền"]
+    },
+    "cursor": {
+      "display_name": "Cursor AI Pro",
+      "title": "Tài khoản Cursor AI Pro giá rẻ - Code thông minh hơn",
+      "description": "Cung cấp tài khoản Cursor AI Pro giá tốt cho lập trình viên. Tích hợp sẵn Copilot ++, Composer AI đỉnh cao.",
+      "keywords": ["tài khoản cursor pro", "cursor ai pro giá rẻ", "cursor editor"]
+    },
+    "gamma": {
+      "display_name": "Gamma App",
+      "title": "Tài khoản Gamma App Premium giá rẻ - Thiết kế Slide AI",
+      "description": "Mua tài khoản Gamma App Plus/Pro giá rẻ. Tạo slide bài thuyết trình, website, văn bản tự động chỉ bằng 1 cú click.",
+      "keywords": ["gamma app pro giá rẻ", "tài khoản gamma", "slide ai"]
+    },
+    "deepseek": {
+      "display_name": "DeepSeek Pro",
+      "title": "Tài khoản DeepSeek Pro giá rẻ - Chatbot AI DeepSeek V3",
+      "description": "Mua tài khoản DeepSeek Pro giá rẻ, trải nghiệm mô hình DeepSeek V3, DeepSeek Coder siêu nhanh. Bảo hành 1 đổi 1 uy tín.",
+      "keywords": ["tài khoản deepseek pro", "deepseek v3 giá rẻ", "deepseek coder", "mua deepseek"]
+    },
+    "sora": {
+      "display_name": "OpenAI Sora",
+      "title": "Tài khoản OpenAI Sora giá rẻ - Trải nghiệm video AI chân thực",
+      "description": "Đăng ký tài khoản OpenAI Sora giá rẻ. Tạo video chất lượng cao từ mô tả văn bản (text-to-video) chuyên nghiệp.",
+      "keywords": ["tài khoản openai sora", "mua sora ai", "openai sora giá rẻ", "sora video ai"]
+    },
+    "flux": {
+      "display_name": "Flux AI",
+      "title": "Tài khoản Flux AI giá rẻ - Tạo ảnh AI Flux.1 siêu thực",
+      "description": "Cung cấp tài khoản Flux AI Premium giá rẻ. Trải nghiệm mô hình tạo ảnh nghệ thuật Flux.1 mới nhất cực kỳ chân thực.",
+      "keywords": ["tài khoản flux ai", "mua flux.1 pro", "tạo ảnh ai flux", "flux premium"]
+    },
+    "v0": {
+      "display_name": "v0.dev Vercel",
+      "title": "Tài khoản v0.dev Premium giá rẻ - Sinh code giao diện AI",
+      "description": "Nâng cấp tài khoản v0.dev Premium của Vercel giá rẻ. Tạo code UI React, Tailwind CSS nhanh chóng bằng AI.",
+      "keywords": ["tài khoản v0.dev", "v0 dev premium giá rẻ", "vercel v0 pro", "sinh giao diện ai"]
+    },
+    "leonardo": {
+      "display_name": "Leonardo AI",
+      "title": "Tài khoản Leonardo.Ai Premium giá rẻ - Thiết kế ảnh AI",
+      "description": "Mua tài khoản Leonardo AI Pro giá tốt. Tạo assets game, ảnh nhân vật 3D, anime chất lượng cực cao bằng AI.",
+      "keywords": ["tài khoản leonardo ai", "leonardo pro giá rẻ", "thiết kế ảnh ai", "leonardo.ai premium"]
+    },
+    "ideogram": {
+      "display_name": "Ideogram AI",
+      "title": "Tài khoản Ideogram AI Pro giá rẻ - Tạo ảnh chữ AI chuẩn xác",
+      "description": "Bán tài khoản Ideogram AI Premium giá rẻ. Tạo ảnh nghệ thuật có chứa chữ typography chuẩn xác nhất hiện nay.",
+      "keywords": ["tài khoản ideogram ai", "ideogram pro giá rẻ", "tạo ảnh chữ ai", "ideogram premium"]
+    },
+    "stable-diffusion": {
+      "display_name": "Stable Diffusion",
+      "title": "Tài khoản Stable Diffusion Web Premium giá rẻ",
+      "description": "Mua tài khoản Stable Diffusion Cloud Premium. Sử dụng GPU đám mây tạo ảnh không giới hạn, kích hoạt tự động.",
+      "keywords": ["tài khoản stable diffusion", "stable diffusion web giá rẻ", "sdxl pro", "vẽ tranh ai"]
+    },
+    "heygen": {
+      "display_name": "HeyGen Video",
+      "title": "Tài khoản HeyGen Premium giá rẻ - Tạo avatar người ảo AI",
+      "description": "Bán tài khoản HeyGen Pro giá tốt nhất. Tạo video thuyết trình, dịch thuật giọng nói khớp khẩu hình bằng AI avatar.",
+      "keywords": ["tài khoản heygen giá rẻ", "heygen premium", "tạo avatar ai", "dịch video heygen"]
+    },
+    "pika": {
+      "display_name": "Pika Labs",
+      "title": "Tài khoản Pika AI Premium giá rẻ - Tạo video từ ảnh và text",
+      "description": "Nâng cấp tài khoản Pika.art Premium giá rẻ. Làm video hoạt hình, hiệu ứng 3D siêu tốc từ văn bản và hình ảnh.",
+      "keywords": ["tài khoản pika labs", "pika pro giá rẻ", "pika.art premium", "làm video ai"]
+    },
+    "udio": {
+      "display_name": "Udio Music",
+      "title": "Tài khoản Udio AI Pro giá rẻ - Sáng tác nhạc AI chuyên nghiệp",
+      "description": "Mua tài khoản Udio Music AI giá tốt nhất. Tạo bài hát hoàn chỉnh đủ thể loại Pop, Rock, Rap bằng AI.",
+      "keywords": ["tài khoản udio music", "udio pro giá rẻ", "sáng tác nhạc ai", "udio ai premium"]
+    },
+    "dall-e": {
+      "display_name": "DALL-E 3",
+      "title": "Tài khoản DALL-E 3 Premium giá rẻ - Tranh AI từ OpenAI",
+      "description": "Cung cấp tài khoản DALL-E 3 (OpenAI) giá rẻ tích hợp ChatGPT Plus. Vẽ tranh nghệ thuật thông minh, cực kỳ chi tiết.",
+      "keywords": ["tài khoản dalle 3", "dall-e 3 giá rẻ", "mua dall-e openai", "tạo ảnh ai"]
+    },
+    "groq": {
+      "display_name": "Groq AI",
+      "title": "Tài khoản Groq Pro giá rẻ - Chatbot phản hồi siêu tốc",
+      "description": "Đăng ký tài khoản Groq Cloud Pro giá rẻ. Trải nghiệm tốc độ xử lý hàng trăm tokens mỗi giây từ chip LPU độc quyền.",
+      "keywords": ["tài khoản groq pro", "groq cloud giá rẻ", "groq ai"]
+    },
+    "huggingface": {
+      "display_name": "Hugging Face Pro",
+      "title": "Tài khoản Hugging Face PRO giá rẻ - AI Hub lập trình viên",
+      "description": "Nâng cấp tài khoản Hugging Face PRO giá rẻ. Tăng giới hạn chạy Spaces, Spaces GPU chất lượng cao cho nhà phát triển.",
+      "keywords": ["tài khoản hugging face pro", "huggingface pro giá rẻ", "gpu hugging face"]
+    },
+    "chatpdf": {
+      "display_name": "ChatPDF Pro",
+      "title": "Tài khoản ChatPDF Premium giá rẻ - Đọc tài liệu bằng AI",
+      "description": "Mua tài khoản ChatPDF Pro giá tốt nhất. Phân tích tài liệu PDF dài hàng nghìn trang, trích xuất thông tin nhanh chóng.",
+      "keywords": ["tài khoản chatpdf pro", "chatpdf premium giá rẻ", "đọc pdf bằng ai"]
+    },
+    "writesonic": {
+      "display_name": "Writesonic Pro",
+      "title": "Tài khoản Writesonic Premium giá rẻ - Viết bài chuẩn SEO",
+      "description": "Cung cấp tài khoản Writesonic Pro giá tốt. Tạo bài viết chuẩn SEO, bài quảng cáo, kịch bản tự động trong vài giây.",
+      "keywords": ["tài khoản writesonic", "writesonic pro giá rẻ", "viết bài ai", "writesonic premium"]
+    },
+    "jasper": {
+      "display_name": "Jasper AI",
+      "title": "Tài khoản Jasper AI Premium giá rẻ - Copywriting chuyên nghiệp",
+      "description": "Nâng cấp tài khoản Jasper AI Pro giá rẻ. Trợ lý viết nội dung, blog, email marketing đỉnh cao cho doanh nghiệp.",
+      "keywords": ["tài khoản jasper ai", "jasper pro giá rẻ", "jasper premium", "copywriting ai"]
+    },
+    "copy-ai": {
+      "display_name": "Copy.ai Pro",
+      "title": "Tài khoản Copy.ai Premium giá rẻ - Tự động hóa nội dung",
+      "description": "Mua tài khoản Copy.ai Pro giá rẻ nhất. Giải pháp tự động hóa viết nội dung truyền thông và marketing hiệu quả.",
+      "keywords": ["tài khoản copy.ai", "copy.ai pro giá rẻ", "viết nội dung marketing"]
+    },
+    "rytr": {
+      "display_name": "Rytr Premium",
+      "title": "Tài khoản Rytr Premium giá rẻ - Viết content đa ngôn ngữ",
+      "description": "Bán tài khoản Rytr Premium giá rẻ chính chủ. Viết bài với hơn 30 ngôn ngữ và 20 tông giọng khác nhau cực mượt.",
+      "keywords": ["tài khoản rytr premium", "rytr giá rẻ", "viết content ai"]
+    },
+    "character-ai": {
+      "display_name": "Character.ai+",
+      "title": "Tài khoản Character.ai Plus (c.ai+) giá rẻ chính chủ",
+      "description": "Mua tài khoản Character.ai+ giá tốt nhất. Trò chuyện không hàng chờ với hàng triệu nhân vật ảo AI thông minh.",
+      "keywords": ["tài khoản character.ai plus", "c.ai plus giá rẻ", "character ai premium"]
+    },
+    "novel-ai": {
+      "display_name": "NovelAI",
+      "title": "Tài khoản NovelAI Premium giá rẻ - Viết truyện & Tạo ảnh anime",
+      "description": "Cung cấp tài khoản NovelAI giá rẻ. Hỗ trợ viết tiểu thuyết tự động và tạo ảnh phong cách Anime cực kỳ đẹp mắt.",
+      "keywords": ["tài khoản novelai", "novel ai giá rẻ", "tạo ảnh anime ai", "novelai premium"]
+    },
+    "quillbot": {
+      "display_name": "Quillbot Premium",
+      "title": "Tài khoản Quillbot Premium giá rẻ - Paraphrase & Check đạo văn",
+      "description": "Nâng cấp tài khoản Quillbot Premium giá rẻ. Công cụ viết lại câu, sửa lỗi ngữ pháp tiếng Anh tốt nhất cho học sinh, du học sinh.",
+      "keywords": ["quillbot premium giá rẻ", "tài khoản quillbot", "check đạo văn quillbot"]
+    },
+    "grammarly": {
+      "display_name": "Grammarly Pro",
+      "title": "Tài khoản Grammarly Premium giá rẻ - Sửa lỗi ngữ pháp tiếng Anh",
+      "description": "Bán tài khoản Grammarly Premium giá rẻ. Tự động kiểm tra chính tả, ngữ pháp, đạo văn và cải thiện câu chữ tiếng Anh chuyên nghiệp.",
+      "keywords": ["grammarly premium giá rẻ", "tài khoản grammarly", "mua grammarly pro"]
+    },
+    "vocalremover": {
+      "display_name": "Vocal Remover",
+      "title": "Tài khoản Vocal Remover Premium giá rẻ - Tách lời bài hát",
+      "description": "Mua tài khoản Vocal Remover Premium. Tách vocal (giọng hát) và acapella ra khỏi nhạc nền chất lượng cực cao bằng AI.",
+      "keywords": ["tài khoản vocal remover", "vocal remover premium giá rẻ", "tách lời bài hát ai"]
+    },
+    "lalal": {
+      "display_name": "Lalal.ai",
+      "title": "Tài khoản Lalal.ai Premium giá rẻ - Tách nhạc cụ AI",
+      "description": "Nâng cấp tài khoản Lalal.ai giá tốt. Trích xuất giọng hát, trống, bass, guitar từ bất kỳ file âm thanh nào bằng AI.",
+      "keywords": ["tài khoản lalal.ai", "lalal ai giá rẻ", "tách nhạc cụ ai", "lalal.ai premium"]
+    },
+    "submagic": {
+      "display_name": "Submagic",
+      "title": "Tài khoản Submagic Premium giá rẻ - Auto tạo phụ đề short video",
+      "description": "Mua tài khoản Submagic Pro giá rẻ nhất. Tự động tạo phụ đề động đẹp mắt cho TikTok, Reels, Shorts bằng AI.",
+      "keywords": ["tài khoản submagic pro", "submagic giá rẻ", "phụ đề động ai", "submagic premium"]
+    },
+    "opus": {
+      "display_name": "Opus Clip Pro",
+      "title": "Tài khoản Opus Clip Pro giá rẻ - Cắt video dài thành Short",
+      "description": "Cung cấp tài khoản Opus Clip Premium giá rẻ. Sử dụng AI để tự động phát hiện highlight và cắt video dài thành short có phụ đề.",
+      "keywords": ["tài khoản opus clip pro", "opus clip giá rẻ", "cắt video ngắn bằng ai"]
+    },
+    "captions": {
+      "display_name": "Captions App",
+      "title": "Tài khoản Captions App Pro giá rẻ - Edit video thông minh",
+      "description": "Nâng cấp tài khoản Captions App Pro giá rẻ. Tự động thêm phụ đề, zoom thông minh, sửa khẩu hình mắt nhìn camera bằng AI.",
+      "keywords": ["tài khoản captions app pro", "captions pro giá rẻ", "app captions"]
+    },
+    "phind": {
+      "display_name": "Phind Pro",
+      "title": "Tài khoản Phind Pro giá rẻ - AI Search Engine cho Dev",
+      "description": "Mua tài khoản Phind Pro giá tốt nhất. Công cụ tìm kiếm lập trình thông minh hỗ trợ kết nối internet và chạy code test nhanh.",
+      "keywords": ["tài khoản phind pro", "phind pro giá rẻ", "phind ai search"]
+    },
+    "cohere": {
+      "display_name": "Cohere Pro",
+      "title": "Tài khoản Cohere Pro giá rẻ - AI đàm thoại doanh nghiệp",
+      "description": "Cung cấp tài khoản Cohere Premium giá rẻ. Sử dụng mô hình Command R+ thế hệ mới cho doanh nghiệp hiệu năng cao.",
+      "keywords": ["tài khoản cohere", "cohere command r", "cohere ai giá rẻ"]
+    },
+    "mistral": {
+      "display_name": "Mistral Large",
+      "title": "Tài khoản Mistral Large giá rẻ - AI mã nguồn mở Pháp",
+      "description": "Mua tài khoản Mistral Large Premium giá rẻ nhất. Trải nghiệm Chatbot AI hàng đầu châu Âu bảo mật và tối ưu.",
+      "keywords": ["tài khoản mistral large", "mistral ai giá rẻ", "mistral pro"]
+    },
+    "synthesia": {
+      "display_name": "Synthesia Video",
+      "title": "Tài khoản Synthesia AI giá rẻ - Tạo video phát ngôn viên ảo",
+      "description": "Bán tài khoản Synthesia Premium giá tốt. Tạo video giới thiệu sản phẩm chuyên nghiệp bằng người ảo thuyết trình hơn 120 ngôn ngữ.",
+      "keywords": ["tài khoản synthesia", "synthesia ai giá rẻ", "phát ngôn viên ảo ai"]
+    },
+    "descript": {
+      "display_name": "Descript Pro",
+      "title": "Tài khoản Descript Creator/Pro giá rẻ - Edit audio bằng text",
+      "description": "Nâng cấp tài khoản Descript Pro giá rẻ chính chủ. Biên tập âm thanh và video thông qua chỉnh sửa văn bản ghi âm bằng AI.",
+      "keywords": ["tài khoản descript pro", "descript creator giá rẻ", "edit âm thanh ai"]
+    },
+    "invideo": {
+      "display_name": "InVideo AI",
+      "title": "Tài khoản InVideo AI Premium giá rẻ - Tạo video từ kịch bản",
+      "description": "Mua tài khoản InVideo AI Pro giá rẻ nhất. Chuyển kịch bản viết sẵn thành video đầy đủ hình ảnh minh họa, voice đọc chuyên nghiệp.",
+      "keywords": ["tài khoản invideo ai pro", "invideo ai giá rẻ", "invideo premium"]
+    },
+    "d-id": {
+      "display_name": "D-ID Studio",
+      "title": "Tài khoản Creative Reality Studio D-ID giá rẻ chính chủ",
+      "description": "Cung cấp tài khoản D-ID Premium giá rẻ. Làm cho bức ảnh chân dung chuyển động nói chuyện sống động bằng giọng đọc AI.",
+      "keywords": ["tài khoản d-id studio", "d-id giá rẻ", "creative reality studio"]
+    },
+    "viggle": {
+      "display_name": "Viggle AI",
+      "title": "Tài khoản Viggle AI Premium giá rẻ - Tạo video nhảy múa AI",
+      "description": "Nâng cấp tài khoản Viggle AI Pro giá rẻ. Ghép ảnh chân dung vào bất kỳ chuyển động, nhảy múa nào chuẩn xác, tự nhiên.",
+      "keywords": ["tài khoản viggle ai", "viggle pro giá rẻ", "viggle video ai"]
+    },
+    "photoroom": {
+      "display_name": "PhotoRoom Pro",
+      "title": "Tài khoản PhotoRoom Pro giá rẻ - Xóa phông nền ảnh bán hàng",
+      "description": "Mua tài khoản PhotoRoom Pro giá rẻ. Xóa nền ảnh hàng loạt, ghép phông nền studio chụp ảnh sản phẩm cực đẹp bằng AI.",
+      "keywords": ["photoroom pro giá rẻ", "tài khoản photoroom", "xóa nền ảnh sản phẩm"]
+    },
+    "krea": {
+      "display_name": "Krea AI",
+      "title": "Tài khoản Krea AI Premium giá rẻ - Upscale & Enhance ảnh real-time",
+      "description": "Cung cấp tài khoản Krea AI Pro giá tốt. Vẽ phác thảo sinh ảnh thời gian thực, nâng cấp độ nét cao cho tranh thiết kế.",
+      "keywords": ["tài khoản krea ai", "krea pro giá rẻ", "krea premium", "upscale ảnh ai"]
+    },
+    "magnific": {
+      "display_name": "Magnific AI",
+      "title": "Tài khoản Magnific AI Premium giá rẻ - Siêu độ nét ảnh AI",
+      "description": "Nâng cấp tài khoản Magnific AI giá rẻ. Công cụ upscale và làm nét ảnh đỉnh cao bằng cách thêm chi tiết chân thực nhất.",
+      "keywords": ["tài khoản magnific ai", "magnific premium giá rẻ", "làm nét ảnh bằng ai"]
+    },
+    "remove-bg": {
+      "display_name": "Remove.bg Pro",
+      "title": "Tài khoản Remove.bg Premium giá rẻ - Tự động tách nền ảnh",
+      "description": "Bán tài khoản Remove.bg giá rẻ theo lượt credit. Tách nền ảnh tự động 100% chỉ trong 5 giây với độ phân giải HD sắc nét.",
+      "keywords": ["remove.bg premium giá rẻ", "tài khoản remove bg", "mua credit remove bg"]
+    },
+    "befunky": {
+      "display_name": "BeFunky Plus",
+      "title": "Tài khoản BeFunky Plus giá rẻ - Edit ảnh & Cắt dán trực tuyến",
+      "description": "Mua tài khoản BeFunky Plus giá rẻ nhất. Chỉnh sửa hình ảnh, ghép ảnh và thiết kế đồ họa dễ dàng với công cụ AI tự động.",
+      "keywords": ["tài khoản befunky plus", "befunky giá rẻ", "edit ảnh online"]
+    },
+    "vanceai": {
+      "display_name": "VanceAI",
+      "title": "Tài khoản VanceAI Premium giá rẻ - Nâng cao chất lượng ảnh",
+      "description": "Cung cấp tài khoản VanceAI giá tốt. Tự động phục hồi ảnh cũ, khử nhiễu, làm nét và tăng kích thước ảnh không bể hình.",
+      "keywords": ["tài khoản vanceai", "vanceai giá rẻ", "phục hồi ảnh cũ ai"]
+    },
+    "cutout-pro": {
+      "display_name": "Cutout.pro",
+      "title": "Tài khoản Cutout.pro Premium giá rẻ - Thiết kế ảnh tự động",
+      "description": "Nâng cấp tài khoản Cutout.pro giá rẻ theo lượt tải. Xóa vật thể thừa, khôi phục ảnh mờ, làm ảnh anime bằng trí tuệ nhân tạo.",
+      "keywords": ["cutout.pro premium giá rẻ", "tài khoản cutout pro", "xóa vật thể thừa ai"]
+    },
+    "picsart": {
+      "display_name": "Picsart Gold",
+      "title": "Tài khoản Picsart Gold Pro giá rẻ - App chỉnh sửa ảnh số 1",
+      "description": "Bán tài khoản Picsart Gold giá rẻ trên tài khoản cá nhân. Đầy đủ bộ lọc Premium, font chữ đẹp, nhãn dán độc quyền, bảo hành uy tín.",
+      "keywords": ["tài khoản picsart gold", "picsart giá rẻ", "picsart gold pro"]
+    },
+    "remaker": {
+      "display_name": "Remaker AI",
+      "title": "Tài khoản Remaker AI Premium giá rẻ - Face Swap mặt đổi ngôi",
+      "description": "Mua tài khoản Remaker AI giá rẻ. Đổi khuôn mặt trong ảnh hoặc video đơn giản, nhanh chóng, kết quả cực kỳ chân thật.",
+      "keywords": ["tài khoản remaker ai", "remaker face swap", "đổi mặt ảnh video ai"]
+    },
+    "seaart": {
+      "display_name": "SeaArt AI",
+      "title": "Tài khoản SeaArt AI Premium giá rẻ - Tạo ảnh anime cực chất",
+      "description": "Nâng cấp tài khoản SeaArt AI Pro giá rẻ. Sử dụng các model Lora, Checkpoint tạo nhân vật anime, game sống động.",
+      "keywords": ["tài khoản seaart ai", "seaart pro giá rẻ", "tạo ảnh anime seaart"]
+    }
+  },
+  "aliases": {
+    "chatgpt": "gpt",
+    "chat-gpt": "gpt",
+    "openai": "gpt",
+    "chat-gpt-gia-re": "gpt",
+    "tai-khoan-gpt": "gpt",
+    "tai-khoan-chatgpt": "gpt",
+    "tai-khoan-gpt-gia-re": "gpt",
+    "gemini-advanced": "gemini",
+    "gemini-pro": "gemini",
+    "google-gemini": "gemini",
+    "tai-khoan-gemini": "gemini",
+    "tai-khoan-gemini-pro": "gemini",
+    "copilot-pro": "copilot",
+    "github-copilot": "copilot",
+    "canva-pro": "canva",
+    "tai-khoan-canva": "canva",
+    "netflix-premium": "netflix",
+    "tai-khoan-netflix": "netflix",
+    "youtube-premium": "youtube",
+    "tai-khoan-youtube": "youtube",
+    "yt-premium": "youtube",
+    "claude-pro": "claude",
+    "claude-3-5": "claude",
+    "claude-opus": "claude",
+    "tai-khoan-claude": "claude",
+    "midjourney-ai": "midjourney",
+    "tai-khoan-midjourney": "midjourney",
+    "suno-ai": "suno",
+    "tai-khoan-suno": "suno",
+    "runway-gen3": "runway",
+    "tai-khoan-runway": "runway",
+    "luma-ai": "luma",
+    "tai-khoan-luma": "luma",
+    "elevenlabs-voice": "elevenlabs",
+    "tai-khoan-elevenlabs": "elevenlabs",
+    "perplexity-pro": "perplexity",
+    "tai-khoan-perplexity": "perplexity",
+    "poe-ai": "poe",
+    "tai-khoan-poe": "poe",
+    "capcut-pro": "capcut",
+    "tai-khoan-capcut": "capcut",
+    "freepik-premium": "freepik",
+    "tai-khoan-freepik": "freepik",
+    "adobe-creative-cloud": "adobe",
+    "tai-khoan-adobe": "adobe",
+    "cursor-pro": "cursor",
+    "tai-khoan-cursor": "cursor",
+    "gamma-app": "gamma",
+    "tai-khoan-gamma": "gamma",
+    "deepseek-pro": "deepseek",
+    "deepseek-v3": "deepseek",
+    "deepseek-coder": "deepseek",
+    "sora-ai": "sora",
+    "openai-sora": "sora",
+    "flux-ai": "flux",
+    "flux-1": "flux",
+    "v0-dev": "v0",
+    "vercel-v0": "v0",
+    "leonardo-ai": "leonardo",
+    "ideogram-ai": "ideogram",
+    "heygen-ai": "heygen",
+    "pika-labs": "pika",
+    "udio-music": "udio",
+    "dalle-3": "dall-e",
+    "dalle": "dall-e",
+    "groq-pro": "groq",
+    "hugging-face": "huggingface",
+    "writesonic-pro": "writesonic",
+    "jasper-ai": "jasper",
+    "character-ai-plus": "character-ai",
+    "c-ai": "character-ai",
+    "novelai": "novel-ai",
+    "quillbot-premium": "quillbot",
+    "grammarly-pro": "grammarly",
+    "vocal-remover": "vocalremover",
+    "lalal-ai": "lalal",
+    "submagic-pro": "submagic",
+    "opus-clip": "opus",
+    "phind-pro": "phind",
+    "cohere-ai": "cohere",
+    "mistral-pro": "mistral",
+    "synthesia-video": "synthesia",
+    "descript-pro": "descript",
+    "invideo-ai": "invideo",
+    "d-id-studio": "d-id",
+    "viggle-ai": "viggle",
+    "photoroom-pro": "photoroom",
+    "krea-ai": "krea",
+    "magnific-ai": "magnific",
+    "remove-bg-pro": "remove-bg",
+    "removebg": "remove-bg",
+    "befunky-plus": "befunky",
+    "vance-ai": "vanceai",
+    "cutout-pro-premium": "cutout-pro",
+    "picsart-gold": "picsart",
+    "remaker-face-swap": "remaker",
+    "seaart-ai": "seaart"
+  }
+}

@@ -84,9 +84,11 @@
                 <?php if (!empty($product['badge'])): ?>
                     <span class="badge-hot"><?= htmlspecialchars($product['badge'] ?? '') ?></span>
                 <?php endif; ?>
-                <img src="<?= htmlspecialchars(image_url($product['image'] ?? '')) ?>" class="card-img-top"
-                    alt="<?= htmlspecialchars($product['title'] ?? ($product['category'] ?? 'Sản phẩm')) ?>"
-                    loading="lazy" decoding="async">
+                <div class="product-image-wrapper position-relative w-100 overflow-hidden">
+                    <img src="<?= htmlspecialchars(image_url($product['image'] ?? '')) ?>" class="card-img-top position-absolute top-0 start-0 w-100 h-100"
+                        alt="<?= htmlspecialchars($product['title'] ?? ($product['category'] ?? 'Sản phẩm')) ?>"
+                        loading="lazy" decoding="async">
+                </div>
                 <div class="card-body d-flex flex-column p-4">
                     <h3 class="product-title mb-1">
                         <a href="<?= htmlspecialchars(Url::product($product)) ?>" class="stretched-link text-decoration-none text-dark">
@@ -464,9 +466,11 @@
                     <?php if (!empty($product['badge'])): ?>
                         <span class="badge-hot"><?= htmlspecialchars($product['badge'] ?? '') ?></span>
                     <?php endif; ?>
-                    <img src="<?= htmlspecialchars(image_url($product['image'] ?? '')) ?>" class="card-img-top"
-                        alt="<?= htmlspecialchars($product['title'] ?? ($product['category'] ?? 'Sản phẩm')) ?>"
-                        loading="<?= $index < 4 ? 'eager' : 'lazy' ?>" <?= $index < 4 ? 'fetchpriority="high"' : '' ?> decoding="async">
+                    <div class="product-image-wrapper position-relative w-100 overflow-hidden">
+                        <img src="<?= htmlspecialchars(image_url($product['image'] ?? '')) ?>" class="card-img-top position-absolute top-0 start-0 w-100 h-100"
+                            alt="<?= htmlspecialchars($product['title'] ?? ($product['category'] ?? 'Sản phẩm')) ?>"
+                            loading="<?= $index < 4 ? 'eager' : 'lazy' ?>" <?= $index < 4 ? 'fetchpriority="high"' : '' ?> decoding="async">
+                    </div>
                     <div class="card-body d-flex flex-column p-4">
                         <h3 class="product-title mb-1">
                             <a href="<?= htmlspecialchars(Url::product($product)) ?>" class="stretched-link text-decoration-none text-dark">
@@ -597,6 +601,33 @@
             <p class="mb-0">Không có sản phẩm nào trong danh mục này.</p>
         </div>
     <?php endif; ?>
+
+    <!-- Tìm nhanh theo sản phẩm (Internal Linking Automation - Item 3) -->
+    <div class="mt-5 pt-4 border-top fade-in-element">
+        <h4 class="fw-bold mb-3 fs-5 text-dark"><i class="fa-solid fa-tags text-primary me-2"></i>Tìm nhanh theo sản phẩm</h4>
+        <div class="d-flex flex-wrap gap-2 keyword-search-grid">
+            <a href="<?= Url::search('gpt') ?>" class="btn btn-sm btn-light border rounded-pill px-3 py-1.5 small hover-up">ChatGPT</a>
+            <a href="<?= Url::search('gemini') ?>" class="btn btn-sm btn-light border rounded-pill px-3 py-1.5 small hover-up">Gemini</a>
+            <a href="<?= Url::search('copilot') ?>" class="btn btn-sm btn-light border rounded-pill px-3 py-1.5 small hover-up">GitHub Copilot</a>
+            <a href="<?= Url::search('canva') ?>" class="btn btn-sm btn-light border rounded-pill px-3 py-1.5 small hover-up">Canva Pro</a>
+            <a href="<?= Url::search('netflix') ?>" class="btn btn-sm btn-light border rounded-pill px-3 py-1.5 small hover-up">Netflix Premium</a>
+            <a href="<?= Url::search('youtube') ?>" class="btn btn-sm btn-light border rounded-pill px-3 py-1.5 small hover-up">YouTube Premium</a>
+            <a href="<?= Url::search('claude') ?>" class="btn btn-sm btn-light border rounded-pill px-3 py-1.5 small hover-up">Claude Pro</a>
+            <a href="<?= Url::search('midjourney') ?>" class="btn btn-sm btn-light border rounded-pill px-3 py-1.5 small hover-up">Midjourney</a>
+            <a href="<?= Url::search('suno') ?>" class="btn btn-sm btn-light border rounded-pill px-3 py-1.5 small hover-up">Suno AI</a>
+            <a href="<?= Url::search('runway') ?>" class="btn btn-sm btn-light border rounded-pill px-3 py-1.5 small hover-up">Runway Gen-3</a>
+            <a href="<?= Url::search('luma') ?>" class="btn btn-sm btn-light border rounded-pill px-3 py-1.5 small hover-up">Luma Dream Machine</a>
+            <a href="<?= Url::search('elevenlabs') ?>" class="btn btn-sm btn-light border rounded-pill px-3 py-1.5 small hover-up">ElevenLabs</a>
+            <a href="<?= Url::search('perplexity') ?>" class="btn btn-sm btn-light border rounded-pill px-3 py-1.5 small hover-up">Perplexity Pro</a>
+            <a href="<?= Url::search('poe') ?>" class="btn btn-sm btn-light border rounded-pill px-3 py-1.5 small hover-up">Poe AI</a>
+            <a href="<?= Url::search('capcut') ?>" class="btn btn-sm btn-light border rounded-pill px-3 py-1.5 small hover-up">CapCut Pro</a>
+            <a href="<?= Url::search('freepik') ?>" class="btn btn-sm btn-light border rounded-pill px-3 py-1.5 small hover-up">Freepik Premium</a>
+            <a href="<?= Url::search('adobe') ?>" class="btn btn-sm btn-light border rounded-pill px-3 py-1.5 small hover-up">Adobe CC</a>
+            <a href="<?= Url::search('cursor') ?>" class="btn btn-sm btn-light border rounded-pill px-3 py-1.5 small hover-up">Cursor AI</a>
+            <a href="<?= Url::search('gamma') ?>" class="btn btn-sm btn-light border rounded-pill px-3 py-1.5 small hover-up">Gamma App</a>
+            <a href="<?= Url::search('ai') ?>" class="btn btn-sm btn-light border rounded-pill px-3 py-1.5 small hover-up">Tài khoản AI</a>
+        </div>
+    </div>
 </div>
 
 <div id="blog-section" style="display: <?php echo ($tab === 'blog') ? 'block' : 'none'; ?>;">

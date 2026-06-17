@@ -100,6 +100,7 @@ require_once APP_ROOT . '/app/Controllers/HomeController.php';
 require_once APP_ROOT . '/app/Controllers/AdminController.php';
 require_once APP_ROOT . '/app/Controllers/CheckoutController.php';
 require_once APP_ROOT . '/app/Controllers/SeoController.php';
+require_once APP_ROOT . '/app/Controllers/SeoRouterController.php';
 
 // Refresh logged-in user's session from DB on every request so role/status changes
 // take effect without requiring re-login. Silent if user no longer exists.
@@ -187,6 +188,18 @@ if ($rawUrl !== '' && empty($_GET['action'])) {
         case 'webhook':
             if ($second === 'sepay') {
                 $_GET['action'] = 'sepayWebhook';
+            }
+            break;
+        case 'tim-kiem':
+            if ($second !== '') {
+                $_GET['action'] = 'searchKeyword';
+                $_GET['keyword'] = $second;
+            }
+            break;
+        case 'go':
+            if ($second !== '') {
+                $_GET['action'] = 'seoRedirect';
+                $_GET['slug'] = $second;
             }
             break;
     }
@@ -289,6 +302,8 @@ if ($isPost && !in_array($action, $csrfExempt, true)) {
 // Simple Route Map
 if (in_array($action, ['sitemap', 'robots'], true)) {
     $controllerName = 'SeoController';
+} elseif (in_array($action, ['seoRedirect', 'submitPreOrder'], true)) {
+    $controllerName = 'SeoRouterController';
 } elseif (strpos($action, 'admin') === 0) {
     $controllerName = 'AdminController';
 } elseif (in_array($action, ['checkout', 'payment', 'sepayWebhook', 'checkOrderStatus', 'createOrderJson', 'history', 'success', 'checkoutPage', 'paymentDemo', 'sepayDebug'])) {

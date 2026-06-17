@@ -31,6 +31,9 @@ class Url {
     public static function home(): string    { return url(); }
     public static function products(): string { return url('san-pham'); }
     public static function blogs(): string    { return url('tap-chi'); }
+    public static function search(string $keyword): string {
+        return url('tim-kiem/' . rawurlencode($keyword));
+    }
 
     public static function withQuery(string $base, array $params): string {
         $params = array_filter($params, function ($value) {
