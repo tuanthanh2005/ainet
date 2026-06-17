@@ -32,6 +32,16 @@ class Url {
     public static function products(): string { return url('san-pham'); }
     public static function blogs(): string    { return url('tap-chi'); }
 
+    public static function withQuery(string $base, array $params): string {
+        $params = array_filter($params, function ($value) {
+            return $value !== null && $value !== '' && $value !== false;
+        });
+        if (empty($params)) {
+            return $base;
+        }
+        return $base . '?' . http_build_query($params);
+    }
+
     /**
      * Extract the trailing id from a "slug-id" path segment.
      * Examples:

@@ -200,6 +200,75 @@ if ($action === 'webhook/sepay') {
     $action = 'sepayWebhook';
 }
 
+function current_request_url_for_redirect(): string {
+    $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
+        || (($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? '') === 'https')
+        || ((int) ($_SERVER['SERVER_PORT'] ?? 0) === 443)
+        ? 'https'
+        : 'http';
+    $host = $_SERVER['HTTP_HOST'] ?? parse_url(URLROOT, PHP_URL_HOST);
+    $uri = $_SERVER['REQUEST_URI'] ?? '/';
+    return Seo::normalizeUrl($scheme . '://' . $host . $uri);
+}
+
+function redirect_to_public_canonical_if_needed(string $action): void {
+    if (($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'GET') {
+        return;
+    }
+
+    $target = null;
+    $query = [];
+
+    foreach (['q', 'sort', 'page'] as $key) {
+        if (isset($_GET[$key]) && trim((string) $_GET[$key]) !== '') {
+            $query[$key] = trim((string) $_GET[$key]);
+        }
+    }
+
+    if ($action === 'index') {
+        $tab = $_GET['tab'] ?? '';
+        $category = trim((string) ($_GET['category'] ?? ''));
+        if ($category !== '' && $category !== 'all') {
+            $target = Url::withQuery(Url::category($category), $query);
+        } elseif ($tab === 'products') {
+            $target = Url::withQuery(Url::products(), $query);
+        } elseif ($tab === 'blog') {
+            $target = Url::blogs();
+        } elseif ($tab === 'home') {
+            $target = Url::home();
+        }
+    } elseif ($action === 'productDetail' && !empty($_GET['id'])) {
+        $product = Product::getBySlugOrId((string) $_GET['id']);
+        if ($product) {
+            $target = Url::product($product);
+        }
+    } elseif ($action === 'blogDetail' && !empty($_GET['id'])) {
+        $blog = Blog::getBySlugOrId((string) $_GET['id']);
+        if ($blog) {
+            $target = Url::blog($blog);
+        }
+    } elseif ($action === 'about') {
+        $target = Url::about();
+    } elseif ($action === 'contact') {
+        $target = Url::contact();
+    } elseif ($action === 'cart') {
+        $target = Url::cart();
+    }
+
+    if (!$target) {
+        return;
+    }
+
+    $current = current_request_url_for_redirect();
+    $target = Seo::normalizeUrl($target);
+    if ($current !== $target) {
+        header('Location: ' . $target, true, 301);
+        exit;
+    }
+}
+
+redirect_to_public_canonical_if_needed($action);
+
 // CSRF protection on all state-changing requests EXCEPT third-party webhook
 $isPost = ($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST';
 $csrfExempt = ['sepayWebhook'];

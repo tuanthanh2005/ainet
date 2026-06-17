@@ -169,6 +169,7 @@ class HomeController extends Controller {
                 'structured'  => $this->productItemListSchema($products, $canonical),
             ]);
         } else {
+            $homeSeo = Seo::defaults($tab === 'products' ? 'products' : ($tab === 'blog' ? 'blog' : 'home'));
             $canonical = Url::home();
             if ($tab === 'products') {
                 $canonical = Url::products() . ($page > 1 ? '?page=' . $page : '');
@@ -183,9 +184,9 @@ class HomeController extends Controller {
                 ? Url::products() . '?page=' . ($page + 1)
                 : null;
             Seo::set([
-                'title'       => 'Tài khoản AI Premium - Gemini Advanced, ChatGPT, Copilot',
-                'description' => 'Cung cấp tài khoản Gemini Advanced (Google One AI Premium), ChatGPT Plus, YouTube Premium, GitHub Copilot giá tốt nhất. Kích hoạt tự động, bảo hành 1 đổi 1 uy tín.',
-                'keywords'    => ['tài khoản gemini advanced', 'google gemini advanced', 'tài khoản chatgpt plus', 'youtube premium', 'github copilot', 'tài khoản ai', SITENAME],
+                'title'       => $homeSeo['title'] ?? 'Tài khoản AI Premium - Gemini Advanced, ChatGPT, Copilot',
+                'description' => $homeSeo['description'] ?? 'Cung cấp tài khoản Gemini Advanced (Google One AI Premium), ChatGPT Plus, YouTube Premium, GitHub Copilot giá tốt nhất. Kích hoạt tự động, bảo hành 1 đổi 1 uy tín.',
+                'keywords'    => $homeSeo['keywords'] ?? ['tài khoản gemini advanced', 'google gemini advanced', 'tài khoản chatgpt plus', 'youtube premium', 'github copilot', 'tài khoản ai', SITENAME],
                 'image'       => url('assets/images/gemini_share.png'),
                 'canonical'   => $canonical,
                 'type'        => 'website',
@@ -709,9 +710,11 @@ class HomeController extends Controller {
     }
 
     public function about() {
+        $aboutSeo = Seo::defaults('about');
         Seo::set([
-            'title'       => 'Giới thiệu',
-            'description' => Seo::truncate(strip_tags($this->settings['about_desc'] ?? ''), 200) ?: 'Giới thiệu về ' . SITENAME,
+            'title'       => $aboutSeo['title'] ?? 'Giới thiệu',
+            'description' => $aboutSeo['description'] ?? (Seo::truncate(strip_tags($this->settings['about_desc'] ?? ''), 200) ?: 'Giới thiệu về ' . SITENAME),
+            'keywords'    => $aboutSeo['keywords'] ?? [],
             'image'       => $this->settings['about_image'] ?? '',
             'canonical'   => Url::about(),
             'type'        => 'website',
@@ -723,9 +726,11 @@ class HomeController extends Controller {
     }
 
     public function contact() {
+        $contactSeo = Seo::defaults('contact');
         Seo::set([
-            'title'       => 'Liên hệ',
-            'description' => Seo::truncate(strip_tags($this->settings['contact_desc'] ?? ''), 200) ?: 'Thông tin liên hệ ' . SITENAME,
+            'title'       => $contactSeo['title'] ?? 'Liên hệ',
+            'description' => $contactSeo['description'] ?? (Seo::truncate(strip_tags($this->settings['contact_desc'] ?? ''), 200) ?: 'Thông tin liên hệ ' . SITENAME),
+            'keywords'    => $contactSeo['keywords'] ?? [],
             'canonical'   => Url::contact(),
             'type'        => 'website',
         ]);

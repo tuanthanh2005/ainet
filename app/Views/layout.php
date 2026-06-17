@@ -13,8 +13,7 @@
     <meta http-equiv="refresh" content="5">
 <?php endif; ?>
     <link rel="icon" type="image/png" href="<?php echo asset('images/fvcoin.png'); ?>">
-    <link rel="icon" type="image/png" href="<?php echo asset('images/fvcoin.pgn'); ?>">
-    <link rel="icon" type="image/png" href="<?php echo url('fvcoin.png'); ?>">
+    <link rel="apple-touch-icon" href="<?php echo asset('images/fvcoin.png'); ?>">
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
@@ -70,11 +69,11 @@
                     }
                     ?>
                     <div class="header-nav-wrapper">
-                        <a href="<?php echo url('index.php?tab=home'); ?>"
+                        <a href="<?php echo Url::home(); ?>"
                            class="header-nav-btn text-decoration-none <?php echo ($currentAction === 'index' && $activeTab === 'home') ? 'active' : ''; ?>">Trang Chủ</a>
-                        <a href="<?php echo url('index.php?tab=products'); ?>"
+                        <a href="<?php echo Url::products(); ?>"
                            class="header-nav-btn text-decoration-none <?php echo ($currentAction === 'index' && $activeTab === 'products') ? 'active' : ''; ?>">Sản Phẩm</a>
-                        <a href="<?php echo url('index.php?tab=blog'); ?>"
+                        <a href="<?php echo Url::blogs(); ?>"
                            class="header-nav-btn text-decoration-none <?php echo ($currentAction === 'index' && $activeTab === 'blog') ? 'active' : ''; ?>">Tạp Chí</a>
                         <a href="<?php echo Url::about(); ?>"
                            class="header-nav-btn text-decoration-none <?php echo $currentAction === 'about' ? 'active' : ''; ?>">Giới Thiệu</a>
@@ -85,8 +84,7 @@
 
                 <!-- Thanh tìm kiếm (Ẩn trên Mobile, chỉ hiện Desktop) -->
                 <div class="col-12 col-lg-2 order-3 order-lg-2 d-none d-lg-block position-relative">
-                    <form class="d-flex search-form" action="<?php echo url('index.php'); ?>" method="GET" role="search">
-                        <input type="hidden" name="tab" value="products">
+                    <form class="d-flex search-form" action="<?php echo Url::products(); ?>" method="GET" role="search">
                         <input class="form-control" type="search" name="q" value="<?php echo htmlspecialchars($searchQuery ?? ($_GET['q'] ?? '')); ?>"
                             placeholder="Tìm kiếm..."
                             aria-label="Search">
@@ -193,8 +191,7 @@
     </header>
 
     <div class="collapse d-lg-none bg-light border-bottom p-3" id="mobileSearchCollapse">
-        <form class="d-flex search-form w-100" action="<?php echo url('index.php'); ?>" method="GET" role="search">
-            <input type="hidden" name="tab" value="products">
+        <form class="d-flex search-form w-100" action="<?php echo Url::products(); ?>" method="GET" role="search">
             <input class="form-control me-2" type="search" name="q" value="<?php echo htmlspecialchars($searchQuery ?? ($_GET['q'] ?? '')); ?>"
                 placeholder="Tìm kiếm sản phẩm (gpt, git, yt)..." aria-label="Search">
             <button class="btn btn-dark px-3" type="submit"><i class="fa-solid fa-magnifying-glass"></i></button>
@@ -478,15 +475,15 @@
 
     <!-- Mobile Bottom Navigation Bar -->
     <div class="mobile-bottom-nav d-lg-none">
-        <a href="<?php echo url('index.php?tab=home'); ?>" class="mobile-nav-item <?php echo ($currentAction === 'index' && $activeTab === 'home') ? 'active' : ''; ?>">
+        <a href="<?php echo Url::home(); ?>" class="mobile-nav-item <?php echo ($currentAction === 'index' && $activeTab === 'home') ? 'active' : ''; ?>">
             <i class="fa-solid fa-house"></i>
             <span>Trang Chủ</span>
         </a>
-        <a href="<?php echo url('index.php?tab=products'); ?>" class="mobile-nav-item <?php echo ($currentAction === 'index' && $activeTab === 'products') ? 'active' : ''; ?>">
+        <a href="<?php echo Url::products(); ?>" class="mobile-nav-item <?php echo ($currentAction === 'index' && $activeTab === 'products') ? 'active' : ''; ?>">
             <i class="fa-solid fa-box-open"></i>
             <span>Sản Phẩm</span>
         </a>
-        <a href="<?php echo url('index.php?tab=blog'); ?>" class="mobile-nav-item <?php echo ($currentAction === 'index' && $activeTab === 'blog') ? 'active' : ''; ?>">
+        <a href="<?php echo Url::blogs(); ?>" class="mobile-nav-item <?php echo ($currentAction === 'index' && $activeTab === 'blog') ? 'active' : ''; ?>">
             <i class="fa-solid fa-newspaper"></i>
             <span>Tạp Chí</span>
         </a>

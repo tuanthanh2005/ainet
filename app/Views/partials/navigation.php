@@ -9,11 +9,11 @@ $isProductPage = $currentAction === 'index' && $activeTab === 'products';
 <div class="navigation-wrapper <?php echo $isProductPage ? 'mb-4 mb-lg-2' : 'mb-0 d-none'; ?>">
     <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-2 border-bottom border-light pb-2 pb-md-0 <?php echo $isProductPage ? 'justify-content-lg-end border-lg-0 pb-lg-0 mb-lg-0' : 'd-none'; ?>">
         <div class="tab-nav flex-grow-1 flex-md-grow-0 d-none">
-            <a href="<?php echo url('index.php?tab=home'); ?>"
+            <a href="<?php echo Url::home(); ?>"
                class="tab-btn text-decoration-none <?php echo ($currentAction === 'index' && $activeTab === 'home') ? 'active' : ''; ?>">Trang Chủ</a>
-            <a href="<?php echo url('index.php?tab=products'); ?>"
+            <a href="<?php echo Url::products(); ?>"
                class="tab-btn text-decoration-none <?php echo ($currentAction === 'index' && $activeTab === 'products') ? 'active' : ''; ?>">Sản Phẩm</a>
-            <a href="<?php echo url('index.php?tab=blog'); ?>"
+            <a href="<?php echo Url::blogs(); ?>"
                class="tab-btn text-decoration-none <?php echo ($currentAction === 'index' && $activeTab === 'blog') ? 'active' : ''; ?>">Tạp Chí</a>
 
             <a href="<?php echo Url::about(); ?>"

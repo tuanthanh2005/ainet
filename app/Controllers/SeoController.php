@@ -82,12 +82,16 @@ class SeoController extends Controller {
         echo "User-agent: *\n";
         if ($isProd) {
             echo "Allow: /\n";
-            echo "Disallow: /index.php?action=admin\n";
-            echo "Disallow: /index.php?action=checkout\n";
-            echo "Disallow: /index.php?action=payment\n";
-            echo "Disallow: /index.php?action=cart\n";
-            echo "Disallow: /index.php?action=profile\n";
-            echo "Disallow: /index.php?action=orderHistory\n";
+            echo "Disallow: /index.php\n";
+            echo "Disallow: /*?action=\n";
+            echo "Disallow: /*?sort=\n";
+            echo "Disallow: /*&sort=\n";
+            echo "Disallow: /*?q=\n";
+            echo "Disallow: /*&q=\n";
+            echo "Disallow: /checkout\n";
+            echo "Disallow: /payment\n";
+            echo "Disallow: /profile\n";
+            echo "Disallow: /order-history\n";
             echo "Disallow: /gio-hang\n";
         } else {
             echo "Disallow: /\n";

@@ -2,6 +2,7 @@
 
 class Seo {
     private static array $data = [];
+    private static ?array $config = null;
 
     /**
      * Set page meta. Call once per page in controller before view().
@@ -23,24 +24,46 @@ class Seo {
         return self::$data[$key] ?? $default;
     }
 
+    public static function defaults(string $page): array {
+        $config = self::config();
+        return $config['pages'][$page] ?? [];
+    }
+
+    private static function config(): array {
+        if (self::$config !== null) {
+            return self::$config;
+        }
+
+        $path = APP_ROOT . '/config/seo.php';
+        self::$config = is_file($path) ? (require $path) : [];
+        return is_array(self::$config) ? self::$config : [];
+    }
+
     /**
      * Build the rendered <head> SEO block.
      * Falls back gracefully when fields are empty.
      */
     public static function render(array $settings = []): string {
+        $seoConfig   = self::config();
+        $siteConfig  = $seoConfig['site'] ?? [];
+        $pageConfig  = self::pageConfig($seoConfig);
         $siteName    = SITENAME;
-        $defaultDesc = trim($settings['footerDesc'] ?? '') ?: ($siteName . ' - cửa hàng dịch vụ AI và tài khoản Premium uy tín tại Việt Nam.');
-        $defaultImg  = $settings['about_image'] ?? '';
+        $defaultDesc = trim($pageConfig['description'] ?? '')
+            ?: trim($siteConfig['description'] ?? '')
+            ?: trim($settings['footerDesc'] ?? '')
+            ?: ($siteName . ' - cửa hàng dịch vụ AI và tài khoản Premium uy tín tại Việt Nam.');
+        $defaultImg  = self::absoluteAsset($siteConfig['image'] ?? ($settings['about_image'] ?? ''));
+        $defaultLogo = self::absoluteAsset($siteConfig['logo'] ?? '/assets/images/fvcoin.png');
 
-        $title       = self::$data['title'] ?? '';
+        $title       = self::$data['title'] ?? ($pageConfig['title'] ?? '');
         $fullTitle   = $title ? ($title . ' | ' . $siteName) : ($siteName . ' - Cửa Hàng Dịch Vụ AI Cao Cấp');
         $description = self::$data['description'] ?? $defaultDesc;
-        $keywords    = self::$data['keywords'] ?? '';
+        $keywords    = self::$data['keywords'] ?? ($pageConfig['keywords'] ?? ($siteConfig['keywords'] ?? ''));
         if (is_array($keywords)) {
-            $keywords = implode(', ', $keywords);
+            $keywords = implode(', ', array_values(array_unique(array_filter(array_map('trim', $keywords)))));
         }
-        $canonical = self::$data['canonical'] ?? self::currentUrl();
-        $image     = self::$data['image'] ?? $defaultImg;
+        $canonical = self::normalizeUrl(self::$data['canonical'] ?? self::currentUrl());
+        $image     = self::absoluteAsset(self::$data['image'] ?? $defaultImg);
         $type      = self::$data['type'] ?? 'website';
         $robots    = self::$data['robots'] ?? 'index,follow';
         $structured = self::$data['structured'] ?? null;
@@ -60,6 +83,8 @@ class Seo {
             $out .= "    <meta name=\"keywords\" content=\"{$h($keywords)}\">\n";
         }
         $out .= "    <meta name=\"robots\" content=\"{$h($robots)}\">\n";
+        $out .= "    <meta name=\"googlebot\" content=\"{$h($robots . ',max-snippet:-1,max-image-preview:large,max-video-preview:-1')}\">\n";
+        $out .= "    <meta name=\"author\" content=\"{$h($siteName)}\">\n";
         $out .= "    <link rel=\"canonical\" href=\"{$h($canonical)}\">\n";
         if ($prevUrl) {
             $out .= "    <link rel=\"prev\" href=\"{$h($prevUrl)}\">\n";
@@ -77,6 +102,7 @@ class Seo {
         $out .= "    <meta property=\"og:locale\" content=\"vi_VN\">\n";
         if ($image) {
             $out .= "    <meta property=\"og:image\" content=\"{$h($image)}\">\n";
+            $out .= "    <meta property=\"og:image:alt\" content=\"{$h($siteName . ' - tài khoản AI Premium')}\">\n";
         }
 
         // Twitter
@@ -89,7 +115,7 @@ class Seo {
 
         // JSON-LD
         $schemas = [];
-        $sameAs = [];
+        $sameAs = $siteConfig['sameAs'] ?? [];
         if (!empty($settings['social_links_json'])) {
             $socialLinks = json_decode((string) $settings['social_links_json'], true);
             if (is_array($socialLinks)) {
@@ -105,11 +131,30 @@ class Seo {
         // Site-wide Organization + WebSite (always included)
         $organization = [
             '@context' => 'https://schema.org',
-            '@type'    => 'Organization',
+            '@type'    => 'OnlineStore',
             'name'     => $siteName,
+            'alternateName' => $siteConfig['alternateName'] ?? 'AICuaToi',
             'url'      => rtrim(URLROOT, '/'),
-            'logo'     => $image ?: rtrim(URLROOT, '/') . '/assets/logo.png',
+            'logo'     => $defaultLogo,
+            'image'    => $image ?: $defaultLogo,
+            'description' => $siteConfig['description'] ?? $defaultDesc,
+            'priceRange' => $siteConfig['priceRange'] ?? '₫₫',
+            'areaServed' => $siteConfig['areaServed'] ?? 'VN',
+            'contactPoint' => [
+                '@type' => 'ContactPoint',
+                'contactType' => 'customer support',
+                'availableLanguage' => ['vi-VN', 'vi'],
+                'areaServed' => $siteConfig['areaServed'] ?? 'VN',
+            ],
         ];
+        if (!empty($siteConfig['telephone'])) {
+            $organization['telephone'] = $siteConfig['telephone'];
+            $organization['contactPoint']['telephone'] = $siteConfig['telephone'];
+        }
+        if (!empty($siteConfig['email'])) {
+            $organization['email'] = $siteConfig['email'];
+            $organization['contactPoint']['email'] = $siteConfig['email'];
+        }
         if (!empty($sameAs)) {
             $organization['sameAs'] = array_values(array_unique($sameAs));
         }
@@ -121,21 +166,17 @@ class Seo {
             'url'      => rtrim(URLROOT, '/'),
             'potentialAction' => [
                 '@type'       => 'SearchAction',
-                'target'      => rtrim(URLROOT, '/') . '/?q={search_term_string}',
+                'target'      => rtrim(URLROOT, '/') . '/san-pham?q={search_term_string}',
                 'query-input' => 'required name=search_term_string',
             ],
         ];
+        $schemas[] = self::breadcrumbSchema(self::defaultBreadcrumb($canonical, $title));
 
         if ($structured) {
             if (isset($structured['@type'])) {
                 $schemas[] = $structured;
                 if (($structured['@type'] ?? '') === 'Product') {
                     $schemas[] = self::productFaqSchema($structured, $siteName);
-                    $schemas[] = self::breadcrumbSchema([
-                        ['name' => 'Trang chủ', 'url' => rtrim(URLROOT, '/') . '/'],
-                        ['name' => 'Sản phẩm', 'url' => rtrim(URLROOT, '/') . '/?tab=products'],
-                        ['name' => $structured['name'] ?? $title, 'url' => $canonical],
-                    ]);
                 }
             } else {
                 foreach ($structured as $s) {
@@ -149,6 +190,66 @@ class Seo {
         $out .= "\n    </script>\n";
 
         return $out;
+    }
+
+    private static function pageConfig(array $seoConfig): array {
+        $pages = $seoConfig['pages'] ?? [];
+        $action = $_GET['action'] ?? 'index';
+        $tab = $_GET['tab'] ?? '';
+
+        if ($action === 'about') return $pages['about'] ?? [];
+        if ($action === 'contact') return $pages['contact'] ?? [];
+        if ($action === 'index' && $tab === 'products') return $pages['products'] ?? [];
+        if ($action === 'index' && $tab === 'blog') return $pages['blog'] ?? [];
+        return $pages['home'] ?? [];
+    }
+
+    private static function absoluteAsset(string $path): string {
+        $path = trim($path);
+        if ($path === '') return '';
+        if (preg_match('/^https?:\/\//i', $path)) return $path;
+        return url(ltrim($path, '/'));
+    }
+
+    public static function normalizeUrl(string $url): string {
+        $url = trim($url);
+        if ($url === '') return rtrim(URLROOT, '/') . '/';
+
+        $parts = parse_url($url);
+        if (!$parts || empty($parts['host'])) {
+            $url = url(ltrim($url, '/'));
+            $parts = parse_url($url);
+        }
+
+        $scheme = strtolower($parts['scheme'] ?? parse_url(URLROOT, PHP_URL_SCHEME) ?: 'https');
+        $host = strtolower($parts['host'] ?? parse_url(URLROOT, PHP_URL_HOST));
+        $path = '/' . ltrim($parts['path'] ?? '/', '/');
+        $path = preg_replace('#/+#', '/', $path);
+        $path = $path !== '/' ? rtrim($path, '/') : '/';
+        $query = isset($parts['query']) && $parts['query'] !== '' ? '?' . $parts['query'] : '';
+        return $scheme . '://' . $host . $path . $query;
+    }
+
+    private static function defaultBreadcrumb(string $canonical, string $title): array {
+        $base = rtrim(URLROOT, '/');
+        $path = parse_url($canonical, PHP_URL_PATH) ?: '/';
+        $items = [['name' => 'Trang chủ', 'url' => $base . '/']];
+
+        if (strpos($path, '/san-pham') === 0) {
+            $items[] = ['name' => 'Sản phẩm', 'url' => Url::products()];
+        } elseif (strpos($path, '/tap-chi') === 0) {
+            $items[] = ['name' => 'Tạp chí', 'url' => Url::blogs()];
+        } elseif ($path === '/gioi-thieu') {
+            $items[] = ['name' => 'Giới thiệu', 'url' => Url::about()];
+        } elseif ($path === '/lien-he') {
+            $items[] = ['name' => 'Liên hệ', 'url' => Url::contact()];
+        }
+
+        if (count($items) > 1 && end($items)['url'] !== $canonical) {
+            $items[] = ['name' => preg_replace('/\s+\|\s+.*$/', '', $title), 'url' => $canonical];
+        }
+
+        return $items;
     }
 
     private static function productFaqSchema(array $product, string $siteName): array {

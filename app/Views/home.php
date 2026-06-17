@@ -8,7 +8,7 @@
                 <?php echo nl2br(htmlspecialchars($settings['heroDesc'] ?? 'Chào mừng bạn đến với AI CỦA TÔI - nền tảng hàng đầu cung cấp các tài khoản Premium (ChatGPT Plus, Claude Pro, Midjourney, YouTube Premium, GitHub Copilot...) tự động 24/7. Uy tín, an toàn, kích hoạt ngay lập tức với chế độ bảo hành 1 đổi 1 trọn gói.')); ?>
             </p>
             <div class="d-flex gap-2 gap-md-3">
-                <a href="<?php echo url('index.php?tab=products'); ?>" class="btn btn-buy flex-fill px-2 px-md-4 py-2.5 fs-6 shadow-sm text-center" style="white-space: nowrap;"><i class="fa-solid fa-store me-1 me-md-2"></i>Xem sản phẩm</a>
+                <a href="<?php echo Url::products(); ?>" class="btn btn-buy flex-fill px-2 px-md-4 py-2.5 fs-6 shadow-sm text-center" style="white-space: nowrap;"><i class="fa-solid fa-store me-1 me-md-2"></i>Xem sản phẩm</a>
                 <a href="<?php echo Url::about(); ?>" class="btn btn-outline-dark flex-fill px-2 px-md-4 py-2.5 fs-6 text-center" style="border-radius: 8px; white-space: nowrap;"><i class="fa-solid fa-circle-info me-1 me-md-2"></i>Về chúng tôi</a>
             </div>
         </div>
@@ -182,7 +182,7 @@
         </div>
         
         <div class="text-center mt-4 pt-2">
-            <a href="<?php echo url('index.php?tab=products'); ?>" class="btn btn-outline-dark rounded-pill px-4 py-2 fw-bold shadow-sm" style="transition: all 0.3s ease;">
+            <a href="<?php echo Url::products(); ?>" class="btn btn-outline-dark rounded-pill px-4 py-2 fw-bold shadow-sm" style="transition: all 0.3s ease;">
                 Xem tất cả sản phẩm <i class="fa-solid fa-arrow-right ms-2"></i>
             </a>
         </div>
@@ -339,7 +339,7 @@
                     
                     <div class="mt-4">
                         <p class="text-muted small mb-3">Mọi ý kiến đóng góp được hệ thống tự động ghi nhận từ tài khoản người dùng thực tế sau khi mua sản phẩm thành công.</p>
-                        <a href="<?php echo url('index.php?tab=products'); ?>" class="btn btn-sm btn-outline-dark w-100 rounded-pill py-2.5 fw-bold" style="border-radius: 8px;"><i class="fa-solid fa-pen-nib me-2"></i>Xem sản phẩm & Trải nghiệm</a>
+                        <a href="<?php echo Url::products(); ?>" class="btn btn-sm btn-outline-dark w-100 rounded-pill py-2.5 fw-bold" style="border-radius: 8px;"><i class="fa-solid fa-pen-nib me-2"></i>Xem sản phẩm & Trải nghiệm</a>
                     </div>
                 </div>
             </div>
@@ -404,7 +404,7 @@
                     <h2 class="fw-bold mb-1">Cập Nhật Tin Tức & Hướng Dẫn</h2>
                     <p class="text-muted small mb-0">Các kiến thức hữu ích và mẹo sử dụng công cụ AI hiệu quả</p>
                 </div>
-                <a href="<?php echo url('index.php?tab=blog'); ?>" class="btn btn-outline-dark btn-sm rounded-pill px-3">Xem tất cả <i class="fa-solid fa-arrow-right ms-1"></i></a>
+                <a href="<?php echo Url::blogs(); ?>" class="btn btn-outline-dark btn-sm rounded-pill px-3">Xem tất cả <i class="fa-solid fa-arrow-right ms-1"></i></a>
             </div>
             <div class="row g-4">
                 <?php foreach (array_slice($blogs, 0, 3) as $blog): ?>
@@ -442,7 +442,7 @@
         $qParam = !empty($searchQuery) ? '&q=' . urlencode($searchQuery) : '';
         $sortParam = !empty($_GET['sort']) ? '&sort=' . urlencode($_GET['sort']) : '';
         ?>
-        <a href="<?php echo url('index.php?tab=products' . $qParam . $sortParam); ?>"
+        <a href="<?php echo Url::withQuery(Url::products(), array_filter(['q' => $searchQuery ?? null, 'sort' => ($sort ?? '') !== 'newest' ? ($sort ?? '') : null])); ?>"
            class="cat-pill text-decoration-none <?php echo (empty($currentCat) || $currentCat === 'all') ? 'active' : ''; ?>">Tất Cả</a>
         <?php foreach ($categories as $cat): ?>
             <?php $activeSlug = $cat['seo_slug'] ?: $cat['slug']; ?>
@@ -547,11 +547,14 @@
 
     <?php if ($totalPages > 1): ?>
         <?php
-        $catParam = !empty($currentCat) ? '&category=' . urlencode($currentCat) : '';
-        $sortParam = !empty($_GET['sort']) ? '&sort=' . urlencode($_GET['sort']) : '';
-        $qParam = !empty($searchQuery) ? '&q=' . urlencode($searchQuery) : '';
-        $pageUrl = function($p) use ($catParam, $qParam, $sortParam) {
-            return url('index.php?tab=products' . $catParam . $qParam . $sortParam . '&page=' . $p . '#products-section');
+        $pageUrl = function($p) use ($currentCat, $searchQuery, $sort) {
+            $base = !empty($currentCat) && $currentCat !== 'all' ? Url::category($currentCat) : Url::products();
+            $query = array_filter([
+                'q' => $searchQuery ?: null,
+                'sort' => $sort !== 'newest' ? $sort : null,
+                'page' => $p > 1 ? $p : null,
+            ]);
+            return Url::withQuery($base, $query) . '#products-section';
         };
         ?>
         <div class="d-flex justify-content-center mt-5 mb-3">

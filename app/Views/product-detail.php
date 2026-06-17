@@ -31,7 +31,7 @@ $reviewCount = count($reviews);
         <div class="product-detail-container text-center py-5">
             <h1 class="fw-bold text-dark mb-3" style="font-size: 1.7rem;">Sản phẩm không tồn tại</h1>
             <p class="text-muted mb-4">Sản phẩm này có thể đã bị xóa, đổi đường dẫn hoặc đang bị ẩn.</p>
-            <a href="<?php echo url('index.php?tab=products'); ?>" class="btn btn-buy px-4 py-3 rounded-pill">
+            <a href="<?php echo Url::products(); ?>" class="btn btn-buy px-4 py-3 rounded-pill">
                 Xem danh sách sản phẩm
             </a>
         </div>
