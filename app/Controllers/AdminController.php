@@ -889,6 +889,97 @@ class AdminController extends Controller {
         $this->jsonSuccess(['submitted' => $submitted, 'total' => count($results), 'results' => $results]);
     }
 
+    public function adminSaveKeywordsBulk() {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            $this->jsonError('Method not allowed', 405);
+        }
+
+        $keywordsJson = $_POST['keywords_json'] ?? '';
+        $list = json_decode($keywordsJson, true);
+        if (!is_array($list)) {
+            $this->jsonError('Dữ liệu không hợp lệ.');
+        }
+
+        $path = APP_ROOT . '/config/seo_keywords.json';
+        $seoData = ['keywords' => [], 'aliases' => []];
+        if (file_exists($path)) {
+            $decoded = json_decode(file_get_contents($path), true);
+            if (is_array($decoded)) {
+                $seoData = $decoded;
+            }
+        }
+
+        if (!isset($seoData['keywords'])) {
+            $seoData['keywords'] = [];
+        }
+        if (!isset($seoData['aliases'])) {
+            $seoData['aliases'] = [];
+        }
+
+        $updatedSlugs = [];
+
+        foreach ($list as $item) {
+            $slug = strtolower(trim($item['slug'] ?? ''));
+            $displayName = trim($item['display_name'] ?? '');
+            
+            if ($slug === '' || $displayName === '') {
+                continue;
+            }
+
+            if (!preg_match('/^[a-z0-9\-]+$/', $slug)) {
+                continue;
+            }
+
+            $title = trim($item['title'] ?? '');
+            $description = trim($item['description'] ?? '');
+
+            $keywordsRaw = trim($item['keywords'] ?? '');
+            $keywords = array_values(array_filter(array_map('trim', explode(',', $keywordsRaw))));
+
+            $aliasesRaw = trim($item['aliases'] ?? '');
+            $aliasesInput = array_values(array_filter(array_map('trim', explode(',', $aliasesRaw))));
+
+            $seoData['keywords'][$slug] = [
+                'display_name' => $displayName,
+                'title' => $title ?: 'Tài khoản ' . ucwords(str_replace('-', ' ', $slug)) . ' giá rẻ - Mua bán ' . ucwords(str_replace('-', ' ', $slug)) . ' tự động',
+                'description' => $description ?: 'Cung cấp tài khoản ' . str_replace('-', ' ', $slug) . ' giá rẻ, chính chủ, kích hoạt tự động 24/7. Bảo hành 1 đổi 1.',
+                'keywords' => $keywords ?: ['tài khoản ' . str_replace('-', ' ', $slug) . ' giá rẻ', str_replace('-', ' ', $slug)]
+            ];
+
+            foreach ($seoData['aliases'] as $aliasKey => $targetSlug) {
+                if ($targetSlug === $slug) {
+                    unset($seoData['aliases'][$aliasKey]);
+                }
+            }
+
+            foreach ($aliasesInput as $alias) {
+                $alias = strtolower(trim($alias));
+                if ($alias === '') continue;
+                if (isset($seoData['keywords'][$alias]) && $alias !== $slug) {
+                    continue;
+                }
+                $seoData['aliases'][$alias] = $slug;
+            }
+
+            $updatedSlugs[] = $slug;
+        }
+
+        if (file_put_contents($path, json_encode($seoData, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE)) === false) {
+            $this->jsonError('Không thể ghi file seo_keywords.json.');
+        }
+
+        $indexingResults = [];
+        foreach ($updatedSlugs as $slug) {
+            try {
+                $indexingResults[$slug] = IndexingService::submitUrl(Url::search($slug), 'URL_UPDATED');
+            } catch (Throwable $e) {
+                $indexingResults[$slug] = ['success' => false, 'message' => $e->getMessage()];
+            }
+        }
+
+        $this->jsonSuccess(['indexing_results' => $indexingResults, 'count' => count($updatedSlugs)]);
+    }
+
     private function randomPassword(int $length = 12): string {
         $alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789@#$%';
         $max = strlen($alphabet) - 1;

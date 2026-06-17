@@ -765,9 +765,14 @@
                                         <h5 class="fw-bold mb-1"><i class="fa-solid fa-key text-primary me-2"></i>Quản lý Từ khóa SEO</h5>
                                         <small class="text-muted">Quản lý từ khóa (URL tĩnh, metadata SEO, aliases) lưu trong file JSON.</small>
                                     </div>
-                                    <button class="btn btn-black btn-sm" onclick="openKeywordModal()">
-                                        <i class="fa-solid fa-plus me-1"></i> Thêm từ khóa
-                                    </button>
+                                    <div class="d-flex gap-2">
+                                        <button class="btn btn-outline-primary btn-sm" onclick="openBulkKeywordModal()">
+                                            <i class="fa-solid fa-file-import me-1"></i> Nhập hàng loạt
+                                        </button>
+                                        <button class="btn btn-black btn-sm" onclick="openKeywordModal()">
+                                            <i class="fa-solid fa-plus me-1"></i> Thêm từ khóa
+                                        </button>
+                                    </div>
                                 </div>
                                 <div class="table-responsive p-3">
                                     <table class="table table-hover table-custom mb-0" style="border: 1px solid var(--border-color); border-radius: 8px; overflow: hidden;">
@@ -1760,6 +1765,153 @@
                     })
                     .catch(() => AppNotify.error('Không thể kết nối server.', 'Lỗi'));
                 }
+            });
+        }
+
+        let bulkKeywordModal;
+        function getBulkKeywordModal() {
+            return bulkKeywordModal ||= new bootstrap.Modal(document.getElementById('bulkKeywordModal'));
+        }
+
+        let bulkParsedKeywordsCache = [];
+
+        function openBulkKeywordModal() {
+            document.getElementById('bulk-keywords-input').value = '';
+            document.getElementById('bulk-keywords-preview-table-body').innerHTML = '';
+            document.getElementById('bulk-keywords-preview-area').classList.add('d-none');
+            document.getElementById('btnBulkKeywordsConfirm').disabled = true;
+            bulkParsedKeywordsCache = [];
+            getBulkKeywordModal().show();
+        }
+
+        function previewBulkKeywords() {
+            const raw = document.getElementById('bulk-keywords-input').value;
+            const lines = raw.split(/\r?\n/);
+            const tbody = document.getElementById('bulk-keywords-preview-table-body');
+            tbody.innerHTML = '';
+            bulkParsedKeywordsCache = [];
+
+            let count = 0;
+            let hasErrors = false;
+            let errorMessage = '';
+
+            for (let i = 0; i < lines.length; i++) {
+                const line = lines[i].trim();
+                if (line === '') continue;
+
+                const parts = line.split('|');
+                if (parts.length < 2) {
+                    hasErrors = true;
+                    errorMessage = `Dòng ${i + 1} không đúng định dạng (thiếu dấu | để ngăn cách).`;
+                    break;
+                }
+
+                const slug = parts[0].trim().toLowerCase();
+                const displayName = parts[1].trim();
+                const aliasesRaw = parts[2] ? parts[2].trim() : '';
+
+                if (!slug) {
+                    hasErrors = true;
+                    errorMessage = `Dòng ${i + 1} thiếu Từ khóa (slug).`;
+                    break;
+                }
+                if (!displayName) {
+                    hasErrors = true;
+                    errorMessage = `Dòng ${i + 1} thiếu Tên hiển thị.`;
+                    break;
+                }
+
+                if (!/^[a-z0-9\-]+$/.test(slug)) {
+                    hasErrors = true;
+                    errorMessage = `Dòng ${i + 1} có slug "${slug}" không hợp lệ (chỉ được chứa chữ thường không dấu, số và dấu gạch ngang).`;
+                    break;
+                }
+
+                const aliases = aliasesRaw.split(',').map(a => a.trim()).filter(Boolean);
+                const displaySlugWords = slug.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+                const autoTitle = `Tài khoản ${displaySlugWords} giá rẻ - Mua bán ${displaySlugWords} tự động`;
+
+                bulkParsedKeywordsCache.push({
+                    slug: slug,
+                    display_name: displayName,
+                    title: '',
+                    description: '',
+                    keywords: '',
+                    aliases: aliasesRaw
+                });
+
+                const escSlug = escapeHtml(slug);
+                const escDisplayName = escapeHtml(displayName);
+                const escTitle = escapeHtml(autoTitle);
+                const escAliases = aliases.map(a => `<code class="bg-light border px-1 py-0.5 rounded text-dark smaller me-1 mb-1 d-inline-block">${escapeHtml(a)}</code>`).join('') || '<span class="text-muted smaller">—</span>';
+
+                tbody.innerHTML += `
+                    <tr>
+                        <td><code>${escSlug}</code></td>
+                        <td>${escDisplayName}</td>
+                        <td><span class="small text-muted">${escTitle}</span></td>
+                        <td><div class="d-flex flex-wrap">${escAliases}</div></td>
+                    </tr>
+                `;
+                count++;
+            }
+
+            if (hasErrors) {
+                document.getElementById('bulk-keywords-preview-area').classList.add('d-none');
+                document.getElementById('btnBulkKeywordsConfirm').disabled = true;
+                bulkParsedKeywordsCache = [];
+                AppNotify.warning(errorMessage, 'Định dạng không hợp lệ');
+                return;
+            }
+
+            if (count > 0) {
+                document.getElementById('bulk-keywords-preview-area').classList.remove('d-none');
+                document.getElementById('btnBulkKeywordsConfirm').disabled = false;
+            } else {
+                document.getElementById('bulk-keywords-preview-area').classList.add('d-none');
+                document.getElementById('btnBulkKeywordsConfirm').disabled = true;
+                AppNotify.warning('Vui lòng nhập ít nhất một dòng từ khóa.', 'Không có dữ liệu');
+            }
+        }
+
+        function confirmBulkKeywords() {
+            if (bulkParsedKeywordsCache.length === 0) {
+                AppNotify.warning('Không có dữ liệu từ khóa hợp lệ để lưu.', 'Lỗi');
+                return;
+            }
+
+            const btn = document.getElementById('btnBulkKeywordsConfirm');
+            const originalText = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Đang xử lý...';
+
+            const fd = new FormData();
+            fd.append('keywords_json', JSON.stringify(bulkParsedKeywordsCache));
+            fd.append('csrf_token', APP_STATE.csrfToken);
+
+            fetch('?action=adminSaveKeywordsBulk', {
+                method: 'POST',
+                headers: { 'X-Requested-With': 'XMLHttpRequest', 'X-CSRF-Token': APP_STATE.csrfToken },
+                body: fd,
+                credentials: 'same-origin'
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    AppNotify.success(`Đã thêm thành công ${data.count} từ khóa!`);
+                    getBulkKeywordModal().hide();
+                    renderKeywords();
+                } else {
+                    AppNotify.error(data.message || 'Không thể lưu từ khóa hàng loạt.', 'Lỗi');
+                }
+            })
+            .catch(err => {
+                AppNotify.error('Không thể kết nối server.', 'Lỗi kết nối');
+                console.error(err);
+            })
+            .finally(() => {
+                btn.disabled = false;
+                btn.innerHTML = originalText;
             });
         }
 
@@ -3770,6 +3922,59 @@
                 <div class="modal-footer border-top p-4">
                     <button type="button" class="btn btn-light border" data-bs-dismiss="modal">Hủy</button>
                     <button type="button" class="btn btn-black px-4" onclick="saveKeyword()">Lưu từ khóa</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Bulk Keyword Import Modal -->
+    <div class="modal fade" id="bulkKeywordModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content border-0 shadow" style="border-radius: 16px;">
+                <div class="modal-header border-bottom p-4">
+                    <h5 class="modal-title fw-bold">Nhập từ khóa hàng loạt</h5>
+                    <button type="button" class="btn-close shadow-none" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <div class="alert alert-light border small mb-3">
+                        <i class="fa-solid fa-circle-info text-primary me-1"></i>
+                        Định dạng mỗi dòng: <code>slug|tên hiển thị|aliases (nếu có)</code>. Aliases cách nhau bằng dấu phẩy.<br>
+                        Ví dụ:<br>
+                        <code>chatgpt|ChatGPT Plus|gpt,chat-gpt</code><br>
+                        <code>gemini|Gemini Advanced|google-gemini</code>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold small">Nhập danh sách từ khóa</label>
+                        <textarea class="form-control" id="bulk-keywords-input" rows="8" placeholder="chatgpt|ChatGPT Plus|gpt,chat-gpt&#10;gemini|Gemini Advanced|google-gemini"></textarea>
+                    </div>
+
+                    <div class="d-flex justify-content-end mb-3">
+                        <button type="button" class="btn btn-outline-dark btn-sm px-4" onclick="previewBulkKeywords()">
+                            <i class="fa-solid fa-eye me-1"></i> Xem trước (Review)
+                        </button>
+                    </div>
+
+                    <div id="bulk-keywords-preview-area" class="d-none">
+                        <h6 class="fw-bold mb-2 text-dark"><i class="fa-solid fa-magnifying-glass me-1"></i> Kết quả phân tích (Xem trước)</h6>
+                        <div class="table-responsive border rounded-3" style="max-height: 250px; overflow-y: auto;">
+                            <table class="table table-sm table-custom mb-0" style="font-size: 0.82rem;">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Slug</th>
+                                        <th>Tên hiển thị</th>
+                                        <th>SEO Title (Tự tạo)</th>
+                                        <th>Aliases</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="bulk-keywords-preview-table-body">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer border-top p-4">
+                    <button type="button" class="btn btn-light border" data-bs-dismiss="modal">Hủy</button>
+                    <button type="button" class="btn btn-success px-4" id="btnBulkKeywordsConfirm" onclick="confirmBulkKeywords()" disabled>Xác nhận thêm hàng loạt</button>
                 </div>
             </div>
         </div>
