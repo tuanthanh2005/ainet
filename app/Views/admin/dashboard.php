@@ -1780,6 +1780,7 @@
             document.getElementById('bulk-keywords-preview-table-body').innerHTML = '';
             document.getElementById('bulk-keywords-preview-area').classList.add('d-none');
             document.getElementById('btnBulkKeywordsConfirm').disabled = true;
+            document.getElementById('bulk-keywords-replace-all').checked = false;
             bulkParsedKeywordsCache = [];
             getBulkKeywordModal().show();
         }
@@ -1880,6 +1881,29 @@
                 return;
             }
 
+            const replaceAll = document.getElementById('bulk-keywords-replace-all').checked;
+
+            if (replaceAll) {
+                Swal.fire({
+                    title: 'Xóa sạch & Nhập mới?',
+                    text: "Bạn đã chọn tùy chọn xóa sạch toàn bộ từ khóa hiện có trên hệ thống. Tất cả từ khóa cũ sẽ bị xóa vĩnh viễn và thay thế bằng danh sách mới này!",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#ef4444',
+                    cancelButtonColor: '#6b7280',
+                    confirmButtonText: 'Đồng ý xóa & nhập mới',
+                    cancelButtonText: 'Hủy bỏ'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        executeBulkSave(true);
+                    }
+                });
+            } else {
+                executeBulkSave(false);
+            }
+        }
+
+        function executeBulkSave(replaceAll) {
             const btn = document.getElementById('btnBulkKeywordsConfirm');
             const originalText = btn.innerHTML;
             btn.disabled = true;
@@ -1887,6 +1911,7 @@
 
             const fd = new FormData();
             fd.append('keywords_json', JSON.stringify(bulkParsedKeywordsCache));
+            fd.append('replace_all', replaceAll ? '1' : '0');
             fd.append('csrf_token', APP_STATE.csrfToken);
 
             fetch('?action=adminSaveKeywordsBulk', {
@@ -3946,6 +3971,13 @@
                     <div class="mb-3">
                         <label class="form-label fw-bold small">Nhập danh sách từ khóa</label>
                         <textarea class="form-control" id="bulk-keywords-input" rows="8" placeholder="chatgpt|ChatGPT Plus|gpt,chat-gpt&#10;gemini|Gemini Advanced|google-gemini"></textarea>
+                    </div>
+
+                    <div class="form-check mb-3">
+                        <input class="form-check-input" type="checkbox" id="bulk-keywords-replace-all">
+                        <label class="form-check-label text-danger small fw-bold" for="bulk-keywords-replace-all">
+                            <i class="fa-solid fa-triangle-exclamation me-1"></i> Xóa sạch toàn bộ từ khóa hiện có trên hệ thống trước khi nhập mới
+                        </label>
                     </div>
 
                     <div class="d-flex justify-content-end mb-3">

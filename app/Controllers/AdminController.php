@@ -900,9 +900,11 @@ class AdminController extends Controller {
             $this->jsonError('Dữ liệu không hợp lệ.');
         }
 
+        $replaceAll = ($_POST['replace_all'] ?? '0') === '1';
+
         $path = APP_ROOT . '/config/seo_keywords.json';
         $seoData = ['keywords' => [], 'aliases' => []];
-        if (file_exists($path)) {
+        if (!$replaceAll && file_exists($path)) {
             $decoded = json_decode(file_get_contents($path), true);
             if (is_array($decoded)) {
                 $seoData = $decoded;
