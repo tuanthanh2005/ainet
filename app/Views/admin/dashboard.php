@@ -787,6 +787,21 @@
                                         </tbody>
                                     </table>
                                 </div>
+                                <div class="d-flex justify-content-between align-items-center p-3 border-top bg-light">
+                                    <span class="small text-muted">
+                                        Hiển thị trang <span id="keywords-current-page" class="fw-bold text-dark">1</span> / <span id="keywords-total-pages" class="fw-bold text-dark">1</span>
+                                    </span>
+                                    <nav aria-label="Keywords navigation">
+                                        <ul class="pagination pagination-sm mb-0" style="gap:4px; list-style:none; padding-left:0;">
+                                            <li>
+                                                <button class="btn btn-sm btn-outline-dark me-1 px-3" onclick="changeKeywordsPage(-1)" id="keywords-btn-prev">Trước</button>
+                                            </li>
+                                            <li>
+                                                <button class="btn btn-sm btn-outline-dark px-3" onclick="changeKeywordsPage(1)" id="keywords-btn-next">Sau</button>
+                                            </li>
+                                        </ul>
+                                    </nav>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -1528,6 +1543,11 @@
         }
 
         // ================= GOOGLE INDEXING & SEO KEYWORDS JS =================
+        let keywordsCurrentPage = 1;
+        const keywordsPerPage = 20;
+        let keywordsAllEntries = [];
+        let keywordsAliasesByTarget = {};
+
         function renderKeywords() {
             const tbody = document.getElementById('keyword-table-body');
             if (!tbody) return;
@@ -1547,46 +1567,83 @@
                     const keywords = data.keywords || {};
                     const aliases = data.aliases || {};
 
-                    const aliasesByTarget = {};
+                    keywordsAliasesByTarget = {};
                     Object.entries(aliases).forEach(([alias, target]) => {
-                        if (!aliasesByTarget[target]) {
-                            aliasesByTarget[target] = [];
+                        if (!keywordsAliasesByTarget[target]) {
+                            keywordsAliasesByTarget[target] = [];
                         }
-                        aliasesByTarget[target].push(alias);
+                        keywordsAliasesByTarget[target].push(alias);
                     });
 
-                    const entries = Object.entries(keywords);
-                    if (entries.length === 0) {
-                        tbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted py-4">Chưa có từ khóa nào.</td></tr>';
-                        return;
-                    }
+                    keywordsAllEntries = Object.entries(keywords);
+                    keywordsCurrentPage = 1;
 
-                    tbody.innerHTML = '';
-                    entries.forEach(([slug, info]) => {
-                        const targetAliases = aliasesByTarget[slug] || [];
-                        const aliasesHtml = targetAliases.map(a => `<code class="bg-light border px-1.5 py-0.5 rounded text-dark smaller me-1 mb-1 d-inline-block">${escapeHtml(a)}</code>`).join('') || '<span class="text-muted smaller">—</span>';
-                        const descPreview = info.description ? (info.description.length > 50 ? info.description.substring(0, 50) + '...' : info.description) : '<span class="text-muted italic smaller">Tự động tạo</span>';
-                        
-                        const escSlug = escapeHtml(slug);
-                        const escDisplayName = escapeHtml(info.display_name || '');
-                        
-                        tbody.innerHTML += `
-                            <tr>
-                                <td class="fw-bold"><code>${escSlug}</code></td>
-                                <td>${escDisplayName}</td>
-                                <td><span class="small text-muted" title="${escapeHtml(info.description || '')}">${escapeHtml(descPreview)}</span></td>
-                                <td><div class="d-flex flex-wrap" style="max-width: 250px;">${aliasesHtml}</div></td>
-                                <td class="text-end">
-                                    <button class="btn-action" onclick="editKeyword('${escSlug}')" title="Sửa"><i class="fa-solid fa-pen"></i></button>
-                                    <button class="btn-action delete" onclick="deleteKeyword('${escSlug}')" title="Xóa"><i class="fa-solid fa-trash"></i></button>
-                                </td>
-                            </tr>
-                        `;
-                    });
+                    renderKeywordsPage();
                 })
                 .catch(err => {
                     tbody.innerHTML = `<tr><td colspan="5" class="text-center text-danger py-4">Lỗi kết nối: ${err.message}</td></tr>`;
                 });
+        }
+
+        function renderKeywordsPage() {
+            const tbody = document.getElementById('keyword-table-body');
+            if (!tbody) return;
+
+            if (keywordsAllEntries.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted py-4">Chưa có từ khóa nào.</td></tr>';
+                updateKeywordsPaginationControls(0);
+                return;
+            }
+
+            const totalPages = Math.ceil(keywordsAllEntries.length / keywordsPerPage);
+            if (keywordsCurrentPage > totalPages) keywordsCurrentPage = totalPages;
+            if (keywordsCurrentPage < 1) keywordsCurrentPage = 1;
+
+            const start = (keywordsCurrentPage - 1) * keywordsPerPage;
+            const end = start + keywordsPerPage;
+            const pageEntries = keywordsAllEntries.slice(start, end);
+
+            tbody.innerHTML = '';
+            pageEntries.forEach(([slug, info]) => {
+                const targetAliases = keywordsAliasesByTarget[slug] || [];
+                const aliasesHtml = targetAliases.map(a => `<code class="bg-light border px-1.5 py-0.5 rounded text-dark smaller me-1 mb-1 d-inline-block">${escapeHtml(a)}</code>`).join('') || '<span class="text-muted smaller">—</span>';
+                const descPreview = info.description ? (info.description.length > 50 ? info.description.substring(0, 50) + '...' : info.description) : '<span class="text-muted italic smaller">Tự động tạo</span>';
+                
+                const escSlug = escapeHtml(slug);
+                const escDisplayName = escapeHtml(info.display_name || '');
+                
+                tbody.innerHTML += `
+                    <tr>
+                        <td class="fw-bold"><code>${escSlug}</code></td>
+                        <td>${escDisplayName}</td>
+                        <td><span class="small text-muted" title="${escapeHtml(info.description || '')}">${escapeHtml(descPreview)}</span></td>
+                        <td><div class="d-flex flex-wrap" style="max-width: 250px;">${aliasesHtml}</div></td>
+                        <td class="text-end">
+                            <button class="btn-action" onclick="editKeyword('${escSlug}')" title="Sửa"><i class="fa-solid fa-pen"></i></button>
+                            <button class="btn-action delete" onclick="deleteKeyword('${escSlug}')" title="Xóa"><i class="fa-solid fa-trash"></i></button>
+                        </td>
+                    </tr>
+                `;
+            });
+
+            updateKeywordsPaginationControls(totalPages);
+        }
+
+        function changeKeywordsPage(dir) {
+            keywordsCurrentPage += dir;
+            renderKeywordsPage();
+        }
+
+        function updateKeywordsPaginationControls(totalPages) {
+            const curPageEl = document.getElementById('keywords-current-page');
+            const totalPagesEl = document.getElementById('keywords-total-pages');
+            const btnPrev = document.getElementById('keywords-btn-prev');
+            const btnNext = document.getElementById('keywords-btn-next');
+
+            if (curPageEl) curPageEl.innerText = totalPages === 0 ? 0 : keywordsCurrentPage;
+            if (totalPagesEl) totalPagesEl.innerText = totalPages;
+            if (btnPrev) btnPrev.disabled = (keywordsCurrentPage <= 1 || totalPages === 0);
+            if (btnNext) btnNext.disabled = (keywordsCurrentPage >= totalPages || totalPages === 0);
         }
 
         let keywordModal;
