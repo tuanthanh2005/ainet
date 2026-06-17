@@ -483,6 +483,11 @@
                         <i class="fa-solid fa-cloud-arrow-up"></i> Quản lý Index
                     </a>
                 </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link" onclick="switchView('keywords', this)">
+                        <i class="fa-solid fa-key"></i> Quản lý Từ khóa SEO
+                    </a>
+                </li>
 
             </ul>
             <div class="p-3 border-top" style="border-color: #333 !important;">
