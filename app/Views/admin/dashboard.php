@@ -698,8 +698,8 @@
 
                 <div id="view-indexing" class="view-section">
                     <div class="row">
-                        <!-- Manual & Bulk Indexing -->
-                        <div class="col-lg-5 mb-4">
+                        <!-- Manual Indexing -->
+                        <div class="col-lg-6 mb-4">
                             <div class="card-custom p-4 h-100 border-success border-top" style="border-width: 4px !important;">
                                 <h5 class="fw-bold mb-3"><i class="fa-solid fa-paper-plane text-success me-2"></i>Index URL thủ công</h5>
                                 <p class="text-muted small">Nhập URL cần index riêng lẻ (bấm <strong class="text-success">+</strong> để thêm ô nhập).</p>
@@ -720,10 +720,13 @@
                                         <i class="fa-solid fa-paper-plane me-1"></i> Index các URL này
                                     </button>
                                 </div>
+                            </div>
+                        </div>
 
-                                <hr>
-
-                                <h5 class="fw-bold mb-3 mt-4"><i class="fa-solid fa-bolt text-warning me-2"></i>Index hàng loạt</h5>
+                        <!-- Bulk Indexing -->
+                        <div class="col-lg-6 mb-4">
+                            <div class="card-custom p-4 h-100 border-warning border-top" style="border-width: 4px !important;">
+                                <h5 class="fw-bold mb-3"><i class="fa-solid fa-bolt text-warning me-2"></i>Index hàng loạt</h5>
                                 <p class="text-muted small">Gửi yêu cầu index Google Indexing API hàng loạt theo từng danh mục hoặc toàn hệ thống.</p>
                                 <div class="d-grid gap-2">
                                     <button class="btn btn-outline-dark btn-sm text-start" onclick="pushIndexByType('products')">
@@ -744,9 +747,13 @@
                                 </div>
                             </div>
                         </div>
+                    </div>
+                </div>
 
+                <div id="view-keywords" class="view-section">
+                    <div class="row">
                         <!-- Keyword Manager -->
-                        <div class="col-lg-7 mb-4">
+                        <div class="col-12 mb-4">
                             <div class="card-custom h-100 border-primary border-top" style="border-width: 4px !important;">
                                 <div class="card-header-custom border-bottom-0 pb-0">
                                     <div>
@@ -1506,6 +1513,7 @@
                 'blogs': 'Quản lý Tin tức',
                 'settings': 'Cấu hình Website',
                 'indexing': 'Quản lý Index Google',
+                'keywords': 'Quản lý Từ khóa SEO',
                 'chat': 'Hộp thư hỗ trợ'
             };
             document.getElementById('page-title').innerText = titles[viewId];
