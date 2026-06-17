@@ -68,10 +68,10 @@
                                 <span class="badge-hot"><?= htmlspecialchars($product['badge'] ?? '') ?></span>
                             <?php endif; ?>
                             
-                            <div class="product-image-wrapper position-relative w-100 overflow-hidden">
+                            <div class="product-image-wrapper position-relative w-100 overflow-hidden" style="aspect-ratio: 5 / 4; background-color: var(--light-gray, #f3f4f6);">
                                 <img src="<?= htmlspecialchars(image_url($product['image'] ?? '')) ?>" class="card-img-top position-absolute top-0 start-0 w-100 h-100"
                                      alt="<?= htmlspecialchars($product['title'] ?? '') ?>"
-                                     loading="lazy" decoding="async">
+                                     loading="lazy" decoding="async" style="object-fit: cover;">
                             </div>
                             
                             <div class="card-body d-flex flex-column p-4">
