@@ -88,6 +88,20 @@ class IndexingService {
             self::log('Indexing blogs collect failed: ' . $e->getMessage());
         }
 
+        try {
+            $keywordPath = APP_ROOT . '/config/seo_keywords.json';
+            if (file_exists($keywordPath)) {
+                $seoData = json_decode(file_get_contents($keywordPath), true);
+                if (isset($seoData['keywords']) && is_array($seoData['keywords'])) {
+                    foreach (array_keys($seoData['keywords']) as $kw) {
+                        $urls[] = Url::search($kw);
+                    }
+                }
+            }
+        } catch (Throwable $e) {
+            self::log('Indexing keywords collect failed: ' . $e->getMessage());
+        }
+
         return self::submitUrls($urls, 'URL_UPDATED');
     }
 

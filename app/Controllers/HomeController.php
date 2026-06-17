@@ -277,11 +277,15 @@ class HomeController extends Controller {
             // Smart Redirect instead of 404 (Item 5)
             if ($id) {
                 $slug = Seo::slugify($id);
-                $keywords = ['gpt', 'gemini', 'copilot', 'canva', 'netflix', 'youtube', 'ai'];
-                foreach ($keywords as $kw) {
-                    if (strpos($slug, $kw) !== false) {
-                        header('Location: ' . Url::search($kw), true, 302);
-                        exit;
+                $keywordPath = APP_ROOT . '/config/seo_keywords.json';
+                if (file_exists($keywordPath)) {
+                    $seoData = json_decode(file_get_contents($keywordPath), true);
+                    $keywords = isset($seoData['keywords']) ? array_keys($seoData['keywords']) : [];
+                    foreach ($keywords as $kw) {
+                        if (strpos($slug, $kw) !== false) {
+                            header('Location: ' . Url::search($kw), true, 302);
+                            exit;
+                        }
                     }
                 }
             }
@@ -339,11 +343,15 @@ class HomeController extends Controller {
         if (!$product) {
             // Smart Redirect instead of 404 (Item 5)
             $slug = Seo::slugify($id);
-            $keywords = ['gpt', 'gemini', 'copilot', 'canva', 'netflix', 'youtube', 'ai'];
-            foreach ($keywords as $kw) {
-                if (strpos($slug, $kw) !== false) {
-                    header('Location: ' . Url::search($kw), true, 302);
-                    exit;
+            $keywordPath = APP_ROOT . '/config/seo_keywords.json';
+            if (file_exists($keywordPath)) {
+                $seoData = json_decode(file_get_contents($keywordPath), true);
+                $keywords = isset($seoData['keywords']) ? array_keys($seoData['keywords']) : [];
+                foreach ($keywords as $kw) {
+                    if (strpos($slug, $kw) !== false) {
+                        header('Location: ' . Url::search($kw), true, 302);
+                        exit;
+                    }
                 }
             }
 
@@ -1294,74 +1302,12 @@ class HomeController extends Controller {
      */
     public function resolveKeywordSlug(string $keyword): string {
         $keyword = strtolower(trim($keyword));
-        $aliases = [
-            'chatgpt' => 'gpt',
-            'chat-gpt' => 'gpt',
-            'openai' => 'gpt',
-            'chat-gpt-gia-re' => 'gpt',
-            'tai-khoan-gpt' => 'gpt',
-            'tai-khoan-chatgpt' => 'gpt',
-            'tai-khoan-gpt-gia-re' => 'gpt',
-            
-            'gemini-advanced' => 'gemini',
-            'gemini-pro' => 'gemini',
-            'google-gemini' => 'gemini',
-            'tai-khoan-gemini' => 'gemini',
-            'tai-khoan-gemini-pro' => 'gemini',
-            
-            'copilot-pro' => 'copilot',
-            'github-copilot' => 'copilot',
-            
-            'canva-pro' => 'canva',
-            'tai-khoan-canva' => 'canva',
-            
-            'netflix-premium' => 'netflix',
-            'tai-khoan-netflix' => 'netflix',
-
-            'youtube-premium' => 'youtube',
-            'tai-khoan-youtube' => 'youtube',
-            'yt-premium' => 'youtube',
-
-            'claude-pro' => 'claude',
-            'claude-3-5' => 'claude',
-            'tai-khoan-claude' => 'claude',
-
-            'midjourney-ai' => 'midjourney',
-            'tai-khoan-midjourney' => 'midjourney',
-
-            'suno-ai' => 'suno',
-            'tai-khoan-suno' => 'suno',
-
-            'runway-gen3' => 'runway',
-            'tai-khoan-runway' => 'runway',
-
-            'luma-ai' => 'luma',
-            'tai-khoan-luma' => 'luma',
-
-            'elevenlabs-voice' => 'elevenlabs',
-            'tai-khoan-elevenlabs' => 'elevenlabs',
-
-            'perplexity-pro' => 'perplexity',
-            'tai-khoan-perplexity' => 'perplexity',
-
-            'poe-ai' => 'poe',
-            'tai-khoan-poe' => 'poe',
-
-            'capcut-pro' => 'capcut',
-            'tai-khoan-capcut' => 'capcut',
-
-            'freepik-premium' => 'freepik',
-            'tai-khoan-freepik' => 'freepik',
-
-            'adobe-creative-cloud' => 'adobe',
-            'tai-khoan-adobe' => 'adobe',
-
-            'cursor-pro' => 'cursor',
-            'tai-khoan-cursor' => 'cursor',
-
-            'gamma-app' => 'gamma',
-            'tai-khoan-gamma' => 'gamma',
-        ];
+        $aliases = [];
+        $keywordPath = APP_ROOT . '/config/seo_keywords.json';
+        if (file_exists($keywordPath)) {
+            $seoData = json_decode(file_get_contents($keywordPath), true);
+            $aliases = $seoData['aliases'] ?? [];
+        }
         
         $slug = Seo::slugify($keyword);
         if (isset($aliases[$slug])) {
@@ -1375,108 +1321,12 @@ class HomeController extends Controller {
      * Item 1: SEO Keyword Landing Pages
      */
     public function getKeywordSeoData(string $keyword): array {
-        $data = [
-            'gpt' => [
-                'title' => 'Tài khoản GPT giá rẻ - ChatGPT Plus chính chủ 24/7',
-                'description' => 'Cung cấp tài khoản ChatGPT Plus giá rẻ, API OpenAI chính chủ uy tín. Nâng cấp tự động nhanh chóng, hỗ trợ bảo hành 1 đổi 1.',
-                'keywords' => ['tài khoản gpt giá rẻ', 'chatgpt plus giá rẻ', 'mua tài khoản gpt', 'chatgpt', 'openai', 'gpt giá rẻ']
-            ],
-            'gemini' => [
-                'title' => 'Tài khoản Gemini Pro giá rẻ - Gemini Advanced uy tín',
-                'description' => 'Mua tài khoản Google Gemini Advanced (AI Premium) giá tốt nhất. Hỗ trợ kích hoạt tự động 24/7, bảo hành dài hạn uy tín.',
-                'keywords' => ['tài khoản gemini pro giá rẻ', 'gemini advanced giá rẻ', 'google one ai premium', 'gemini pro', 'gemini']
-            ],
-            'ai' => [
-                'title' => 'Tài khoản AI giá rẻ - ChatGPT, Gemini, Claude, Copilot',
-                'description' => 'Tổng hợp các loại tài khoản trí tuệ nhân tạo (AI) giá rẻ nhất thị trường. Nâng cấp tự động, kích hoạt nhanh chóng.',
-                'keywords' => ['tài khoản ai giá rẻ', 'mua tài khoản ai', 'chatgpt giá rẻ', 'claude pro', 'copilot pro']
-            ],
-            'copilot' => [
-                'title' => 'Mua tài khoản GitHub Copilot giá rẻ - Copilot Pro tự động',
-                'description' => 'Cung cấp tài khoản GitHub Copilot, Copilot Pro giá rẻ cho lập trình viên. Kích hoạt tự động, bảo hành 1 đổi 1.',
-                'keywords' => ['github copilot giá rẻ', 'copilot pro giá rẻ', 'tài khoản copilot']
-            ],
-            'canva' => [
-                'title' => 'Tài khoản Canva Pro giá rẻ - Thiết kế không giới hạn',
-                'description' => 'Nâng cấp tài khoản Canva Pro giá rẻ chính chủ. Đầy đủ tính năng Premium, bảo hành suốt thời gian sử dụng.',
-                'keywords' => ['canva pro giá rẻ', 'tài khoản canva pro', 'mua tài khoản canva']
-            ],
-            'netflix' => [
-                'title' => 'Tài khoản Netflix Premium giá rẻ - Xem phim 4K ổn định',
-                'description' => 'Bán tài khoản Netflix Premium giá rẻ, xem phim chất lượng 4K UHD. Slot Netflix chính chủ ổn định, bảo hành 1 đổi 1.',
-                'keywords' => ['tài khoản netflix giá rẻ', 'netflix premium giá rẻ', 'mua netflix']
-            ],
-            'youtube' => [
-                'title' => 'Tài khoản YouTube Premium giá rẻ - Không quảng cáo',
-                'description' => 'Nâng cấp YouTube Premium giá rẻ chính chủ trên email cá nhân. Xem video không quảng cáo, nghe nhạc background cực mượt.',
-                'keywords' => ['tài khoản youtube premium giá rẻ', 'youtube premium giá rẻ', 'mua youtube premium']
-            ],
-            'claude' => [
-                'title' => 'Tài khoản Claude Pro giá rẻ - Claude Opus chính chủ',
-                'description' => 'Mua tài khoản Claude Pro, Claude Opus giá rẻ nhất. Hỗ trợ kích hoạt nhanh chóng, bảo hành 1 đổi 1 uy tín.',
-                'keywords' => ['tài khoản claude pro giá rẻ', 'mua claude pro', 'claude opus', 'claude pro', 'claude ai']
-            ],
-            'midjourney' => [
-                'title' => 'Tài khoản Midjourney giá rẻ - Vẽ tranh AI chuyên nghiệp',
-                'description' => 'Bán tài khoản Midjourney Premium giá rẻ cho nhà thiết kế. Sáng tạo hình ảnh AI không giới hạn, hỗ trợ bảo hành trọn gói.',
-                'keywords' => ['tài khoản midjourney giá rẻ', 'mua midjourney', 'midjourney premium', 'vẽ tranh ai']
-            ],
-            'suno' => [
-                'title' => 'Tài khoản Suno AI giá rẻ - Tạo nhạc AI chất lượng cao',
-                'description' => 'Mua tài khoản Suno AI Premium giá rẻ, tạo bài hát chất lượng phòng thu. Kích hoạt tự động, bảo hành uy tín.',
-                'keywords' => ['tài khoản suno ai giá rẻ', 'mua suno ai', 'suno premium', 'tạo nhạc ai']
-            ],
-            'runway' => [
-                'title' => 'Tài khoản Runway Gen-3 giá rẻ - Tạo video AI đỉnh cao',
-                'description' => 'Cung cấp tài khoản Runway Pro, Gen-3 Alpha giá rẻ. Sáng tạo video từ văn bản và hình ảnh chuyên nghiệp.',
-                'keywords' => ['tài khoản runway gen3', 'runway pro giá rẻ', 'runway ai', 'tạo video ai']
-            ],
-            'luma' => [
-                'title' => 'Tài khoản Luma Dream Machine giá rẻ - Luma AI chính chủ',
-                'description' => 'Mua tài khoản Luma Dream Machine giá tốt nhất. Trải nghiệm công nghệ sinh video AI siêu thực, kích hoạt ngay.',
-                'keywords' => ['luma dream machine giá rẻ', 'tài khoản luma ai', 'luma video ai']
-            ],
-            'elevenlabs' => [
-                'title' => 'Tài khoản ElevenLabs giá rẻ - Chuyển văn bản thành giọng nói AI',
-                'description' => 'Nâng cấp tài khoản ElevenLabs giá rẻ chính chủ. Đọc văn bản bằng giọng nói AI cảm xúc chân thực nhất.',
-                'keywords' => ['tài khoản elevenlabs giá rẻ', 'mua elevenlabs', 'elevenlabs premium', 'giọng nói ai']
-            ],
-            'perplexity' => [
-                'title' => 'Tài khoản Perplexity Pro giá rẻ - Công cụ tìm kiếm AI',
-                'description' => 'Mua tài khoản Perplexity Pro giá rẻ nhất. Tra cứu thông tin thông minh với GPT-4o và Claude 3.5, bảo hành 1 đổi 1.',
-                'keywords' => ['tài khoản perplexity pro', 'perplexity pro giá rẻ', 'perplexity ai']
-            ],
-            'poe' => [
-                'title' => 'Tài khoản Poe AI Pro giá rẻ - Trò chuyện với mọi Chatbot AI',
-                'description' => 'Cung cấp tài khoản Poe AI Pro giá rẻ. Kết nối không giới hạn tới GPT-4, Claude, Gemini Pro trên cùng một ứng dụng.',
-                'keywords' => ['tài khoản poe ai pro', 'poe pro giá rẻ', 'poe ai premium']
-            ],
-            'capcut' => [
-                'title' => 'Tài khoản CapCut Pro giá rẻ - Edit video chuyên nghiệp',
-                'description' => 'Nâng cấp tài khoản CapCut Pro giá rẻ trên tài khoản cá nhân. Đầy đủ hiệu ứng Pro, template độc quyền, bảo hành uy tín.',
-                'keywords' => ['tài khoản capcut pro', 'capcut pro giá rẻ', 'mua capcut pro']
-            ],
-            'freepik' => [
-                'title' => 'Tài khoản Freepik Premium giá rẻ - Download vector, photo',
-                'description' => 'Bán tài khoản Freepik Premium giá rẻ cho designer. Download tài nguyên thiết kế không giới hạn, kích hoạt tự động.',
-                'keywords' => ['tài khoản freepik giá rẻ', 'freepik premium giá rẻ', 'mua freepik']
-            ],
-            'adobe' => [
-                'title' => 'Tài khoản Adobe Creative Cloud bản quyền giá rẻ',
-                'description' => 'Nâng cấp tài khoản Adobe Creative Cloud bản quyền giá rẻ (Photoshop, Illustrator, Premiere Pro). Bảo hành trọn khóa học/sử dụng.',
-                'keywords' => ['tài khoản adobe giá rẻ', 'adobe creative cloud giá rẻ', 'adobe bản quyền']
-            ],
-            'cursor' => [
-                'title' => 'Tài khoản Cursor AI Pro giá rẻ - Code thông minh hơn',
-                'description' => 'Cung cấp tài khoản Cursor AI Pro giá tốt cho lập trình viên. Tích hợp sẵn Copilot ++, Composer AI đỉnh cao.',
-                'keywords' => ['tài khoản cursor pro', 'cursor ai pro giá rẻ', 'cursor editor']
-            ],
-            'gamma' => [
-                'title' => 'Tài khoản Gamma App Premium giá rẻ - Thiết kế Slide AI',
-                'description' => 'Mua tài khoản Gamma App Plus/Pro giá rẻ. Tạo slide bài thuyết trình, website, văn bản tự động chỉ bằng 1 cú click.',
-                'keywords' => ['gamma app pro giá rẻ', 'tài khoản gamma', 'slide ai']
-            ]
-        ];
+        $data = [];
+        $keywordPath = APP_ROOT . '/config/seo_keywords.json';
+        if (file_exists($keywordPath)) {
+            $seoData = json_decode(file_get_contents($keywordPath), true);
+            $data = $seoData['keywords'] ?? [];
+        }
 
         $cleanKeyword = str_replace('-', ' ', $keyword);
         return $data[$keyword] ?? [

@@ -606,26 +606,43 @@
     <div class="mt-5 pt-4 border-top fade-in-element">
         <h4 class="fw-bold mb-3 fs-5 text-dark"><i class="fa-solid fa-tags text-primary me-2"></i>Tìm nhanh theo sản phẩm</h4>
         <div class="d-flex flex-wrap gap-2 keyword-search-grid">
-            <a href="<?= Url::search('gpt') ?>" class="btn btn-sm btn-light border rounded-pill px-3 py-1.5 small hover-up">ChatGPT</a>
-            <a href="<?= Url::search('gemini') ?>" class="btn btn-sm btn-light border rounded-pill px-3 py-1.5 small hover-up">Gemini</a>
-            <a href="<?= Url::search('copilot') ?>" class="btn btn-sm btn-light border rounded-pill px-3 py-1.5 small hover-up">GitHub Copilot</a>
-            <a href="<?= Url::search('canva') ?>" class="btn btn-sm btn-light border rounded-pill px-3 py-1.5 small hover-up">Canva Pro</a>
-            <a href="<?= Url::search('netflix') ?>" class="btn btn-sm btn-light border rounded-pill px-3 py-1.5 small hover-up">Netflix Premium</a>
-            <a href="<?= Url::search('youtube') ?>" class="btn btn-sm btn-light border rounded-pill px-3 py-1.5 small hover-up">YouTube Premium</a>
-            <a href="<?= Url::search('claude') ?>" class="btn btn-sm btn-light border rounded-pill px-3 py-1.5 small hover-up">Claude Pro</a>
-            <a href="<?= Url::search('midjourney') ?>" class="btn btn-sm btn-light border rounded-pill px-3 py-1.5 small hover-up">Midjourney</a>
-            <a href="<?= Url::search('suno') ?>" class="btn btn-sm btn-light border rounded-pill px-3 py-1.5 small hover-up">Suno AI</a>
-            <a href="<?= Url::search('runway') ?>" class="btn btn-sm btn-light border rounded-pill px-3 py-1.5 small hover-up">Runway Gen-3</a>
-            <a href="<?= Url::search('luma') ?>" class="btn btn-sm btn-light border rounded-pill px-3 py-1.5 small hover-up">Luma Dream Machine</a>
-            <a href="<?= Url::search('elevenlabs') ?>" class="btn btn-sm btn-light border rounded-pill px-3 py-1.5 small hover-up">ElevenLabs</a>
-            <a href="<?= Url::search('perplexity') ?>" class="btn btn-sm btn-light border rounded-pill px-3 py-1.5 small hover-up">Perplexity Pro</a>
-            <a href="<?= Url::search('poe') ?>" class="btn btn-sm btn-light border rounded-pill px-3 py-1.5 small hover-up">Poe AI</a>
-            <a href="<?= Url::search('capcut') ?>" class="btn btn-sm btn-light border rounded-pill px-3 py-1.5 small hover-up">CapCut Pro</a>
-            <a href="<?= Url::search('freepik') ?>" class="btn btn-sm btn-light border rounded-pill px-3 py-1.5 small hover-up">Freepik Premium</a>
-            <a href="<?= Url::search('adobe') ?>" class="btn btn-sm btn-light border rounded-pill px-3 py-1.5 small hover-up">Adobe CC</a>
-            <a href="<?= Url::search('cursor') ?>" class="btn btn-sm btn-light border rounded-pill px-3 py-1.5 small hover-up">Cursor AI</a>
-            <a href="<?= Url::search('gamma') ?>" class="btn btn-sm btn-light border rounded-pill px-3 py-1.5 small hover-up">Gamma App</a>
-            <a href="<?= Url::search('ai') ?>" class="btn btn-sm btn-light border rounded-pill px-3 py-1.5 small hover-up">Tài khoản AI</a>
+            <?php
+            $seoKeywordsData = [];
+            $keywordPath = APP_ROOT . '/config/seo_keywords.json';
+            if (file_exists($keywordPath)) {
+                $seoData = json_decode(file_get_contents($keywordPath), true);
+                $seoKeywordsData = $seoData['keywords'] ?? [];
+            }
+            if (empty($seoKeywordsData)) {
+                $seoKeywordsData = [
+                    'gpt' => ['display_name' => 'ChatGPT'],
+                    'gemini' => ['display_name' => 'Gemini'],
+                    'copilot' => ['display_name' => 'GitHub Copilot'],
+                    'canva' => ['display_name' => 'Canva Pro'],
+                    'netflix' => ['display_name' => 'Netflix Premium'],
+                    'youtube' => ['display_name' => 'YouTube Premium'],
+                    'claude' => ['display_name' => 'Claude Pro'],
+                    'midjourney' => ['display_name' => 'Midjourney'],
+                    'suno' => ['display_name' => 'Suno AI'],
+                    'runway' => ['display_name' => 'Runway Gen-3'],
+                    'luma' => ['display_name' => 'Luma Dream Machine'],
+                    'elevenlabs' => ['display_name' => 'ElevenLabs'],
+                    'perplexity' => ['display_name' => 'Perplexity Pro'],
+                    'poe' => ['display_name' => 'Poe AI'],
+                    'capcut' => ['display_name' => 'CapCut Pro'],
+                    'freepik' => ['display_name' => 'Freepik Premium'],
+                    'adobe' => ['display_name' => 'Adobe CC'],
+                    'cursor' => ['display_name' => 'Cursor AI'],
+                    'gamma' => ['display_name' => 'Gamma App'],
+                    'ai' => ['display_name' => 'Tài khoản AI']
+                ];
+            }
+            foreach ($seoKeywordsData as $slug => $info):
+            ?>
+                <a href="<?= Url::search(htmlspecialchars($slug)) ?>" class="btn btn-sm btn-light border rounded-pill px-3 py-1.5 small hover-up">
+                    <?= htmlspecialchars($info['display_name'] ?? $slug) ?>
+                </a>
+            <?php endforeach; ?>
         </div>
     </div>
 </div>

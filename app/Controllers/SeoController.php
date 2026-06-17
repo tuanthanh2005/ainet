@@ -61,11 +61,19 @@ class SeoController extends Controller {
         } catch (Throwable $e) { /* ignore */ }
 
         // Add static SEO search landing pages to sitemap
-        $staticKeywords = [
-            'gpt', 'gemini', 'ai', 'copilot', 'canva', 'netflix', 'youtube',
-            'claude', 'midjourney', 'suno', 'runway', 'luma', 'elevenlabs',
-            'perplexity', 'poe', 'capcut', 'freepik', 'adobe', 'cursor', 'gamma'
-        ];
+        $staticKeywords = [];
+        $keywordPath = APP_ROOT . '/config/seo_keywords.json';
+        if (file_exists($keywordPath)) {
+            $seoData = json_decode(file_get_contents($keywordPath), true);
+            $staticKeywords = isset($seoData['keywords']) ? array_keys($seoData['keywords']) : [];
+        }
+        if (empty($staticKeywords)) {
+            $staticKeywords = [
+                'gpt', 'gemini', 'ai', 'copilot', 'canva', 'netflix', 'youtube',
+                'claude', 'midjourney', 'suno', 'runway', 'luma', 'elevenlabs',
+                'perplexity', 'poe', 'capcut', 'freepik', 'adobe', 'cursor', 'gamma'
+            ];
+        }
         foreach ($staticKeywords as $kw) {
             $urls[] = [
                 'loc'        => Url::search($kw),
@@ -91,6 +99,7 @@ class SeoController extends Controller {
     public function robots(): void {
         $this->botFriendlyHeaders('text/plain');
         $isProd = APP_ENV === 'production';
+        $base = rtrim(URLROOT, '/');
 
         echo "User-agent: *\n";
         if ($isProd) {

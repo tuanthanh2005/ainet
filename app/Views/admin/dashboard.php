@@ -478,6 +478,11 @@
                         <i class="fa-solid fa-gear"></i> Cấu hình Website
                     </a>
                 </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link" onclick="switchView('indexing', this)">
+                        <i class="fa-solid fa-cloud-arrow-up"></i> Quản lý Index
+                    </a>
+                </li>
 
             </ul>
             <div class="p-3 border-top" style="border-color: #333 !important;">
@@ -691,40 +696,91 @@
                     </div>
                 </div>
 
-                <div id="view-settings" class="view-section">
+                <div id="view-indexing" class="view-section">
                     <div class="row">
-                        <div class="col-12">
-                            <div class="card-custom p-4 mb-4 border-success border-top" style="border-width: 4px !important;">
-                                <div class="d-flex align-items-center justify-content-between flex-wrap gap-3 mb-3">
-                                    <div>
-                                        <h5 class="fw-bold mb-1">Google Indexing API</h5>
-                                        <small class="text-muted">Gửi yêu cầu index toàn hệ thống hoặc từng URL riêng lẻ.</small>
-                                    </div>
-                                    <button type="button" class="btn btn-black" onclick="pushIndexAll()">
-                                        <i class="fa-solid fa-cloud-arrow-up me-1"></i> Index toàn hệ thống
-                                    </button>
-                                </div>
-
-                                <div id="index-url-rows" class="d-grid gap-2 mb-3">
-                                    <div class="input-group index-url-row">
-                                        <input type="url" class="form-control index-url-input" placeholder="https://aicuatoi.net/san-pham/slug-hoac-duong-dan-can-index">
-                                        <button class="btn btn-light border" type="button" onclick="removeIndexUrlRow(this)" title="Xóa hàng">
-                                            <i class="fa-solid fa-xmark"></i>
+                        <!-- Manual & Bulk Indexing -->
+                        <div class="col-lg-5 mb-4">
+                            <div class="card-custom p-4 h-100 border-success border-top" style="border-width: 4px !important;">
+                                <h5 class="fw-bold mb-3"><i class="fa-solid fa-paper-plane text-success me-2"></i>Index URL thủ công</h5>
+                                <p class="text-muted small">Nhập URL cần index riêng lẻ (bấm <strong class="text-success">+</strong> để thêm ô nhập).</p>
+                                
+                                <div id="dashboard-index-url-rows" class="d-grid gap-2 mb-3">
+                                    <div class="input-group dashboard-index-url-row">
+                                        <input type="url" class="form-control dashboard-index-url-input" placeholder="https://aicuatoi.net/tim-kiem/gpt">
+                                        <button class="btn btn-light border text-danger" type="button" onclick="removeDashboardIndexUrlRow(this)" title="Xóa hàng">
+                                            <i class="fa-solid fa-trash-can"></i>
                                         </button>
                                     </div>
                                 </div>
-
-                                <div class="d-flex align-items-center gap-2 flex-wrap">
-                                    <button type="button" class="btn btn-light border" onclick="addIndexUrlRow()">
-                                        <i class="fa-solid fa-plus me-1"></i> Thêm hàng
+                                <div class="d-flex align-items-center gap-2 flex-wrap mb-4">
+                                    <button type="button" class="btn btn-light btn-sm border" onclick="addDashboardIndexUrlRow()">
+                                        <i class="fa-solid fa-plus me-1 text-success"></i> Thêm hàng
                                     </button>
-                                    <button type="button" class="btn btn-success" onclick="pushIndexUrls()">
+                                    <button type="button" class="btn btn-black btn-sm" onclick="pushDashboardIndexUrls()">
                                         <i class="fa-solid fa-paper-plane me-1"></i> Index các URL này
+                                    </button>
+                                </div>
+
+                                <hr>
+
+                                <h5 class="fw-bold mb-3 mt-4"><i class="fa-solid fa-bolt text-warning me-2"></i>Index hàng loạt</h5>
+                                <p class="text-muted small">Gửi yêu cầu index Google Indexing API hàng loạt theo từng danh mục hoặc toàn hệ thống.</p>
+                                <div class="d-grid gap-2">
+                                    <button class="btn btn-outline-dark btn-sm text-start" onclick="pushIndexByType('products')">
+                                        <i class="fa-solid fa-box text-primary me-2"></i> Index toàn bộ sản phẩm
+                                    </button>
+                                    <button class="btn btn-outline-dark btn-sm text-start" onclick="pushIndexByType('categories')">
+                                        <i class="fa-solid fa-list-ul text-info me-2"></i> Index toàn bộ danh mục
+                                    </button>
+                                    <button class="btn btn-outline-dark btn-sm text-start" onclick="pushIndexByType('blogs')">
+                                        <i class="fa-solid fa-newspaper text-success me-2"></i> Index toàn bộ tin tức
+                                    </button>
+                                    <button class="btn btn-outline-dark btn-sm text-start" onclick="pushIndexByType('keywords')">
+                                        <i class="fa-solid fa-tags text-purple me-2"></i> Index toàn bộ từ khóa SEO
+                                    </button>
+                                    <button class="btn btn-success btn-sm text-start fw-bold mt-2" onclick="pushIndexByType('all')">
+                                        <i class="fa-solid fa-cloud-arrow-up text-white me-2"></i> Index toàn bộ hệ thống
                                     </button>
                                 </div>
                             </div>
                         </div>
+
+                        <!-- Keyword Manager -->
+                        <div class="col-lg-7 mb-4">
+                            <div class="card-custom h-100 border-primary border-top" style="border-width: 4px !important;">
+                                <div class="card-header-custom border-bottom-0 pb-0">
+                                    <div>
+                                        <h5 class="fw-bold mb-1"><i class="fa-solid fa-key text-primary me-2"></i>Quản lý Từ khóa SEO</h5>
+                                        <small class="text-muted">Quản lý từ khóa (URL tĩnh, metadata SEO, aliases) lưu trong file JSON.</small>
+                                    </div>
+                                    <button class="btn btn-black btn-sm" onclick="openKeywordModal()">
+                                        <i class="fa-solid fa-plus me-1"></i> Thêm từ khóa
+                                    </button>
+                                </div>
+                                <div class="table-responsive p-3">
+                                    <table class="table table-hover table-custom mb-0" style="border: 1px solid var(--border-color); border-radius: 8px; overflow: hidden;">
+                                        <thead>
+                                            <tr>
+                                                <th>Từ khóa (Slug)</th>
+                                                <th>Tên hiển thị</th>
+                                                <th>Mô tả SEO</th>
+                                                <th>Aliases</th>
+                                                <th class="text-end">Thao tác</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="keyword-table-body">
+                                            <tr>
+                                                <td colspan="5" class="text-center text-muted py-4">Đang tải danh sách từ khóa...</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
                     </div>
+                </div>
+
+                <div id="view-settings" class="view-section">
 
                     <div class="row">
                         <div class="col-12">
@@ -1433,6 +1489,7 @@
             // Setup image pickers
             setupProductImagePicker();
             setupBlogModal();
+            renderKeywords();
         });
 
         function switchView(viewId, el) {
@@ -1448,12 +1505,281 @@
                 'users': 'Quản lý User',
                 'blogs': 'Quản lý Tin tức',
                 'settings': 'Cấu hình Website',
+                'indexing': 'Quản lý Index Google',
                 'chat': 'Hộp thư hỗ trợ'
             };
             document.getElementById('page-title').innerText = titles[viewId];
 
             document.querySelectorAll('.view-section').forEach(view => view.classList.remove('active'));
             document.getElementById('view-' + viewId).classList.add('active');
+        }
+
+        // ================= GOOGLE INDEXING & SEO KEYWORDS JS =================
+        function renderKeywords() {
+            const tbody = document.getElementById('keyword-table-body');
+            if (!tbody) return;
+            tbody.innerHTML = '<tr><td colspan="5" class="text-center py-4"><span class="spinner-border spinner-border-sm me-2"></span>Đang tải dữ liệu...</td></tr>';
+
+            fetch('?action=adminGetKeywords', { credentials: 'same-origin' })
+                .then(res => res.json())
+                .then(data => {
+                    if (!data.success) {
+                        tbody.innerHTML = `<tr><td colspan="5" class="text-center text-danger py-4">Lỗi: ${data.message || 'Không thể tải từ khóa.'}</td></tr>`;
+                        return;
+                    }
+
+                    APP_STATE.seoKeywords = data.keywords || {};
+                    APP_STATE.seoAliases = data.aliases || {};
+
+                    const keywords = data.keywords || {};
+                    const aliases = data.aliases || {};
+
+                    const aliasesByTarget = {};
+                    Object.entries(aliases).forEach(([alias, target]) => {
+                        if (!aliasesByTarget[target]) {
+                            aliasesByTarget[target] = [];
+                        }
+                        aliasesByTarget[target].push(alias);
+                    });
+
+                    const entries = Object.entries(keywords);
+                    if (entries.length === 0) {
+                        tbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted py-4">Chưa có từ khóa nào.</td></tr>';
+                        return;
+                    }
+
+                    tbody.innerHTML = '';
+                    entries.forEach(([slug, info]) => {
+                        const targetAliases = aliasesByTarget[slug] || [];
+                        const aliasesHtml = targetAliases.map(a => `<code class="bg-light border px-1.5 py-0.5 rounded text-dark smaller me-1 mb-1 d-inline-block">${escapeHtml(a)}</code>`).join('') || '<span class="text-muted smaller">—</span>';
+                        const descPreview = info.description ? (info.description.length > 50 ? info.description.substring(0, 50) + '...' : info.description) : '<span class="text-muted italic smaller">Tự động tạo</span>';
+                        
+                        const escSlug = escapeHtml(slug);
+                        const escDisplayName = escapeHtml(info.display_name || '');
+                        
+                        tbody.innerHTML += `
+                            <tr>
+                                <td class="fw-bold"><code>${escSlug}</code></td>
+                                <td>${escDisplayName}</td>
+                                <td><span class="small text-muted" title="${escapeHtml(info.description || '')}">${escapeHtml(descPreview)}</span></td>
+                                <td><div class="d-flex flex-wrap" style="max-width: 250px;">${aliasesHtml}</div></td>
+                                <td class="text-end">
+                                    <button class="btn-action" onclick="editKeyword('${escSlug}')" title="Sửa"><i class="fa-solid fa-pen"></i></button>
+                                    <button class="btn-action delete" onclick="deleteKeyword('${escSlug}')" title="Xóa"><i class="fa-solid fa-trash"></i></button>
+                                </td>
+                            </tr>
+                        `;
+                    });
+                })
+                .catch(err => {
+                    tbody.innerHTML = `<tr><td colspan="5" class="text-center text-danger py-4">Lỗi kết nối: ${err.message}</td></tr>`;
+                });
+        }
+
+        let keywordModal;
+        function getKeywordModal() { return keywordModal ||= new bootstrap.Modal(document.getElementById('keywordModal')); }
+
+        function openKeywordModal() {
+            document.getElementById('keywordForm').reset();
+            document.getElementById('kw_old_slug').value = '';
+            document.getElementById('kw_slug').readOnly = false;
+            document.getElementById('keywordModalTitle').innerText = 'Thêm từ khóa mới';
+            getKeywordModal().show();
+        }
+
+        function editKeyword(slug) {
+            const info = APP_STATE.seoKeywords[slug];
+            if (!info) return;
+
+            document.getElementById('kw_old_slug').value = slug;
+            document.getElementById('kw_slug').value = slug;
+            document.getElementById('kw_slug').readOnly = false;
+            document.getElementById('kw_display_name').value = info.display_name || '';
+            document.getElementById('kw_title').value = info.title || '';
+            document.getElementById('kw_description').value = info.description || '';
+            document.getElementById('kw_keywords').value = (info.keywords || []).join(', ');
+
+            const targetAliases = [];
+            Object.entries(APP_STATE.seoAliases).forEach(([alias, target]) => {
+                if (target === slug) {
+                    targetAliases.push(alias);
+                }
+            });
+            document.getElementById('kw_aliases').value = targetAliases.join(', ');
+
+            document.getElementById('keywordModalTitle').innerText = 'Chỉnh sửa từ khóa';
+            getKeywordModal().show();
+        }
+
+        function saveKeyword() {
+            const slug = document.getElementById('kw_slug').value.trim().toLowerCase();
+            const oldSlug = document.getElementById('kw_old_slug').value.trim().toLowerCase();
+            const displayName = document.getElementById('kw_display_name').value.trim();
+            const title = document.getElementById('kw_title').value.trim();
+            const description = document.getElementById('kw_description').value.trim();
+            const keywords = document.getElementById('kw_keywords').value.trim();
+            const aliases = document.getElementById('kw_aliases').value.trim();
+
+            if (!slug || !displayName) {
+                AppNotify.warning('Từ khóa và Tên hiển thị không được để trống.', 'Thiếu thông tin');
+                return;
+            }
+
+            if (!/^[a-z0-9\-]+$/.test(slug)) {
+                AppNotify.warning('Từ khóa slug chỉ chứa chữ thường không dấu, số và dấu gạch ngang.', 'Sai định dạng');
+                return;
+            }
+
+            const fd = new FormData();
+            fd.append('slug', slug);
+            fd.append('old_slug', oldSlug);
+            fd.append('display_name', displayName);
+            fd.append('title', title);
+            fd.append('description', description);
+            fd.append('keywords', keywords);
+            fd.append('aliases', aliases);
+            fd.append('csrf_token', APP_STATE.csrfToken);
+
+            fetch('?action=adminSaveKeyword', {
+                method: 'POST',
+                headers: { 'X-Requested-With': 'XMLHttpRequest', 'X-CSRF-Token': APP_STATE.csrfToken },
+                body: fd,
+                credentials: 'same-origin'
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    AppNotify.success('Lưu từ khóa thành công!');
+                    getKeywordModal().hide();
+                    renderKeywords();
+                } else {
+                    AppNotify.error(data.message || 'Không thể lưu từ khóa.', 'Lỗi');
+                }
+            })
+            .catch(() => AppNotify.error('Không thể kết nối server.', 'Lỗi kết nối'));
+        }
+
+        function deleteKeyword(slug) {
+            Swal.fire({
+                title: 'Xóa từ khóa này?',
+                text: "Toàn bộ cấu hình và các từ đồng nghĩa (aliases) sẽ bị xóa!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#ef4444',
+                confirmButtonText: 'Xóa ngay'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    const fd = new FormData();
+                    fd.append('slug', slug);
+                    fd.append('csrf_token', APP_STATE.csrfToken);
+
+                    fetch('?action=adminDeleteKeyword', {
+                        method: 'POST',
+                        headers: { 'X-Requested-With': 'XMLHttpRequest', 'X-CSRF-Token': APP_STATE.csrfToken },
+                        body: fd,
+                        credentials: 'same-origin'
+                    })
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.success) {
+                            AppNotify.success('Đã xóa từ khóa!');
+                            renderKeywords();
+                        } else {
+                            AppNotify.error(data.message || 'Không thể xóa.', 'Lỗi');
+                        }
+                    })
+                    .catch(() => AppNotify.error('Không thể kết nối server.', 'Lỗi'));
+                }
+            });
+        }
+
+        function addDashboardIndexUrlRow(value = '') {
+            const wrap = document.getElementById('dashboard-index-url-rows');
+            if (!wrap) return;
+            const row = document.createElement('div');
+            row.className = 'input-group dashboard-index-url-row';
+            row.innerHTML = `
+                <input type="url" class="form-control dashboard-index-url-input" placeholder="https://aicuatoi.net/tim-kiem/gpt" value="${String(value).replace(/"/g, '&quot;')}">
+                <button class="btn btn-light border text-danger" type="button" onclick="removeDashboardIndexUrlRow(this)" title="Xóa hàng">
+                    <i class="fa-solid fa-trash-can"></i>
+                </button>
+            `;
+            wrap.appendChild(row);
+        }
+
+        function removeDashboardIndexUrlRow(btn) {
+            const wrap = document.getElementById('dashboard-index-url-rows');
+            const rows = wrap ? wrap.querySelectorAll('.dashboard-index-url-row') : [];
+            if (rows.length <= 1) {
+                const input = rows[0]?.querySelector('.dashboard-index-url-input');
+                if (input) input.value = '';
+                return;
+            }
+            btn.closest('.dashboard-index-url-row')?.remove();
+        }
+
+        function pushDashboardIndexUrls() {
+            const inputs = document.querySelectorAll('.dashboard-index-url-input');
+            const urls = Array.from(inputs)
+                .map(input => input.value.trim())
+                .filter(Boolean);
+            if (!urls.length) {
+                AppNotify.warning('Nhập ít nhất 1 URL cần index.', 'Thiếu URL');
+                return;
+            }
+            
+            AppNotify.info('Đang gửi các URL đã chọn lên Google Indexing API...', 'Push index');
+            apiPost('adminPushIndexUrls', { urls: JSON.stringify(urls) })
+                .then(data => {
+                    if (data.success) {
+                        AppNotify.success(`Đã gửi thành công ${data.submitted || 0}/${data.total || 0} URL.`, 'Push index');
+                        const wrap = document.getElementById('dashboard-index-url-rows');
+                        if (wrap) {
+                            wrap.innerHTML = `
+                                <div class="input-group dashboard-index-url-row">
+                                    <input type="url" class="form-control dashboard-index-url-input" placeholder="https://aicuatoi.net/tim-kiem/gpt">
+                                    <button class="btn btn-light border text-danger" type="button" onclick="removeDashboardIndexUrlRow(this)" title="Xóa hàng">
+                                        <i class="fa-solid fa-trash-can"></i>
+                                    </button>
+                                </div>
+                            `;
+                        }
+                    } else {
+                        AppNotify.error(data.message || 'Không thể index URL.', 'Lỗi indexing');
+                    }
+                })
+                .catch(() => AppNotify.error('Không thể kết nối API index URL.', 'Lỗi indexing'));
+        }
+
+        function pushIndexByType(type) {
+            let msg = 'Đang gửi yêu cầu index hàng loạt lên Google Indexing...';
+            if (type === 'products') msg = 'Đang gửi toàn bộ URL sản phẩm...';
+            else if (type === 'categories') msg = 'Đang gửi toàn bộ URL danh mục...';
+            else if (type === 'blogs') msg = 'Đang gửi toàn bộ URL bài viết tin tức...';
+            else if (type === 'keywords') msg = 'Đang gửi toàn bộ URL từ khóa SEO...';
+            else if (type === 'all') msg = 'Đang gửi toàn bộ URL hệ thống...';
+
+            AppNotify.info(msg, 'Push index');
+            
+            const fd = new FormData();
+            fd.append('type', type);
+            fd.append('csrf_token', APP_STATE.csrfToken);
+
+            fetch('?action=adminPushIndexByType', {
+                method: 'POST',
+                headers: { 'X-Requested-With': 'XMLHttpRequest', 'X-CSRF-Token': APP_STATE.csrfToken },
+                body: fd,
+                credentials: 'same-origin'
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    AppNotify.success(`Đã gửi thành công ${data.submitted || 0}/${data.total || 0} URL.`, 'Push index');
+                } else {
+                    AppNotify.error(data.message || 'Không thể index hàng loạt.', 'Lỗi indexing');
+                }
+            })
+            .catch(() => AppNotify.error('Không thể kết nối server.', 'Lỗi indexing'));
         }
 
         function renderCategoriesSelect() {
@@ -3323,6 +3649,57 @@
                 <div class="modal-footer border-top p-4">
                     <button type="button" class="btn btn-light border" data-bs-dismiss="modal">Hủy</button>
                     <button type="button" class="btn btn-black px-4" onclick="submitManualDeliver()">Gửi bàn giao</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Keyword CRUD Modal -->
+    <div class="modal fade" id="keywordModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content border-0 shadow" style="border-radius: 16px;">
+                <div class="modal-header border-bottom p-4">
+                    <h5 class="modal-title fw-bold" id="keywordModalTitle">Thêm từ khóa mới</h5>
+                    <button type="button" class="btn-close shadow-none" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <form id="keywordForm">
+                        <input type="hidden" id="kw_old_slug">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Từ khóa Slug <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="kw_slug" placeholder="Ví dụ: chatgpt" required>
+                                <small class="text-muted">Chỉ chứa chữ thường không dấu, số và dấu gạch ngang.</small>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Tên hiển thị <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="kw_display_name" placeholder="Ví dụ: ChatGPT Plus" required>
+                            </div>
+                            <div class="col-12 mb-3">
+                                <label class="form-label">SEO Title</label>
+                                <input type="text" class="form-control" id="kw_title" placeholder="Tiêu đề hiển thị trên Google">
+                                <small class="text-muted">Để trống hệ thống tự tạo mẫu chuẩn SEO.</small>
+                            </div>
+                            <div class="col-12 mb-3">
+                                <label class="form-label">SEO Description</label>
+                                <textarea class="form-control" id="kw_description" rows="2" placeholder="Mô tả khi tìm kiếm trên Google"></textarea>
+                                <small class="text-muted">Để trống hệ thống tự tạo mô tả mẫu.</small>
+                            </div>
+                            <div class="col-12 mb-3">
+                                <label class="form-label">SEO Keywords (cách nhau bằng dấu phẩy)</label>
+                                <input type="text" class="form-control" id="kw_keywords" placeholder="tai khoan chatgpt, chatgpt gia re, mua chatgpt">
+                            </div>
+                            <div class="col-12 mb-3">
+                                <label class="form-label">Aliases / Từ đồng nghĩa (cách nhau bằng dấu phẩy)</label>
+                                <input type="text" class="form-control" id="kw_aliases" placeholder="gpt, chat-gpt, open-ai, chatgpt-plus">
+                                <small class="text-muted">Các slug phụ tự động redirect 301 về slug chính này.</small>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer border-top p-4">
+                    <button type="button" class="btn btn-light border" data-bs-dismiss="modal">Hủy</button>
+                    <button type="button" class="btn btn-black px-4" onclick="saveKeyword()">Lưu từ khóa</button>
                 </div>
             </div>
         </div>
