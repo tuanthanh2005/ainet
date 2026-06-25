@@ -55,8 +55,13 @@ class Seo {
         $defaultImg  = self::absoluteAsset($siteConfig['image'] ?? ($settings['about_image'] ?? ''));
         $defaultLogo = self::absoluteAsset($siteConfig['logo'] ?? '/assets/images/fvcoin.png');
 
-        $title       = self::$data['title'] ?? ($pageConfig['title'] ?? '');
-        $fullTitle   = $title ? ($title . ' | ' . $siteName) : ($siteName . ' - Cửa Hàng Dịch Vụ AI Cao Cấp');
+        $customTitle = self::$data['title'] ?? null;
+        if ($customTitle !== null && $customTitle !== '') {
+            $title = $customTitle;
+        } else {
+            $pTitle = $pageConfig['title'] ?? '';
+            $title = $pTitle ? ($pTitle . ' | ' . $siteName) : ($siteName . ' - Cửa Hàng Dịch Vụ AI Cao Cấp');
+        }
         $description = self::$data['description'] ?? $defaultDesc;
         $keywords    = self::$data['keywords'] ?? ($pageConfig['keywords'] ?? ($siteConfig['keywords'] ?? ''));
         if (is_array($keywords)) {
@@ -71,13 +76,18 @@ class Seo {
         $nextUrl = self::$data['next'] ?? null;
 
         $description = self::truncate(strip_tags((string) $description), 200);
-        $title = $fullTitle;
 
         $h = function ($s) {
             return htmlspecialchars((string) $s, ENT_QUOTES, 'UTF-8');
         };
 
-        $out  = "    <title>{$h($title)}</title>\n";
+        $baseUrl = rtrim(URLROOT, '/');
+        $themeColor = $settings['theme_color'] ?? '#ec4899';
+
+        $out  = "    <meta name=\"base-url\" content=\"{$h($baseUrl)}\">\n";
+        $out .= "    <meta name=\"theme-color\" content=\"{$h($themeColor)}\">\n";
+        $out .= "    <meta name=\"format-detection\" content=\"telephone=no\">\n";
+        $out .= "    <title>{$h($title)}</title>\n";
         $out .= "    <meta name=\"description\" content=\"{$h($description)}\">\n";
         if ($keywords !== '') {
             $out .= "    <meta name=\"keywords\" content=\"{$h($keywords)}\">\n";
@@ -102,6 +112,8 @@ class Seo {
         $out .= "    <meta property=\"og:locale\" content=\"vi_VN\">\n";
         if ($image) {
             $out .= "    <meta property=\"og:image\" content=\"{$h($image)}\">\n";
+            $out .= "    <meta property=\"og:image:width\" content=\"1200\">\n";
+            $out .= "    <meta property=\"og:image:height\" content=\"630\">\n";
             $out .= "    <meta property=\"og:image:alt\" content=\"{$h($siteName . ' - tài khoản AI Premium')}\">\n";
         }
 
@@ -113,9 +125,43 @@ class Seo {
             $out .= "    <meta name=\"twitter:image\" content=\"{$h($image)}\">\n";
         }
 
-        // JSON-LD
-        $schemas = [];
+        // Resolve telephone & email from site config or settings table
+        $telephone = !empty($settings['zalo']) ? trim($settings['zalo']) : ($siteConfig['telephone'] ?? '');
+        $email = $siteConfig['email'] ?? '';
+        if (empty($email) && !empty($settings['contact_methods'])) {
+            $methods = json_decode($settings['contact_methods'], true);
+            if (is_array($methods)) {
+                foreach ($methods as $m) {
+                    $txt = trim($m['text'] ?? '');
+                    if (strpos($txt, '@') !== false && strpos($txt, '.') !== false) {
+                        $email = $txt;
+                        break;
+                    }
+                }
+            }
+        }
+
+        // Resolve sameAs links
         $sameAs = $siteConfig['sameAs'] ?? [];
+        if (!empty($settings['zalo'])) {
+            $cleanZalo = preg_replace('/[^0-9]/', '', $settings['zalo']);
+            if ($cleanZalo !== '') {
+                $sameAs[] = 'https://zalo.me/' . $cleanZalo;
+            }
+        }
+        if (!empty($settings['contact_methods'])) {
+            $methods = json_decode($settings['contact_methods'], true);
+            if (is_array($methods)) {
+                foreach ($methods as $m) {
+                    $txt = trim($m['text'] ?? '');
+                    if (strpos($txt, '@') === 0) {
+                        $sameAs[] = 'https://t.me/' . ltrim($txt, '@');
+                    } elseif (preg_match('/^https?:\/\//i', $txt)) {
+                        $sameAs[] = $txt;
+                    }
+                }
+            }
+        }
         if (!empty($settings['social_links_json'])) {
             $socialLinks = json_decode((string) $settings['social_links_json'], true);
             if (is_array($socialLinks)) {
@@ -127,37 +173,41 @@ class Seo {
                 }
             }
         }
+        $sameAs = array_values(array_unique(array_filter($sameAs)));
 
-        // Site-wide Organization + WebSite (always included)
+        // JSON-LD
+        $schemas = [];
+
+        // Site-wide Organization (always included)
         $organization = [
             '@context' => 'https://schema.org',
-            '@type'    => 'OnlineStore',
+            '@type'    => 'Organization',
             'name'     => $siteName,
-            'alternateName' => $siteConfig['alternateName'] ?? 'AICuaToi',
             'url'      => rtrim(URLROOT, '/'),
             'logo'     => $defaultLogo,
-            'image'    => $image ?: $defaultLogo,
-            'description' => $siteConfig['description'] ?? $defaultDesc,
-            'priceRange' => $siteConfig['priceRange'] ?? '₫₫',
-            'areaServed' => $siteConfig['areaServed'] ?? 'VN',
-            'contactPoint' => [
-                '@type' => 'ContactPoint',
-                'contactType' => 'customer support',
-                'availableLanguage' => ['vi-VN', 'vi'],
-                'areaServed' => $siteConfig['areaServed'] ?? 'VN',
-            ],
         ];
-        if (!empty($siteConfig['telephone'])) {
-            $organization['telephone'] = $siteConfig['telephone'];
-            $organization['contactPoint']['telephone'] = $siteConfig['telephone'];
+
+        $contactPoint = [
+            '@type' => 'ContactPoint',
+            'contactType' => 'customer service',
+            'availableLanguage' => 'Vietnamese',
+        ];
+
+        if ($telephone !== '') {
+            $contactPoint['telephone'] = $telephone;
         }
-        if (!empty($siteConfig['email'])) {
-            $organization['email'] = $siteConfig['email'];
-            $organization['contactPoint']['email'] = $siteConfig['email'];
+        if ($email !== '') {
+            $contactPoint['email'] = $email;
         }
+
+        if ($telephone !== '' || $email !== '') {
+            $organization['contactPoint'] = $contactPoint;
+        }
+
         if (!empty($sameAs)) {
-            $organization['sameAs'] = array_values(array_unique($sameAs));
+            $organization['sameAs'] = $sameAs;
         }
+
         $schemas[] = $organization;
         $schemas[] = [
             '@context' => 'https://schema.org',
