@@ -605,46 +605,93 @@
     <!-- Tìm nhanh theo sản phẩm (Internal Linking Automation - Item 3) -->
     <div class="mt-5 pt-4 border-top fade-in-element">
         <h4 class="fw-bold mb-3 fs-5 text-dark"><i class="fa-solid fa-tags text-primary me-2"></i>Tìm nhanh theo sản phẩm</h4>
-        <div class="d-flex flex-wrap gap-2 keyword-search-grid">
-            <?php
-            $seoKeywordsData = [];
-            $keywordPath = APP_ROOT . '/config/seo_keywords.json';
-            if (file_exists($keywordPath)) {
-                $seoData = json_decode(file_get_contents($keywordPath), true);
-                $seoKeywordsData = $seoData['keywords'] ?? [];
-            }
-            if (empty($seoKeywordsData)) {
-                $seoKeywordsData = [
-                    'gpt' => ['display_name' => 'ChatGPT'],
-                    'gemini' => ['display_name' => 'Gemini'],
-                    'copilot' => ['display_name' => 'GitHub Copilot'],
-                    'canva' => ['display_name' => 'Canva Pro'],
-                    'netflix' => ['display_name' => 'Netflix Premium'],
-                    'youtube' => ['display_name' => 'YouTube Premium'],
-                    'claude' => ['display_name' => 'Claude Pro'],
-                    'midjourney' => ['display_name' => 'Midjourney'],
-                    'suno' => ['display_name' => 'Suno AI'],
-                    'runway' => ['display_name' => 'Runway Gen-3'],
-                    'luma' => ['display_name' => 'Luma Dream Machine'],
-                    'elevenlabs' => ['display_name' => 'ElevenLabs'],
-                    'perplexity' => ['display_name' => 'Perplexity Pro'],
-                    'poe' => ['display_name' => 'Poe AI'],
-                    'capcut' => ['display_name' => 'CapCut Pro'],
-                    'freepik' => ['display_name' => 'Freepik Premium'],
-                    'adobe' => ['display_name' => 'Adobe CC'],
-                    'cursor' => ['display_name' => 'Cursor AI'],
-                    'gamma' => ['display_name' => 'Gamma App'],
-                    'ai' => ['display_name' => 'Tài khoản AI']
-                ];
-            }
-            foreach ($seoKeywordsData as $slug => $info):
-            ?>
-                <a href="<?= Url::search(htmlspecialchars($slug)) ?>" class="btn btn-sm btn-light border rounded-pill px-3 py-1.5 small hover-up">
-                    <?= htmlspecialchars($info['display_name'] ?? $slug) ?>
-                </a>
-            <?php endforeach; ?>
+        <div class="position-relative">
+            <div id="keyword-grid" class="d-flex flex-wrap gap-2 keyword-search-grid" style="max-height: 76px; overflow: hidden; transition: max-height 0.3s ease-in-out;">
+                <?php
+                $seoKeywordsData = [];
+                $keywordPath = APP_ROOT . '/config/seo_keywords.json';
+                if (file_exists($keywordPath)) {
+                    $seoData = json_decode(file_get_contents($keywordPath), true);
+                    $seoKeywordsData = $seoData['keywords'] ?? [];
+                }
+                if (empty($seoKeywordsData)) {
+                    $seoKeywordsData = [
+                        'gpt' => ['display_name' => 'ChatGPT'],
+                        'gemini' => ['display_name' => 'Gemini'],
+                        'copilot' => ['display_name' => 'GitHub Copilot'],
+                        'canva' => ['display_name' => 'Canva Pro'],
+                        'netflix' => ['display_name' => 'Netflix Premium'],
+                        'youtube' => ['display_name' => 'YouTube Premium'],
+                        'claude' => ['display_name' => 'Claude Pro'],
+                        'midjourney' => ['display_name' => 'Midjourney'],
+                        'suno' => ['display_name' => 'Suno AI'],
+                        'runway' => ['display_name' => 'Runway Gen-3'],
+                        'luma' => ['display_name' => 'Luma Dream Machine'],
+                        'elevenlabs' => ['display_name' => 'ElevenLabs'],
+                        'perplexity' => ['display_name' => 'Perplexity Pro'],
+                        'poe' => ['display_name' => 'Poe AI'],
+                        'capcut' => ['display_name' => 'CapCut Pro'],
+                        'freepik' => ['display_name' => 'Freepik Premium'],
+                        'adobe' => ['display_name' => 'Adobe CC'],
+                        'cursor' => ['display_name' => 'Cursor AI'],
+                        'gamma' => ['display_name' => 'Gamma App'],
+                        'ai' => ['display_name' => 'Tài khoản AI']
+                    ];
+                }
+                foreach ($seoKeywordsData as $slug => $info):
+                ?>
+                    <a href="<?= Url::search(htmlspecialchars($slug)) ?>" class="btn btn-sm btn-light border rounded-pill px-3 py-1.5 small hover-up">
+                        <?= htmlspecialchars($info['display_name'] ?? $slug) ?>
+                    </a>
+                <?php endforeach; ?>
+            </div>
+            
+            <div id="keyword-toggle-btn-wrap" class="text-center mt-3 d-none">
+                <button class="btn btn-sm btn-light border rounded-pill px-4 py-1.5 text-muted hover-up shadow-sm small" onclick="toggleKeywords()">
+                    <span id="keyword-toggle-text">Xem thêm</span>
+                    <i id="keyword-toggle-icon" class="fa-solid fa-chevron-down ms-1.5"></i>
+                </button>
+            </div>
         </div>
     </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const grid = document.getElementById('keyword-grid');
+            const wrap = document.getElementById('keyword-toggle-btn-wrap');
+            if (grid && wrap) {
+                // If scrollHeight is greater than max-height threshold
+                if (grid.scrollHeight > 82) {
+                    wrap.classList.remove('d-none');
+                }
+            }
+        });
+
+        function toggleKeywords() {
+            const grid = document.getElementById('keyword-grid');
+            const txt = document.getElementById('keyword-toggle-text');
+            const icon = document.getElementById('keyword-toggle-icon');
+            if (!grid || !txt || !icon) return;
+
+            if (grid.style.maxHeight === '76px' || grid.style.maxHeight === '') {
+                grid.style.maxHeight = grid.scrollHeight + 'px';
+                txt.textContent = 'Thu gọn';
+                icon.className = 'fa-solid fa-chevron-up ms-1.5';
+                
+                setTimeout(() => {
+                    if (grid.style.maxHeight !== '76px') {
+                        grid.style.maxHeight = 'none';
+                    }
+                }, 300);
+            } else {
+                grid.style.maxHeight = grid.offsetHeight + 'px';
+                grid.offsetHeight; // reflow
+                grid.style.maxHeight = '76px';
+                txt.textContent = 'Xem thêm';
+                icon.className = 'fa-solid fa-chevron-down ms-1.5';
+            }
+        }
+    </script>
 </div>
 
 <div id="blog-section" style="display: <?php echo ($tab === 'blog') ? 'block' : 'none'; ?>;">
