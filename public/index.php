@@ -202,6 +202,11 @@ if ($rawUrl !== '' && empty($_GET['action'])) {
                 $_GET['slug'] = $second;
             }
             break;
+        case 'admin':
+            if ($second === 'system-indexing') {
+                $_GET['action'] = 'adminSystemIndexing';
+            }
+            break;
     }
 }
 

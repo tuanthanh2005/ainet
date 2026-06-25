@@ -992,6 +992,134 @@ class AdminController extends Controller {
         return $password;
     }
 
+    public function adminSystemIndexing() {
+        $db = Database::getInstance();
+        $pendingOrders = (int) $db->query("SELECT COUNT(*) FROM orders WHERE status IN ('pending', 'processing')")->fetchColumn();
+        $unreadContacts = ContactMessage::countUnread();
+
+        $this->view('admin/indexing_report', [
+            'currentUser' => $_SESSION['user'],
+            'pendingOrders' => $pendingOrders,
+            'unreadContacts' => $unreadContacts,
+            'google_indexing_enabled' => filter_var(getenv('GOOGLE_INDEXING_ENABLED') ?: 'false', FILTER_VALIDATE_BOOLEAN),
+            'google_indexing_credentials' => trim((string) (getenv('GOOGLE_INDEXING_CREDENTIALS') ?: ''))
+        ]);
+    }
+
+    public function adminGetAllUrls() {
+        $urls = [
+            Url::home(),
+            Url::products(),
+            Url::blogs(),
+            Url::about(),
+            Url::contact(),
+            url('sitemap.xml'),
+        ];
+
+        try {
+            foreach (Category::getAll() as $cat) {
+                $slug = trim((string) ($cat['seo_slug'] ?: ($cat['slug'] ?? '')));
+                if ($slug !== '') {
+                    $urls[] = Url::category($slug);
+                }
+            }
+        } catch (Throwable $e) {}
+
+        try {
+            foreach (Product::getAll() as $product) {
+                if (($product['status'] ?? 'active') !== 'hidden') {
+                    $urls[] = Url::product($product);
+                }
+            }
+        } catch (Throwable $e) {}
+
+        try {
+            foreach (Blog::getAll() as $blog) {
+                $urls[] = Url::blog($blog);
+            }
+        } catch (Throwable $e) {}
+
+        try {
+            $keywordPath = base_path('config/seo_keywords.json');
+            if (file_exists($keywordPath)) {
+                $seoData = json_decode(file_get_contents($keywordPath), true);
+                if (isset($seoData['keywords']) && is_array($seoData['keywords'])) {
+                    foreach (array_keys($seoData['keywords']) as $kw) {
+                        $urls[] = Url::search($kw);
+                    }
+                }
+            }
+        } catch (Throwable $e) {}
+
+        $urls = array_values(array_unique(array_filter($urls)));
+        
+        $categorized = [];
+        foreach ($urls as $url) {
+            $type = 'Khác';
+            if ($url === Url::home()) {
+                $type = 'Trang chủ';
+            } elseif ($url === Url::products()) {
+                $type = 'Danh sách sản phẩm';
+            } elseif ($url === Url::blogs()) {
+                $type = 'Trang tin tức';
+            } elseif ($url === Url::about()) {
+                $type = 'Giới thiệu';
+            } elseif ($url === Url::contact()) {
+                $type = 'Liên hệ';
+            } elseif (strpos($url, '/sitemap.xml') !== false) {
+                $type = 'Sitemap';
+            } elseif (strpos($url, '/danh-muc/') !== false) {
+                $type = 'Danh mục';
+            } elseif (strpos($url, '/san-pham/') !== false) {
+                $type = 'Sản phẩm';
+            } elseif (strpos($url, '/tap-chi/') !== false) {
+                $type = 'Tin tức';
+            } elseif (strpos($url, '/tim-kiem/') !== false) {
+                $type = 'SEO Keyword';
+            }
+            $categorized[] = [
+                'url' => $url,
+                'type' => $type
+            ];
+        }
+
+        $this->jsonSuccess(['urls' => $categorized]);
+    }
+
+    public function adminPushIndexSingleUrl() {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            $this->jsonError('Method not allowed', 405);
+        }
+
+        $url = trim($_POST['url'] ?? '');
+        if ($url === '') {
+            $this->jsonError('URL trống.');
+        }
+
+        $result = IndexingService::submitUrl($url, 'URL_UPDATED');
+        if (!empty($result['success'])) {
+            $this->jsonSuccess($result);
+        } else {
+            $this->jsonSuccess(array_merge(['success' => false], $result));
+        }
+    }
+
+    public function adminGetIndexingLogs() {
+        $logPath = base_path('storage/logs/indexing.log');
+        if (!file_exists($logPath)) {
+            $this->jsonSuccess(['logs' => 'Chưa có nhật ký indexing nào.']);
+        }
+        
+        $content = @file_get_contents($logPath);
+        if ($content === false) {
+            $this->jsonSuccess(['logs' => 'Không thể đọc nhật ký.']);
+        }
+        
+        $lines = explode("\n", trim($content));
+        $lastLines = array_slice($lines, -150);
+        $this->jsonSuccess(['logs' => implode("\n", $lastLines)]);
+    }
+
     private function jsonSuccess(array $payload = []): void {
         header('Content-Type: application/json');
         echo json_encode(array_merge(['success' => true], $payload));

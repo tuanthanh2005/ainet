@@ -1522,6 +1522,17 @@
             setupProductImagePicker();
             setupBlogModal();
             renderKeywords();
+
+            // Handle active tab from URL parameter if present
+            const urlParams = new URLSearchParams(window.location.search);
+            const tabParam = urlParams.get('tab');
+            if (tabParam) {
+                const targetLink = document.querySelector(`.nav-link[onclick*="switchView('${tabParam}'"]`) 
+                                || document.querySelector(`.nav-link[onclick*="switchView('${tabParam}',"]`);
+                if (targetLink) {
+                    targetLink.click();
+                }
+            }
         });
 
         function switchView(viewId, el) {
