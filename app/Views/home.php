@@ -441,14 +441,13 @@
     <div class="category-menu-wrapper fade-in-element" style="animation-delay: 0.1s;">
         <?php
         $currentCat = $categorySlug ?? ($_GET['category'] ?? '');
-        $qParam = !empty($searchQuery) ? '&q=' . urlencode($searchQuery) : '';
         $sortParam = !empty($_GET['sort']) ? '&sort=' . urlencode($_GET['sort']) : '';
         ?>
-        <a href="<?php echo Url::withQuery(Url::products(), array_filter(['q' => $searchQuery ?? null, 'sort' => ($sort ?? '') !== 'newest' ? ($sort ?? '') : null])); ?>"
+        <a href="<?php echo Url::withQuery(Url::products(), array_filter(['sort' => ($sort ?? '') !== 'newest' ? ($sort ?? '') : null])); ?>"
            class="cat-pill text-decoration-none <?php echo (empty($currentCat) || $currentCat === 'all') ? 'active' : ''; ?>">Tất Cả</a>
         <?php foreach ($categories as $cat): ?>
             <?php $activeSlug = $cat['seo_slug'] ?: $cat['slug']; ?>
-            <a href="<?php echo Url::category($activeSlug) . ($qParam || $sortParam ? '?' . ltrim($qParam . $sortParam, '&') : ''); ?>"
+            <a href="<?php echo Url::category($activeSlug) . ($sortParam ? '?' . ltrim($sortParam, '&') : ''); ?>"
                class="cat-pill text-decoration-none <?= $cat['is_pro'] ? 'pro-glow' : '' ?> <?php echo ($currentCat === $cat['slug'] || $currentCat === $cat['seo_slug']) ? 'active' : ''; ?>">
                 <?php if ($cat['icon']): ?>
                     <i class="fa-solid <?= htmlspecialchars($cat['icon']) ?> <?= htmlspecialchars($cat['icon_color'] ?: 'text-primary') ?>"></i>
