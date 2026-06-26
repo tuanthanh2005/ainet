@@ -394,7 +394,7 @@ class HomeController extends Controller {
                 'offers'      => $this->productPriceData($product)['offer'],
                 'aggregateRating' => [
                     '@type'       => 'AggregateRating',
-                    'ratingValue' => (string) ($product['rating'] ?? 5),
+                    'ratingValue' => (string) ((isset($product['rating']) && (float)$product['rating'] >= 1.0) ? $product['rating'] : 5.0),
                     'reviewCount' => (string) (max(1, (int) ($product['sold_count'] ?? 10))),
                     'bestRating'  => '5',
                     'worstRating' => '1',
@@ -1030,6 +1030,43 @@ class HomeController extends Controller {
             : 'https://schema.org/OutOfStock';
         $url = Url::product($product);
 
+        $returnPolicy = [
+            '@type' => 'MerchantReturnPolicy',
+            'applicableCountry' => 'VN',
+            'returnPolicyCategory' => 'https://schema.org/MerchantReturnFiniteReturnWindow',
+            'merchantReturnDays' => 30,
+            'returnFees' => 'https://schema.org/FreeReturn',
+            'returnMethod' => 'https://schema.org/ReturnByMail',
+        ];
+
+        $shippingDetails = [
+            '@type' => 'OfferShippingDetails',
+            'shippingRate' => [
+                '@type' => 'MonetaryAmount',
+                'value' => '0',
+                'currency' => 'VND',
+            ],
+            'shippingDestination' => [
+                '@type' => 'DefinedRegion',
+                'addressCountry' => 'VN',
+            ],
+            'deliveryTime' => [
+                '@type' => 'ShippingDeliveryTime',
+                'handlingTime' => [
+                    '@type' => 'QuantitativeValue',
+                    'minValue' => 0,
+                    'maxValue' => 1,
+                    'unitCode' => 'DAY',
+                ],
+                'transitTime' => [
+                    '@type' => 'QuantitativeValue',
+                    'minValue' => 0,
+                    'maxValue' => 1,
+                    'unitCode' => 'DAY',
+                ],
+            ],
+        ];
+
         $offer = count($prices) > 1 ? [
             '@type'         => 'AggregateOffer',
             'priceCurrency' => 'VND',
@@ -1038,6 +1075,8 @@ class HomeController extends Controller {
             'offerCount'    => (string) count($prices),
             'availability'  => $availability,
             'url'           => $url,
+            'hasMerchantReturnPolicy' => $returnPolicy,
+            'shippingDetails' => $shippingDetails,
         ] : [
             '@type'         => 'Offer',
             'priceCurrency' => 'VND',
@@ -1046,6 +1085,8 @@ class HomeController extends Controller {
             'valueAddedTaxIncluded' => 'true',
             'availability'  => $availability,
             'url'           => $url,
+            'hasMerchantReturnPolicy' => $returnPolicy,
+            'shippingDetails' => $shippingDetails,
         ];
 
         return [
