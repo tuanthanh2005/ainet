@@ -341,30 +341,82 @@ class HomeController extends Controller {
         $settings = $this->settings;
 
         if (!$product) {
-            // Smart Redirect instead of 404 (Item 5)
             $slug = Seo::slugify($id);
-            $keywordPath = APP_ROOT . '/config/seo_keywords.json';
-            if (file_exists($keywordPath)) {
-                $seoData = json_decode(file_get_contents($keywordPath), true);
-                $keywords = isset($seoData['keywords']) ? array_keys($seoData['keywords']) : [];
-                foreach ($keywords as $kw) {
-                    if (strpos($slug, $kw) !== false) {
-                        header('Location: ' . Url::search($kw), true, 302);
-                        exit;
+            // Split the slug into keywords
+            $keywords = array_filter(explode('-', $slug), function($w) {
+                return strlen($w) > 2;
+            });
+
+            $relatedProducts = [];
+            $relatedBlogs = [];
+
+            if (!empty($keywords)) {
+                // Search related products
+                $allProducts = Product::getAll();
+                foreach ($allProducts as $p) {
+                    $pSlug = Seo::slugify($p['title'] ?? '');
+                    $pDescSlug = Seo::slugify($p['description'] ?? '');
+                    $matches = 0;
+                    foreach ($keywords as $kw) {
+                        if (strpos($pSlug, $kw) !== false || strpos($pDescSlug, $kw) !== false) {
+                            $matches++;
+                        }
+                    }
+                    if ($matches > 0) {
+                        $relatedProducts[] = [
+                            'item' => $p,
+                            'matches' => $matches
+                        ];
                     }
                 }
-            }
+                usort($relatedProducts, function($a, $b) {
+                    return $b['matches'] <=> $a['matches'];
+                });
+                $relatedProducts = array_map(function($x) { return $x['item']; }, $relatedProducts);
+                // Limit to top 8 related products
+                $relatedProducts = array_slice($relatedProducts, 0, 8);
 
-            $categories = Category::getAll();
-            foreach ($categories as $cat) {
-                $catSlug = $cat['seo_slug'] ?: $cat['slug'];
-                if (strpos($slug, $catSlug) !== false) {
-                    header('Location: ' . Url::category($catSlug), true, 302);
-                    exit;
+                // Search related blogs
+                $allBlogs = Blog::getAll();
+                foreach ($allBlogs as $b) {
+                    $bSlug = Seo::slugify($b['title'] ?? '');
+                    $bDescSlug = Seo::slugify($b['description'] ?? '');
+                    $matches = 0;
+                    foreach ($keywords as $kw) {
+                        if (strpos($bSlug, $kw) !== false || strpos($bDescSlug, $kw) !== false) {
+                            $matches++;
+                        }
+                    }
+                    if ($matches > 0) {
+                        $relatedBlogs[] = [
+                            'item' => $b,
+                            'matches' => $matches
+                        ];
+                    }
                 }
+                usort($relatedBlogs, function($a, $b) {
+                    return $b['matches'] <=> $a['matches'];
+                });
+                $relatedBlogs = array_map(function($x) { return $x['item']; }, $relatedBlogs);
+                // Limit to top 6 related blogs
+                $relatedBlogs = array_slice($relatedBlogs, 0, 6);
             }
 
-            header('Location: ' . Url::products(), true, 302);
+            // Set SEO for this suggestions page
+            Seo::set([
+                'title'       => 'Không tìm thấy sản phẩm - ' . SITENAME,
+                'description' => 'Sản phẩm bạn đang tìm kiếm không tồn tại hoặc đã tạm dừng bán. Vui lòng xem các sản phẩm liên quan bên dưới hoặc liên hệ admin đặt hàng.',
+                'keywords'    => ['404', 'không tìm thấy', SITENAME],
+                'canonical'   => url('san-pham/' . $id),
+                'type'        => 'website',
+            ]);
+
+            $this->view('layout', [
+                'view' => 'not-found-suggestions',
+                'relatedProducts' => $relatedProducts,
+                'relatedBlogs' => $relatedBlogs,
+                'settings' => $settings
+            ]);
             exit;
         }
 
