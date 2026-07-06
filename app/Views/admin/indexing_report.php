@@ -254,6 +254,73 @@
             color: var(--pure-white) !important;
             border-color: var(--pure-black) !important;
         }
+
+        /* ================= RESPONSIVE ADJUSTMENTS ================= */
+        @media (max-width: 991.98px) {
+            .sidebar {
+                position: fixed;
+                top: 0;
+                left: 0;
+                bottom: 0;
+                width: var(--sidebar-width);
+                height: 100vh;
+                transform: translateX(-100%);
+                transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                z-index: 1050;
+                box-shadow: 4px 0 15px rgba(0, 0, 0, 0.25);
+            }
+            .sidebar.show {
+                transform: translateX(0);
+            }
+            .topbar {
+                padding: 0 15px;
+            }
+            .content-area {
+                padding: 15px;
+            }
+            .sidebar-backdrop {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100vw;
+                height: 100vh;
+                background-color: rgba(0, 0, 0, 0.5);
+                z-index: 1040;
+                display: none;
+                opacity: 0;
+                transition: opacity 0.3s ease;
+            }
+            .sidebar-backdrop.show {
+                display: block;
+                opacity: 1;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .topbar h5 {
+                font-size: 1.1rem;
+            }
+            .card-header-custom {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 12px;
+                padding: 15px;
+            }
+            .card-header-custom > div:last-child {
+                width: 100%;
+                display: flex;
+                justify-content: flex-start;
+                gap: 8px;
+            }
+            .table-custom th, .table-custom td {
+                padding: 10px 12px;
+                font-size: 0.82rem;
+            }
+            .btn-black, .btn-light {
+                padding: 6px 12px;
+                font-size: 0.85rem;
+            }
+        }
     </style>
 </head>
 
@@ -261,8 +328,9 @@
 
     <div class="admin-wrapper">
         <aside class="sidebar">
-            <div class="sidebar-brand">
-                <i class="fa-solid fa-circle-nodes me-2"></i>AI CỦA TÔI
+            <div class="sidebar-brand d-flex align-items-center justify-content-between px-3">
+                <span class="flex-grow-1 text-center"><i class="fa-solid fa-circle-nodes me-2"></i>AI CỦA TÔI</span>
+                <button class="btn btn-close btn-close-white d-lg-none shadow-none" style="font-size: 0.8rem;" onclick="toggleSidebar()" aria-label="Close"></button>
             </div>
             <ul class="nav-menu">
                 <li class="nav-item">
@@ -339,13 +407,22 @@
 
         <main class="main-content">
             <header class="topbar">
-                <h5 class="mb-0 fw-bold" id="page-title">Index Toàn Hệ Thống</h5>
-                <div>
-                    <button class="btn btn-light border-0 shadow-sm me-2"><i class="fa-regular fa-bell"></i></button>
-                    <a href="index.php?action=logout" class="btn btn-light border-0 shadow-sm me-2"><i
-                            class="fa-solid fa-right-from-bracket me-2"></i>Đăng xuất</a>
-                    <a href="index.php" target="_blank" class="btn btn-black"><i
-                            class="fa-solid fa-arrow-up-right-from-square me-2"></i>Xem Website</a>
+                <div class="d-flex align-items-center gap-2">
+                    <button class="btn btn-light border shadow-sm me-1 d-lg-none" onclick="toggleSidebar()" aria-label="Toggle Menu">
+                        <i class="fa-solid fa-bars"></i>
+                    </button>
+                    <h5 class="mb-0 fw-bold" id="page-title">Index Toàn Hệ Thống</h5>
+                </div>
+                <div class="d-flex align-items-center gap-1 gap-md-2">
+                    <button class="btn btn-light border-0 shadow-sm" title="Thông báo"><i class="fa-regular fa-bell"></i></button>
+                    <a href="index.php?action=logout" class="btn btn-light border shadow-sm" title="Đăng xuất">
+                        <i class="fa-solid fa-right-from-bracket"></i>
+                        <span class="d-none d-sm-inline ms-1 ms-md-2">Đăng xuất</span>
+                    </a>
+                    <a href="index.php" target="_blank" class="btn btn-black" title="Xem Website">
+                        <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                        <span class="d-none d-sm-inline ms-1 ms-md-2">Xem Website</span>
+                    </a>
                 </div>
             </header>
 
@@ -802,6 +879,33 @@
                 currentIndex++;
                 processNextUrl();
             });
+        }
+
+        function toggleSidebar() {
+            const sidebar = document.querySelector('.sidebar');
+            let backdrop = document.querySelector('.sidebar-backdrop');
+            if (!backdrop) {
+                backdrop = document.createElement('div');
+                backdrop.className = 'sidebar-backdrop';
+                backdrop.addEventListener('click', toggleSidebar);
+                document.body.appendChild(backdrop);
+            }
+
+            if (sidebar.classList.contains('show')) {
+                sidebar.classList.remove('show');
+                backdrop.classList.remove('show');
+                setTimeout(() => {
+                    if (!sidebar.classList.contains('show') && backdrop.parentNode) {
+                        backdrop.style.display = 'none';
+                    }
+                }, 300);
+            } else {
+                backdrop.style.display = 'block';
+                // Force reflow
+                backdrop.offsetHeight;
+                sidebar.classList.add('show');
+                backdrop.classList.add('show');
+            }
         }
     </script>
 </body>

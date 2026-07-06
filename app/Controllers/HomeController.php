@@ -56,10 +56,10 @@ class HomeController extends Controller {
             $isMobile = true;
         }
 
-        // Current active tab: default is home on desktop, products on mobile
-        $tab = $_GET['tab'] ?? ($isMobile ? 'products' : 'home');
+        // Current active tab: default is home
+        $tab = $_GET['tab'] ?? 'home';
         if (!in_array($tab, ['home', 'products', 'blog'])) {
-            $tab = $isMobile ? 'products' : 'home';
+            $tab = 'home';
         }
 
         // Look up active category by slug or seo_slug
