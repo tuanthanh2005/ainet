@@ -420,6 +420,10 @@
 
         /* ================= RESPONSIVE ADJUSTMENTS ================= */
         @media (max-width: 991.98px) {
+            .admin-wrapper {
+                width: 100%;
+                overflow-x: hidden;
+            }
             .sidebar {
                 position: fixed;
                 top: 0;
@@ -434,6 +438,10 @@
             }
             .sidebar.show {
                 transform: translateX(0);
+            }
+            .main-content {
+                width: 100%;
+                overflow-x: hidden;
             }
             .topbar {
                 padding: 0 15px;
@@ -977,11 +985,13 @@
                                         </div>
                                     </div>
                                     <div class="bg-light p-3 rounded-3 mt-2 border-start border-primary border-4">
-                                        <div class="d-flex align-items-center">
-                                            <i class="fa-solid fa-circle-info text-primary me-2"></i>
-                                            <span class="small fw-bold">Webhook URL:</span>
-                                            <code class="ms-2 text-danger"><?= url('index.php?action=sepayWebhook') ?></code>
-                                            <button type="button" class="btn btn-sm btn-outline-primary ms-2" onclick="loadSePayDebug()">
+                                        <div class="d-flex flex-column flex-md-row align-items-start align-items-md-center gap-2">
+                                            <div class="d-flex align-items-center gap-2">
+                                                <i class="fa-solid fa-circle-info text-primary"></i>
+                                                <span class="small fw-bold">Webhook URL:</span>
+                                            </div>
+                                            <code class="text-danger text-break"><?= url('index.php?action=sepayWebhook') ?></code>
+                                            <button type="button" class="btn btn-sm btn-outline-primary mt-2 mt-md-0" onclick="loadSePayDebug()">
                                                 <i class="fa-solid fa-bug me-1"></i>Kiểm tra webhook cuối
                                             </button>
                                         </div>
@@ -1352,6 +1362,7 @@
                                     <button type="button" class="btn btn-sm btn-light border" data-template="table" title="Bảng gói">Bảng</button>
                                     <button type="button" class="btn btn-sm btn-light border" data-template="cta" title="CTA">CTA</button>
                                     <button type="button" class="btn btn-sm btn-light border" data-template="seo" title="Khung mô tả SEO">Mẫu SEO</button>
+                                    <button type="button" class="btn btn-sm btn-light border icon-only text-danger" data-cmd="removeFormat" title="Xóa định dạng"><i class="fa-solid fa-eraser"></i></button>
                                 </div>
                                 <div id="p_detail_desc_editor" class="rich-editor product-detail-editor" contenteditable="true"
                                      data-placeholder="Dán nội dung từ ChatGPT, Word hoặc website vào đây. Editor sẽ giữ heading, bullet, bảng cơ bản."></div>
@@ -3216,7 +3227,9 @@
 
             event.preventDefault();
             document.execCommand('insertHTML', false, content);
-            updateBlogSeoChecklist();
+            if (typeof updateBlogSeoChecklist === 'function') {
+                updateBlogSeoChecklist();
+            }
         }
 
         function getBlogSeoIssues() {

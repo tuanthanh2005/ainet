@@ -257,6 +257,10 @@
 
         /* ================= RESPONSIVE ADJUSTMENTS ================= */
         @media (max-width: 991.98px) {
+            .admin-wrapper {
+                width: 100%;
+                overflow-x: hidden;
+            }
             .sidebar {
                 position: fixed;
                 top: 0;
@@ -271,6 +275,10 @@
             }
             .sidebar.show {
                 transform: translateX(0);
+            }
+            .main-content {
+                width: 100%;
+                overflow-x: hidden;
             }
             .topbar {
                 padding: 0 15px;
