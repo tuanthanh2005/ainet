@@ -3226,7 +3226,23 @@
             if (!content) return;
 
             event.preventDefault();
-            document.execCommand('insertHTML', false, content);
+
+            const editor = event.currentTarget;
+            const selection = window.getSelection();
+            const isAllSelected = selection.toString().trim() === editor.innerText.trim();
+            const isEmpty = editor.innerText.trim() === '';
+
+            if (isEmpty || isAllSelected) {
+                editor.innerHTML = content;
+                const range = document.createRange();
+                range.selectNodeContents(editor);
+                range.collapse(false);
+                selection.removeAllRanges();
+                selection.addRange(range);
+            } else {
+                document.execCommand('insertHTML', false, content);
+            }
+
             if (typeof updateBlogSeoChecklist === 'function') {
                 updateBlogSeoChecklist();
             }
