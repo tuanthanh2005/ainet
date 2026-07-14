@@ -793,6 +793,35 @@ class AdminController extends Controller {
         exit;
     }
 
+    public function adminViewLogs() {
+        error_reporting(E_ALL);
+        ini_set('display_errors', '1');
+
+        echo "<h1>PHP Error Logs (Admin only)</h1>";
+        
+        $logFiles = [
+            'Project Log (storage/logs/php_errors.log)' => APP_ROOT . '/storage/logs/php_errors.log',
+            'System Temp Log (aicualtoi_php_errors.log)' => rtrim(sys_get_temp_dir(), '/\\') . DIRECTORY_SEPARATOR . 'aicualtoi_php_errors.log',
+        ];
+
+        foreach ($logFiles as $name => $path) {
+            echo "<h3>$name: " . htmlspecialchars($path) . "</h3>";
+            if (is_file($path)) {
+                if (filesize($path) > 0) {
+                    $content = file_get_contents($path);
+                    $lines = explode("\n", $content);
+                    $lastLines = array_slice($lines, -100);
+                    echo "<pre style='background:#f4f4f4;padding:10px;border:1px solid #ccc;max-height:400px;overflow:auto;'>" . htmlspecialchars(implode("\n", $lastLines)) . "</pre>";
+                } else {
+                    echo "<p>Log file is empty.</p>";
+                }
+            } else {
+                echo "<p style='color:red;'>File does not exist or is not readable.</p>";
+            }
+        }
+        exit;
+    }
+
     public function adminSaveUser() {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             $this->jsonError('Method not allowed', 405);
