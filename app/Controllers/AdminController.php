@@ -632,14 +632,23 @@ class AdminController extends Controller {
 
             // Prepare attachments
             $attachments = [];
+            $tempFilesToClean = [];
             for ($i = 1; $i <= 2; $i++) {
                 $fileKey = "email_img" . $i;
                 if (isset($_FILES[$fileKey]) && $_FILES[$fileKey]['error'] === UPLOAD_ERR_OK) {
-                    $attachments[] = [
-                        'path' => $_FILES[$fileKey]['tmp_name'],
-                        'name' => $_FILES[$fileKey]['name'],
-                        'type' => $_FILES[$fileKey]['type']
-                    ];
+                    try {
+                        $stored = Upload::store($_FILES[$fileKey], 'email_attachments', Upload::IMAGE_MIMES);
+                        $absolutePath = Upload::publicDiskPath($stored['path']);
+                        
+                        $attachments[] = [
+                            'path' => $absolutePath,
+                            'name' => $_FILES[$fileKey]['name'],
+                            'type' => $_FILES[$fileKey]['type']
+                        ];
+                        $tempFilesToClean[] = $absolutePath;
+                    } catch (Throwable $e) {
+                        error_log("Failed to process attachment $fileKey: " . $e->getMessage());
+                    }
                 }
             }
 
@@ -663,7 +672,16 @@ class AdminController extends Controller {
             // Use the sender email specified in the form, fall back to setting's from email
             $fromEmail = $emailFrom !== '' ? $emailFrom : ($settings['smtp_from_email'] ?? $user);
 
-            if (!$mailer->send($fromEmail, $fromName, $toEmail, $emailSubject, $bodyHtml, $attachments)) {
+            $sendResult = $mailer->send($fromEmail, $fromName, $toEmail, $emailSubject, $bodyHtml, $attachments);
+
+            // Clean up temporary attachments
+            foreach ($tempFilesToClean as $file) {
+                if (is_file($file)) {
+                    @unlink($file);
+                }
+            }
+
+            if (!$sendResult) {
                 $errors = implode(', ', $mailer->getErrors());
                 $this->jsonSuccess([
                     'warning' => 'Đã lưu thông tin bàn giao nhưng gửi Email thất bại: ' . $errors
