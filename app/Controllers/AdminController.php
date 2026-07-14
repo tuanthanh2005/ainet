@@ -672,7 +672,7 @@ class AdminController extends Controller {
             // Use the sender email specified in the form, fall back to setting's from email
             $fromEmail = $emailFrom !== '' ? $emailFrom : ($settings['smtp_from_email'] ?? $user);
 
-            $sendResult = $mailer->send($fromEmail, $fromName, $toEmail, $emailSubject, $bodyHtml, $attachments);
+            $sendResult = $mailer->send($fromEmail, $fromName, $emailTo, $emailSubject, $bodyHtml, $attachments);
 
             // Clean up temporary attachments
             foreach ($tempFilesToClean as $file) {
