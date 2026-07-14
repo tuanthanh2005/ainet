@@ -82,6 +82,7 @@ require_once APP_ROOT . '/app/Core/Upload.php';
 require_once APP_ROOT . '/app/Core/IndexingService.php';
 require_once APP_ROOT . '/app/Core/TelegramService.php';
 require_once APP_ROOT . '/app/Core/GoogleAuth.php';
+require_once APP_ROOT . '/app/Core/SmtpMailer.php';
 
 // Load Models
 require_once APP_ROOT . '/app/Models/Product.php';

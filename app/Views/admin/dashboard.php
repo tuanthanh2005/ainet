@@ -1231,6 +1231,100 @@
                             </div>
                         </div>
                     </div>
+
+                    <!-- Email SMTP Settings -->
+                    <div class="row mt-4">
+                        <div class="col-12">
+                            <div class="card-custom p-4 mb-4" style="border: 2px solid #e0f2fe; background: linear-gradient(135deg, rgba(14,165,233,0.04) 0%, rgba(56,189,248,0.04) 100%);">
+                                <div class="d-flex align-items-center gap-3 mb-4">
+                                    <div style="width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,#0ea5e9,#38bdf8);display:flex;align-items:center;justify-content:center;">
+                                        <i class="fa-solid fa-envelope text-white fs-5"></i>
+                                    </div>
+                                    <div>
+                                        <h5 class="fw-bold mb-0">Cấu hình Email (SMTP)</h5>
+                                        <small class="text-muted">Cấu hình tài khoản SMTP để gửi KEY/Tài khoản tự động hoặc thủ công qua Email</small>
+                                    </div>
+                                </div>
+
+                                <div class="row g-3">
+                                    <div class="col-md-4">
+                                        <label class="form-label fw-semibold">SMTP Host</label>
+                                        <input type="text" class="form-control" id="st_smtp_host"
+                                            placeholder="smtp.hostinger.com"
+                                            value="<?php echo htmlspecialchars($settings['smtp_host'] ?? ''); ?>">
+                                    </div>
+                                    <div class="col-md-2">
+                                        <label class="form-label fw-semibold">SMTP Port</label>
+                                        <input type="number" class="form-control" id="st_smtp_port"
+                                            placeholder="465"
+                                            value="<?php echo htmlspecialchars($settings['smtp_port'] ?? ''); ?>">
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label class="form-label fw-semibold">Mã hóa (Encryption)</label>
+                                        <select class="form-select" id="st_smtp_secure">
+                                            <option value="ssl" <?= ($settings['smtp_secure'] ?? 'ssl') == 'ssl' ? 'selected' : '' ?>>SSL (Khuyên dùng cho 465)</option>
+                                            <option value="tls" <?= ($settings['smtp_secure'] ?? '') == 'tls' ? 'selected' : '' ?>>TLS (Khuyên dùng cho 587)</option>
+                                            <option value="none" <?= ($settings['smtp_secure'] ?? '') == 'none' ? 'selected' : '' ?>>Không mã hóa</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label class="form-label fw-semibold">Tên người gửi (From Name)</label>
+                                        <input type="text" class="form-control" id="st_smtp_from_name"
+                                            placeholder="AI CỦA TÔI"
+                                            value="<?php echo htmlspecialchars($settings['smtp_from_name'] ?? ''); ?>">
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="form-label fw-semibold">Tài khoản SMTP (Username)</label>
+                                        <input type="text" class="form-control" id="st_smtp_user"
+                                            placeholder="aicuatoi.net_no-reply@aicuatoi.net"
+                                            value="<?php echo htmlspecialchars($settings['smtp_user'] ?? ''); ?>">
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="form-label fw-semibold">Mật khẩu SMTP (Password)</label>
+                                        <div class="input-group">
+                                            <input type="password" class="form-control border-end-0" id="st_smtp_pass"
+                                                placeholder="••••••••"
+                                                value="<?php echo htmlspecialchars($settings['smtp_pass'] ?? ''); ?>">
+                                            <button class="btn btn-outline-secondary" type="button" onclick="this.previousElementSibling.type = this.previousElementSibling.type === 'password' ? 'text' : 'password'">
+                                                <i class="fa-regular fa-eye"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="form-label fw-semibold">Email gửi (From Email)</label>
+                                        <input type="email" class="form-control" id="st_smtp_from_email"
+                                            placeholder="aicuatoi.net_no-reply@aicuatoi.net"
+                                            value="<?php echo htmlspecialchars($settings['smtp_from_email'] ?? ''); ?>">
+                                    </div>
+                                    
+                                    <hr class="my-4">
+                                    <h6 class="fw-bold mb-2">Mẫu Email bàn giao mặc định</h6>
+                                    
+                                    <div class="col-md-12">
+                                        <label class="form-label fw-semibold">Tiêu đề Email mặc định</label>
+                                        <input type="text" class="form-control" id="st_smtp_default_subject"
+                                            placeholder="Bàn giao tài khoản / Key dịch vụ đơn hàng #{order_id}"
+                                            value="<?php echo htmlspecialchars($settings['smtp_default_subject'] ?? 'Bàn giao tài khoản / Key dịch vụ đơn hàng #{order_id}'); ?>">
+                                    </div>
+                                    <div class="col-md-12">
+                                        <label class="form-label fw-semibold">Nội dung Email mặc định</label>
+                                        <textarea class="form-control" id="st_smtp_default_body" rows="6" 
+                                            placeholder="Chào bạn, đây là thông tin tài khoản / key cho đơn hàng #{order_id} của bạn:&#10;&#10;{delivered_accounts}&#10;&#10;Cảm ơn bạn đã mua hàng!"><?php echo htmlspecialchars($settings['smtp_default_body'] ?? "Chào bạn,\n\nĐây là thông tin tài khoản / key kích hoạt cho đơn hàng #{order_id} ({product_name}) của bạn:\n\n{delivered_accounts}\n\nCảm ơn bạn đã tin dùng dịch vụ của chúng tôi!\nNếu có bất kỳ câu hỏi nào, vui lòng liên hệ hỗ trợ.\nTrân trọng,\nBan quản trị."); ?></textarea>
+                                        <small class="text-muted d-block mt-1">Sử dụng các biến sau để tự động điền: <code>#{order_id}</code> (Mã đơn), <code>{product_name}</code> (Tên sản phẩm), <code>{delivered_accounts}</code> (Tài khoản bàn giao nhập ở trên).</small>
+                                    </div>
+                                </div>
+
+                                <div class="d-flex gap-2 mt-4">
+                                    <button class="btn btn-black px-4" onclick="saveSmtpSettings()">
+                                        <i class="fa-solid fa-floppy-disk me-2"></i>Lưu cấu hình Email
+                                    </button>
+                                    <button class="btn btn-outline-primary px-4" id="btnSmtpTest" onclick="testSmtp()">
+                                        <i class="fa-solid fa-paper-plane me-2"></i>Gửi thử Email
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <div id="view-dashboard" class="view-section">
@@ -2771,11 +2865,32 @@
             });
             formData.append('social_links_json', JSON.stringify(socialLinks));
 
-            // Telegram Bot settings are also included in main settings
+            // Telegram Bot settings
             const botToken = document.getElementById('st_telegram_bot_token').value;
             const chatId = document.getElementById('st_telegram_chat_id').value;
             formData.append('telegram_bot_token', botToken);
             formData.append('telegram_chat_id', chatId);
+
+            // SMTP Settings
+            const smtpHost = document.getElementById('st_smtp_host').value;
+            const smtpPort = document.getElementById('st_smtp_port').value;
+            const smtpSecure = document.getElementById('st_smtp_secure').value;
+            const smtpFromName = document.getElementById('st_smtp_from_name').value;
+            const smtpUser = document.getElementById('st_smtp_user').value;
+            const smtpPass = document.getElementById('st_smtp_pass').value;
+            const smtpFromEmail = document.getElementById('st_smtp_from_email').value;
+            const smtpDefaultSubject = document.getElementById('st_smtp_default_subject').value;
+            const smtpDefaultBody = document.getElementById('st_smtp_default_body').value;
+
+            formData.append('smtp_host', smtpHost);
+            formData.append('smtp_port', smtpPort);
+            formData.append('smtp_secure', smtpSecure);
+            formData.append('smtp_from_name', smtpFromName);
+            formData.append('smtp_user', smtpUser);
+            formData.append('smtp_pass', smtpPass);
+            formData.append('smtp_from_email', smtpFromEmail);
+            formData.append('smtp_default_subject', smtpDefaultSubject);
+            formData.append('smtp_default_body', smtpDefaultBody);
 
             fetch('?action=adminSaveSettings', {
                 method: 'POST',
@@ -2788,6 +2903,15 @@
                     if (data.success) {
                         APP_STATE.settings['telegram_bot_token'] = botToken;
                         APP_STATE.settings['telegram_chat_id'] = chatId;
+                        APP_STATE.settings['smtp_host'] = smtpHost;
+                        APP_STATE.settings['smtp_port'] = smtpPort;
+                        APP_STATE.settings['smtp_secure'] = smtpSecure;
+                        APP_STATE.settings['smtp_from_name'] = smtpFromName;
+                        APP_STATE.settings['smtp_user'] = smtpUser;
+                        APP_STATE.settings['smtp_pass'] = smtpPass;
+                        APP_STATE.settings['smtp_from_email'] = smtpFromEmail;
+                        APP_STATE.settings['smtp_default_subject'] = smtpDefaultSubject;
+                        APP_STATE.settings['smtp_default_body'] = smtpDefaultBody;
                         AppNotify.success('Cấu hình website đã được cập nhật.', 'Lưu thành công');
                     } else {
                         AppNotify.error(data.message || 'Không thể lưu cấu hình.', 'Lỗi lưu');
@@ -2807,7 +2931,9 @@
              'sepay_active','sepay_mode','sepay_token','sepay_merchant_id','sepay_api_key',
              'bank_id','bank_account','bank_name','about_title','about_desc','about_image',
              'about_stat_value','about_stat_label','about_features','contact_title','contact_desc',
-             'contact_methods','social_links_json','demo_payment_active'].forEach(k => {
+             'contact_methods','social_links_json','demo_payment_active',
+             'smtp_host','smtp_port','smtp_secure','smtp_from_name','smtp_user','smtp_pass',
+             'smtp_from_email','smtp_default_subject','smtp_default_body'].forEach(k => {
                 const el = document.getElementById('st_' + k);
                 if (el) fd.append(k, el.type === 'checkbox' ? (el.checked ? '1' : '0') : el.value);
                 else fd.append(k, APP_STATE.settings[k] || '');
@@ -2824,6 +2950,113 @@
                     AppNotify.success('Cấu hình Telegram đã được lưu.', 'Lưu thành công');
                 } else {
                     AppNotify.error(d.message || 'Không thể lưu.', 'Lỗi');
+                }
+            });
+        }
+
+        function saveSmtpSettings() {
+            const fd = new FormData();
+            const smtpHost = document.getElementById('st_smtp_host').value;
+            const smtpPort = document.getElementById('st_smtp_port').value;
+            const smtpSecure = document.getElementById('st_smtp_secure').value;
+            const smtpFromName = document.getElementById('st_smtp_from_name').value;
+            const smtpUser = document.getElementById('st_smtp_user').value;
+            const smtpPass = document.getElementById('st_smtp_pass').value;
+            const smtpFromEmail = document.getElementById('st_smtp_from_email').value;
+            const smtpDefaultSubject = document.getElementById('st_smtp_default_subject').value;
+            const smtpDefaultBody = document.getElementById('st_smtp_default_body').value;
+
+            fd.append('smtp_host', smtpHost);
+            fd.append('smtp_port', smtpPort);
+            fd.append('smtp_secure', smtpSecure);
+            fd.append('smtp_from_name', smtpFromName);
+            fd.append('smtp_user', smtpUser);
+            fd.append('smtp_pass', smtpPass);
+            fd.append('smtp_from_email', smtpFromEmail);
+            fd.append('smtp_default_subject', smtpDefaultSubject);
+            fd.append('smtp_default_body', smtpDefaultBody);
+            
+            // Send existing values for other fields
+            ['bannerText','zalo','footerDesc','heroDesc','socialLink','copyright','terms_of_service','privacy_policy',
+             'sepay_active','sepay_mode','sepay_token','sepay_merchant_id','sepay_api_key',
+             'bank_id','bank_account','bank_name','about_title','about_desc','about_image',
+             'about_stat_value','about_stat_label','about_features','contact_title','contact_desc',
+             'contact_methods','social_links_json','demo_payment_active',
+             'telegram_bot_token','telegram_chat_id'].forEach(k => {
+                const el = document.getElementById('st_' + k);
+                if (el) fd.append(k, el.type === 'checkbox' ? (el.checked ? '1' : '0') : el.value);
+                else fd.append(k, APP_STATE.settings[k] || '');
+            });
+            fd.append('csrf_token', APP_STATE.csrfToken);
+            
+            fetch('?action=adminSaveSettings', {
+                method: 'POST',
+                headers: { 'X-Requested-With': 'XMLHttpRequest', 'X-CSRF-Token': APP_STATE.csrfToken },
+                body: fd, credentials: 'same-origin'
+            }).then(r => r.json()).then(d => {
+                if (d.success) {
+                    APP_STATE.settings['smtp_host'] = smtpHost;
+                    APP_STATE.settings['smtp_port'] = smtpPort;
+                    APP_STATE.settings['smtp_secure'] = smtpSecure;
+                    APP_STATE.settings['smtp_from_name'] = smtpFromName;
+                    APP_STATE.settings['smtp_user'] = smtpUser;
+                    APP_STATE.settings['smtp_pass'] = smtpPass;
+                    APP_STATE.settings['smtp_from_email'] = smtpFromEmail;
+                    APP_STATE.settings['smtp_default_subject'] = smtpDefaultSubject;
+                    APP_STATE.settings['smtp_default_body'] = smtpDefaultBody;
+                    AppNotify.success('Cấu hình Email SMTP đã được lưu.', 'Lưu thành công');
+                } else {
+                    AppNotify.error(d.message || 'Không thể lưu.', 'Lỗi');
+                }
+            });
+        }
+
+        function testSmtp() {
+            Swal.fire({
+                title: 'Gửi Email thử nghiệm',
+                text: 'Nhập địa chỉ email nhận thư thử nghiệm:',
+                input: 'email',
+                inputPlaceholder: 'email_cua_ban@example.com',
+                showCancelButton: true,
+                confirmButtonText: 'Gửi thử',
+                cancelButtonText: 'Hủy',
+                confirmButtonColor: '#111',
+                preConfirm: (email) => {
+                    if (!email) {
+                        Swal.showValidationMessage('Vui lòng nhập địa chỉ email hợp lệ');
+                    }
+                    return email;
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    const email = result.value;
+                    const btn = document.getElementById('btnSmtpTest');
+                    btn.disabled = true;
+                    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Đang gửi...';
+
+                    const fd = new FormData();
+                    fd.append('test_email', email);
+                    fd.append('csrf_token', APP_STATE.csrfToken);
+
+                    fetch('?action=adminSmtpTest', {
+                        method: 'POST',
+                        headers: { 'X-Requested-With': 'XMLHttpRequest', 'X-CSRF-Token': APP_STATE.csrfToken },
+                        body: fd,
+                        credentials: 'same-origin'
+                    })
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.success) {
+                            AppNotify.success(data.message || 'Đã gửi email thử nghiệm thành công! Vui lòng kiểm tra hộp thư.');
+                        } else {
+                            AppNotify.error(data.message || 'Lỗi gửi email thử nghiệm.');
+                        }
+                    })
+                    .catch(() => AppNotify.error('Không thể kết nối server.'))
+                    .finally(() => {
+                        btn.disabled = false;
+                        btn.innerHTML = '<i class="fa-solid fa-paper-plane me-2"></i>Gửi thử Email';
+                    });
                 }
             });
         }
@@ -3685,9 +3918,58 @@
         function getManualDeliverModal() { return manualDeliverModal ||= new bootstrap.Modal(document.getElementById('manualDeliverModal')); }
 
         function openManualDeliver(orderId) {
+            const order = (APP_STATE.orders || []).find(o => o.id == orderId);
+            const customerEmail = order ? order.customer_email : '';
+            const productName = order ? order.product_name : '';
+            
             document.getElementById('md_order_id').value = orderId;
             document.getElementById('md_lines').value = '';
+            
+            // Prefill email details
+            document.getElementById('md_email_from').value = (APP_STATE.settings && APP_STATE.settings['smtp_from_email']) || '';
+            document.getElementById('md_email_to').value = customerEmail;
+            
+            // Generate subject & body using templates from settings
+            let subjectTpl = (APP_STATE.settings && APP_STATE.settings['smtp_default_subject']) || 'Bàn giao tài khoản / Key dịch vụ đơn hàng #{order_id}';
+            let bodyTpl = (APP_STATE.settings && APP_STATE.settings['smtp_default_body']) || "Chào bạn,\n\nĐây là thông tin tài khoản / key kích hoạt cho đơn hàng #{order_id} ({product_name}) của bạn:\n\n{delivered_accounts}\n\nCảm ơn bạn đã tin dùng dịch vụ của chúng tôi!\nNếu có bất kỳ câu hỏi nào, vui lòng liên hệ hỗ trợ.\nTrân trọng,\nBan quản trị.";
+            
+            subjectTpl = subjectTpl.replace(/#{order_id}/g, orderId).replace(/{product_name}/g, productName);
+            document.getElementById('md_email_subject').value = subjectTpl;
+            
+            const updateEmailBody = () => {
+                const lines = document.getElementById('md_lines').value;
+                let currentBody = bodyTpl.replace(/#{order_id}/g, orderId)
+                                         .replace(/{product_name}/g, productName)
+                                         .replace(/{delivered_accounts}/g, lines || '(Chưa nhập tài khoản)');
+                document.getElementById('md_email_body').value = currentBody;
+            };
+            
+            document.getElementById('md_lines').oninput = updateEmailBody;
+            updateEmailBody(); // Initial update
+            
+            // Reset modal states
+            document.getElementById('md_send_email').checked = false;
+            document.getElementById('md_email_section').style.display = 'none';
+            document.querySelector('#manualDeliverModal .modal-dialog').classList.remove('modal-lg');
+            
+            document.getElementById('md_email_img1').value = '';
+            document.getElementById('md_email_img2').value = '';
+            
             getManualDeliverModal().show();
+        }
+
+        function toggleMdEmailSection() {
+            const sendEmail = document.getElementById('md_send_email').checked;
+            const emailSection = document.getElementById('md_email_section');
+            const modalDialog = document.querySelector('#manualDeliverModal .modal-dialog');
+            
+            if (sendEmail) {
+                emailSection.style.display = 'block';
+                modalDialog.classList.add('modal-lg');
+            } else {
+                emailSection.style.display = 'none';
+                modalDialog.classList.remove('modal-lg');
+            }
         }
 
         function submitManualDeliver() {
@@ -3698,10 +3980,31 @@
                 return;
             }
 
+            const sendEmail = document.getElementById('md_send_email').checked ? '1' : '0';
+
             const fd = new FormData();
             fd.append('id', orderId);
             fd.append('lines', lines);
+            fd.append('send_email', sendEmail);
             fd.append('csrf_token', APP_STATE.csrfToken);
+
+            if (sendEmail === '1') {
+                fd.append('email_from', document.getElementById('md_email_from').value);
+                fd.append('email_to', document.getElementById('md_email_to').value);
+                fd.append('email_subject', document.getElementById('md_email_subject').value);
+                fd.append('email_body', document.getElementById('md_email_body').value);
+                
+                const img1 = document.getElementById('md_email_img1').files[0];
+                if (img1) fd.append('email_img1', img1);
+                
+                const img2 = document.getElementById('md_email_img2').files[0];
+                if (img2) fd.append('email_img2', img2);
+            }
+
+            const btn = document.querySelector('#manualDeliverModal .btn-black');
+            const originalText = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Đang xử lý...';
 
             fetch('?action=adminUpdateOrderDelivery', {
                 method: 'POST',
@@ -3712,14 +4015,31 @@
             .then(res => res.json())
             .then(data => {
                 if (data.success) {
-                    AppNotify.success('Đã giao hàng và chuyển trạng thái đơn hàng sang Thành công!');
-                    getManualDeliverModal().hide();
-                    location.reload();
+                    if (data.warning) {
+                        Swal.fire({
+                            title: 'Bàn giao thành công',
+                            text: data.warning,
+                            icon: 'warning',
+                            confirmButtonColor: '#111',
+                            confirmButtonText: 'Đóng'
+                        }).then(() => {
+                            getManualDeliverModal().hide();
+                            location.reload();
+                        });
+                    } else {
+                        AppNotify.success('Đã giao hàng và chuyển trạng thái đơn hàng sang Thành công!');
+                        getManualDeliverModal().hide();
+                        location.reload();
+                    }
                 } else {
                     AppNotify.error(data.message || 'Lỗi bàn giao');
                 }
             })
-            .catch(() => AppNotify.error('Không thể kết nối server.'));
+            .catch(() => AppNotify.error('Không thể kết nối server.'))
+            .finally(() => {
+                btn.disabled = false;
+                btn.innerHTML = originalText;
+            });
         }
 
         function updateOrderStatus(orderId, status) {
@@ -4045,8 +4365,46 @@
                     <input type="hidden" id="md_order_id">
                     <div class="mb-3">
                         <label class="form-label fw-bold small">Nhập tài khoản bàn giao (mỗi dòng 1 tài khoản)</label>
-                        <textarea class="form-control" id="md_lines" rows="6" placeholder="account1@gmail.com|password1&#10;account2@gmail.com|password2"></textarea>
-                        <small class="text-muted d-block mt-1">Khi bấm gửi, hệ thống sẽ lưu thông tin bàn giao vào đơn hàng và cập nhật trạng thái đơn thành <strong>Thành công (Completed)</strong>.</small>
+                        <textarea class="form-control" id="md_lines" rows="4" placeholder="account1@gmail.com|password1&#10;account2@gmail.com|password2"></textarea>
+                        <small class="text-muted d-block mt-1">Hệ thống sẽ lưu thông tin bàn giao vào đơn hàng và cập nhật trạng thái đơn thành <strong>Thành công (Completed)</strong>.</small>
+                    </div>
+
+                    <div class="form-check form-switch mb-3">
+                        <input class="form-check-input" type="checkbox" id="md_send_email" onchange="toggleMdEmailSection()">
+                        <label class="form-check-label fw-bold small text-primary" for="md_send_email">
+                            <i class="fa-solid fa-envelope me-1"></i> Gửi KEY / Tài Khoản qua Email
+                        </label>
+                    </div>
+
+                    <div id="md_email_section" style="display: none;" class="p-3 bg-light rounded-3 border mb-3">
+                        <div class="row g-2">
+                            <div class="col-md-6 mb-2">
+                                <label class="form-label fw-bold small">Từ (From Email)</label>
+                                <input type="email" class="form-control form-control-sm" id="md_email_from" placeholder="no-reply@aicuatoi.net">
+                            </div>
+                            <div class="col-md-6 mb-2">
+                                <label class="form-label fw-bold small">Đến (To Email)</label>
+                                <input type="email" class="form-control form-control-sm" id="md_email_to" placeholder="khachhang@gmail.com">
+                            </div>
+                        </div>
+                        <div class="mb-2">
+                            <label class="form-label fw-bold small">Tiêu đề (Subject)</label>
+                            <input type="text" class="form-control form-control-sm" id="md_email_subject">
+                        </div>
+                        <div class="mb-2">
+                            <label class="form-label fw-bold small">Nội dung Email (Sửa nếu cần)</label>
+                            <textarea class="form-control form-control-sm" id="md_email_body" rows="6"></textarea>
+                        </div>
+                        <div class="row g-2 mt-2">
+                            <div class="col-6">
+                                <label class="form-label fw-bold small"><i class="fa-solid fa-image text-muted me-1"></i>Hình ảnh 1 (Đính kèm)</label>
+                                <input type="file" class="form-control form-control-sm" id="md_email_img1" accept="image/*">
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label fw-bold small"><i class="fa-solid fa-image text-muted me-1"></i>Hình ảnh 2 (Đính kèm)</label>
+                                <input type="file" class="form-control form-control-sm" id="md_email_img2" accept="image/*">
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <div class="modal-footer border-top p-4">

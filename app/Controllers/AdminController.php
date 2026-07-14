@@ -110,6 +110,9 @@ class AdminController extends Controller {
             'contact_methods', 'social_links_json', 'terms_of_service', 'privacy_policy',
             'demo_payment_active',
             'telegram_bot_token', 'telegram_chat_id',
+            'smtp_host', 'smtp_port', 'smtp_secure', 'smtp_from_name',
+            'smtp_user', 'smtp_pass', 'smtp_from_email',
+            'smtp_default_subject', 'smtp_default_body',
         ];
 
         $data = [];
@@ -599,7 +602,114 @@ class AdminController extends Controller {
         Order::setDelivered($id, $items);
         Order::updateStatus($id, 'completed');
 
+        // Check if email sending is requested
+        $sendEmail = ($_POST['send_email'] ?? '0') === '1';
+        if ($sendEmail) {
+            $emailFrom = trim($_POST['email_from'] ?? '');
+            $emailTo = trim($_POST['email_to'] ?? '');
+            $emailSubject = trim($_POST['email_subject'] ?? '');
+            $emailBody = trim($_POST['email_body'] ?? '');
+
+            if ($emailTo === '' || !filter_var($emailTo, FILTER_VALIDATE_EMAIL)) {
+                $this->jsonError('Email nhận không hợp lệ.');
+            }
+
+            // Retrieve SMTP settings
+            $settings = Setting::getAll();
+            $host = $settings['smtp_host'] ?? '';
+            $port = (int)($settings['smtp_port'] ?? 465);
+            $secure = $settings['smtp_secure'] ?? 'ssl';
+            $user = $settings['smtp_user'] ?? '';
+            $pass = $settings['smtp_pass'] ?? '';
+            $fromName = $settings['smtp_from_name'] ?? 'AI CỦA TÔI';
+
+            if (!$host || !$user || !$pass) {
+                $this->jsonSuccess([
+                    'warning' => 'Đã lưu thông tin bàn giao nhưng không thể gửi Email do cấu hình SMTP chưa hoàn tất.'
+                ]);
+                return;
+            }
+
+            // Prepare attachments
+            $attachments = [];
+            for ($i = 1; $i <= 2; $i++) {
+                $fileKey = "email_img" . $i;
+                if (isset($_FILES[$fileKey]) && $_FILES[$fileKey]['error'] === UPLOAD_ERR_OK) {
+                    $attachments[] = [
+                        'path' => $_FILES[$fileKey]['tmp_name'],
+                        'name' => $_FILES[$fileKey]['name'],
+                        'type' => $_FILES[$fileKey]['type']
+                    ];
+                }
+            }
+
+            // Prepare body HTML - convert text newlines to HTML line breaks
+            $bodyHtml = nl2br(htmlspecialchars($emailBody));
+            $bodyHtml = "
+                <div style='font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e5e7eb; border-radius: 12px;'>
+                    <h2 style='color: #111; border-bottom: 2px solid #111; padding-bottom: 10px; margin-top: 0;'>BÀN GIAO ĐƠN HÀNG</h2>
+                    <div style='background-color: #f9fafb; padding: 15px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #10b981;'>
+                        " . $bodyHtml . "
+                    </div>
+                    <p style='font-size: 12px; color: #666; text-align: center; margin-top: 30px; border-top: 1px solid #e5e7eb; padding-top: 15px;'>
+                        Thư này được gửi tự động từ hệ thống " . SITENAME . ". Vui lòng không trả lời trực tiếp email này.
+                    </p>
+                </div>
+            ";
+
+            require_once APP_ROOT . '/app/Core/SmtpMailer.php';
+            $mailer = new SmtpMailer($host, $port, $secure, $user, $pass);
+
+            // Use the sender email specified in the form, fall back to setting's from email
+            $fromEmail = $emailFrom !== '' ? $emailFrom : ($settings['smtp_from_email'] ?? $user);
+
+            if (!$mailer->send($fromEmail, $fromName, $toEmail, $emailSubject, $bodyHtml, $attachments)) {
+                $errors = implode(', ', $mailer->getErrors());
+                $this->jsonSuccess([
+                    'warning' => 'Đã lưu thông tin bàn giao nhưng gửi Email thất bại: ' . $errors
+                ]);
+                return;
+            }
+        }
+
         $this->jsonSuccess();
+    }
+
+    public function adminSmtpTest() {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            $this->jsonError('Method not allowed', 405);
+        }
+
+        $toEmail = trim($_POST['test_email'] ?? '');
+        if (!filter_var($toEmail, FILTER_VALIDATE_EMAIL)) {
+            $this->jsonError('Địa chỉ email không hợp lệ.');
+        }
+
+        $settings = Setting::getAll();
+        $host = $settings['smtp_host'] ?? '';
+        $port = (int)($settings['smtp_port'] ?? 465);
+        $secure = $settings['smtp_secure'] ?? 'ssl';
+        $user = $settings['smtp_user'] ?? '';
+        $pass = $settings['smtp_pass'] ?? '';
+        $fromEmail = $settings['smtp_from_email'] ?? '';
+        $fromName = $settings['smtp_from_name'] ?? 'AI CỦA TÔI';
+
+        if (!$host || !$user || !$pass || !$fromEmail) {
+            $this->jsonError('Vui lòng lưu đầy đủ cấu hình SMTP trước khi test.');
+        }
+
+        require_once APP_ROOT . '/app/Core/SmtpMailer.php';
+        $mailer = new SmtpMailer($host, $port, $secure, $user, $pass);
+        
+        $subject = "Kiểm tra kết nối SMTP - " . SITENAME;
+        $body = "<h3>Kết nối SMTP hoạt động tốt!</h3><p>Thư này được gửi lúc " . date('Y-m-d H:i:s') . " để kiểm tra cấu hình email của hệ thống.</p>";
+
+        if ($mailer->send($fromEmail, $fromName, $toEmail, $subject, $body)) {
+            $this->jsonSuccess(['message' => 'Email thử nghiệm đã được gửi thành công!']);
+        } else {
+            $errors = implode(', ', $mailer->getErrors());
+            $this->jsonError('Gửi email thất bại: ' . $errors);
+        }
     }
 
     public function adminSaveUser() {
