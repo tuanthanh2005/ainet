@@ -112,7 +112,7 @@ $variantIdx = isset($_GET['variant_idx']) ? (int)$_GET['variant_idx'] : 0;
                     </div>
 
                     <div class="col-lg-4">
-                        <div class="card border-0 shadow-sm rounded-4 p-4 sticky-top" style="top: 2rem;">
+                        <div class="card border-0 shadow-sm rounded-4 p-4 sticky-top checkout-order-summary">
                             <h5 class="fw-bold mb-4"><i class="fa-solid fa-cart-shopping me-2 text-primary"></i> Đơn Hàng</h5>
                             <div class="d-flex align-items-center mb-3 pb-3 border-bottom">
                                 <img src="<?= htmlspecialchars(image_url($product['image'] ?? '')) ?>" class="rounded-3 border me-3" loading="lazy" decoding="async" style="width: 55px; height: 55px; object-fit: cover;">
@@ -185,6 +185,21 @@ $variantIdx = isset($_GET['variant_idx']) ? (int)$_GET['variant_idx'] : 0;
 .smaller { font-size: 0.75rem; }
 .text-truncate-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 
+/* Keep the sticky order summary below the sticky site header. */
+.checkout-order-summary {
+    top: 92px;
+    z-index: 10;
+}
+
+/* Bootstrap switches col-lg-* to a single column below 992px. */
+@media (max-width: 991.98px) {
+    .checkout-order-summary {
+        position: static !important;
+        top: auto !important;
+        margin-top: 0;
+    }
+}
+
 /* Mobile Optimization */
 @media (max-width: 768px) {
     .stepper-item { width: 70px; }
@@ -193,7 +208,7 @@ $variantIdx = isset($_GET['variant_idx']) ? (int)$_GET['variant_idx'] : 0;
     .stepper-line { top: 16px; }
     .card { padding: 20px !important; }
     .btn-place-order { width: 100%; padding: 16px !important; font-size: 1rem; }
-    .sticky-top { position: static !important; }
+    .checkout-order-summary { position: static !important; }
 }
 </style>
 
