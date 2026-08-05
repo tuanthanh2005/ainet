@@ -1,6 +1,25 @@
 <?php
 
 class Review {
+    /**
+     * Keep review reads safe on deployments where migrations have not run yet.
+     * This method was called by hasReviewed() but was previously missing,
+     * causing the payment-success page to stop rendering after the header.
+     */
+    private static function ensureReviewTable(PDO $db): void {
+        $db->exec("CREATE TABLE IF NOT EXISTS reviews (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            order_id VARCHAR(50) NOT NULL,
+            product_id VARCHAR(100) NOT NULL,
+            user_id INT NOT NULL,
+            rating INT NOT NULL DEFAULT 5,
+            content TEXT NULL,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            INDEX idx_reviews_product (product_id),
+            INDEX idx_reviews_order (order_id)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+    }
+
     public static function create(string $orderId, string $productId, int $userId, int $rating, string $content): bool {
         $db = Database::getInstance();
         

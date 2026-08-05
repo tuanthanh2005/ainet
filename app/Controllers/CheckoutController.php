@@ -137,6 +137,24 @@ class CheckoutController extends Controller {
     public function success() {
         $orderId = $_GET['id'] ?? '';
         $order = Order::getById($orderId);
+
+        if (!$order) {
+            $_SESSION['flash_error'] = 'Không tìm thấy đơn hàng.';
+            header('Location: ' . url('index.php?action=orderHistory'));
+            exit;
+        }
+
+        if (($order['customer_email'] ?? '') !== ($_SESSION['user']['email'] ?? '_')
+            && ($_SESSION['user']['role'] ?? '') !== 'admin') {
+            http_response_code(403);
+            die('Bạn không có quyền xem đơn hàng này.');
+        }
+
+        if (!in_array($order['status'] ?? '', ['completed', 'processing'], true)) {
+            header('Location: ' . url('index.php?action=payment&id=' . urlencode($orderId)));
+            exit;
+        }
+
         $this->view('layout', [
             'view' => 'checkout/payment',
             'order' => $order, 
