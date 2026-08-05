@@ -78,6 +78,10 @@
         }
         echo '<div class="row g-4">';
         foreach ($productList as $index => $product):
+            $cardVariantIdx = Product::firstAvailableVariantIndex($product);
+            $cardAvailable = $cardVariantIdx !== null;
+            $cardVariantIdx = $cardVariantIdx ?? 0;
+            $cardOption = $product['options'][$cardVariantIdx] ?? [];
         ?>
         <div class="col-6 col-md-4 col-lg-3 product-item" data-category="<?= htmlspecialchars($product['category_slug'] ?? '') ?>">
             <div class="card product-card position-relative h-100" data-product-id="<?= htmlspecialchars($product['id'] ?? '') ?>">
@@ -117,8 +121,8 @@
                     <?php endif; ?>
                     <div class="mt-auto">
                         <?php
-                            $cardPrice = (float) ($product['options'][0]['price'] ?? $product['price'] ?? 0);
-                            $variantOrig = (float) ($product['options'][0]['original_price'] ?? 0);
+                            $cardPrice = (float) ($cardOption['price'] ?? $product['price'] ?? 0);
+                            $variantOrig = (float) ($cardOption['original_price'] ?? 0);
                             $productOrig = (float) ($product['original_price'] ?? 0);
                             $cardOrig = $variantOrig > $cardPrice ? $variantOrig : $productOrig;
                             $cardHasDiscount = $cardOrig > $cardPrice && $cardPrice > 0;
@@ -134,8 +138,13 @@
                             <p class="product-price mb-3"><?= number_format($cardPrice, 0, ',', '.') ?>đ</p>
                         <?php endif; ?>
                         <div class="product-actions position-relative" style="z-index: 2;">
-                            <a href="<?= url('index.php?action=checkoutPage&product_id=' . urlencode($product['id']) . '&variant_idx=0') ?>" class="btn btn-buy shadow-sm" data-auth-required="true">Mua ngay</a>
-                            <a href="<?= url('index.php?action=addToCart&id=' . urlencode($product['id'])) ?>" class="btn btn-cart-icon shadow-sm" title="Thêm"><i class="fa-solid fa-plus"></i></a>
+                            <?php if ($cardAvailable): ?>
+                                <a href="<?= url('index.php?action=checkoutPage&product_id=' . urlencode($product['id']) . '&variant_idx=' . $cardVariantIdx) ?>" class="btn btn-buy shadow-sm" data-auth-required="true">Mua ngay</a>
+                                <a href="<?= url('index.php?action=addToCart&id=' . urlencode($product['id']) . '&variant_idx=' . $cardVariantIdx) ?>" class="btn btn-cart-icon shadow-sm" title="Thêm"><i class="fa-solid fa-plus"></i></a>
+                            <?php else: ?>
+                                <button type="button" class="btn btn-secondary shadow-sm flex-grow-1" disabled>Hết hàng</button>
+                                <button type="button" class="btn btn-cart-icon shadow-sm" disabled aria-label="Hết hàng"><i class="fa-solid fa-ban"></i></button>
+                            <?php endif; ?>
                         </div>
                     </div>
                 </div>
@@ -458,7 +467,12 @@
     </div>
 
     <div class="row g-4" id="product-list" data-page-size="12">
-        <?php foreach ($products as $index => $product): ?>
+        <?php foreach ($products as $index => $product):
+            $cardVariantIdx = Product::firstAvailableVariantIndex($product);
+            $cardAvailable = $cardVariantIdx !== null;
+            $cardVariantIdx = $cardVariantIdx ?? 0;
+            $cardOption = $product['options'][$cardVariantIdx] ?? [];
+        ?>
             <div class="col-6 col-md-4 col-lg-3 product-item"
                  data-category="<?= htmlspecialchars($product['category_slug'] ?? '') ?>">
                 <div class="card product-card position-relative h-100" data-product-id="<?= htmlspecialchars($product['id'] ?? '') ?>">
@@ -515,8 +529,8 @@
                         <?php endif; ?>
                         <div class="mt-auto">
                             <?php
-                                $cardPrice = (float) ($product['options'][0]['price'] ?? $product['price'] ?? 0);
-                                $variantOrig = (float) ($product['options'][0]['original_price'] ?? 0);
+                                $cardPrice = (float) ($cardOption['price'] ?? $product['price'] ?? 0);
+                                $variantOrig = (float) ($cardOption['original_price'] ?? 0);
                                 $productOrig = (float) ($product['original_price'] ?? 0);
                                 $cardOrig = $variantOrig > $cardPrice ? $variantOrig : $productOrig;
                                 $cardHasDiscount = $cardOrig > $cardPrice && $cardPrice > 0;
@@ -534,12 +548,15 @@
                                 <p class="product-price mb-3"><?= number_format($cardPrice, 0, ',', '.') ?>đ</p>
                             <?php endif; ?>
                             <div class="product-actions position-relative" style="z-index: 2;">
-                                <a href="<?= url('index.php?action=checkoutPage&product_id=' . urlencode($product['id']) . '&variant_idx=0') ?>" 
-                                   class="btn btn-buy shadow-sm" data-auth-required="true">Mua ngay</a>
-                                <a href="<?= url('index.php?action=addToCart&id=' . urlencode($product['id'])) ?>" 
-                                   class="btn btn-cart-icon shadow-sm" title="Thêm">
-                                    <i class="fa-solid fa-plus"></i>
-                                </a>
+                                <?php if ($cardAvailable): ?>
+                                    <a href="<?= url('index.php?action=checkoutPage&product_id=' . urlencode($product['id']) . '&variant_idx=' . $cardVariantIdx) ?>"
+                                       class="btn btn-buy shadow-sm" data-auth-required="true">Mua ngay</a>
+                                    <a href="<?= url('index.php?action=addToCart&id=' . urlencode($product['id']) . '&variant_idx=' . $cardVariantIdx) ?>"
+                                       class="btn btn-cart-icon shadow-sm" title="Thêm"><i class="fa-solid fa-plus"></i></a>
+                                <?php else: ?>
+                                    <button type="button" class="btn btn-secondary shadow-sm flex-grow-1" disabled>Hết hàng</button>
+                                    <button type="button" class="btn btn-cart-icon shadow-sm" disabled aria-label="Hết hàng"><i class="fa-solid fa-ban"></i></button>
+                                <?php endif; ?>
                             </div>
                         </div>
                     </div>

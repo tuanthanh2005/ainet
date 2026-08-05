@@ -869,6 +869,21 @@ class HomeController extends Controller {
             exit;
         }
 
+        $existingQuantity = 0;
+        foreach (($_SESSION['cart'] ?? []) as $existingItem) {
+            if (($existingItem['id'] ?? '') === $productId
+                && (int) ($existingItem['variant_idx'] ?? 0) === $variantIdx) {
+                $existingQuantity = (int) ($existingItem['quantity'] ?? 0);
+                break;
+            }
+        }
+        $requestedQuantity = $actionType === 'cart' ? $existingQuantity + 1 : 1;
+        if (!Product::isPurchasable($product, $variantIdx, $requestedQuantity)) {
+            $_SESSION['flash_error'] = 'Gói dịch vụ này đã hết hàng hoặc không còn đủ số lượng.';
+            header('Location: ' . (empty($_SERVER['HTTP_REFERER']) ? Url::product($product) : $_SERVER['HTTP_REFERER']));
+            exit;
+        }
+
         if ($actionType === 'buy') {
             header('Location: ' . url('index.php?action=checkoutPage&product_id=' . urlencode($productId) . '&variant_idx=' . urlencode($variantIdx)));
             exit;
@@ -910,6 +925,20 @@ class HomeController extends Controller {
         if (!$product) {
             $_SESSION['flash_error'] = 'Sản phẩm không tồn tại.';
             header('Location: ' . (empty($_SERVER['HTTP_REFERER']) ? url() : $_SERVER['HTTP_REFERER']));
+            exit;
+        }
+
+        $existingQuantity = 0;
+        foreach (($_SESSION['cart'] ?? []) as $existingItem) {
+            if (($existingItem['id'] ?? '') === $productId
+                && (int) ($existingItem['variant_idx'] ?? 0) === $variantIdx) {
+                $existingQuantity = (int) ($existingItem['quantity'] ?? 0);
+                break;
+            }
+        }
+        if (!Product::isPurchasable($product, $variantIdx, $existingQuantity + 1)) {
+            $_SESSION['flash_error'] = 'Gói dịch vụ này đã hết hàng hoặc không còn đủ số lượng.';
+            header('Location: ' . (empty($_SERVER['HTTP_REFERER']) ? Url::product($product) : $_SERVER['HTTP_REFERER']));
             exit;
         }
 
@@ -997,7 +1026,13 @@ class HomeController extends Controller {
                 $sameVariant = $variantIdx === null || (int) ($item['variant_idx'] ?? 0) === $variantIdx;
                 if (($item['id'] ?? '') == $productId && $sameVariant) {
                     $found = true;
-                    $item['quantity'] += $change;
+                    $newQuantity = $item['quantity'] + $change;
+                    $product = Product::getById($productId);
+                    if ($newQuantity > 0 && (!$product || !Product::isPurchasable($product, (int) ($item['variant_idx'] ?? 0), $newQuantity))) {
+                        $_SESSION['flash_error'] = 'Kho không còn đủ số lượng để cập nhật giỏ hàng.';
+                        break;
+                    }
+                    $item['quantity'] = $newQuantity;
                     if ($item['quantity'] <= 0) {
                         $_SESSION['flash_success'] = 'Đã xóa "' . $item['title'] . '" khỏi giỏ hàng.';
                         unset($_SESSION['cart'][$key]);
@@ -1036,6 +1071,8 @@ class HomeController extends Controller {
             'price' => $price,
             'image' => $product['image'],
             'quantity' => max(1, $quantity)
+            ,'stock' => max(0, (int) ($variant['stock'] ?? 0))
+            ,'available' => Product::isPurchasable($product, $variantIdx, max(1, $quantity))
         ];
     }
 

@@ -35,6 +35,9 @@
                                                     <div>
                                                         <h6 class="fw-bold mb-0"><?= htmlspecialchars($item['title']) ?></h6>
                                                         <span class="small text-muted"><?= number_format($item['price'], 0, ',', '.') ?>đ / sản phẩm</span>
+                                                        <?php if (empty($item['available'])): ?>
+                                                            <div><span class="badge bg-danger mt-1">Hết hàng hoặc không đủ kho</span></div>
+                                                        <?php endif; ?>
                                                     </div>
                                                 </div>
                                             </td>
@@ -44,9 +47,13 @@
                                                         <i class="fa-solid fa-minus fs-xs"></i>
                                                     </a>
                                                     <span class="px-3 fw-bold"><?= $item['quantity'] ?></span>
-                                                    <a class="btn btn-sm btn-light rounded-circle p-0 d-flex align-items-center justify-content-center" style="width: 28px; height: 28px; text-decoration: none;" href="<?= url('index.php?action=updateCartQuantity&id=' . urlencode($item['id']) . '&variant_idx=' . $variantIdx . '&change=1') ?>">
-                                                        <i class="fa-solid fa-plus fs-xs"></i>
-                                                    </a>
+                                                    <?php if ((int) ($item['quantity'] ?? 1) < (int) ($item['stock'] ?? 0)): ?>
+                                                        <a class="btn btn-sm btn-light rounded-circle p-0 d-flex align-items-center justify-content-center" style="width: 28px; height: 28px; text-decoration: none;" href="<?= url('index.php?action=updateCartQuantity&id=' . urlencode($item['id']) . '&variant_idx=' . $variantIdx . '&change=1') ?>">
+                                                            <i class="fa-solid fa-plus fs-xs"></i>
+                                                        </a>
+                                                    <?php else: ?>
+                                                        <button type="button" class="btn btn-sm btn-light rounded-circle p-0" style="width:28px;height:28px" disabled><i class="fa-solid fa-plus fs-xs"></i></button>
+                                                    <?php endif; ?>
                                                 </div>
                                             </td>
                                             <td class="py-4 border-0 text-end fw-bold text-dark">
@@ -79,10 +86,14 @@
                         
                         <div class="d-grid gap-2">
                             <?php foreach ($cart as $item): ?>
-                                <a href="<?= url('index.php?action=checkoutPage&product_id=' . urlencode($item['id']) . '&variant_idx=' . (int) ($item['variant_idx'] ?? 0)) ?>" class="btn btn-dark py-3 rounded-3 d-flex justify-content-between align-items-center px-4" data-auth-required="true">
-                                    <span>Mua ngay <?= htmlspecialchars($item['title']) ?></span>
-                                    <i class="fa-solid fa-chevron-right fs-small"></i>
-                                </a>
+                                <?php if (!empty($item['available'])): ?>
+                                    <a href="<?= url('index.php?action=checkoutPage&product_id=' . urlencode($item['id']) . '&variant_idx=' . (int) ($item['variant_idx'] ?? 0)) ?>" class="btn btn-dark py-3 rounded-3 d-flex justify-content-between align-items-center px-4" data-auth-required="true">
+                                        <span>Mua ngay <?= htmlspecialchars($item['title']) ?></span>
+                                        <i class="fa-solid fa-chevron-right fs-small"></i>
+                                    </a>
+                                <?php else: ?>
+                                    <button type="button" class="btn btn-secondary py-3 rounded-3" disabled>Hết hàng — vui lòng xoá khỏi giỏ</button>
+                                <?php endif; ?>
                             <?php endforeach; ?>
                         </div>
                         

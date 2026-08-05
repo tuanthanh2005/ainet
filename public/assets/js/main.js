@@ -210,6 +210,17 @@ function selectOption(element) {
     if (stock !== null && stock !== undefined) {
         const stockEl = document.getElementById('detail-stock');
         if (stockEl) stockEl.innerText = stock;
+
+        const available = stock > 0;
+        const buyButton = document.getElementById('detail-buy-button');
+        const cartButton = document.getElementById('detail-cart-button');
+        if (buyButton) {
+            buyButton.disabled = !available;
+            buyButton.textContent = available ? 'Mua Ngay' : 'Hết hàng';
+            buyButton.classList.toggle('btn-buy', available);
+            buyButton.classList.toggle('btn-secondary', !available);
+        }
+        if (cartButton) cartButton.disabled = !available;
     }
 }
 

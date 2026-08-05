@@ -36,6 +36,12 @@ $reviewCount = count($reviews);
             </a>
         </div>
     <?php return; endif; ?>
+    <?php
+        $initialVariantIdx = Product::firstAvailableVariantIndex($product);
+        $hasAvailableVariant = $initialVariantIdx !== null;
+        $initialVariantIdx = $initialVariantIdx ?? 0;
+        $initialOption = $product['options'][$initialVariantIdx] ?? [];
+    ?>
 
     <div class="product-detail-container">
         <div class="row align-items-center">
@@ -87,12 +93,12 @@ $reviewCount = count($reviews);
                     </div>
                     <small class="text-muted"><span id="sold-count">Đã bán
                             <?= number_format($product['sold_count'] ?? 0, 0, ',', '.') ?></span> | <span
-                            id="detail-stock"><?= $product['options'][0]['stock'] ?? 0 ?></span> Sản Phẩm </small>
+                            id="detail-stock"><?= (int) ($initialOption['stock'] ?? 0) ?></span> Sản Phẩm </small>
                 </div>
 
                 <div class="mb-4">
                     <?php
-                        $firstOpt = $product['options'][0] ?? null;
+                        $firstOpt = $initialOption ?: null;
                         $basePrice = (float) ($firstOpt['price'] ?? $product['price'] ?? 0);
                         $baseOriginal = (float) ($firstOpt['original_price'] ?? 0);
                         $hasDiscount = $baseOriginal > $basePrice && $basePrice > 0;
@@ -130,13 +136,13 @@ $reviewCount = count($reviews);
                         <div id="product-options">
                             <?php if (isset($product['options']) && is_array($product['options'])): ?>
                                 <?php foreach ($product['options'] as $index => $option):
-                                    $isOutOfStock = ($option['stock'] ?? 0) <= 0;
+                                    $isOutOfStock = !Product::isPurchasable($product, (int) $index);
                                     $optPrice     = (float) ($option['price'] ?? 0);
                                     $optOriginal  = (float) ($option['original_price'] ?? 0);
                                     $optDiscount  = $optOriginal > $optPrice && $optPrice > 0;
                                     $optPctOff    = $optDiscount ? round((1 - $optPrice / $optOriginal) * 100) : 0;
                                     ?>
-                                    <label class="option-item <?= $index === 0 && !$isOutOfStock ? 'selected' : '' ?> <?= $isOutOfStock ? 'disabled-option' : '' ?>"
+                                    <label class="option-item <?= $index === $initialVariantIdx && !$isOutOfStock ? 'selected' : '' ?> <?= $isOutOfStock ? 'disabled-option' : '' ?>"
                                         for="variant_<?= $index ?>"
                                         onclick="<?= $isOutOfStock ? 'event.preventDefault();' : 'selectOption(this)' ?>"
                                         data-price="<?= $optPrice ?>"
@@ -147,7 +153,7 @@ $reviewCount = count($reviews);
                                             <div class="d-flex align-items-center">
                                                 <div class="custom-radio">
                                                     <input type="radio" id="variant_<?= $index ?>" name="variant_idx" value="<?= $index ?>"
-                                                           <?= $index === 0 && !$isOutOfStock ? 'checked' : '' ?>
+                                                           <?= $index === $initialVariantIdx && !$isOutOfStock ? 'checked' : '' ?>
                                                            <?= $isOutOfStock ? 'disabled' : '' ?>
                                                            style="position: absolute; opacity: 0; pointer-events: none;">
                                                     <div class="radio-dot"></div>
@@ -181,10 +187,10 @@ $reviewCount = count($reviews);
                     </div>
 
                     <div class="d-flex gap-3 mt-4">
-                        <button type="submit" class="btn btn-buy flex-grow-1 py-3 fs-6 rounded-pill"
-                            onclick="document.getElementById('detail-action-type').value='buy'">Mua Ngay</button>
-                        <button type="submit" class="btn btn-outline-dark px-4 py-3 rounded-pill"
-                            onclick="document.getElementById('detail-action-type').value='cart'" title="Thêm vào giỏ">
+                        <button type="submit" id="detail-buy-button" class="btn <?= $hasAvailableVariant ? 'btn-buy' : 'btn-secondary' ?> flex-grow-1 py-3 fs-6 rounded-pill"
+                            onclick="document.getElementById('detail-action-type').value='buy'" <?= $hasAvailableVariant ? '' : 'disabled' ?>><?= $hasAvailableVariant ? 'Mua Ngay' : 'Hết hàng' ?></button>
+                        <button type="submit" id="detail-cart-button" class="btn btn-outline-dark px-4 py-3 rounded-pill"
+                            onclick="document.getElementById('detail-action-type').value='cart'" title="Thêm vào giỏ" <?= $hasAvailableVariant ? '' : 'disabled' ?>>
                             <i class="fa-solid fa-cart-plus"></i>
                         </button>
                     </div>

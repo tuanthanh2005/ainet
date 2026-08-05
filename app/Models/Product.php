@@ -15,6 +15,34 @@ class Product {
         }
     }
 
+    public static function variant(array $product, int $variantIdx = 0): ?array {
+        $options = is_array($product['options'] ?? null) ? $product['options'] : [];
+        return isset($options[$variantIdx]) && is_array($options[$variantIdx])
+            ? $options[$variantIdx]
+            : null;
+    }
+
+    public static function availableStock(array $product, int $variantIdx = 0): int {
+        $variant = self::variant($product, $variantIdx);
+        return $variant ? max(0, (int) ($variant['stock'] ?? 0)) : 0;
+    }
+
+    public static function isPurchasable(array $product, int $variantIdx = 0, int $quantity = 1): bool {
+        return ($product['status'] ?? 'active') === 'active'
+            && $quantity > 0
+            && self::variant($product, $variantIdx) !== null
+            && self::availableStock($product, $variantIdx) >= $quantity;
+    }
+
+    public static function firstAvailableVariantIndex(array $product): ?int {
+        foreach ((array) ($product['options'] ?? []) as $index => $variant) {
+            if (self::isPurchasable($product, (int) $index)) {
+                return (int) $index;
+            }
+        }
+        return null;
+    }
+
     public static function getAll() {
         return Cache::remember('products.all', 60, function () {
             $db = Database::getInstance();

@@ -24,6 +24,11 @@ class CheckoutController extends Controller {
         $options = $product['options'] ?? [];
         $variant = $options[$variantIdx] ?? ($options[0] ?? null);
         if (!$variant) die("Gói dịch vụ không tồn tại.");
+        if (!Product::isPurchasable($product, (int) $variantIdx)) {
+            $_SESSION['flash_error'] = 'Gói dịch vụ này đã hết hàng. Vui lòng chọn gói khác.';
+            header('Location: ' . Url::product($product));
+            exit;
+        }
         
         $this->view('layout', [
             'view' => 'checkout/index',
@@ -48,6 +53,11 @@ class CheckoutController extends Controller {
             $options = $product['options'] ?? [];
             $variant = $options[$variantIdx] ?? ($options[0] ?? null);
             if (!$variant) die("Gói dịch vụ không tồn tại.");
+            if (!Product::isPurchasable($product, $variantIdx, $quantity)) {
+                $_SESSION['flash_error'] = 'Sản phẩm không còn đủ số lượng trong kho.';
+                header('Location: ' . Url::product($product));
+                exit;
+            }
 
             $amount = (float)($variant['price'] ?? 0) * $quantity;
             $variantName = $variant['name'] ?? 'Mặc định';
