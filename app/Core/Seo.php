@@ -53,7 +53,7 @@ class Seo {
             ?: trim($settings['footerDesc'] ?? '')
             ?: ($siteName . ' - cửa hàng dịch vụ AI và tài khoản Premium uy tín tại Việt Nam.');
         $defaultImg  = self::absoluteAsset($siteConfig['image'] ?? ($settings['about_image'] ?? ''));
-        $defaultLogo = self::absoluteAsset($siteConfig['logo'] ?? '/assets/images/fvcoin.png');
+        $defaultLogo = self::absoluteAsset($siteConfig['logo'] ?? '/assets/images/fvcoin-180.png');
 
         $customTitle = self::$data['title'] ?? null;
         if ($customTitle !== null && $customTitle !== '') {

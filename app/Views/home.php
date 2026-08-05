@@ -13,7 +13,7 @@
             </div>
         </div>
         <div class="col-lg-5 text-center pe-4 pe-md-5 d-none d-lg-block">
-            <img src="<?php echo url('assets/images/gemini_share.png'); ?>" class="img-fluid rounded-4 shadow-sm" alt="AI Của Tôi" loading="eager" fetchpriority="high" decoding="async" style="max-height: 280px; object-fit: cover; border: 1px solid var(--border-color);">
+            <img src="<?php echo url('assets/images/gemini_share.webp'); ?>" width="1024" height="1024" class="img-fluid rounded-4 shadow-sm" alt="AI Của Tôi" loading="eager" fetchpriority="high" decoding="async" style="max-height: 280px; object-fit: cover; border: 1px solid var(--border-color);">
         </div>
     </div>
 

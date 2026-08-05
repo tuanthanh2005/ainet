@@ -71,6 +71,7 @@ header('Referrer-Policy: strict-origin-when-cross-origin');
 
 // Load Core Libraries
 require_once APP_ROOT . '/app/Core/Database.php';
+require_once APP_ROOT . '/app/Core/Cache.php';
 require_once APP_ROOT . '/app/Core/Controller.php';
 require_once APP_ROOT . '/app/Core/Model.php';
 require_once APP_ROOT . '/app/Core/FileSystem.php';
@@ -105,7 +106,7 @@ require_once APP_ROOT . '/app/Controllers/SeoRouterController.php';
 
 // Refresh logged-in user's session from DB on every request so role/status changes
 // take effect without requiring re-login. Silent if user no longer exists.
-if (!empty($_SESSION['user']['id'])) {
+if (!empty($_SESSION['user']['id']) && (time() - (int) ($_SESSION['user_checked_at'] ?? 0)) >= 300) {
     try {
         $freshUser = User::findById($_SESSION['user']['id']);
         if ($freshUser && ($freshUser['status'] ?? '') === 'active') {
@@ -115,6 +116,7 @@ if (!empty($_SESSION['user']['id'])) {
                 'email' => $freshUser['email'],
                 'role'  => $freshUser['role'],
             ];
+            $_SESSION['user_checked_at'] = time();
         } else {
             // User deleted or blocked: drop session silently
             $_SESSION = [];

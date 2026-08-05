@@ -11,9 +11,13 @@
 <?php if (!empty($metaRefresh)): ?>
     <meta http-equiv="refresh" content="5">
 <?php endif; ?>
-    <link rel="icon" type="image/png" href="<?php echo asset('images/fvcoin.png'); ?>">
-    <link rel="apple-touch-icon" href="<?php echo asset('images/fvcoin.png'); ?>">
+    <link rel="icon" type="image/png" sizes="180x180" href="<?php echo asset('images/fvcoin-180.png'); ?>">
+    <link rel="apple-touch-icon" href="<?php echo asset('images/fvcoin-180.png'); ?>">
 
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -420,9 +424,8 @@
         </a>
     </div>
 
-    <!-- Bootstrap & SweetAlert2 — Load TRƯỚC các modal để data-bs-toggle hoạt động -->
+    <!-- Bootstrap powers the public navigation and modal components. -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     
     <!-- AppNotify system - Load from public_html root so every page uses the same deployed file -->
     <?php $mainJsVersion = is_file(public_path('assets/js/main.js')) ? filemtime(public_path('assets/js/main.js')) : time(); ?>
@@ -432,31 +435,6 @@
 
     <!-- Link to separated JS - Already loaded above after Bootstrap -->
     <!-- <script src="<?php echo asset('js/main.js'); ?>"></script> -->
-
-    <!-- Debug Log for Modals -->
-    <script>
-    document.addEventListener('DOMContentLoaded', () => {
-        console.log('[Debug] DOM loaded. Bootstrap check:', typeof bootstrap !== 'undefined' ? 'OK' : 'MISSING');
-        
-        document.querySelectorAll('[data-bs-toggle="modal"]').forEach(btn => {
-            btn.addEventListener('click', function() {
-                const target = this.getAttribute('data-bs-target');
-                console.log('[Debug] Button clicked:', this.textContent.trim(), '| Target:', target);
-                const el = document.querySelector(target);
-                if (!el) {
-                    console.error('[Debug] Target modal element not found:', target);
-                } else {
-                    console.log('[Debug] Target modal element exists in DOM:', el);
-                }
-                if (typeof bootstrap === 'undefined') {
-                    console.error('[Debug] Bootstrap JS is not loaded!');
-                } else {
-                    console.log('[Debug] Bootstrap JS is loaded.');
-                }
-            });
-        });
-    });
-    </script>
 
     <!-- Flash Session Notifications via AppNotify -->
     <?php if ($flashSuccess || $flashError): ?>

@@ -2,6 +2,7 @@
 
 class Setting {
     public static function getAll() {
+        return Cache::remember('settings.all', 300, function () {
         $db = Database::getInstance();
         $stmt = $db->query("SELECT * FROM settings");
         $rows = $stmt->fetchAll();
@@ -28,6 +29,7 @@ class Setting {
         }
 
         return $settings;
+        });
     }
 
     public static function saveAll($data) {
@@ -37,5 +39,6 @@ class Setting {
         foreach ($data as $key => $value) {
             $stmt->execute([$key, $value]);
         }
+        Cache::forget('settings.all');
     }
 }

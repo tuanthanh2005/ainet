@@ -8,12 +8,13 @@
  * - Routes everything else through public/index.php so clean URLs work.
  */
 
-$path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+$path = rawurldecode(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH) ?: '/');
 
 // Serve real existing files (assets, favicon, etc.)
-$publicDir = __DIR__;
-$target = $publicDir . $path;
-if ($path !== '/' && is_file($target)) {
+$publicDir = realpath(__DIR__);
+$relativePath = ltrim(str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $path), DIRECTORY_SEPARATOR);
+$target = realpath($publicDir . DIRECTORY_SEPARATOR . $relativePath);
+if ($path !== '/' && $target !== false && str_starts_with($target, $publicDir . DIRECTORY_SEPARATOR) && is_file($target)) {
     return false; // let the built-in server handle it
 }
 

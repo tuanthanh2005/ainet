@@ -3,16 +3,17 @@
 class RecentOrder {
     public static function getAll() {
         try {
-            $db = Database::getInstance();
-            $stmt = $db->query(
-                "SELECT product_name, amount, customer_email, created_at
-                 FROM orders
-                 WHERE status IN ('completed', 'processing')
-                 ORDER BY updated_at DESC, created_at DESC
-                 LIMIT 20"
-            );
-
-            return array_map([self::class, 'formatOrder'], $stmt->fetchAll());
+            return Cache::remember('orders.recent', 60, function (): array {
+                $db = Database::getInstance();
+                $stmt = $db->query(
+                    "SELECT product_name, amount, customer_email, created_at
+                     FROM orders
+                     WHERE status IN ('completed', 'processing')
+                     ORDER BY updated_at DESC, created_at DESC
+                     LIMIT 20"
+                );
+                return array_map([self::class, 'formatOrder'], $stmt->fetchAll());
+            });
         } catch (Throwable $e) {
             return [];
         }

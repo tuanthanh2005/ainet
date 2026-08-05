@@ -10,41 +10,31 @@ class HomeController extends Controller {
     public function index() {
         $products = Product::getAll();
         $categories = Category::getAll();
-        $blogs = Blog::getAll();
+        $blogs = Blog::getSummaries();
         $recentOrders = RecentOrder::getAll();
         $settings = $this->settings;
 
-        // Query system statistics dynamically
-        $db = Database::getInstance();
-        $completedCount = (int)$db->query("SELECT COUNT(*) FROM orders WHERE status IN ('completed', 'processing')")->fetchColumn();
-        $userCount = (int)$db->query("SELECT COUNT(*) FROM users WHERE status = 'active'")->fetchColumn();
-        
-        // Count rating distribution
-        $ratingsCount = [5 => 0, 4 => 0, 3 => 0, 2 => 0, 1 => 0];
-        try {
-            $distStmt = $db->query("SELECT rating, COUNT(*) as cnt FROM reviews GROUP BY rating");
-            while ($row = $distStmt->fetch()) {
-                $r = (int)$row['rating'];
-                $ratingsCount[$r] = (int)$row['cnt'];
-            }
-        } catch (Throwable $ignored) {}
-        
-        $totalReviews = array_sum($ratingsCount);
-        $pct5 = $totalReviews > 0 ? round(($ratingsCount[5] / $totalReviews) * 100) : 100;
-        $pct4 = $totalReviews > 0 ? round(($ratingsCount[4] / $totalReviews) * 100) : 0;
-        $pct1_3 = $totalReviews > 0 ? round((($ratingsCount[3] + $ratingsCount[2] + $ratingsCount[1]) / $totalReviews) * 100) : 0;
+        $systemStats = Cache::remember('home.stats', 60, function (): array {
+            $db = Database::getInstance();
+            $row = $db->query("SELECT
+                (SELECT COUNT(*) FROM orders WHERE status IN ('completed', 'processing')) AS completed_orders,
+                (SELECT COUNT(*) FROM users WHERE status = 'active') AS total_users,
+                (SELECT AVG(rating) FROM reviews) AS average_rating,
+                (SELECT COUNT(*) FROM reviews) AS total_reviews,
+                (SELECT COUNT(*) FROM reviews WHERE rating = 5) AS rating_5,
+                (SELECT COUNT(*) FROM reviews WHERE rating = 4) AS rating_4,
+                (SELECT COUNT(*) FROM reviews WHERE rating BETWEEN 1 AND 3) AS rating_1_3")->fetch() ?: [];
+            $total = (int) ($row['total_reviews'] ?? 0);
 
-        $avgRating = $db->query("SELECT AVG(rating) FROM reviews")->fetchColumn();
-        $avgRating = $avgRating ? round((float)$avgRating, 1) : 5.0;
-
-        $systemStats = [
-            'completed_orders' => $completedCount,
-            'total_users'      => $userCount,
-            'average_rating'   => $avgRating,
-            'pct_5'            => $pct5,
-            'pct_4'            => $pct4,
-            'pct_1_3'          => $pct1_3
-        ];
+            return [
+                'completed_orders' => (int) ($row['completed_orders'] ?? 0),
+                'total_users'      => (int) ($row['total_users'] ?? 0),
+                'average_rating'   => isset($row['average_rating']) ? round((float) $row['average_rating'], 1) : 5.0,
+                'pct_5'            => $total > 0 ? (int) round(((int) $row['rating_5'] / $total) * 100) : 100,
+                'pct_4'            => $total > 0 ? (int) round(((int) $row['rating_4'] / $total) * 100) : 0,
+                'pct_1_3'          => $total > 0 ? (int) round(((int) $row['rating_1_3'] / $total) * 100) : 0,
+            ];
+        });
 
         // Fetch latest reviews
         $recentReviews = Review::getRecentReviews(6);
@@ -165,7 +155,7 @@ class HomeController extends Controller {
                 'title'       => $seoData['title'],
                 'description' => $seoData['description'],
                 'keywords'    => $seoData['keywords'],
-                'image'       => url('assets/images/gemini_share.png'),
+                'image'       => url('assets/images/gemini_share.webp'),
                 'canonical'   => $canonical,
                 'type'        => 'website',
                 'robots'      => 'index,follow',
@@ -187,7 +177,7 @@ class HomeController extends Controller {
                 'title'       => $seoTitle,
                 'description' => $seoDesc,
                 'keywords'    => $seoKey,
-                'image'       => url('assets/images/gemini_share.png'),
+                'image'       => url('assets/images/gemini_share.webp'),
                 'canonical'   => $canonical,
                 'type'        => 'website',
                 'robots'      => $robots,
@@ -214,7 +204,7 @@ class HomeController extends Controller {
                 'title'       => $homeSeo['title'] ?? 'Tài khoản AI Premium - Gemini Advanced, ChatGPT, Copilot',
                 'description' => $homeSeo['description'] ?? 'Cung cấp tài khoản Gemini Advanced (Google One AI Premium), ChatGPT Plus, YouTube Premium, GitHub Copilot giá tốt nhất. Kích hoạt tự động, bảo hành 1 đổi 1 uy tín.',
                 'keywords'    => $homeSeo['keywords'] ?? ['tài khoản gemini advanced', 'google gemini advanced', 'tài khoản chatgpt plus', 'youtube premium', 'github copilot', 'tài khoản ai', SITENAME],
-                'image'       => url('assets/images/gemini_share.png'),
+                'image'       => url('assets/images/gemini_share.webp'),
                 'canonical'   => $canonical,
                 'type'        => 'website',
                 'robots'      => $robots,

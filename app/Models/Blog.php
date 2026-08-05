@@ -7,6 +7,14 @@ class Blog {
         return $stmt->fetchAll();
     }
 
+    public static function getSummaries(): array {
+        return Cache::remember('blogs.summaries', 120, function () {
+            $db = Database::getInstance();
+            $stmt = $db->query("SELECT id, title, image, description, seo_title, seo_description, seo_keywords, seo_slug, created_at FROM blogs ORDER BY created_at DESC");
+            return $stmt->fetchAll();
+        });
+    }
+
     public static function getById($id) {
         $db = Database::getInstance();
         $stmt = $db->prepare("SELECT * FROM blogs WHERE id = ? LIMIT 1");
@@ -59,5 +67,6 @@ class Blog {
                 $blog['seo_slug'] ?? null
             ]);
         }
+        Cache::forget('blogs.summaries');
     }
 }

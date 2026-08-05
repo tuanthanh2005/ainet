@@ -9,7 +9,7 @@ class Order {
                  customer_email, status, phone, note, upgrade_email, upgrade_pass, upgrade_link)
              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
         );
-        return $stmt->execute([
+        $created = $stmt->execute([
             $data['id'],
             $data['product_id'],
             $data['product_name'],
@@ -25,6 +25,11 @@ class Order {
             $data['upgrade_pass'] ?? null,
             $data['upgrade_link'] ?? null,
         ]);
+        if ($created) {
+            Cache::forget('home.stats');
+            Cache::forget('orders.recent');
+        }
+        return $created;
     }
 
     public static function getById($id) {
@@ -44,7 +49,12 @@ class Order {
     public static function updateStatus($id, $status, $transactionId = null) {
         $db = Database::getInstance();
         $stmt = $db->prepare("UPDATE orders SET status = ?, transaction_id = ? WHERE id = ?");
-        return $stmt->execute([$status, $transactionId, $id]);
+        $updated = $stmt->execute([$status, $transactionId, $id]);
+        if ($updated) {
+            Cache::forget('home.stats');
+            Cache::forget('orders.recent');
+        }
+        return $updated;
     }
 
     public static function setDelivered(string $id, array $items): void {

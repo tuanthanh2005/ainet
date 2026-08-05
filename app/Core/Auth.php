@@ -25,6 +25,7 @@ class Auth {
                 'email' => $fresh['email'],
                 'role'  => $fresh['role'],
             ];
+            $_SESSION['user_checked_at'] = time();
             $sessionUser = $_SESSION['user'];
 
             if (($fresh['status'] ?? '') !== 'active') {
@@ -48,6 +49,7 @@ class Auth {
             'email' => $user['email'],
             'role'  => $user['role'],
         ];
+        $_SESSION['user_checked_at'] = time();
         // Reset rate-limit counter on success
         unset($_SESSION['login_attempts']);
     }

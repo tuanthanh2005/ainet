@@ -1,21 +1,6 @@
 <?php
 
 class Product {
-    private static function ensureProductColumns(PDO $db): void {
-        static $done = false;
-        if ($done) return;
-        $done = true;
-
-        try {
-            $db->exec("ALTER TABLE products ADD COLUMN card_features TEXT NULL AFTER feature_text");
-        } catch (Throwable $ignored) {
-        }
-        try {
-            $db->exec("ALTER TABLE products ADD COLUMN original_price DECIMAL(15, 2) DEFAULT 0.00 AFTER price");
-        } catch (Throwable $ignored) {
-        }
-    }
-
     private static function decodeProduct(&$product): void {
         if (isset($product['options']) && is_string($product['options'])) {
             $decoded = json_decode($product['options'], true);
@@ -31,36 +16,32 @@ class Product {
     }
 
     public static function getAll() {
-        $db = Database::getInstance();
-        self::ensureProductColumns($db);
-        $stmt = $db->query("SELECT *, category_name AS category FROM products ORDER BY created_at DESC");
-        $products = $stmt->fetchAll();
+        return Cache::remember('products.all', 60, function () {
+            $db = Database::getInstance();
+            $stmt = $db->query("SELECT p.*, p.category_name AS category,
+                COALESCE(r.avg_rating, 0) AS real_rating,
+                COALESCE(r.review_count, 0) AS review_real_count
+                FROM products p
+                LEFT JOIN (
+                    SELECT product_id, AVG(rating) AS avg_rating, COUNT(*) AS review_count
+                    FROM reviews GROUP BY product_id
+                ) r ON r.product_id = p.id
+                ORDER BY p.created_at DESC");
+            $products = $stmt->fetchAll();
 
-        // Fetch average ratings and counts from reviews dynamically
-        $ratings = [];
-        try {
-            $stmtRatings = $db->query("SELECT product_id, AVG(rating) as avg_rating, COUNT(*) as cnt FROM reviews GROUP BY product_id");
-            while ($row = $stmtRatings->fetch()) {
-                $ratings[$row['product_id']] = [
-                    'rating' => round((float)$row['avg_rating'], 1),
-                    'count'  => (int)$row['cnt']
-                ];
+            foreach ($products as &$product) {
+                self::decodeProduct($product);
+                $product['rating'] = round((float) $product['real_rating'], 1);
+                unset($product['real_rating']);
+                $product['review_real_count'] = (int) $product['review_real_count'];
             }
-        } catch (Throwable $ignored) {}
-
-        foreach ($products as &$product) {
-            self::decodeProduct($product);
-            $pid = $product['id'] ?? '';
-            $product['rating'] = isset($ratings[$pid]) ? $ratings[$pid]['rating'] : 0;
-            $product['review_real_count'] = isset($ratings[$pid]) ? $ratings[$pid]['count'] : 0;
-        }
-        unset($product);
-        return $products;
+            unset($product);
+            return $products;
+        });
     }
 
     public static function getById($id) {
         $db = Database::getInstance();
-        self::ensureProductColumns($db);
         $stmt = $db->prepare("SELECT *, category_name AS category FROM products WHERE id = ?");
         $stmt->execute([$id]);
         $product = $stmt->fetch();
@@ -86,7 +67,6 @@ class Product {
 
     public static function getBySlugOrId($slugOrId) {
         $db = Database::getInstance();
-        self::ensureProductColumns($db);
         $slugOrId = trim(rawurldecode((string) $slugOrId));
 
         $id = '';
@@ -135,7 +115,6 @@ class Product {
 
     public static function saveAll($products) {
         $db = Database::getInstance();
-        self::ensureProductColumns($db);
         $db->exec("DELETE FROM products");
 
         $stmt = $db->prepare("INSERT INTO products (id, title, category_slug, category_name, price, original_price, status, image, feature_text, card_features, feature_icon, rating, sold_count, badge, description, options, is_upgrade, seo_title, seo_description, seo_keywords, seo_slug) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
@@ -165,12 +144,14 @@ class Product {
                 $p['seo_slug'] ?? null
             ]);
         }
+        Cache::forget('products.all');
     }
 
     public static function incrementSoldCount(string $id, int $qty = 1, int $variantIdx = -1): void {
         $db = Database::getInstance();
         $stmt = $db->prepare("UPDATE products SET sold_count = sold_count + ? WHERE id = ?");
         $stmt->execute([$qty, $id]);
+        Cache::forget('products.all');
 
         if ($variantIdx >= 0) {
             $stmt = $db->prepare("SELECT options FROM products WHERE id = ?");
