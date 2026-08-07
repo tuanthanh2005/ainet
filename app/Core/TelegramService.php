@@ -184,6 +184,12 @@ class TelegramService {
             $email = $user['email'] ?? '';
             $time  = date('d/m/Y H:i');
 
+            // Rút gọn thông báo nếu là hình ảnh để tránh gửi payload nặng sang Telegram gây lag
+            $trimmed = trim($body);
+            if (strpos($trimmed, '[img]') === 0 || preg_match('/^https?:\/\/.+\.(png|jpg|jpeg|gif|webp)/i', $trimmed) || $attachmentName !== null) {
+                $body = '📷 [Khách vừa gửi 1 hình ảnh]';
+            }
+
             $lines = [
                 "💬 *TIN NHẮN MỚI* từ " . self::esc($name),
                 "",
@@ -191,13 +197,9 @@ class TelegramService {
             ];
 
             if ($body !== '') {
-                $preview = mb_substr($body, 0, 300);
-                if (mb_strlen($body) > 300) $preview .= '...';
+                $preview = mb_substr($body, 0, 200);
+                if (mb_strlen($body) > 200) $preview .= '...';
                 $lines[] = "💭 \"" . self::esc($preview) . "\"";
-            }
-
-            if ($attachmentName) {
-                $lines[] = "📎 _Tệp đính kèm: " . self::esc($attachmentName) . "_";
             }
 
             $lines[] = "";
@@ -218,25 +220,24 @@ class TelegramService {
      */
     public static function sendTest(): array {
         [$token, $chatId] = self::getConfig();
-        if ($token === '') {
-            return ['success' => false, 'message' => 'Bot Token chưa được cấu hình.'];
+        if ($token === '' || $chatId === '') {
+            return ['success' => false, 'message' => 'Chưa cấu hình Telegram Bot Token hoặc Chat ID.'];
         }
-        if ($chatId === '') {
-            return ['success' => false, 'message' => 'Chat ID chưa được cấu hình.'];
+        $time = date('d/m/Y H:i:s');
+        $msg  = "✅ *KIỂM TRA KẾT NỐI TELEGRAM BOT*\n\n"
+              . "Hệ thống *AI CỦA TÔI* đã kết nối thành công với Telegram Bot!\n"
+              . "⏰ Thời gian: {$time}";
+        $ok = self::sendRaw($msg);
+        if ($ok) {
+            return ['success' => true, 'message' => 'Gửi tin nhắn test đến Telegram thành công! Hãy kiểm tra ứng dụng Telegram của bạn.'];
         }
-
-        $text = "🤖 *Test kết nối thành công!*\n\n✅ Bot Telegram đã được cấu hình đúng và sẵn sàng nhận thông báo từ website.\n\n⏰ " . date('d/m/Y H:i:s');
-        $ok = self::callApi($token, $chatId, $text);
-        return [
-            'success' => $ok,
-            'message' => $ok ? 'Gửi test thành công! Kiểm tra Telegram của bạn.' : 'Gửi thất bại. Kiểm tra lại Bot Token và Chat ID (xem logs trong storage/logs/telegram.log).',
-        ];
+        return ['success' => false, 'message' => 'Không thể gửi tin nhắn. Kiểm tra lại Bot Token, Chat ID hoặc xem file storage/logs/telegram.log'];
     }
 
     /**
-     * Escape ký tự đặc biệt cho MarkdownV2 của Telegram.
+     * Escape Markdown special characters cho Telegram API legacy Markdown.
      */
-    private static function esc(string $text): string {
+    public static function esc(string $text): string {
         // Escape legacy Markdown special characters: *, _, `
         return str_replace(['*', '_', '`'], ['\*', '\_', '\`'], $text);
     }
@@ -266,7 +267,8 @@ class TelegramService {
                 'Content-Length: ' . strlen($payload)
             ]);
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-            curl_setopt($ch, CURLOPT_TIMEOUT, 8);
+            curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 2);
+            curl_setopt($ch, CURLOPT_TIMEOUT, 3);
             curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
 
             $response = curl_exec($ch);

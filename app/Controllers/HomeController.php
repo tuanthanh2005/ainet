@@ -1644,13 +1644,12 @@ class HomeController extends Controller {
             if ($ok) {
                 $_SESSION['last_chat_send_time'] = time();
 
-                // Trigger Telegram Notification to Admin
+                // Trigger Telegram Notification to Admin (tin nhắn văn bản nhẹ, không gửi payload hình ảnh)
                 try {
                     if (class_exists('TelegramService')) {
                         TelegramService::notifyNewChatMessage(
                             ['name' => $senderName, 'email' => ($user['email'] ?? "Session: {$sessionId}")],
-                            '[Gửi hình ảnh]',
-                            $imgUrl
+                            '📷 [Khách vừa gửi 1 hình ảnh]'
                         );
                     }
                 } catch (Throwable $ignored) {}
