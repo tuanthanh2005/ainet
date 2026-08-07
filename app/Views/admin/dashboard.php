@@ -1375,7 +1375,7 @@
                     <div class="card-custom overflow-hidden" style="height: calc(100vh - 160px); min-height: 520px;">
                         <div class="row g-0 h-100">
                             <!-- Left Column: Conversations List -->
-                            <div class="col-12 col-md-4 border-end h-100 d-flex flex-column bg-white">
+                            <div class="col-12 col-md-4 border-end h-100 d-flex flex-column bg-white" id="admin-chat-col-list">
                                 <div class="p-3 border-bottom bg-light">
                                     <h6 class="fw-bold mb-2 text-dark"><i class="fa-solid fa-comments me-2"></i>Hội thoại Chat</h6>
                                     <div class="input-group input-group-sm">
@@ -1389,9 +1389,12 @@
                             </div>
 
                             <!-- Right Column: Active Conversation Messages & Input -->
-                            <div class="col-12 col-md-8 h-100 d-flex flex-column bg-light">
+                            <div class="col-12 col-md-8 h-100 d-none d-md-flex flex-column bg-light" id="admin-chat-col-detail">
                                 <div id="admin-chat-header" class="p-3 border-bottom bg-white d-flex align-items-center justify-content-between">
                                     <div class="d-flex align-items-center">
+                                        <button type="button" class="btn btn-sm btn-light border d-md-none me-2 shadow-none" onclick="AdminChat.showMobileList()" title="Quay lại danh sách">
+                                            <i class="fa-solid fa-arrow-left"></i>
+                                        </button>
                                         <div class="avatar-circle bg-dark text-white rounded-circle me-3 d-flex align-items-center justify-content-center fw-bold" style="width:40px; height:40px;">
                                             <i class="fa-solid fa-user"></i>
                                         </div>
@@ -4733,11 +4736,31 @@ window.AdminChat = (function() {
         container.innerHTML = html;
     }
 
+    function showMobileList() {
+        const listCol = document.getElementById('admin-chat-col-list');
+        const detailCol = document.getElementById('admin-chat-col-detail');
+        if (listCol && detailCol) {
+            listCol.classList.remove('d-none');
+            listCol.classList.add('d-flex');
+            detailCol.classList.remove('d-flex');
+            detailCol.classList.add('d-none');
+        }
+    }
+
     function selectConversation(sessionId, senderName) {
         activeSessionId = sessionId;
         document.getElementById('admin-chat-user-name').textContent = senderName;
         document.getElementById('admin-chat-user-sub').textContent = 'ID: ' + sessionId;
         document.getElementById('admin-chat-input-area').style.display = 'block';
+
+        const listCol = document.getElementById('admin-chat-col-list');
+        const detailCol = document.getElementById('admin-chat-col-detail');
+        if (listCol && detailCol && window.innerWidth < 768) {
+            listCol.classList.remove('d-flex');
+            listCol.classList.add('d-none');
+            detailCol.classList.remove('d-none');
+            detailCol.classList.add('d-flex');
+        }
 
         renderConversationsList();
         loadMessages(sessionId, true);
@@ -4904,6 +4927,7 @@ window.AdminChat = (function() {
         selectConversation,
         sendMessage,
         handleImageUpload,
+        showMobileList,
         filterConversations: renderConversationsList
     };
 })();
