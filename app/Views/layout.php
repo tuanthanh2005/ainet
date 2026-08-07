@@ -106,32 +106,24 @@
                                 </a>
                             <?php endif; ?>
                             <div class="dropdown account-dropdown">
-                                <button class="account-toggle" type="button" data-bs-toggle="dropdown"
-                                    aria-expanded="false">
-                                    <span
-                                        class="account-avatar"><?php echo htmlspecialchars(strtoupper(substr($currentUser['name'], 0, 1))); ?></span>
-                                    <span class="account-greeting">Hi,
-                                        <?php echo htmlspecialchars($currentUser['name']); ?></span>
-                                    <i class="fa-solid fa-chevron-down account-chevron"></i>
+                                <button class="account-toggle btn btn-light border rounded-pill d-flex align-items-center gap-1 px-2 py-1 shadow-sm" type="button" data-bs-toggle="dropdown" aria-expanded="false" title="<?php echo htmlspecialchars($currentUser['name']); ?>">
+                                    <span class="account-avatar rounded-circle text-white d-inline-flex align-items-center justify-content-center fw-bold" style="width: 32px; height: 32px; font-size: 0.85rem; background: var(--vip-gradient) !important;"><?php echo htmlspecialchars(strtoupper(mb_substr($currentUser['name'], 0, 1))); ?></span>
+                                    <i class="fa-solid fa-chevron-down account-chevron ms-1 text-muted" style="font-size: 0.7rem;"></i>
                                 </button>
-                                <ul class="dropdown-menu dropdown-menu-end account-menu shadow-sm">
-                                    <?php if (($currentUser['role'] ?? '') === 'admin'): ?>
-                                        <li><a class="dropdown-item fw-bold"
-                                                href="<?php echo url('index.php?action=adminDashboard'); ?>"><i
-                                                    class="fa-solid fa-shield-halved"></i>Trang quản trị</a></li>
-                                        <li><hr class="dropdown-divider"></li>
-                                    <?php endif; ?>
-                                    <li><a class="dropdown-item" href="<?php echo url('index.php?action=profile'); ?>"><i
-                                                class="fa-regular fa-user"></i>Profile</a></li>
-                                    <li><a class="dropdown-item"
-                                            href="<?php echo url('index.php?action=orderHistory'); ?>"><i
-                                                class="fa-solid fa-clock-rotate-left"></i>Lịch sử đơn hàng</a></li>
-                                    <li>
-                                        <hr class="dropdown-divider">
+                                <ul class="dropdown-menu dropdown-menu-end account-menu shadow-sm border-0" style="border-radius: 14px; box-shadow: 0 10px 30px rgba(0,0,0,0.1) !important;">
+                                    <li class="px-3 py-2 bg-light rounded-top">
+                                        <div class="fw-bold text-dark text-truncate" style="max-width: 200px;"><?php echo htmlspecialchars($currentUser['name']); ?></div>
+                                        <small class="text-muted text-truncate d-block" style="max-width: 200px;"><?php echo htmlspecialchars($currentUser['email'] ?? ''); ?></small>
                                     </li>
-                                    <li><a class="dropdown-item text-danger"
-                                            href="<?php echo url('index.php?action=logout'); ?>"><i
-                                                class="fa-solid fa-right-from-bracket"></i>Đăng xuất</a></li>
+                                    <li><hr class="dropdown-divider my-1"></li>
+                                    <?php if (($currentUser['role'] ?? '') === 'admin'): ?>
+                                        <li><a class="dropdown-item fw-bold py-2" href="<?php echo url('index.php?action=adminDashboard'); ?>"><i class="fa-solid fa-shield-halved me-2 text-primary"></i>Trang quản trị</a></li>
+                                        <li><hr class="dropdown-divider my-1"></li>
+                                    <?php endif; ?>
+                                    <li><a class="dropdown-item py-2" href="<?php echo url('index.php?action=profile'); ?>"><i class="fa-regular fa-user me-2"></i>Profile</a></li>
+                                    <li><a class="dropdown-item py-2" href="<?php echo url('index.php?action=orderHistory'); ?>"><i class="fa-solid fa-clock-rotate-left me-2"></i>Lịch sử đơn hàng</a></li>
+                                    <li><hr class="dropdown-divider my-1"></li>
+                                    <li><a class="dropdown-item text-danger py-2" href="<?php echo url('index.php?action=logout'); ?>"><i class="fa-solid fa-right-from-bracket me-2"></i>Đăng xuất</a></li>
                                 </ul>
                             </div>
                         <?php else: ?>
