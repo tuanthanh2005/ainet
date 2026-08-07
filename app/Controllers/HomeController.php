@@ -1478,5 +1478,200 @@ class HomeController extends Controller {
 
         $this->index();
     }
+
+    private function getOrCreateChatSessionId(): string {
+        if (!empty($_SESSION['chat_session_id'])) {
+            return $_SESSION['chat_session_id'];
+        }
+        if (!empty($_COOKIE['chat_session_id'])) {
+            $_SESSION['chat_session_id'] = $_COOKIE['chat_session_id'];
+            return $_COOKIE['chat_session_id'];
+        }
+        $newId = 'chat_' . bin2hex(random_bytes(12));
+        $_SESSION['chat_session_id'] = $newId;
+        setcookie('chat_session_id', $newId, time() + 365 * 86400, '/');
+        return $newId;
+    }
+
+    public function chatGetMessages(): void {
+        header('Content-Type: application/json');
+        $sessionId = $this->getOrCreateChatSessionId();
+        $messages = ChatMessage::getMessagesBySession($sessionId);
+        
+        $unreadCount = 0;
+        foreach ($messages as $m) {
+            if ($m['sender_type'] === 'admin' && (int)$m['is_read'] === 0) {
+                $unreadCount++;
+            }
+        }
+
+        if (!empty($_GET['mark_read'])) {
+            ChatMessage::markAsRead($sessionId, 'admin');
+        }
+
+        $isWaiting = ChatMessage::isWaitingForAdminReply($sessionId, 10);
+
+        echo json_encode([
+            'success' => true,
+            'session_id' => $sessionId,
+            'messages' => $messages,
+            'unread_count' => $unreadCount,
+            'is_waiting' => $isWaiting
+        ]);
+        exit;
+    }
+
+    public function chatSendMessage(): void {
+        header('Content-Type: application/json');
+        if (($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'POST') {
+            echo json_encode(['success' => false, 'message' => 'Invalid method']);
+            exit;
+        }
+
+        $input = json_decode(file_get_contents('php://input'), true);
+        $messageText = trim($input['message'] ?? $_POST['message'] ?? '');
+
+        if ($messageText === '') {
+            echo json_encode(['success' => false, 'message' => 'Nội dung tin nhắn không được để trống']);
+            exit;
+        }
+
+        $sessionId = $this->getOrCreateChatSessionId();
+
+        // 5s rate limit check
+        if (!empty($_SESSION['last_chat_send_time'])) {
+            $elapsed = time() - (int)$_SESSION['last_chat_send_time'];
+            if ($elapsed < 5) {
+                $wait = 5 - $elapsed;
+                echo json_encode([
+                    'success' => false,
+                    'message' => "Vui lòng chờ {$wait}s để gửi tin nhắn tiếp theo."
+                ]);
+                exit;
+            }
+        }
+
+        // Anti-spam: check if already sent 10 consecutive messages waiting for admin reply
+        if (ChatMessage::isWaitingForAdminReply($sessionId, 10)) {
+            echo json_encode([
+                'success' => false,
+                'waiting_admin' => true,
+                'message' => 'Bạn đã gửi 10 tin nhắn liên tiếp. Vui lòng chờ Admin phản hồi trước khi gửi tiếp nhé.'
+            ]);
+            exit;
+        }
+
+        $user = $_SESSION['user'] ?? null;
+        $userId = $user['id'] ?? null;
+        $senderName = $user['name'] ?? 'Khách hàng';
+
+        $ok = ChatMessage::sendMessage($sessionId, 'user', $messageText, $userId, $senderName);
+        if ($ok) {
+            $_SESSION['last_chat_send_time'] = time();
+
+            // Trigger Telegram Notification to Admin
+            try {
+                if (class_exists('TelegramService')) {
+                    TelegramService::notifyNewChatMessage(
+                        ['name' => $senderName, 'email' => ($user['email'] ?? "Session: {$sessionId}")],
+                        $messageText
+                    );
+                }
+            } catch (Throwable $ignored) {}
+
+            $messages = ChatMessage::getMessagesBySession($sessionId);
+            $isWaiting = ChatMessage::isWaitingForAdminReply($sessionId, 10);
+            echo json_encode([
+                'success' => true,
+                'session_id' => $sessionId,
+                'messages' => $messages,
+                'is_waiting' => $isWaiting
+            ]);
+        } else {
+            echo json_encode(['success' => false, 'message' => 'Không thể gửi tin nhắn']);
+        }
+        exit;
+    }
+
+    public function chatUploadImage(): void {
+        header('Content-Type: application/json');
+        if (($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'POST') {
+            echo json_encode(['success' => false, 'message' => 'Invalid method']);
+            exit;
+        }
+
+        if (empty($_FILES['image'])) {
+            echo json_encode(['success' => false, 'message' => 'Vui lòng chọn hình ảnh']);
+            exit;
+        }
+
+        $sessionId = $this->getOrCreateChatSessionId();
+
+        // 5s rate limit check
+        if (!empty($_SESSION['last_chat_send_time'])) {
+            $elapsed = time() - (int)$_SESSION['last_chat_send_time'];
+            if ($elapsed < 5) {
+                $wait = 5 - $elapsed;
+                echo json_encode([
+                    'success' => false,
+                    'message' => "Vui lòng chờ {$wait}s để gửi hình ảnh tiếp theo."
+                ]);
+                exit;
+            }
+        }
+
+        // Anti-spam: check if already sent 10 consecutive messages waiting for admin reply
+        if (ChatMessage::isWaitingForAdminReply($sessionId, 10)) {
+            echo json_encode([
+                'success' => false,
+                'waiting_admin' => true,
+                'message' => 'Bạn đã gửi 10 tin nhắn liên tiếp. Vui lòng chờ Admin phản hồi trước khi gửi tiếp nhé.'
+            ]);
+            exit;
+        }
+
+        try {
+            $uploaded = Upload::store($_FILES['image'], 'chat', Upload::IMAGE_MIMES);
+            $imgUrl = $uploaded['url'];
+            
+            $user = $_SESSION['user'] ?? null;
+            $userId = $user['id'] ?? null;
+            $senderName = $user['name'] ?? 'Khách hàng';
+
+            $imgMsg = '[img]' . $imgUrl . '[/img]';
+            $ok = ChatMessage::sendMessage($sessionId, 'user', $imgMsg, $userId, $senderName);
+
+            if ($ok) {
+                $_SESSION['last_chat_send_time'] = time();
+
+                // Trigger Telegram Notification to Admin
+                try {
+                    if (class_exists('TelegramService')) {
+                        TelegramService::notifyNewChatMessage(
+                            ['name' => $senderName, 'email' => ($user['email'] ?? "Session: {$sessionId}")],
+                            '[Gửi hình ảnh]',
+                            $imgUrl
+                        );
+                    }
+                } catch (Throwable $ignored) {}
+
+                $messages = ChatMessage::getMessagesBySession($sessionId);
+                $isWaiting = ChatMessage::isWaitingForAdminReply($sessionId, 10);
+                echo json_encode([
+                    'success' => true,
+                    'session_id' => $sessionId,
+                    'messages' => $messages,
+                    'url' => $imgUrl,
+                    'is_waiting' => $isWaiting
+                ]);
+            } else {
+                echo json_encode(['success' => false, 'message' => 'Không thể lưu hình ảnh']);
+            }
+        } catch (Throwable $e) {
+            echo json_encode(['success' => false, 'message' => $e->getMessage()]);
+        }
+        exit;
+    }
 }
+
 ?>

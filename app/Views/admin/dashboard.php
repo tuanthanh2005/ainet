@@ -539,6 +539,17 @@
                     </a>
                 </li>
                 <li class="nav-item">
+                    <a href="#" class="nav-link" onclick="switchView('chats', this)">
+                        <i class="fa-solid fa-comments"></i>
+                        <span class="nav-label">Quản lý Chat Box</span>
+                        <?php if (!empty($unreadChats)): ?>
+                            <span class="nav-count-badge" id="chat-unread-badge-sidebar" title="Tin nhắn chưa đọc"><?php echo (int) $unreadChats; ?></span>
+                        <?php else: ?>
+                            <span class="nav-count-badge d-none" id="chat-unread-badge-sidebar" title="Tin nhắn chưa đọc">0</span>
+                        <?php endif; ?>
+                    </a>
+                </li>
+                <li class="nav-item">
                     <a href="#" class="nav-link" onclick="switchView('users', this)">
                         <i class="fa-solid fa-users"></i> Quản lý User
                     </a>
@@ -1359,7 +1370,63 @@
                     </div>
                 </div>
 
+                <!-- Chat Box Section -->
+                <div id="view-chats" class="view-section">
+                    <div class="card-custom overflow-hidden" style="height: calc(100vh - 160px); min-height: 520px;">
+                        <div class="row g-0 h-100">
+                            <!-- Left Column: Conversations List -->
+                            <div class="col-12 col-md-4 border-end h-100 d-flex flex-column bg-white">
+                                <div class="p-3 border-bottom bg-light">
+                                    <h6 class="fw-bold mb-2 text-dark"><i class="fa-solid fa-comments me-2"></i>Hội thoại Chat</h6>
+                                    <div class="input-group input-group-sm">
+                                        <span class="input-group-text bg-white"><i class="fa-solid fa-magnifying-glass text-muted"></i></span>
+                                        <input type="text" id="admin-chat-search" class="form-control" placeholder="Tìm theo tên/session..." onkeyup="AdminChat.filterConversations()">
+                                    </div>
+                                </div>
+                                <div class="flex-grow-1 overflow-auto" id="admin-conversations-list">
+                                    <div class="text-center p-4 text-muted"><i class="fa-solid fa-spinner fa-spin me-2"></i>Đang tải hội thoại...</div>
+                                </div>
+                            </div>
 
+                            <!-- Right Column: Active Conversation Messages & Input -->
+                            <div class="col-12 col-md-8 h-100 d-flex flex-column bg-light">
+                                <div id="admin-chat-header" class="p-3 border-bottom bg-white d-flex align-items-center justify-content-between">
+                                    <div class="d-flex align-items-center">
+                                        <div class="avatar-circle bg-dark text-white rounded-circle me-3 d-flex align-items-center justify-content-center fw-bold" style="width:40px; height:40px;">
+                                            <i class="fa-solid fa-user"></i>
+                                        </div>
+                                        <div>
+                                            <h6 id="admin-chat-user-name" class="fw-bold mb-0 text-dark">Chọn một cuộc hội thoại</h6>
+                                            <small id="admin-chat-user-sub" class="text-muted">Chưa có hội thoại nào được chọn</small>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="flex-grow-1 p-3 overflow-auto" id="admin-messages-container" style="background: #f8fafc;">
+                                    <div class="h-100 d-flex flex-column align-items-center justify-content-center text-muted">
+                                        <i class="fa-regular fa-comments fa-3x mb-3 opacity-50"></i>
+                                        <p class="mb-0 fw-medium">Chọn một cuộc hội thoại ở danh sách bên trái để bắt đầu chat trực tiếp.</p>
+                                    </div>
+                                </div>
+
+                                <div class="p-3 border-top bg-white" id="admin-chat-input-area" style="display: none;">
+                                    <form id="admin-chat-form" onsubmit="AdminChat.sendMessage(event)">
+                                        <div class="input-group">
+                                            <button type="button" class="btn btn-light border text-secondary px-3" onclick="document.getElementById('admin-chat-image-input').click()" title="Gửi hình ảnh">
+                                                <i class="fa-regular fa-image" style="font-size: 1.15rem;"></i>
+                                            </button>
+                                            <input type="file" id="admin-chat-image-input" accept="image/png,image/jpeg,image/gif,image/webp" style="display:none;" onchange="AdminChat.handleImageUpload(event)">
+                                            <input type="text" id="admin-chat-input" class="form-control" placeholder="Nhập tin nhắn phản hồi..." autocomplete="off">
+                                            <button class="btn btn-dark px-4 fw-bold" type="submit">
+                                                <i class="fa-solid fa-paper-plane me-1"></i> Gửi
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
             </div>
         </main>
@@ -4525,6 +4592,322 @@
             </div>
         </div>
     </div>
+
+<script>
+window.AdminChat = (function() {
+    let activeSessionId = null;
+    let conversations = [];
+    let pollTimer = null;
+
+    function init() {
+        loadConversations();
+        startPolling(3000);
+
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden) {
+                startPolling(15000);
+            } else {
+                loadConversations();
+                startPolling(3000);
+            }
+        });
+    }
+
+    function startPolling(ms) {
+        if (pollTimer) clearInterval(pollTimer);
+        pollTimer = setInterval(loadConversations, ms);
+    }
+
+    let lastUnreadTotal = -1;
+
+    function playNotificationSound() {
+        try {
+            const AudioContext = window.AudioContext || window.webkitAudioContext;
+            if (!AudioContext) return;
+            const ctx = new AudioContext();
+            const now = ctx.currentTime;
+            
+            const osc1 = ctx.createOscillator();
+            const osc2 = ctx.createOscillator();
+            const gain = ctx.createGain();
+
+            osc1.type = 'sine';
+            osc2.type = 'sine';
+
+            osc1.frequency.setValueAtTime(659.25, now);
+            osc2.frequency.setValueAtTime(987.77, now + 0.08);
+
+            gain.gain.setValueAtTime(0.15, now);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+
+            osc1.connect(gain);
+            osc2.connect(gain);
+            gain.connect(ctx.destination);
+
+            osc1.start(now);
+            osc1.stop(now + 0.08);
+
+            osc2.start(now + 0.08);
+            osc2.stop(now + 0.35);
+        } catch (e) {}
+    }
+
+    function loadConversations() {
+        fetch('?action=adminChatGetConversations')
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    conversations = data.conversations || [];
+                    renderConversationsList();
+                    const unread = Number(data.unread_total || 0);
+                    updateBadge(unread);
+
+                    if (lastUnreadTotal >= 0 && unread > lastUnreadTotal) {
+                        playNotificationSound();
+                    }
+                    lastUnreadTotal = unread;
+
+                    if (activeSessionId) {
+                        loadMessages(activeSessionId, false);
+                    }
+                }
+            })
+            .catch(() => {});
+    }
+
+    function updateBadge(count) {
+        const badge = document.getElementById('chat-unread-badge-sidebar');
+        if (badge) {
+            if (count > 0) {
+                badge.textContent = count;
+                badge.classList.remove('d-none');
+            } else {
+                badge.classList.add('d-none');
+                badge.textContent = '0';
+            }
+        }
+    }
+
+    function renderConversationsList() {
+        const container = document.getElementById('admin-conversations-list');
+        if (!container) return;
+
+        const searchKeyword = (document.getElementById('admin-chat-search')?.value || '').toLowerCase().trim();
+        const filtered = conversations.filter(c => {
+            const name = (c.sender_name || 'Khách').toLowerCase();
+            const sid = (c.session_id || '').toLowerCase();
+            const msg = (c.last_message || '').toLowerCase();
+            return name.includes(searchKeyword) || sid.includes(searchKeyword) || msg.includes(searchKeyword);
+        });
+
+        if (filtered.length === 0) {
+            container.innerHTML = '<div class="p-4 text-center text-muted small">Không có cuộc hội thoại nào.</div>';
+            return;
+        }
+
+        let html = '';
+        filtered.forEach(c => {
+            const isActive = c.session_id === activeSessionId;
+            const unread = Number(c.unread_count || 0);
+            const timeStr = c.last_time ? c.last_time.substring(11, 16) : '';
+            const isUser = c.last_sender_type === 'user';
+            const prefix = isUser ? '' : 'Admin: ';
+
+            html += `
+            <div class="p-3 border-bottom conversation-item ${isActive ? 'bg-light border-start border-4 border-dark fw-semibold' : ''}" 
+                 style="cursor: pointer; transition: all 0.2s;" 
+                 onclick="AdminChat.selectConversation('${c.session_id}', '${escapeHtml(c.sender_name || 'Khách')}')">
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="fw-bold text-dark text-truncate" style="max-width: 130px;">${escapeHtml(c.sender_name || 'Khách')}</span>
+                        ${c.user_id ? '<span class="badge bg-dark" style="font-size:0.65rem;">User</span>' : '<span class="badge bg-secondary" style="font-size:0.65rem;">Guest</span>'}
+                    </div>
+                    <small class="text-muted" style="font-size: 0.75rem;">${timeStr}</small>
+                </div>
+                <div class="d-flex justify-content-between align-items-center">
+                    <p class="mb-0 text-muted small text-truncate" style="max-width: 180px;">${prefix}${escapeHtml(c.last_message || '')}</p>
+                    ${unread > 0 ? `<span class="badge bg-danger rounded-pill">${unread}</span>` : ''}
+                </div>
+            </div>`;
+        });
+        container.innerHTML = html;
+    }
+
+    function selectConversation(sessionId, senderName) {
+        activeSessionId = sessionId;
+        document.getElementById('admin-chat-user-name').textContent = senderName;
+        document.getElementById('admin-chat-user-sub').textContent = 'ID: ' + sessionId;
+        document.getElementById('admin-chat-input-area').style.display = 'block';
+
+        renderConversationsList();
+        loadMessages(sessionId, true);
+    }
+
+    function loadMessages(sessionId, scroll = true) {
+        fetch(`?action=adminChatGetMessages&session_id=${sessionId}`)
+            .then(res => res.json())
+            .then(data => {
+                if (data.success && data.session_id === activeSessionId) {
+                    renderMessages(data.messages || []);
+                    if (scroll) scrollToBottom();
+                }
+            })
+            .catch(() => {});
+    }
+
+    function formatMsgContent(text) {
+        if (!text) return '';
+        const trimmed = text.trim();
+        if (trimmed.startsWith('[img]') && trimmed.endsWith('[/img]')) {
+            const url = trimmed.substring(5, trimmed.length - 6);
+            return `<a href="${escapeHtml(url)}" target="_blank" class="d-inline-block mt-1"><img src="${escapeHtml(url)}" alt="Hình ảnh" style="max-width:260px; max-height:260px; border-radius:10px; border:1px solid #cbd5e1; object-fit:cover;"></a>`;
+        }
+        if (/^https?:\/\/.+\.(png|jpg|jpeg|gif|webp)(\?.*)?$/i.test(trimmed)) {
+            return `<a href="${escapeHtml(trimmed)}" target="_blank" class="d-inline-block mt-1"><img src="${escapeHtml(trimmed)}" alt="Hình ảnh" style="max-width:260px; max-height:260px; border-radius:10px; border:1px solid #cbd5e1; object-fit:cover;"></a>`;
+        }
+        return escapeHtml(text);
+    }
+
+    let lastAdminMessagesFingerprint = '';
+
+    function renderMessages(messages, forceScroll = false) {
+        const container = document.getElementById('admin-messages-container');
+        if (!container) return;
+
+        const newFingerprint = (messages || []).map(m => `${m.id}_${m.is_read}`).join('|');
+        if (newFingerprint === lastAdminMessagesFingerprint && !forceScroll) {
+            return;
+        }
+
+        const isNearBottom = (container.scrollHeight - container.scrollTop <= container.clientHeight + 80);
+
+        let html = '';
+        (messages || []).forEach(msg => {
+            const isAdmin = msg.sender_type === 'admin';
+            const timeStr = msg.created_at ? msg.created_at.substring(11, 16) : '';
+            const contentHtml = formatMsgContent(msg.message);
+
+            if (isAdmin) {
+                html += `
+                <div class="d-flex justify-content-end mb-3">
+                    <div class="text-end" style="max-width: 75%;">
+                        <div class="bg-dark text-white p-3 rounded-3 shadow-sm text-start" style="border-top-right-radius: 2px !important;">
+                            ${contentHtml}
+                        </div>
+                        <small class="text-muted d-block mt-1" style="font-size: 0.7rem;">${escapeHtml(msg.sender_name || 'Admin')} • ${timeStr}</small>
+                    </div>
+                </div>`;
+            } else {
+                html += `
+                <div class="d-flex justify-content-start mb-3">
+                    <div class="text-start" style="max-width: 75%;">
+                        <div class="bg-white text-dark p-3 rounded-3 border shadow-sm" style="border-top-left-radius: 2px !important;">
+                            ${contentHtml}
+                        </div>
+                        <small class="text-muted d-block mt-1" style="font-size: 0.7rem;">${escapeHtml(msg.sender_name || 'Khách')} • ${timeStr}</small>
+                    </div>
+                </div>`;
+            }
+        });
+
+        container.innerHTML = html;
+        lastAdminMessagesFingerprint = newFingerprint;
+
+        if (forceScroll || isNearBottom) {
+            requestAnimationFrame(() => {
+                container.scrollTop = container.scrollHeight;
+            });
+        }
+    }
+
+    function scrollToBottom() {
+        const container = document.getElementById('admin-messages-container');
+        if (container) {
+            container.scrollTop = container.scrollHeight;
+        }
+    }
+
+    function sendMessage(e) {
+        if (e) e.preventDefault();
+        if (!activeSessionId) return;
+
+        const input = document.getElementById('admin-chat-input');
+        const text = input ? input.value.trim() : '';
+        if (!text) return;
+
+        input.value = '';
+
+        fetch('?action=adminChatSendMessage', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-Token': APP_STATE.csrfToken
+            },
+            body: JSON.stringify({
+                session_id: activeSessionId,
+                message: text
+            })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                renderMessages(data.messages || []);
+                scrollToBottom();
+                loadConversations();
+            } else {
+                AppNotify.error(data.message || 'Không thể gửi tin nhắn.');
+            }
+        })
+        .catch(() => AppNotify.error('Không thể kết nối server.'));
+    }
+
+    function handleImageUpload(e) {
+        const file = e.target.files?.[0];
+        if (!file || !activeSessionId) return;
+
+        const formData = new FormData();
+        formData.append('image', file);
+        formData.append('session_id', activeSessionId);
+        formData.append('csrf_token', APP_STATE.csrfToken);
+
+        fetch('?action=adminChatUploadImage', {
+            method: 'POST',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRF-Token': APP_STATE.csrfToken
+            },
+            body: formData
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                renderMessages(data.messages || []);
+                scrollToBottom();
+                loadConversations();
+            } else {
+                AppNotify.error(data.message || 'Không thể tải hình ảnh lên.');
+            }
+        })
+        .catch(() => AppNotify.error('Không thể kết nối server.'))
+        .finally(() => {
+            e.target.value = '';
+        });
+    }
+
+    function escapeHtml(str) {
+        return (str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    document.addEventListener('DOMContentLoaded', init);
+
+    return {
+        selectConversation,
+        sendMessage,
+        handleImageUpload,
+        filterConversations: renderConversationsList
+    };
+})();
+</script>
 </body>
 
 </html>

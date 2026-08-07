@@ -35,6 +35,7 @@ class AdminController extends Controller {
         $users      = User::getAll();
         $contactMessages = ContactMessage::getAll();
         $unreadContacts = ContactMessage::countUnread();
+        $unreadChats    = ChatMessage::countTotalUnreadForAdmin();
 
         $this->view('admin/dashboard', [
             'settings'         => $settings,
@@ -45,6 +46,7 @@ class AdminController extends Controller {
             'users'            => $users,
             'contactMessages'  => $contactMessages,
             'unreadContacts'   => $unreadContacts,
+            'unreadChats'      => $unreadChats,
             'totalRevenue'     => $totalRevenue,
             'totalOrders'      => $totalOrders,
             'pendingOrders'    => $pendingOrders,
@@ -1338,6 +1340,106 @@ class AdminController extends Controller {
         $lines = explode("\n", trim($content));
         $lastLines = array_slice($lines, -150);
         $this->jsonSuccess(['logs' => implode("\n", $lastLines)]);
+    }
+
+    public function adminChatGetConversations(): void {
+        $conversations = ChatMessage::getConversations();
+        $unreadTotal = ChatMessage::countTotalUnreadForAdmin();
+        $this->jsonSuccess([
+            'conversations' => $conversations,
+            'unread_total'  => $unreadTotal,
+        ]);
+    }
+
+    public function adminChatGetMessages(): void {
+        $sessionId = trim($_GET['session_id'] ?? '');
+        if ($sessionId === '') {
+            $this->jsonError('Session ID required');
+        }
+
+        ChatMessage::markAsRead($sessionId, 'user');
+        $messages = ChatMessage::getMessagesBySession($sessionId);
+        $this->jsonSuccess([
+            'session_id' => $sessionId,
+            'messages'   => $messages,
+        ]);
+    }
+
+    public function adminChatSendMessage(): void {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            $this->jsonError('Method not allowed', 405);
+        }
+
+        $input = json_decode(file_get_contents('php://input'), true);
+        $sessionId   = trim($input['session_id'] ?? $_POST['session_id'] ?? '');
+        $messageText = trim($input['message'] ?? $_POST['message'] ?? '');
+
+        if ($sessionId === '' || $messageText === '') {
+            $this->jsonError('Thiếu dữ liệu session_id hoặc nội dung tin nhắn');
+        }
+
+        $adminUser = $_SESSION['user'] ?? null;
+        $adminId   = $adminUser['id'] ?? null;
+        $adminName = 'Admin (' . ($adminUser['name'] ?? 'Hệ thống') . ')';
+
+        $ok = ChatMessage::sendMessage($sessionId, 'admin', $messageText, $adminId, $adminName);
+        if ($ok) {
+            $messages = ChatMessage::getMessagesBySession($sessionId);
+            $this->jsonSuccess([
+                'session_id' => $sessionId,
+                'messages'   => $messages,
+            ]);
+        } else {
+            $this->jsonError('Không thể lưu tin nhắn');
+        }
+    }
+
+    public function adminChatMarkRead(): void {
+        $sessionId = trim($_GET['session_id'] ?? $_POST['session_id'] ?? '');
+        if ($sessionId !== '') {
+            ChatMessage::markAsRead($sessionId, 'user');
+        }
+        $this->jsonSuccess();
+    }
+
+    public function adminChatUploadImage(): void {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            $this->jsonError('Method not allowed', 405);
+        }
+
+        $sessionId = trim($_POST['session_id'] ?? '');
+        if ($sessionId === '') {
+            $this->jsonError('Session ID required');
+        }
+
+        if (empty($_FILES['image'])) {
+            $this->jsonError('Vui lòng chọn hình ảnh');
+        }
+
+        try {
+            $uploaded = Upload::store($_FILES['image'], 'chat', Upload::IMAGE_MIMES);
+            $imgUrl = $uploaded['url'];
+
+            $adminUser = $_SESSION['user'] ?? null;
+            $adminId   = $adminUser['id'] ?? null;
+            $adminName = 'Admin (' . ($adminUser['name'] ?? 'Hệ thống') . ')';
+
+            $imgMsg = '[img]' . $imgUrl . '[/img]';
+            $ok = ChatMessage::sendMessage($sessionId, 'admin', $imgMsg, $adminId, $adminName);
+
+            if ($ok) {
+                $messages = ChatMessage::getMessagesBySession($sessionId);
+                $this->jsonSuccess([
+                    'session_id' => $sessionId,
+                    'messages'   => $messages,
+                    'url'        => $imgUrl
+                ]);
+            } else {
+                $this->jsonError('Không thể lưu hình ảnh');
+            }
+        } catch (Throwable $e) {
+            $this->jsonError($e->getMessage());
+        }
     }
 
     private function jsonSuccess(array $payload = []): void {

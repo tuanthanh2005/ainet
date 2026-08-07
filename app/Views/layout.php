@@ -401,28 +401,34 @@
         </button>
         <?php
         $zaloValue = trim($settings['zalo'] ?? '');
-        $zaloLink = '#';
+        $zaloLink = 'https://zalo.me';
         if ($zaloValue !== '') {
             if (strpos($zaloValue, 'http') === 0) {
                 $zaloLink = $zaloValue;
             } else {
                 $cleanPhone = preg_replace('/[^0-9]/', '', $zaloValue);
-                $zaloLink = 'https://zalo.me/' . $cleanPhone;
+                if ($cleanPhone !== '') {
+                    $zaloLink = 'https://zalo.me/' . $cleanPhone;
+                }
             }
         }
         ?>
-        <?php if ($zaloValue !== ''): ?>
         <a href="<?= htmlspecialchars($zaloLink) ?>" target="_blank" 
            class="fab-btn fab-zalo" 
            style="background-color: #0068FF !important; color: #ffffff !important; text-decoration: none;"
            title="Hỗ trợ Zalo">
             <span class="zalo-text" style="color: #ffffff !important;">Zalo</span>
         </a>
-        <?php endif; ?>
         <a href="https://t.me/specademy" target="_blank" class="fab-btn fab-telegram" title="Hỗ trợ Telegram">
             <i class="fa-brands fa-telegram"></i>
         </a>
+        <button id="chat-bubble-toggle" class="fab-btn fab-chat" type="button" aria-label="Mở chat hỗ trợ" title="Chat với Admin">
+            <i class="fa-solid fa-comments"></i>
+            <span id="chat-unread-badge" class="chat-badge d-none">0</span>
+        </button>
     </div>
+
+
 
     <!-- Bootstrap powers the public navigation and modal components. -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
@@ -473,6 +479,9 @@
             <span>Liên Hệ</span>
         </a>
     </div>
+
+    <!-- Floating Chat Bubble Component -->
+    <?php require_once APP_ROOT . '/app/Views/partials/chat_bubble.php'; ?>
 
 </body>
 

@@ -96,6 +96,7 @@ require_once APP_ROOT . '/app/Models/RecentOrder.php';
 require_once APP_ROOT . '/app/Models/Order.php';
 require_once APP_ROOT . '/app/Models/Stock.php';
 require_once APP_ROOT . '/app/Models/ContactMessage.php';
+require_once APP_ROOT . '/app/Models/ChatMessage.php';
 
 // Load Controllers
 require_once APP_ROOT . '/app/Controllers/HomeController.php';
