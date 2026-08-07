@@ -121,7 +121,6 @@ const AppNotify = (() => {
 // Helper: copy text to clipboard and show AppNotify toast
 function copyText(textOrId) {
     let text = textOrId;
-    // If it is a selector or element ID, try to read the inner text
     const el = document.getElementById(textOrId);
     if (el) {
         text = el.innerText || el.textContent;
@@ -148,13 +147,20 @@ document.addEventListener('DOMContentLoaded', function() {
     const scrollToTopBtn = document.getElementById('btnScrollToTop');
     
     if (scrollToTopBtn) {
+        let isTicking = false;
         window.addEventListener('scroll', function() {
-            if (window.scrollY > 300) {
-                scrollToTopBtn.classList.add('show');
-            } else {
-                scrollToTopBtn.classList.remove('show');
+            if (!isTicking) {
+                window.requestAnimationFrame(function() {
+                    if (window.scrollY > 300) {
+                        scrollToTopBtn.classList.add('show');
+                    } else {
+                        scrollToTopBtn.classList.remove('show');
+                    }
+                    isTicking = false;
+                });
+                isTicking = true;
             }
-        });
+        }, { passive: true });
 
         scrollToTopBtn.addEventListener('click', function(e) {
             e.preventDefault();

@@ -1,6 +1,6 @@
 <div id="home-section" style="display: <?php echo ($tab === 'home') ? 'block' : 'none'; ?>;">
     <!-- Hero / Intro Section -->
-    <div class="row align-items-center g-5 py-5 mb-5 rounded-4 position-relative overflow-hidden fade-in-element" style="background: rgba(255,255,255,0.45); border: 1px solid var(--border-color); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); margin-left: 0; margin-right: 0;">
+    <div class="row align-items-center g-5 py-5 mb-5 rounded-4 position-relative overflow-hidden fade-in-element" style="background: rgba(255,255,255,0.92); border: 1px solid var(--border-color); box-shadow: 0 10px 30px rgba(0,0,0,0.02); margin-left: 0; margin-right: 0;">
         <div class="col-lg-7 text-start ps-4 ps-md-5">
             <span class="badge bg-primary bg-opacity-10 text-primary mb-3 px-3 py-2 rounded-pill fw-bold" style="letter-spacing:1px; font-size:0.75rem;"><i class="fa-solid fa-sparkles me-1"></i> HỆ SINH THÁI TÀI KHOẢN PREMIUM</span>
             <h1 class="display-5 fw-bold text-dark mb-3 lh-sm">Sở Hữu Tài Khoản AI <br><span class="text-gradient fw-extrabold" style="background: var(--vip-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Chính Hãng, Giá Rẻ</span></h1>
@@ -16,59 +16,6 @@
             <img src="<?php echo url('assets/images/gemini_share.webp'); ?>" width="1024" height="1024" class="img-fluid rounded-4 shadow-sm" alt="AI Của Tôi" loading="eager" fetchpriority="high" decoding="async" style="max-height: 280px; object-fit: cover; border: 1px solid var(--border-color);">
         </div>
     </div>
-
-    <style>
-        .pulse-green {
-            display: inline-block;
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: #10b981;
-            box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
-            animation: pulse-green-anim 1.8s infinite;
-            vertical-align: middle;
-        }
-        @keyframes pulse-green-anim {
-            0% {
-                transform: scale(0.95);
-                box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
-            }
-            70% {
-                transform: scale(1);
-                box-shadow: 0 0 0 8px rgba(16, 185, 129, 0);
-            }
-            100% {
-                transform: scale(0.95);
-                box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
-            }
-        }
-        .system-monitor-card {
-            background: rgba(255, 255, 255, 0.45);
-            border: 1px solid var(--border-color);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
-            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.03);
-            border-radius: 16px;
-        }
-        .system-monitor-card:hover {
-            transform: translateY(-5px);
-            background: rgba(255, 255, 255, 0.85);
-            border-color: rgba(99, 102, 241, 0.3);
-            box-shadow: 0 10px 30px rgba(99, 102, 241, 0.1);
-        }
-        .live-label {
-            font-size: 0.65rem;
-            letter-spacing: 1.5px;
-            text-transform: uppercase;
-            font-weight: 700;
-            color: rgba(99, 102, 241, 0.8);
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-        }
-    </style>
-
     <!-- Product Showcase Section -->
     <?php
     $renderProductList = function($productList) {
@@ -202,22 +149,6 @@
     <style>
         .showcase-tabs .nav-link {
             background-color: rgba(255, 255, 255, 0.8);
-            border: 1px solid var(--border-color);
-            color: #4b5563;
-            transition: all 0.3s ease;
-        }
-        .showcase-tabs .nav-link:hover {
-            background-color: #f3f4f6;
-            transform: translateY(-2px);
-        }
-        .showcase-tabs .nav-link.active {
-            background: var(--vip-gradient);
-            color: white;
-            border-color: transparent;
-            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3) !important;
-        }
-        .showcase-tabs .nav-link.active i {
-            color: white !important;
         }
     </style>
 
