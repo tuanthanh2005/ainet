@@ -853,6 +853,9 @@
                                         <h6 class="mb-0 fw-bold"><i class="fa-solid fa-clock-rotate-left me-2"></i>Lịch Sử Thao Tác & Session Đã Rời Đi (History)</h6>
                                         <small class="text-muted">Khi người dùng rời khỏi trang web (> 2 phút), phên của họ được tự động lưu vào lịch sử tại đây.</small>
                                     </div>
+                                    <button class="btn btn-sm btn-outline-danger" onclick="clearSecurityHistoryLogs()">
+                                        <i class="fa-solid fa-trash me-1"></i> Xóa Sạch Lịch Sử
+                                    </button>
                                 </div>
                                 <div class="table-responsive">
                                     <table class="table table-hover table-custom mb-0">
@@ -2893,6 +2896,29 @@
                         loadSecurityLogs();
                     } else {
                         AppNotify.error(data.message || 'Không thể gỡ block.');
+                    }
+                });
+            });
+        }
+
+        function clearSecurityHistoryLogs() {
+            Swal.fire({
+                title: 'Xóa sạch Lịch sử Log?',
+                text: 'Hành động này sẽ dọn dẹp toàn bộ log lịch sử thao tác cũ.',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#dc3545',
+                confirmButtonText: 'Xóa Sạch'
+            }).then(res => {
+                if (!res.isConfirmed) return;
+                apiPost('adminClearSecurityLogs', new FormData()).then(data => {
+                    if (data.success) {
+                        AppNotify.success(data.message || 'Đã xóa toàn bộ lịch sử log.');
+                        window.SECURITY_LOGS_STATE.allLogs = [];
+                        window.SECURITY_LOGS_STATE.currentPage = 1;
+                        loadSecurityLogs(true);
+                    } else {
+                        AppNotify.error(data.message || 'Không thể xóa log.');
                     }
                 });
             });

@@ -967,6 +967,15 @@ class AdminController extends Controller {
         $this->jsonSuccess(['message' => 'Đã xóa toàn bộ cache của hệ thống.']);
     }
 
+    public function adminClearSecurityLogs() {
+        Auth::requireAdmin();
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            $this->jsonError('Method not allowed', 405);
+        }
+        SecurityLogger::clearLogs();
+        $this->jsonSuccess(['message' => 'Đã xóa sạch toàn bộ lịch sử log thao tác.']);
+    }
+
     public function adminGetKeywords() {
         $path = APP_ROOT . '/config/seo_keywords.json';
         $data = ['keywords' => [], 'aliases' => []];

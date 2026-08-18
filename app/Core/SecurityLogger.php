@@ -284,12 +284,26 @@ class SecurityLogger {
                 'user_info' => $userInfo,
                 'is_logged_in' => $logEntry['is_logged_in'] ? 1 : 0,
                 'action_type' => $actionType,
-                'url' => substr($logEntry['url'], 0, 500),
-                'details' => substr($details, 0, 500),
+                'url' => $logEntry['url'],
+                'details' => $details,
                 'is_suspicious' => $isSuspicious ? 1 : 0,
-                'user_agent' => substr($logEntry['user_agent'], 0, 255)
+                'user_agent' => substr($_SERVER['HTTP_USER_AGENT'] ?? '', 0, 250)
             ]);
+
+            // Auto prune MySQL log table if > 1000 rows (every 50 inserts)
+            if (rand(1, 50) === 1) {
+                $db->exec("DELETE FROM security_logs WHERE id NOT IN (SELECT id FROM (SELECT id FROM security_logs ORDER BY id DESC LIMIT 1000) as tmp)");
+            }
         } catch (Throwable $ignored) {}
+    }
+
+    public static function clearLogs(): void {
+        $file = self::getLogsFile();
+        @file_put_contents($file, json_encode([]));
+        try {
+            $db = Database::getInstance();
+            $db->exec("TRUNCATE TABLE security_logs");
+        } catch (Throwable $e) {}
     }
 
     public static function getLogs(int $limit = 200): array {
