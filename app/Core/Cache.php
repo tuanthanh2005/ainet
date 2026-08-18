@@ -39,4 +39,18 @@ class Cache {
             apcu_delete('ainet:' . $key);
         }
     }
+
+    public static function clear(): void {
+        self::$requestCache = [];
+        if (self::apcuAvailable()) {
+            apcu_clear_cache();
+        }
+        $cacheDir = defined('APP_ROOT') ? (APP_ROOT . '/storage/cache') : (dirname(__DIR__, 2) . '/storage/cache');
+        if (is_dir($cacheDir)) {
+            $files = glob($cacheDir . '/*');
+            foreach ($files as $file) {
+                if (is_file($file)) @unlink($file);
+            }
+        }
+    }
 }

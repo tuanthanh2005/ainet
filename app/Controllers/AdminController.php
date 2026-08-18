@@ -961,6 +961,12 @@ class AdminController extends Controller {
         $this->jsonError('IP không hợp lệ.');
     }
 
+    public function adminClearCache() {
+        Auth::requireAdmin();
+        Cache::clear();
+        $this->jsonSuccess(['message' => 'Đã xóa toàn bộ cache của hệ thống.']);
+    }
+
     public function adminGetKeywords() {
         $path = APP_ROOT . '/config/seo_keywords.json';
         $data = ['keywords' => [], 'aliases' => []];
