@@ -90,9 +90,10 @@ require_once APP_ROOT . '/app/Core/SecurityLogger.php';
 SecurityLogger::inspectAndFilter();
 SecurityLogger::checkGuestSession();
 
-// Log user activity
+// Track active online sessions & log user activity
 $uriPath = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH);
 if (!preg_match('/\.(js|css|png|jpg|jpeg|gif|ico|svg|woff2?)$/i', $uriPath)) {
+    SecurityLogger::touchSession($uriPath);
     SecurityLogger::logActivity('VIEW_PAGE', 'Truy cập: ' . $uriPath);
 }
 

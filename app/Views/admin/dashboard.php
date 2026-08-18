@@ -784,6 +784,41 @@
 
                 <div id="view-security-logs" class="view-section">
                     <div class="row">
+                        <!-- Realtime Active Sessions (Online Users) -->
+                        <div class="col-lg-12 mb-4">
+                            <div class="card-custom border-success border-top" style="border-width: 4px !important;">
+                                <div class="card-header-custom d-flex justify-content-between align-items-center flex-wrap gap-2">
+                                    <div>
+                                        <h6 class="mb-0 fw-bold text-success">
+                                            <span class="spinner-grow spinner-grow-sm text-success me-2" role="status"></span>
+                                            Phiên Đang Hoạt Động (Realtime Online - Auto 5s)
+                                        </h6>
+                                        <small class="text-muted">Danh sách các phên (Khách vãng lai & User) đang lướt web trong 2 phút vừa qua.</small>
+                                    </div>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <span class="badge bg-success rounded-pill px-3 py-2" id="active-sessions-count-badge">0 Đang Online</span>
+                                        <button class="btn btn-sm btn-outline-secondary" onclick="loadSecurityLogs()">
+                                            <i class="fa-solid fa-rotate me-1"></i> Cập nhật
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="table-responsive">
+                                    <table class="table table-hover table-custom mb-0">
+                                        <thead>
+                                            <tr>
+                                                <th>Đối tượng / Session</th>
+                                                <th>IP</th>
+                                                <th>Trang Đang Xem / URL Gõ</th>
+                                                <th>Lần Cuối Xuất Hiện</th>
+                                                <th>Trạng thái</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="active-sessions-table-body"></tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+
                         <!-- Banned IPs List -->
                         <div class="col-lg-12 mb-4">
                             <div class="card-custom border-danger border-top" style="border-width: 4px !important;">
@@ -792,9 +827,6 @@
                                         <h6 class="mb-0 fw-bold text-danger"><i class="fa-solid fa-ban me-2"></i>Danh sách IP Đã Bị Block Vĩnh Viễn</h6>
                                         <small class="text-muted">Tự động cấm các IP thử nghiệm hack SQLi, XSS hoặc gõ URL rác/thăm dò.</small>
                                     </div>
-                                    <button class="btn btn-sm btn-outline-secondary" onclick="loadSecurityLogs()">
-                                        <i class="fa-solid fa-rotate me-1"></i> Làm mới
-                                    </button>
                                 </div>
                                 <div class="table-responsive">
                                     <table class="table table-hover table-custom mb-0">
@@ -813,13 +845,13 @@
                             </div>
                         </div>
 
-                        <!-- Activity & Audit Logs -->
+                        <!-- Activity History & Audit Logs -->
                         <div class="col-lg-12">
                             <div class="card-custom">
                                 <div class="card-header-custom d-flex justify-content-between align-items-center flex-wrap gap-2">
                                     <div>
-                                        <h6 class="mb-0 fw-bold"><i class="fa-solid fa-list-check me-2"></i>Log Hoạt Động & Session (Khách & User)</h6>
-                                        <small class="text-muted">Theo dõi xem người dùng gõ gì, tìm kiếm từ khóa nào và hoạt động ra sao.</small>
+                                        <h6 class="mb-0 fw-bold"><i class="fa-solid fa-clock-rotate-left me-2"></i>Lịch Sử Thao Tác & Session Đã Rời Đi (History)</h6>
+                                        <small class="text-muted">Khi người dùng rời khỏi trang web (> 2 phút), phên của họ được tự động lưu vào lịch sử tại đây.</small>
                                     </div>
                                 </div>
                                 <div class="table-responsive">
@@ -1885,6 +1917,14 @@
 
             if (viewId === 'security-logs') {
                 loadSecurityLogs();
+                if (!window.securityLogsInterval) {
+                    window.securityLogsInterval = setInterval(loadSecurityLogs, 5000);
+                }
+            } else {
+                if (window.securityLogsInterval) {
+                    clearInterval(window.securityLogsInterval);
+                    window.securityLogsInterval = null;
+                }
             }
 
             // Close sidebar on mobile
@@ -2622,9 +2662,45 @@
                 .then(r => r.json())
                 .then(res => {
                     if (!res.success) return;
+                    renderActiveSessions(res.active_sessions || []);
                     renderBannedIps(res.banned_ips || []);
                     renderSecurityLogs(res.logs || []);
                 }).catch(err => console.error(err));
+        }
+
+        function renderActiveSessions(sessions) {
+            const tbody = document.getElementById('active-sessions-table-body');
+            const badge = document.getElementById('active-sessions-count-badge');
+            if (badge) badge.innerText = `${sessions.length} Đang Online`;
+            if (!tbody) return;
+            tbody.innerHTML = '';
+
+            if (!sessions || sessions.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted py-3">Không có người dùng nào đang Online.</td></tr>';
+                return;
+            }
+
+            sessions.forEach(sess => {
+                const isUser = sess.is_logged_in;
+                const userBadge = isUser
+                    ? `<span class="badge bg-primary rounded-pill"><i class="fa-solid fa-user me-1"></i>${escapeHtml(sess.user_info)}</span>`
+                    : `<span class="badge bg-secondary rounded-pill"><i class="fa-solid fa-user-secret me-1"></i>Khách vãng lai</span>`;
+                
+                const timeAgo = sess.seconds_ago <= 5 ? 'Vừa xong' : `${sess.seconds_ago} giây trước`;
+
+                tbody.innerHTML += `
+                    <tr class="align-middle">
+                        <td>
+                            ${userBadge}
+                            <div class="text-muted extra-small mt-1">Session: <code>${escapeHtml(sess.session_id.substring(0, 16))}...</code></div>
+                        </td>
+                        <td class="font-monospace small">${escapeHtml(sess.ip)}</td>
+                        <td><code class="text-dark bg-light p-1 rounded small fw-bold">${escapeHtml(sess.current_url || '/')}</code></td>
+                        <td class="small text-muted"><i class="fa-regular fa-clock me-1"></i>${timeAgo}</td>
+                        <td><span class="badge bg-success rounded-pill"><i class="fa-solid fa-circle me-1 small"></i>ONLINE</span></td>
+                    </tr>
+                `;
+            });
         }
 
         function renderBannedIps(bannedList) {

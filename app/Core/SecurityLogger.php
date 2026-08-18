@@ -17,6 +17,10 @@ class SecurityLogger {
         return self::getStorageDir() . '/security_logs.json';
     }
 
+    private static function getActiveSessionsFile(): string {
+        return self::getStorageDir() . '/active_sessions.json';
+    }
+
     public static function getClientIp(): string {
         if (!empty($_SERVER['HTTP_CF_CONNECTING_IP'])) {
             return trim($_SERVER['HTTP_CF_CONNECTING_IP']);
@@ -101,6 +105,70 @@ class SecurityLogger {
             $stmt = $db->prepare("DELETE FROM banned_ips WHERE ip = :ip");
             $stmt->execute(['ip' => $ip]);
         } catch (Throwable $ignored) {}
+    }
+
+    /**
+     * Touch current session to track active online users (realtime 2-minute window)
+     */
+    public static function touchSession(string $currentUrl = ''): void {
+        $sid = session_id();
+        if (!$sid) return;
+
+        $ip = self::getClientIp();
+        $user = Auth::user();
+        $userInfo = $user ? ($user['name'] . ' (' . $user['email'] . ')') : 'Khách vãng lai';
+        $now = time();
+
+        $file = self::getActiveSessionsFile();
+        $sessions = file_exists($file) ? (json_decode(file_get_contents($file), true) ?: []) : [];
+
+        // Prune sessions inactive for > 120 seconds (move off users to history)
+        foreach ($sessions as $key => $sess) {
+            if (($now - ($sess['last_seen_time'] ?? 0)) > 120) {
+                unset($sessions[$key]);
+            }
+        }
+
+        $url = $currentUrl !== '' ? $currentUrl : ($_SERVER['REQUEST_URI'] ?? '/');
+        
+        // Update current active session
+        $sessions[$sid] = [
+            'session_id' => $sid,
+            'ip' => $ip,
+            'user_info' => $userInfo,
+            'is_logged_in' => !empty($user),
+            'current_url' => $url,
+            'last_seen' => date('Y-m-d H:i:s'),
+            'last_seen_time' => $now,
+            'started_at' => $sessions[$sid]['started_at'] ?? date('Y-m-d H:i:s'),
+            'user_agent' => $_SERVER['HTTP_USER_AGENT'] ?? ''
+        ];
+
+        @file_put_contents($file, json_encode($sessions, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+    }
+
+    public static function getActiveSessions(): array {
+        $file = self::getActiveSessionsFile();
+        if (!file_exists($file)) return [];
+
+        $sessions = json_decode(file_get_contents($file), true) ?: [];
+        $now = time();
+        $active = [];
+
+        foreach ($sessions as $sid => $sess) {
+            $diff = $now - ($sess['last_seen_time'] ?? 0);
+            if ($diff <= 120) { // Active in last 2 minutes
+                $sess['online_status'] = 'online';
+                $sess['seconds_ago'] = $diff;
+                $active[] = $sess;
+            }
+        }
+
+        usort($active, function($a, $b) {
+            return ($b['last_seen_time'] ?? 0) <=> ($a['last_seen_time'] ?? 0);
+        });
+
+        return $active;
     }
 
     public static function logActivity(string $actionType, string $details = '', bool $isSuspicious = false): void {
