@@ -59,6 +59,9 @@
                     <h3 class="fw-bold mb-4 text-dark">Gửi tin nhắn cho chúng tôi</h3>
                     <form id="contactForm" method="POST" action="<?php echo url('index.php?action=submitContact'); ?>">
                         <?php echo Csrf::field(); ?>
+                        <div class="d-none" style="display:none !important;" aria-hidden="true">
+                            <input type="text" name="website_url_check" tabindex="-1" autocomplete="off">
+                        </div>
                         <div class="row g-4">
                             <div class="col-md-6">
                                 <label class="form-label small fw-bold">Họ tên</label>

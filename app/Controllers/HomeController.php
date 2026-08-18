@@ -866,10 +866,51 @@ class HomeController extends Controller {
             exit;
         }
 
+        // 1. Honeypot trap check for bots
+        if (!empty($_POST['website_url_check'])) {
+            $_SESSION['flash_success'] = 'Cảm ơn bạn đã liên hệ. Chúng tôi sẽ phản hồi sớm.';
+            header('Location: ' . Url::contact());
+            exit;
+        }
+
+        // 2. Rate Limiting (max 3 contact submissions per 10 mins per IP)
+        $ip = SecurityLogger::getClientIp();
+        $rateKey = 'contact_submit_' . md5($ip);
+        $attempts = $_SESSION[$rateKey] ?? ['count' => 0, 'time' => time()];
+        if ((time() - $attempts['time']) > 600) {
+            $attempts = ['count' => 0, 'time' => time()];
+        }
+        if ($attempts['count'] >= 3) {
+            $_SESSION['flash_error'] = 'Bạn đã gửi liên hệ quá nhiều lần. Vui lòng thử lại sau 10 phút.';
+            header('Location: ' . Url::contact());
+            exit;
+        }
+
         $name = trim($_POST['name'] ?? '');
         $email = strtolower(trim($_POST['email'] ?? ''));
         $subject = trim($_POST['subject'] ?? '');
         $message = trim($_POST['message'] ?? '');
+
+        // 3. Filter disposable / spam bot domains
+        $spamDomains = ['meewignite.info', 'synthetic-lab.invalid', 'lab-synth.dev', 'tempmail', 'dispostable', 'guerrillamail', '10minutemail', '.invalid'];
+        foreach ($spamDomains as $domain) {
+            if (str_contains($email, $domain)) {
+                SecurityLogger::logActivity('SPAM_CONTACT_BLOCKED', "Chặn email spam domain: $email", true);
+                $_SESSION['flash_error'] = 'Địa chỉ email không hợp lệ.';
+                header('Location: ' . Url::contact());
+                exit;
+            }
+        }
+
+        // 4. Detect gibberish bot submissions (single word without spaces > 12 random chars)
+        $isGibberishName = strlen($name) > 6 && !str_contains($name, ' ') && preg_match('/^[b-df-hj-np-tv-z]{5,}/i', $name);
+        $isGibberishMessage = strlen($message) > 12 && !str_contains($message, ' ');
+        if ($isGibberishName || $isGibberishMessage) {
+            SecurityLogger::logActivity('SPAM_CONTACT_BLOCKED', "Chặn bot spam rác: $name ($email)", true);
+            $_SESSION['flash_error'] = 'Nội dung liên hệ không hợp lệ.';
+            header('Location: ' . Url::contact());
+            exit;
+        }
 
         if ($name === '' || !filter_var($email, FILTER_VALIDATE_EMAIL) || $subject === '' || $message === '') {
             $_SESSION['flash_error'] = 'Vui lòng nhập đầy đủ thông tin liên hệ hợp lệ.';
@@ -877,12 +918,15 @@ class HomeController extends Controller {
             exit;
         }
 
+        $attempts['count']++;
+        $_SESSION[$rateKey] = $attempts;
+
         ContactMessage::create([
             'name' => mb_substr($name, 0, 190),
             'email' => mb_substr($email, 0, 190),
             'subject' => mb_substr($subject, 0, 255),
             'message' => $message,
-            'ip_address' => $_SERVER['REMOTE_ADDR'] ?? null,
+            'ip_address' => $ip,
             'user_agent' => mb_substr($_SERVER['HTTP_USER_AGENT'] ?? '', 0, 255),
         ]);
 
