@@ -933,6 +933,12 @@ class AdminController extends Controller {
     public function adminGetSecurityLogs() {
         Auth::requireAdmin();
         $activeSessions = SecurityLogger::getActiveSessions();
+        if (!empty($_GET['only_active'])) {
+            $this->jsonSuccess([
+                'active_sessions' => $activeSessions
+            ]);
+        }
+
         $logs = SecurityLogger::getLogs(300);
         $banned = SecurityLogger::getBannedIps();
         $this->jsonSuccess([

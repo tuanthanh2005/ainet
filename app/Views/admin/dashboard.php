@@ -1925,14 +1925,21 @@
             if (targetView) targetView.classList.add('active');
 
             if (viewId === 'security-logs') {
-                loadSecurityLogs();
-                if (!window.securityLogsInterval) {
-                    window.securityLogsInterval = setInterval(loadSecurityLogs, 5000);
+                loadSecurityLogs(true);
+                if (!window.activeSessionsInterval) {
+                    window.activeSessionsInterval = setInterval(loadActiveSessionsOnly, 5000);
+                }
+                if (!window.historyLogsInterval) {
+                    window.historyLogsInterval = setInterval(() => loadSecurityLogs(true), 120000);
                 }
             } else {
-                if (window.securityLogsInterval) {
-                    clearInterval(window.securityLogsInterval);
-                    window.securityLogsInterval = null;
+                if (window.activeSessionsInterval) {
+                    clearInterval(window.activeSessionsInterval);
+                    window.activeSessionsInterval = null;
+                }
+                if (window.historyLogsInterval) {
+                    clearInterval(window.historyLogsInterval);
+                    window.historyLogsInterval = null;
                 }
             }
 
@@ -2666,15 +2673,22 @@
             });
         }
 
-        function loadSecurityLogs() {
-            fetch('?action=adminGetSecurityLogs')
+        function loadSecurityLogs(fullLoad = true) {
+            const url = fullLoad ? '?action=adminGetSecurityLogs' : '?action=adminGetSecurityLogs&only_active=1';
+            fetch(url)
                 .then(r => r.json())
                 .then(res => {
                     if (!res.success) return;
                     renderActiveSessions(res.active_sessions || []);
-                    renderBannedIps(res.banned_ips || []);
-                    renderSecurityLogs(res.logs || []);
+                    if (fullLoad) {
+                        renderBannedIps(res.banned_ips || []);
+                        renderSecurityLogs(res.logs || []);
+                    }
                 }).catch(err => console.error(err));
+        }
+
+        function loadActiveSessionsOnly() {
+            loadSecurityLogs(false);
         }
 
         function renderActiveSessions(sessions) {

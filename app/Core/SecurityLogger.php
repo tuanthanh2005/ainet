@@ -172,6 +172,21 @@ class SecurityLogger {
     }
 
     public static function logActivity(string $actionType, string $details = '', bool $isSuspicious = false): void {
+        // Deduplicate consecutive identical URL logs within 60 seconds unless suspicious
+        if (!$isSuspicious) {
+            $currentUri = $_SERVER['REQUEST_URI'] ?? '/';
+            $lastLog = $_SESSION['last_activity_log'] ?? null;
+            $nowTime = time();
+            if ($lastLog && ($lastLog['url'] === $currentUri) && ($lastLog['action'] === $actionType) && ($nowTime - $lastLog['time']) < 60) {
+                return;
+            }
+            $_SESSION['last_activity_log'] = [
+                'url' => $currentUri,
+                'action' => $actionType,
+                'time' => $nowTime
+            ];
+        }
+
         $ip = self::getClientIp();
         $user = Auth::user();
         $userInfo = $user ? ($user['name'] . ' (' . $user['email'] . ')') : 'Khách vãng lai';
