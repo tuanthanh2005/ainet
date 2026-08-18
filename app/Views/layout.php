@@ -324,6 +324,10 @@
                 <div class="modal-body">
                     <form method="POST" action="<?php echo url('index.php?action=register'); ?>">
                         <?php echo Csrf::field(); ?>
+                        <!-- Honeypot Field (Antispam Trap for Bots) -->
+                        <div style="display:none !important; opacity:0; position:absolute; left:-9999px;" aria-hidden="true">
+                            <input type="text" name="website_url_check" tabindex="-1" autocomplete="off" value="">
+                        </div>
                         <div class="mb-3">
                             <label class="form-label small fw-bold">Họ tên</label>
                             <input type="text" name="name" class="form-control bg-light border-0"

@@ -111,7 +111,6 @@ class Auth {
         if ($attempts['count'] >= $maxAttempts && (time() - $attempts['last']) < $windowSeconds) {
             return false;
         }
-        // Reset window if expired
         if ((time() - $attempts['last']) >= $windowSeconds) {
             $_SESSION['login_attempts'] = ['count' => 0, 'last' => time()];
         }
@@ -123,5 +122,26 @@ class Auth {
         $attempts['count'] = ($attempts['count'] ?? 0) + 1;
         $attempts['last'] = time();
         $_SESSION['login_attempts'] = $attempts;
+    }
+
+    /**
+     * Rate limit registration to prevent bot account creation spam.
+     */
+    public static function checkRegisterRateLimit(int $maxAttempts = 3, int $windowSeconds = 600): bool {
+        $attempts = $_SESSION['register_attempts'] ?? ['count' => 0, 'last' => 0];
+        if ($attempts['count'] >= $maxAttempts && (time() - $attempts['last']) < $windowSeconds) {
+            return false;
+        }
+        if ((time() - $attempts['last']) >= $windowSeconds) {
+            $_SESSION['register_attempts'] = ['count' => 0, 'last' => time()];
+        }
+        return true;
+    }
+
+    public static function recordRegisterAttempt(): void {
+        $attempts = $_SESSION['register_attempts'] ?? ['count' => 0, 'last' => 0];
+        $attempts['count'] = ($attempts['count'] ?? 0) + 1;
+        $attempts['last'] = time();
+        $_SESSION['register_attempts'] = $attempts;
     }
 }

@@ -51,6 +51,18 @@ class User extends Model {
         ]);
     }
 
+    public static function delete($id) {
+        $db = Database::getInstance();
+        $stmt = $db->prepare('DELETE FROM users WHERE id = :id AND role != "admin"');
+        return $stmt->execute(['id' => $id]);
+    }
+
+    public static function deleteBlockedSpam() {
+        $db = Database::getInstance();
+        $stmt = $db->prepare('DELETE FROM users WHERE status = "blocked" AND role != "admin"');
+        return $stmt->execute();
+    }
+
     public static function create($name, $email, $password, $role = 'user') {
         $db = Database::getInstance();
         $stmt = $db->prepare(

@@ -751,11 +751,14 @@
 
                 <div id="view-users" class="view-section">
                     <div class="card-custom">
-                        <div class="card-header-custom">
+                        <div class="card-header-custom d-flex justify-content-between align-items-center flex-wrap gap-2">
                             <div>
                                 <h6 class="mb-0 fw-bold">Quản lý User</h6>
-                                <small class="text-muted">Sửa thông tin, block/unblock và reset mật khẩu user.</small>
+                                <small class="text-muted">Sửa thông tin, block/unblock, reset mật khẩu và dọn dẹp user spam.</small>
                             </div>
+                            <button class="btn btn-sm btn-danger rounded-pill px-3" onclick="deleteBlockedUsers()">
+                                <i class="fa-solid fa-broom me-1"></i> Xoá tất cả User bị Block (Spam)
+                            </button>
                         </div>
                         <div class="table-responsive">
                             <table class="table table-hover table-custom mb-0">
@@ -2403,7 +2406,8 @@
                         <td class="text-end">
                             <button class="btn btn-sm btn-outline-dark me-1" onclick="openUserModal(${Number(user.id)})" title="Sửa"><i class="fa-solid fa-pen"></i></button>
                             <button class="btn btn-sm ${toggleClass} me-1" onclick="toggleUserStatus(${Number(user.id)})" title="${toggleLabel}"><i class="fa-solid ${toggleIcon}"></i></button>
-                            <button class="btn btn-sm btn-outline-primary" onclick="resetUserPassword(${Number(user.id)})" title="Reset mật khẩu"><i class="fa-solid fa-key"></i></button>
+                            <button class="btn btn-sm btn-outline-primary me-1" onclick="resetUserPassword(${Number(user.id)})" title="Reset mật khẩu"><i class="fa-solid fa-key"></i></button>
+                            <button class="btn btn-sm btn-outline-danger" onclick="deleteUser(${Number(user.id)})" title="Xoá user"><i class="fa-solid fa-trash"></i></button>
                         </td>
                     </tr>
                 `;
@@ -2487,6 +2491,57 @@
                     document.getElementById('reset_pass_email').innerText = data.email || '';
                     document.getElementById('reset_pass_value').value = data.password || '';
                     new bootstrap.Modal(document.getElementById('resetPassModal')).show();
+                }).catch(() => AppNotify.error('Không thể kết nối server.'));
+            });
+        }
+
+        function deleteUser(id) {
+            const user = (APP_STATE.users || []).find(u => Number(u.id) === Number(id));
+            if (!user) return;
+            Swal.fire({
+                title: 'Xóa vĩnh viễn user này?',
+                text: `${user.name} (${user.email})`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#dc3545',
+                confirmButtonText: 'Xóa vĩnh viễn'
+            }).then(result => {
+                if (!result.isConfirmed) return;
+                apiPost('adminDeleteUser', { id }).then(data => {
+                    if (!data.success) {
+                        AppNotify.error(data.message || 'Không thể xóa user.');
+                        return;
+                    }
+                    APP_STATE.users = (APP_STATE.users || []).filter(u => Number(u.id) !== Number(id));
+                    renderUsers();
+                    AppNotify.success('Đã xóa user.');
+                }).catch(() => AppNotify.error('Không thể kết nối server.'));
+            });
+        }
+
+        function deleteBlockedUsers() {
+            const blockedCount = (APP_STATE.users || []).filter(u => u.status === 'blocked').length;
+            if (blockedCount === 0) {
+                AppNotify.info('Không có tài khoản bị block nào để dọn dẹp.');
+                return;
+            }
+            Swal.fire({
+                title: `Xóa tất cả ${blockedCount} user bị Block?`,
+                text: 'Hành động này sẽ xóa vĩnh viễn các tài khoản spam đã bị block.',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#dc3545',
+                confirmButtonText: 'Dọn dẹp ngay'
+            }).then(result => {
+                if (!result.isConfirmed) return;
+                apiPost('adminDeleteBlockedUsers', {}).then(data => {
+                    if (!data.success) {
+                        AppNotify.error(data.message || 'Không thể xóa.');
+                        return;
+                    }
+                    APP_STATE.users = (APP_STATE.users || []).filter(u => u.status !== 'blocked');
+                    renderUsers();
+                    AppNotify.success('Đã dọn dẹp tất cả user bị block.');
                 }).catch(() => AppNotify.error('Không thể kết nối server.'));
             });
         }

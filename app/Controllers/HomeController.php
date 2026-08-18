@@ -457,14 +457,48 @@ class HomeController extends Controller {
             exit;
         }
 
+        // 1. CSRF Token Validation
+        if (!Csrf::validate()) {
+            $_SESSION['flash_error'] = 'Yêu cầu không hợp lệ hoặc phiên làm việc đã hết hạn.';
+            header('Location: ' . url());
+            exit;
+        }
+
+        // 2. Honeypot check (Antispam trap)
+        if (!empty($_POST['website_url_check'])) {
+            // Silence bot without error message or create delay
+            header('Location: ' . url());
+            exit;
+        }
+
+        // 3. Rate limiting check
+        if (!Auth::checkRegisterRateLimit(3, 600)) {
+            $_SESSION['flash_error'] = 'Bạn đã thử đăng ký quá nhiều lần. Vui lòng thử lại sau 10 phút.';
+            header('Location: ' . url());
+            exit;
+        }
+
+        Auth::recordRegisterAttempt();
+
         $name = trim($_POST['name'] ?? '');
         $email = strtolower(trim($_POST['email'] ?? ''));
         $password = $_POST['password'] ?? '';
 
+        // 4. Basic input validation
         if ($name === '' || !filter_var($email, FILTER_VALIDATE_EMAIL) || strlen($password) < 6) {
             $_SESSION['flash_error'] = 'Vui lòng nhập đúng họ tên, email và mật khẩu tối thiểu 6 ký tự.';
             header('Location: ' . url());
             exit;
+        }
+
+        // 5. Block synthetic / pentest / temporary disposable email domains
+        $suspiciousDomains = ['lab-synth.dev', 'synthetic-lab.invalid', 'tempmail', 'dispostable', 'mailinator', '.invalid'];
+        foreach ($suspiciousDomains as $domain) {
+            if (strpos($email, $domain) !== false || strpos($name, 'pentest') !== false || strpos($email, 'pentest') !== false) {
+                $_SESSION['flash_error'] = 'Tên hoặc Email không được chấp nhận.';
+                header('Location: ' . url());
+                exit;
+            }
         }
 
         if (User::findByEmail($email)) {

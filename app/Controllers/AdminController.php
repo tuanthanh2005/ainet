@@ -904,6 +904,32 @@ class AdminController extends Controller {
         ]);
     }
 
+    public function adminDeleteUser() {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            $this->jsonError('Method not allowed', 405);
+        }
+
+        $id = (int) ($_POST['id'] ?? 0);
+        if ($id === (int) ($_SESSION['user']['id'] ?? 0)) {
+            $this->jsonError('Không thể xóa tài khoản admin hiện tại.');
+        }
+
+        if (!User::delete($id)) {
+            $this->jsonError('Không thể xóa user.');
+        }
+
+        $this->jsonSuccess(['message' => 'Đã xóa tài khoản.']);
+    }
+
+    public function adminDeleteBlockedUsers() {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            $this->jsonError('Method not allowed', 405);
+        }
+
+        User::deleteBlockedSpam();
+        $this->jsonSuccess(['message' => 'Đã dọn dẹp các tài khoản bị block.']);
+    }
+
     public function adminGetKeywords() {
         $path = APP_ROOT . '/config/seo_keywords.json';
         $data = ['keywords' => [], 'aliases' => []];
