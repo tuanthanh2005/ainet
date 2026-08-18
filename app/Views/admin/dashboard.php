@@ -869,6 +869,15 @@
                                         <tbody id="security-logs-table-body"></tbody>
                                     </table>
                                 </div>
+                                <div class="card-footer bg-light border-top p-3 d-flex justify-content-between align-items-center flex-wrap gap-2">
+                                    <span class="small text-muted" id="security-logs-pagination-info">
+                                        Hiển thị <span id="security-logs-count-start" class="fw-bold text-dark">0</span> - <span id="security-logs-count-end" class="fw-bold text-dark">0</span> / tổng số <span id="security-logs-count-total" class="fw-bold text-dark">0</span> log
+                                    </span>
+                                    <nav aria-label="Security logs navigation">
+                                        <ul class="pagination pagination-sm mb-0 d-flex align-items-center gap-1" id="security-logs-pagination-container">
+                                        </ul>
+                                    </nav>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -2730,17 +2739,54 @@
             });
         }
 
+        window.SECURITY_LOGS_STATE = window.SECURITY_LOGS_STATE || {
+            allLogs: [],
+            currentPage: 1,
+            pageSize: 10
+        };
+
         function renderSecurityLogs(logs) {
+            if (logs !== undefined) {
+                window.SECURITY_LOGS_STATE.allLogs = logs || [];
+            }
+
             const tbody = document.getElementById('security-logs-table-body');
             if (!tbody) return;
             tbody.innerHTML = '';
 
-            if (!logs || logs.length === 0) {
+            const allLogs = window.SECURITY_LOGS_STATE.allLogs || [];
+            const totalLogs = allLogs.length;
+
+            if (totalLogs === 0) {
                 tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted py-3">Chưa có log hoạt động nào.</td></tr>';
+                const elStart = document.getElementById('security-logs-count-start');
+                const elEnd = document.getElementById('security-logs-count-end');
+                const elTotal = document.getElementById('security-logs-count-total');
+                const elPag = document.getElementById('security-logs-pagination-container');
+                if (elStart) elStart.innerText = '0';
+                if (elEnd) elEnd.innerText = '0';
+                if (elTotal) elTotal.innerText = '0';
+                if (elPag) elPag.innerHTML = '';
                 return;
             }
 
-            logs.forEach(log => {
+            const totalPages = Math.max(1, Math.ceil(totalLogs / window.SECURITY_LOGS_STATE.pageSize));
+            if (window.SECURITY_LOGS_STATE.currentPage > totalPages) {
+                window.SECURITY_LOGS_STATE.currentPage = totalPages;
+            }
+
+            const startIdx = (window.SECURITY_LOGS_STATE.currentPage - 1) * window.SECURITY_LOGS_STATE.pageSize;
+            const endIdx = Math.min(startIdx + window.SECURITY_LOGS_STATE.pageSize, totalLogs);
+            const pageLogs = allLogs.slice(startIdx, endIdx);
+
+            const elStart = document.getElementById('security-logs-count-start');
+            const elEnd = document.getElementById('security-logs-count-end');
+            const elTotal = document.getElementById('security-logs-count-total');
+            if (elStart) elStart.innerText = (startIdx + 1).toString();
+            if (elEnd) elEnd.innerText = endIdx.toString();
+            if (elTotal) elTotal.innerText = totalLogs.toString();
+
+            pageLogs.forEach(log => {
                 const isSusp = log.is_suspicious == 1;
                 const badge = isSusp 
                     ? '<span class="badge bg-danger rounded-pill"><i class="fa-solid fa-triangle-exclamation me-1"></i>Nghi ngờ</span>'
@@ -2763,6 +2809,56 @@
                     </tr>
                 `;
             });
+
+            renderSecurityLogsPagination(totalPages);
+        }
+
+        function renderSecurityLogsPagination(totalPages) {
+            const container = document.getElementById('security-logs-pagination-container');
+            if (!container) return;
+            container.innerHTML = '';
+
+            const curPage = window.SECURITY_LOGS_STATE.currentPage;
+
+            // Prev Button
+            const prevDisabled = curPage <= 1 ? 'disabled' : '';
+            container.innerHTML += `
+                <li class="page-item ${prevDisabled}">
+                    <button class="btn btn-sm btn-outline-dark me-1 px-2 py-1" onclick="changeSecurityLogsPage(${curPage - 1})" ${prevDisabled}>
+                        <i class="fa-solid fa-chevron-left"></i>
+                    </button>
+                </li>
+            `;
+
+            let startPage = Math.max(1, curPage - 2);
+            let endPage = Math.min(totalPages, startPage + 4);
+            if (endPage - startPage < 4) {
+                startPage = Math.max(1, endPage - 4);
+            }
+
+            for (let p = startPage; p <= endPage; p++) {
+                const activeClass = p === curPage ? 'btn-dark text-white fw-bold' : 'btn-outline-secondary';
+                container.innerHTML += `
+                    <li class="page-item me-1">
+                        <button class="btn btn-sm ${activeClass} px-3 py-1" onclick="changeSecurityLogsPage(${p})">${p}</button>
+                    </li>
+                `;
+            }
+
+            // Next Button
+            const nextDisabled = curPage >= totalPages ? 'disabled' : '';
+            container.innerHTML += `
+                <li class="page-item ${nextDisabled}">
+                    <button class="btn btn-sm btn-outline-dark px-2 py-1" onclick="changeSecurityLogsPage(${curPage + 1})" ${nextDisabled}>
+                        <i class="fa-solid fa-chevron-right"></i>
+                    </button>
+                </li>
+            `;
+        }
+
+        function changeSecurityLogsPage(newPage) {
+            window.SECURITY_LOGS_STATE.currentPage = newPage;
+            renderSecurityLogs();
         }
 
         function unbanIp(ip) {
