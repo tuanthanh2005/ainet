@@ -294,6 +294,14 @@ class SecurityLogger {
         // Patterns triggering automatic permanent IP Ban
         $maliciousPatterns = [
             '/tesst2jasd/i',
+            '/wp-admin/i',
+            '/wp-login\.php/i',
+            '/wp-config/i',
+            '/setup-config\.php/i',
+            '/xmlrpc\.php/i',
+            '/\.env/i',
+            '/phpmyadmin/i',
+            '/\.git/i',
             '/union\s+all\s+select/i',
             '/union\s+select/i',
             '/select\s+.*\s+from\s+information_schema/i',
