@@ -479,6 +479,28 @@
     <!-- Floating Chat Bubble Component -->
     <?php require_once APP_ROOT . '/app/Views/partials/chat_bubble.php'; ?>
 
+    <!-- 5-Minute Guest Session Limit Overlay Modal -->
+    <?php if (!Auth::check() && !empty($_SESSION['guest_expired'])): ?>
+    <div class="modal fade show" id="guestExpiredModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" style="display:block; background:rgba(15, 23, 42, 0.85); z-index:99999;">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content p-4 text-center border-0 shadow-lg rounded-4">
+                <div class="mb-3 text-warning">
+                    <i class="fa-solid fa-user-clock fa-3x"></i>
+                </div>
+                <h4 class="fw-bold mb-2">Hết thời gian trải nghiệm vãng lai (5 phút)</h4>
+                <p class="text-muted small mb-4">Bạn đã xem trang web 5 phút dưới dạng khách vãng lai. Vui lòng đăng nhập hoặc đăng ký tài khoản để tiếp tục thao tác trên hệ thống.</p>
+                <div class="d-grid gap-2">
+                    <button type="button" class="btn btn-dark py-2.5 rounded-3 fw-bold" data-bs-toggle="modal" data-bs-target="#loginModal" onclick="document.getElementById('guestExpiredModal').style.display='none'">Đăng nhập ngay</button>
+                    <button type="button" class="btn btn-outline-dark py-2.5 rounded-3 fw-bold" data-bs-toggle="modal" data-bs-target="#registerModal" onclick="document.getElementById('guestExpiredModal').style.display='none'">Tạo tài khoản mới</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <style>
+    body { overflow: hidden !important; }
+    </style>
+    <?php endif; ?>
+
 </body>
 
 </html>

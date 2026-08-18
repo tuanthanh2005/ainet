@@ -930,6 +930,29 @@ class AdminController extends Controller {
         $this->jsonSuccess(['message' => 'Đã dọn dẹp các tài khoản bị block.']);
     }
 
+    public function adminGetSecurityLogs() {
+        Auth::requireAdmin();
+        $logs = SecurityLogger::getLogs(300);
+        $banned = SecurityLogger::getBannedIps();
+        $this->jsonSuccess([
+            'logs' => $logs,
+            'banned_ips' => array_values($banned)
+        ]);
+    }
+
+    public function adminUnbanIp() {
+        Auth::requireAdmin();
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            $this->jsonError('Method not allowed', 405);
+        }
+        $ip = trim($_POST['ip'] ?? '');
+        if ($ip !== '') {
+            SecurityLogger::unbanIp($ip);
+            $this->jsonSuccess(['message' => "Đã mở khóa IP: {$ip}"]);
+        }
+        $this->jsonError('IP không hợp lệ.');
+    }
+
     public function adminGetKeywords() {
         $path = APP_ROOT . '/config/seo_keywords.json';
         $data = ['keywords' => [], 'aliases' => []];

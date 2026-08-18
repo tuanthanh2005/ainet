@@ -69,34 +69,6 @@ header('X-Frame-Options: SAMEORIGIN');
 header('X-Content-Type-Options: nosniff');
 header('Referrer-Policy: strict-origin-when-cross-origin');
 
-// Lightweight Web Application Firewall (WAF) - Defense against SQL Injection & Malicious Probe Attacks
-(function() {
-    $uri = $_SERVER['REQUEST_URI'] ?? '';
-    $rawInput = urldecode($uri) . ' ' . json_encode($_GET) . ' ' . json_encode($_POST);
-
-    $sqliPatterns = [
-        '/union\s+all\s+select/i',
-        '/union\s+select/i',
-        '/select\s+.*\s+from\s+information_schema/i',
-        '/concat\s*\(/i',
-        '/group_concat\s*\(/i',
-        '/benchmark\s*\(/i',
-        '/sleep\s*\(/i',
-        '/\/\*!\d+.*?\*\//i',
-        '/\b(drop|alter|truncate)\s+(table|database)\b/i',
-        '/\' OR \'1\'=\'1/i',
-        '/" OR "1"="1/i',
-    ];
-
-    foreach ($sqliPatterns as $pattern) {
-        if (preg_match($pattern, $rawInput)) {
-            http_response_code(400);
-            echo '400 Bad Request - Security Filter Blocked Potential Exploit Attack';
-            exit;
-        }
-    }
-})();
-
 // Load Core Libraries
 require_once APP_ROOT . '/app/Core/Database.php';
 require_once APP_ROOT . '/app/Core/Cache.php';
@@ -112,6 +84,17 @@ require_once APP_ROOT . '/app/Core/IndexingService.php';
 require_once APP_ROOT . '/app/Core/TelegramService.php';
 require_once APP_ROOT . '/app/Core/GoogleAuth.php';
 require_once APP_ROOT . '/app/Core/SmtpMailer.php';
+require_once APP_ROOT . '/app/Core/SecurityLogger.php';
+
+// Active Security Monitoring & WAF Filtering
+SecurityLogger::inspectAndFilter();
+SecurityLogger::checkGuestSession();
+
+// Log user activity
+$uriPath = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH);
+if (!preg_match('/\.(js|css|png|jpg|jpeg|gif|ico|svg|woff2?)$/i', $uriPath)) {
+    SecurityLogger::logActivity('VIEW_PAGE', 'Truy cập: ' . $uriPath);
+}
 
 // Load Models
 require_once APP_ROOT . '/app/Models/Product.php';

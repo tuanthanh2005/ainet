@@ -579,6 +579,11 @@
                         <i class="fa-solid fa-key"></i> Quản lý Từ khóa SEO
                     </a>
                 </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link text-danger fw-bold" onclick="switchView('security-logs', this)">
+                        <i class="fa-solid fa-shield-halved"></i> Log An Ninh & Session
+                    </a>
+                </li>
 
             </ul>
             <div class="p-3 border-top" style="border-color: #333 !important;">
@@ -773,6 +778,66 @@
                                 </thead>
                                 <tbody id="user-table-body"></tbody>
                             </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="view-security-logs" class="view-section">
+                    <div class="row">
+                        <!-- Banned IPs List -->
+                        <div class="col-lg-12 mb-4">
+                            <div class="card-custom border-danger border-top" style="border-width: 4px !important;">
+                                <div class="card-header-custom d-flex justify-content-between align-items-center flex-wrap gap-2">
+                                    <div>
+                                        <h6 class="mb-0 fw-bold text-danger"><i class="fa-solid fa-ban me-2"></i>Danh sách IP Đã Bị Block Vĩnh Viễn</h6>
+                                        <small class="text-muted">Tự động cấm các IP thử nghiệm hack SQLi, XSS hoặc gõ URL rác/thăm dò.</small>
+                                    </div>
+                                    <button class="btn btn-sm btn-outline-secondary" onclick="loadSecurityLogs()">
+                                        <i class="fa-solid fa-rotate me-1"></i> Làm mới
+                                    </button>
+                                </div>
+                                <div class="table-responsive">
+                                    <table class="table table-hover table-custom mb-0">
+                                        <thead>
+                                            <tr>
+                                                <th>Địa chỉ IP</th>
+                                                <th>Lý do Block</th>
+                                                <th>URL / Payload Dò Thăm</th>
+                                                <th>Thời gian Block</th>
+                                                <th class="text-end">Thao tác</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="banned-ips-table-body"></tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Activity & Audit Logs -->
+                        <div class="col-lg-12">
+                            <div class="card-custom">
+                                <div class="card-header-custom d-flex justify-content-between align-items-center flex-wrap gap-2">
+                                    <div>
+                                        <h6 class="mb-0 fw-bold"><i class="fa-solid fa-list-check me-2"></i>Log Hoạt Động & Session (Khách & User)</h6>
+                                        <small class="text-muted">Theo dõi xem người dùng gõ gì, tìm kiếm từ khóa nào và hoạt động ra sao.</small>
+                                    </div>
+                                </div>
+                                <div class="table-responsive">
+                                    <table class="table table-hover table-custom mb-0">
+                                        <thead>
+                                            <tr>
+                                                <th>Thời gian</th>
+                                                <th>Đối tượng / Session</th>
+                                                <th>Hành động</th>
+                                                <th>URL & Nội dung gõ</th>
+                                                <th>IP</th>
+                                                <th>Trạng thái</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="security-logs-table-body"></tbody>
+                                    </table>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -1809,12 +1874,18 @@
                 'settings': 'Cấu hình Website',
                 'indexing': 'Quản lý Index Google',
                 'keywords': 'Quản lý Từ khóa SEO',
-                'chat': 'Hộp thư hỗ trợ'
+                'chat': 'Hộp thư hỗ trợ',
+                'security-logs': 'Log An Ninh & Session'
             };
-            document.getElementById('page-title').innerText = titles[viewId];
+            document.getElementById('page-title').innerText = titles[viewId] || 'Quản trị';
 
             document.querySelectorAll('.view-section').forEach(view => view.classList.remove('active'));
-            document.getElementById('view-' + viewId).classList.add('active');
+            const targetView = document.getElementById('view-' + viewId);
+            if (targetView) targetView.classList.add('active');
+
+            if (viewId === 'security-logs') {
+                loadSecurityLogs();
+            }
 
             // Close sidebar on mobile
             if (window.innerWidth < 992) {
@@ -2543,6 +2614,101 @@
                     renderUsers();
                     AppNotify.success('Đã dọn dẹp tất cả user bị block.');
                 }).catch(() => AppNotify.error('Không thể kết nối server.'));
+            });
+        }
+
+        function loadSecurityLogs() {
+            fetch('?action=adminGetSecurityLogs')
+                .then(r => r.json())
+                .then(res => {
+                    if (!res.success) return;
+                    renderBannedIps(res.banned_ips || []);
+                    renderSecurityLogs(res.logs || []);
+                }).catch(err => console.error(err));
+        }
+
+        function renderBannedIps(bannedList) {
+            const tbody = document.getElementById('banned-ips-table-body');
+            if (!tbody) return;
+            tbody.innerHTML = '';
+
+            if (!bannedList || bannedList.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted py-3">Chưa có IP nào bị Block.</td></tr>';
+                return;
+            }
+
+            bannedList.forEach(item => {
+                tbody.innerHTML += `
+                    <tr>
+                        <td class="fw-bold text-danger"><i class="fa-solid fa-ban me-1"></i>${escapeHtml(item.ip)}</td>
+                        <td><span class="badge bg-danger rounded-pill">${escapeHtml(item.reason || 'Dò quét / Tấn công')}</span></td>
+                        <td><code class="small text-dark bg-light p-1 rounded">${escapeHtml(item.payload || item.url || '')}</code></td>
+                        <td class="small text-muted">${escapeHtml(item.banned_at || '')}</td>
+                        <td class="text-end">
+                            <button class="btn btn-sm btn-outline-success" onclick="unbanIp('${escapeHtml(item.ip)}')">
+                                <i class="fa-solid fa-key me-1"></i> Gỡ Block IP
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        function renderSecurityLogs(logs) {
+            const tbody = document.getElementById('security-logs-table-body');
+            if (!tbody) return;
+            tbody.innerHTML = '';
+
+            if (!logs || logs.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted py-3">Chưa có log hoạt động nào.</td></tr>';
+                return;
+            }
+
+            logs.forEach(log => {
+                const isSusp = log.is_suspicious == 1;
+                const badge = isSusp 
+                    ? '<span class="badge bg-danger rounded-pill"><i class="fa-solid fa-triangle-exclamation me-1"></i>Nghi ngờ</span>'
+                    : '<span class="badge bg-light text-dark border rounded-pill">Bình thường</span>';
+                
+                tbody.innerHTML += `
+                    <tr class="${isSusp ? 'table-danger' : ''}">
+                        <td class="small text-muted">${escapeHtml(log.timestamp || log.created_at || '')}</td>
+                        <td>
+                            <div class="fw-bold small text-dark">${escapeHtml(log.user || log.user_info || 'Khách vãng lai')}</div>
+                            <div class="text-muted extra-small">ID: ${escapeHtml(log.session_id ? log.session_id.substring(0,16)+'...' : '')}</div>
+                        </td>
+                        <td><span class="badge bg-secondary rounded-pill">${escapeHtml(log.action_type || 'ACCESS')}</span></td>
+                        <td>
+                            <div class="fw-bold small">${escapeHtml(log.url || '')}</div>
+                            ${log.details ? `<div class="small text-muted">${escapeHtml(log.details)}</div>` : ''}
+                        </td>
+                        <td class="small font-monospace">${escapeHtml(log.ip || '')}</td>
+                        <td>${badge}</td>
+                    </tr>
+                `;
+            });
+        }
+
+        function unbanIp(ip) {
+            Swal.fire({
+                title: 'Mở khóa IP này?',
+                text: `Cho phép IP ${ip} truy cập lại website?`,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#198754',
+                confirmButtonText: 'Gỡ Block'
+            }).then(res => {
+                if (!res.isConfirmed) return;
+                const fd = new FormData();
+                fd.append('ip', ip);
+                apiPost('adminUnbanIp', fd).then(data => {
+                    if (data.success) {
+                        AppNotify.success(data.message || 'Đã mở khóa IP.');
+                        loadSecurityLogs();
+                    } else {
+                        AppNotify.error(data.message || 'Không thể gỡ block.');
+                    }
+                });
             });
         }
 
