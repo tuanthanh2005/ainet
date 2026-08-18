@@ -33,17 +33,54 @@ class SecurityLogger {
     }
 
     public static function getBannedIps(): array {
+        $dbList = [];
+        try {
+            $db = Database::getInstance();
+            $stmt = $db->query("SELECT ip, reason, payload, banned_at FROM banned_ips ORDER BY id DESC");
+            $rows = $stmt->fetchAll();
+            foreach ($rows as $row) {
+                $dbList[$row['ip']] = [
+                    'ip' => $row['ip'],
+                    'reason' => $row['reason'],
+                    'payload' => $row['payload'],
+                    'banned_at' => $row['banned_at']
+                ];
+            }
+        } catch (Throwable $e) {}
+
         $file = self::getBannedIpsFile();
-        if (file_exists($file)) {
-            $data = json_decode(file_get_contents($file), true);
-            return is_array($data) ? $data : [];
-        }
-        return [];
+        $fileList = file_exists($file) ? (json_decode(file_get_contents($file), true) ?: []) : [];
+
+        // Merge DB and File records
+        $merged = array_merge($fileList, $dbList);
+
+        return $merged;
     }
 
     public static function isIpBanned(string $ip): bool {
-        $banned = self::getBannedIps();
-        return isset($banned[$ip]);
+        try {
+            $db = Database::getInstance();
+            $stmt = $db->prepare("SELECT id FROM banned_ips WHERE ip = :ip LIMIT 1");
+            $stmt->execute(['ip' => $ip]);
+            $existsInDb = (bool) $stmt->fetchColumn();
+
+            $file = self::getBannedIpsFile();
+            $fileList = file_exists($file) ? (json_decode(file_get_contents($file), true) ?: []) : [];
+            $existsInFile = isset($fileList[$ip]);
+
+            // If manually deleted from DB, sync file and unban immediately
+            if (!$existsInDb && $existsInFile) {
+                unset($fileList[$ip]);
+                @file_put_contents($file, json_encode($fileList, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+                return false;
+            }
+
+            return $existsInDb;
+        } catch (Throwable $e) {
+            $file = self::getBannedIpsFile();
+            $fileList = file_exists($file) ? (json_decode(file_get_contents($file), true) ?: []) : [];
+            return isset($fileList[$ip]);
+        }
     }
 
     public static function banIp(string $ip, string $reason, string $payload = ''): void {
@@ -94,17 +131,20 @@ class SecurityLogger {
     }
 
     public static function unbanIp(string $ip): void {
-        $banned = self::getBannedIps();
-        if (isset($banned[$ip])) {
-            unset($banned[$ip]);
-            @file_put_contents(self::getBannedIpsFile(), json_encode($banned, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
-        }
-
         try {
             $db = Database::getInstance();
             $stmt = $db->prepare("DELETE FROM banned_ips WHERE ip = :ip");
             $stmt->execute(['ip' => $ip]);
         } catch (Throwable $ignored) {}
+
+        $file = self::getBannedIpsFile();
+        if (file_exists($file)) {
+            $fileList = json_decode(file_get_contents($file), true) ?: [];
+            if (isset($fileList[$ip])) {
+                unset($fileList[$ip]);
+                @file_put_contents($file, json_encode($fileList, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+            }
+        }
     }
 
     /**
