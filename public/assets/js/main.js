@@ -230,12 +230,38 @@ function selectOption(element) {
     }
 }
 
+function switchModal(fromModal, toModal) {
+    const fromEl = typeof fromModal === 'string' ? document.querySelector(fromModal) : fromModal;
+    const toEl = typeof toModal === 'string' ? document.querySelector(toModal) : toModal;
+
+    if (!toEl || typeof bootstrap === 'undefined') return;
+
+    const toInstance = bootstrap.Modal.getOrCreateInstance(toEl);
+
+    if (fromEl && fromEl.classList.contains('show')) {
+        const fromInstance = bootstrap.Modal.getInstance(fromEl) || bootstrap.Modal.getOrCreateInstance(fromEl);
+        const onHidden = function () {
+            fromEl.removeEventListener('hidden.bs.modal', onHidden);
+            toInstance.show();
+        };
+        fromEl.addEventListener('hidden.bs.modal', onHidden);
+        fromInstance.hide();
+    } else {
+        toInstance.show();
+    }
+}
+
 function openLoginPrompt(message) {
     const text = message || 'Bạn cần đăng nhập để tiếp tục.';
     AppNotify.info(text, 'Yêu cầu đăng nhập');
 
     const loginModalEl = document.getElementById('loginModal');
-    if (loginModalEl && typeof bootstrap !== 'undefined') {
+    if (!loginModalEl || typeof bootstrap === 'undefined') return;
+
+    const openModalEl = document.querySelector('.modal.show');
+    if (openModalEl && openModalEl !== loginModalEl) {
+        switchModal(openModalEl, loginModalEl);
+    } else {
         const loginModal = bootstrap.Modal.getOrCreateInstance(loginModalEl);
         loginModal.show();
     }

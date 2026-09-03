@@ -307,8 +307,7 @@
                 </div>
                 <div class="modal-footer border-0 justify-content-center pt-0 pb-4">
                     <span class="small text-muted">Chưa có tài khoản? <a href="#"
-                            class="text-dark fw-bold text-decoration-none ms-1" data-bs-toggle="modal"
-                            data-bs-target="#registerModal">Đăng ký ngay</a></span>
+                            class="text-dark fw-bold text-decoration-none ms-1" onclick="switchModal('#loginModal', '#registerModal'); return false;">Đăng ký ngay</a></span>
                 </div>
             </div>
         </div>
@@ -348,8 +347,7 @@
                 </div>
                 <div class="modal-footer border-0 justify-content-center pt-0 pb-4">
                     <span class="small text-muted">Đã có tài khoản? <a href="#"
-                            class="text-dark fw-bold text-decoration-none ms-1" data-bs-toggle="modal"
-                            data-bs-target="#loginModal">Đăng nhập</a></span>
+                            class="text-dark fw-bold text-decoration-none ms-1" onclick="switchModal('#registerModal', '#loginModal'); return false;">Đăng nhập</a></span>
                 </div>
             </div>
         </div>
@@ -481,7 +479,7 @@
 
     <!-- 5-Minute Guest Session Limit Overlay Modal -->
     <?php if (!Auth::check() && !empty($_SESSION['guest_expired'])): ?>
-    <div class="modal fade show" id="guestExpiredModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" style="display:block; background:rgba(15, 23, 42, 0.85); z-index:99999;">
+    <div class="modal fade" id="guestExpiredModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content p-4 text-center border-0 shadow-lg rounded-4">
                 <div class="mb-3 text-warning">
@@ -490,15 +488,21 @@
                 <h4 class="fw-bold mb-2">Hết thời gian trải nghiệm vãng lai (5 phút)</h4>
                 <p class="text-muted small mb-4">Bạn đã xem trang web 5 phút dưới dạng khách vãng lai. Vui lòng đăng nhập hoặc đăng ký tài khoản để tiếp tục thao tác trên hệ thống.</p>
                 <div class="d-grid gap-2">
-                    <button type="button" class="btn btn-dark py-2.5 rounded-3 fw-bold" data-bs-toggle="modal" data-bs-target="#loginModal" onclick="document.getElementById('guestExpiredModal').style.display='none'">Đăng nhập ngay</button>
-                    <button type="button" class="btn btn-outline-dark py-2.5 rounded-3 fw-bold" data-bs-toggle="modal" data-bs-target="#registerModal" onclick="document.getElementById('guestExpiredModal').style.display='none'">Tạo tài khoản mới</button>
+                    <button type="button" class="btn btn-dark py-2.5 rounded-3 fw-bold" onclick="switchModal('#guestExpiredModal', '#loginModal')">Đăng nhập ngay</button>
+                    <button type="button" class="btn btn-outline-dark py-2.5 rounded-3 fw-bold" onclick="switchModal('#guestExpiredModal', '#registerModal')">Tạo tài khoản mới</button>
                 </div>
             </div>
         </div>
     </div>
-    <style>
-    body { overflow: hidden !important; }
-    </style>
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const guestModalEl = document.getElementById('guestExpiredModal');
+        if (guestModalEl && typeof bootstrap !== 'undefined') {
+            const guestModal = bootstrap.Modal.getOrCreateInstance(guestModalEl);
+            guestModal.show();
+        }
+    });
+    </script>
     <?php endif; ?>
 
 </body>
