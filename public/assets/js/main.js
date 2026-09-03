@@ -250,6 +250,7 @@ function switchModal(fromModal, toModal) {
         toInstance.show();
     }
 }
+window.switchModal = switchModal;
 
 function openLoginPrompt(message) {
     const text = message || 'Bạn cần đăng nhập để tiếp tục.';
@@ -266,6 +267,7 @@ function openLoginPrompt(message) {
         loginModal.show();
     }
 }
+window.openLoginPrompt = openLoginPrompt;
 
 function setupAuthRequiredActions() {
     if (window.APP_USER_LOGGED_IN) {

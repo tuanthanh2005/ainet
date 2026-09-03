@@ -35,6 +35,26 @@
     ?>
     <script>
         window.APP_USER_LOGGED_IN = <?php echo $currentUser ? 'true' : 'false'; ?>;
+        window.switchModal = function(fromModal, toModal) {
+            const fromEl = typeof fromModal === 'string' ? document.querySelector(fromModal) : fromModal;
+            const toEl = typeof toModal === 'string' ? document.querySelector(toModal) : toModal;
+
+            if (!toEl || typeof bootstrap === 'undefined') return;
+
+            const toInstance = bootstrap.Modal.getOrCreateInstance(toEl);
+
+            if (fromEl && fromEl.classList.contains('show')) {
+                const fromInstance = bootstrap.Modal.getInstance(fromEl) || bootstrap.Modal.getOrCreateInstance(fromEl);
+                const onHidden = function () {
+                    fromEl.removeEventListener('hidden.bs.modal', onHidden);
+                    toInstance.show();
+                };
+                fromEl.addEventListener('hidden.bs.modal', onHidden);
+                fromInstance.hide();
+            } else {
+                toInstance.show();
+            }
+        };
     </script>
     <!-- Global Toast Notification Container -->
     <div id="app-toast-container" role="region" aria-label="Thông báo" aria-live="polite"></div>
