@@ -24,29 +24,49 @@ class Blog {
 
     public static function getBySlugOrId($slugOrId) {
         $db = Database::getInstance();
-        
-        // Backward compatibility: check if it ends with legacy id format e.g. -123
-        $id = '';
-        if (preg_match('/-([A-Za-z0-9_]+)$/', $slugOrId, $m)) {
-            $id = $m[1];
+        $slugOrId = trim(rawurldecode((string) $slugOrId));
+        if ($slugOrId === '') {
+            return null;
         }
-        
-        $stmt = $db->prepare("SELECT * FROM blogs WHERE seo_slug = ? OR id = ? OR (? != '' AND id = ?)");
-        $stmt->execute([$slugOrId, $slugOrId, $id, $id]);
+
+        // 1. Exact match by seo_slug
+        $stmt = $db->prepare("SELECT * FROM blogs WHERE seo_slug = ?");
+        $stmt->execute([$slugOrId]);
         $blog = $stmt->fetch();
-        
-        // Fallback to title-based slug
-        if (!$blog) {
-            $blogs = self::getAll();
-            foreach ($blogs as $b) {
-                $titleSlug = Seo::slugify($b['title'] ?? '');
-                if ($titleSlug === $slugOrId) {
-                    return $b;
-                }
+        if ($blog) {
+            return $blog;
+        }
+
+        // 2. Exact match by numeric ID if parameter is purely digits
+        if (ctype_digit($slugOrId)) {
+            $stmt = $db->prepare("SELECT * FROM blogs WHERE id = ?");
+            $stmt->execute([(int) $slugOrId]);
+            $blog = $stmt->fetch();
+            if ($blog) {
+                return $blog;
+            }
+        }
+
+        // 3. Match by trailing numeric ID suffix (e.g. "slug-title-123")
+        if (preg_match('/-(\d+)$/', $slugOrId, $m)) {
+            $stmt = $db->prepare("SELECT * FROM blogs WHERE id = ?");
+            $stmt->execute([(int) $m[1]]);
+            $blog = $stmt->fetch();
+            if ($blog) {
+                return $blog;
             }
         }
         
-        return $blog ?: null;
+        // 4. Fallback to title-based slug matching
+        $blogs = self::getAll();
+        foreach ($blogs as $b) {
+            $titleSlug = Seo::slugify($b['title'] ?? '');
+            if ($titleSlug === $slugOrId) {
+                return $b;
+            }
+        }
+        
+        return null;
     }
 
     public static function saveAll($blogs) {

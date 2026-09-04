@@ -96,16 +96,30 @@ class Product {
     public static function getBySlugOrId($slugOrId) {
         $db = Database::getInstance();
         $slugOrId = trim(rawurldecode((string) $slugOrId));
-
-        $id = '';
-        if (preg_match('/-(prod_[A-Za-z0-9_]+|\d+)$/', $slugOrId, $m)) {
-            $id = $m[1];
+        if ($slugOrId === '') {
+            return null;
         }
 
-        $stmt = $db->prepare("SELECT *, category_name AS category FROM products WHERE seo_slug = ? OR id = ? OR (? != '' AND id = ?)");
-        $stmt->execute([$slugOrId, $slugOrId, $id, $id]);
+        // 1. Exact match by seo_slug
+        $stmt = $db->prepare("SELECT *, category_name AS category FROM products WHERE seo_slug = ?");
+        $stmt->execute([$slugOrId]);
         $product = $stmt->fetch();
 
+        // 2. Exact match by ID if $slugOrId is pure numeric or prod_...
+        if (!$product && (ctype_digit($slugOrId) || strpos($slugOrId, 'prod_') === 0)) {
+            $stmt = $db->prepare("SELECT *, category_name AS category FROM products WHERE id = ?");
+            $stmt->execute([$slugOrId]);
+            $product = $stmt->fetch();
+        }
+
+        // 3. Match by trailing ID suffix (e.g. "-prod_123" or "-\d+")
+        if (!$product && preg_match('/-(prod_[A-Za-z0-9_]+|\d+)$/', $slugOrId, $m)) {
+            $stmt = $db->prepare("SELECT *, category_name AS category FROM products WHERE id = ?");
+            $stmt->execute([$m[1]]);
+            $product = $stmt->fetch();
+        }
+
+        // 4. Fallback to title-based / combined slug matching
         if (!$product) {
             $products = self::getAll();
             foreach ($products as $p) {
@@ -116,7 +130,8 @@ class Product {
                 $stableSlug = $productId !== '' ? ($baseSlug . '-' . $productId) : $baseSlug;
 
                 if ($titleSlug === $slugOrId || $seoSlug === $slugOrId || $stableSlug === $slugOrId) {
-                    return $p;
+                    $product = $p;
+                    break;
                 }
             }
         }
