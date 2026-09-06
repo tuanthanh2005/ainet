@@ -496,7 +496,91 @@
                 font-size: 0.85rem;
             }
         }
-    </style>
+    <script>
+        // Define core layout functions early so menu click handlers work immediately
+        function switchView(viewId, el) {
+            document.querySelectorAll('.nav-link').forEach(nav => nav.classList.remove('active'));
+            if (el) el.classList.add('active');
+
+            const titles = {
+                'dashboard': 'Tổng quan',
+                'products': 'Quản lý Sản phẩm',
+                'orders': 'Quản lý Đơn hàng',
+                'contacts': 'Quản lý Liên hệ',
+                'categories': 'Quản lý Danh mục',
+                'users': 'Quản lý User',
+                'blogs': 'Quản lý Tin tức',
+                'settings': 'Cấu hình Website',
+                'indexing': 'Quản lý Index Google',
+                'keywords': 'Quản lý Từ khóa SEO',
+                'chat': 'Hộp thư hỗ trợ',
+                'security-logs': 'Log An Ninh & Session'
+            };
+            const pageTitle = document.getElementById('page-title');
+            if (pageTitle) pageTitle.innerText = titles[viewId] || 'Quản trị';
+
+            document.querySelectorAll('.view-section').forEach(view => view.classList.remove('active'));
+            const targetView = document.getElementById('view-' + viewId);
+            if (targetView) targetView.classList.add('active');
+
+            if (viewId === 'security-logs') {
+                if (typeof loadSecurityLogs === 'function') loadSecurityLogs(true);
+                if (!window.activeSessionsInterval) {
+                    if (typeof loadActiveSessionsOnly === 'function') {
+                        window.activeSessionsInterval = setInterval(loadActiveSessionsOnly, 5000);
+                    }
+                }
+                if (!window.historyLogsInterval) {
+                    if (typeof loadSecurityLogs === 'function') {
+                        window.historyLogsInterval = setInterval(() => loadSecurityLogs(true), 120000);
+                    }
+                }
+            } else {
+                if (window.activeSessionsInterval) {
+                    clearInterval(window.activeSessionsInterval);
+                    window.activeSessionsInterval = null;
+                }
+                if (window.historyLogsInterval) {
+                    clearInterval(window.historyLogsInterval);
+                    window.historyLogsInterval = null;
+                }
+            }
+
+            if (window.innerWidth < 992) {
+                const sidebar = document.querySelector('.sidebar');
+                if (sidebar && sidebar.classList.contains('show')) {
+                    if (typeof toggleSidebar === 'function') toggleSidebar();
+                }
+            }
+        }
+
+        function toggleSidebar() {
+            const sidebar = document.querySelector('.sidebar');
+            if (!sidebar) return;
+            let backdrop = document.querySelector('.sidebar-backdrop');
+            if (!backdrop) {
+                backdrop = document.createElement('div');
+                backdrop.className = 'sidebar-backdrop';
+                backdrop.addEventListener('click', toggleSidebar);
+                document.body.appendChild(backdrop);
+            }
+
+            if (sidebar.classList.contains('show')) {
+                sidebar.classList.remove('show');
+                backdrop.classList.remove('show');
+                setTimeout(() => {
+                    if (!sidebar.classList.contains('show') && backdrop.parentNode) {
+                        backdrop.style.display = 'none';
+                    }
+                }, 300);
+            } else {
+                backdrop.style.display = 'block';
+                backdrop.offsetHeight;
+                sidebar.classList.add('show');
+                backdrop.classList.add('show');
+            }
+        }
+    </script>
 </head>
 
 <body>
@@ -1706,16 +1790,19 @@
     <?php $mainJsVersion = is_file(public_path('assets/js/main.js')) ? filemtime(public_path('assets/js/main.js')) : time(); ?>
     <script src="/assets/js/main.js?v=<?php echo $mainJsVersion; ?>"></script>
 
+    <?php
+        $jsonFlags = JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_INVALID_UTF8_SUBSTITUTE;
+    ?>
     <script>
         const APP_STATE = {
-            categories: <?php echo json_encode($categories); ?>,
-            settings: <?php echo json_encode($settings); ?>,
-            products: <?php echo json_encode($products); ?>,
-            orders: <?php echo json_encode($orders); ?>,
-            users: <?php echo json_encode($users ?? []); ?>,
-            blogs: <?php echo json_encode($blogs ?? []); ?>,
-            contactMessages: <?php echo json_encode($contactMessages ?? []); ?>,
-            csrfToken: <?php echo json_encode(Csrf::token()); ?>
+            categories: <?php echo json_encode($categories, $jsonFlags) ?: '[]'; ?>,
+            settings: <?php echo json_encode($settings, $jsonFlags) ?: '[]'; ?>,
+            products: <?php echo json_encode($products, $jsonFlags) ?: '[]'; ?>,
+            orders: <?php echo json_encode($orders, $jsonFlags) ?: '[]'; ?>,
+            users: <?php echo json_encode($users ?? [], $jsonFlags) ?: '[]'; ?>,
+            blogs: <?php echo json_encode($blogs ?? [], $jsonFlags) ?: '[]'; ?>,
+            contactMessages: <?php echo json_encode($contactMessages ?? [], $jsonFlags) ?: '[]'; ?>,
+            csrfToken: <?php echo json_encode(Csrf::token(), $jsonFlags) ?: '""'; ?>
         };
 
         let ordersCurrentPage = 1;
