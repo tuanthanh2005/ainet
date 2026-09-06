@@ -496,6 +496,7 @@
                 font-size: 0.85rem;
             }
         }
+    </style>
     <script>
         // Define core layout functions early so menu click handlers work immediately
         function switchView(viewId, el) {
@@ -1791,7 +1792,7 @@
     <script src="/assets/js/main.js?v=<?php echo $mainJsVersion; ?>"></script>
 
     <?php
-        $jsonFlags = JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_INVALID_UTF8_SUBSTITUTE;
+        $jsonFlags = JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | (defined('JSON_INVALID_UTF8_SUBSTITUTE') ? JSON_INVALID_UTF8_SUBSTITUTE : 0);
     ?>
     <script>
         const APP_STATE = {
