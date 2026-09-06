@@ -1793,17 +1793,27 @@
 
     <?php
         $jsonFlags = JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | (defined('JSON_INVALID_UTF8_SUBSTITUTE') ? JSON_INVALID_UTF8_SUBSTITUTE : 0);
+        if (!function_exists('safeAdminJson')) {
+            function safeAdminJson($data, $flags) {
+                try {
+                    $res = json_encode($data, $flags);
+                    return ($res !== false && $res !== null) ? $res : '[]';
+                } catch (\Throwable $t) {
+                    return '[]';
+                }
+            }
+        }
     ?>
     <script>
         const APP_STATE = {
-            categories: <?php echo json_encode($categories, $jsonFlags) ?: '[]'; ?>,
-            settings: <?php echo json_encode($settings, $jsonFlags) ?: '[]'; ?>,
-            products: <?php echo json_encode($products, $jsonFlags) ?: '[]'; ?>,
-            orders: <?php echo json_encode($orders, $jsonFlags) ?: '[]'; ?>,
-            users: <?php echo json_encode($users ?? [], $jsonFlags) ?: '[]'; ?>,
-            blogs: <?php echo json_encode($blogs ?? [], $jsonFlags) ?: '[]'; ?>,
-            contactMessages: <?php echo json_encode($contactMessages ?? [], $jsonFlags) ?: '[]'; ?>,
-            csrfToken: <?php echo json_encode(Csrf::token(), $jsonFlags) ?: '""'; ?>
+            categories: <?php echo safeAdminJson($categories, $jsonFlags); ?>,
+            settings: <?php echo safeAdminJson($settings, $jsonFlags); ?>,
+            products: <?php echo safeAdminJson($products, $jsonFlags); ?>,
+            orders: <?php echo safeAdminJson($orders, $jsonFlags); ?>,
+            users: <?php echo safeAdminJson($users ?? [], $jsonFlags); ?>,
+            blogs: <?php echo safeAdminJson($blogs ?? [], $jsonFlags); ?>,
+            contactMessages: <?php echo safeAdminJson($contactMessages ?? [], $jsonFlags); ?>,
+            csrfToken: <?php echo safeAdminJson(Csrf::token(), $jsonFlags); ?>
         };
 
         let ordersCurrentPage = 1;

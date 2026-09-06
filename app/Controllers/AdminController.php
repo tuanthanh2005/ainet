@@ -31,7 +31,7 @@ class AdminController extends Controller {
         $settings   = Setting::getAll();
         $products   = Product::getAll();
         $categories = Category::getAll();
-        $blogs      = Blog::getAll();
+        $blogs      = Blog::getSummaries();
         $users      = User::getAll();
         $contactMessages = ContactMessage::getAll();
         $unreadContacts = ContactMessage::countUnread();
