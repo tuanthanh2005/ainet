@@ -909,8 +909,8 @@
                             <div class="card-custom border-danger border-top" style="border-width: 4px !important;">
                                 <div class="card-header-custom d-flex justify-content-between align-items-center flex-wrap gap-2">
                                     <div>
-                                        <h6 class="mb-0 fw-bold text-danger"><i class="fa-solid fa-ban me-2"></i>Danh sách IP Đã Bị Block Vĩnh Viễn</h6>
-                                        <small class="text-muted">Tự động cấm các IP thử nghiệm hack SQLi, XSS hoặc gõ URL rác/thăm dò.</small>
+                                        <h6 class="mb-0 fw-bold text-muted"><i class="fa-solid fa-ban me-2"></i>Chặn / Khóa IP (Đã Tắt)</h6>
+                                        <small class="text-muted">Cơ chế chặn và khóa IP đã được tắt hoàn toàn theo yêu cầu hệ thống.</small>
                                     </div>
                                 </div>
                                 <div class="table-responsive">
@@ -935,8 +935,8 @@
                             <div class="card-custom">
                                 <div class="card-header-custom d-flex justify-content-between align-items-center flex-wrap gap-2">
                                     <div>
-                                        <h6 class="mb-0 fw-bold"><i class="fa-solid fa-clock-rotate-left me-2"></i>Lịch Sử Thao Tác & Session Đã Rời Đi (History)</h6>
-                                        <small class="text-muted">Khi người dùng rời khỏi trang web (> 2 phút), phên của họ được tự động lưu vào lịch sử tại đây.</small>
+                                        <h6 class="mb-0 fw-bold text-muted"><i class="fa-solid fa-clock-rotate-left me-2"></i>Lịch Sử Thao Tác (Đã Tắt Ghi Log)</h6>
+                                        <small class="text-muted">Ghi nhận log thao tác đã được tắt để tối ưu tốc độ và dung lượng hệ thống.</small>
                                     </div>
                                     <button class="btn btn-sm btn-outline-danger" onclick="clearSecurityHistoryLogs()">
                                         <i class="fa-solid fa-trash me-1"></i> Xóa Sạch Lịch Sử
@@ -2833,7 +2833,7 @@
             tbody.innerHTML = '';
 
             if (!bannedList || bannedList.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted py-3">Chưa có IP nào bị Block.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted py-3"><i class="fa-solid fa-circle-check text-success me-1"></i> Cơ chế chặn / khóa IP đã được tắt.</td></tr>';
                 return;
             }
 
@@ -2873,7 +2873,7 @@
             const totalLogs = allLogs.length;
 
             if (totalLogs === 0) {
-                tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted py-3">Chưa có log hoạt động nào.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted py-3"><i class="fa-solid fa-info-circle text-primary me-1"></i> Ghi nhận log thao tác đã được tắt theo yêu cầu.</td></tr>';
                 const elStart = document.getElementById('security-logs-count-start');
                 const elEnd = document.getElementById('security-logs-count-end');
                 const elTotal = document.getElementById('security-logs-count-total');
@@ -4916,7 +4916,7 @@
                         <div class="row">
                             <div class="col-6 mb-3">
                                 <label class="form-label">Icon (FontAwesome)</label>
-                                <input type="text" class="form-control" id="cat_icon" placeholder="fa-sparkles">
+                                <input type="text" class="form-control" id="cat_icon" placeholder="fa-wand-magic-sparkles">
                             </div>
                             <div class="col-6 mb-3">
                                 <label class="form-label">Màu Icon (Class)</label>

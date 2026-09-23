@@ -60,15 +60,15 @@
     <div id="app-toast-container" role="region" aria-label="Thông báo" aria-live="polite"></div>
     <div class="mini-banner">
         <div class="marquee-wrapper">
-            <span class="marquee-item">🔥 <strong>HỆ THỐNG TÀI KHOẢN PREMIUM TỰ ĐỘNG 24/7:</strong> Cung cấp ChatGPT Plus, API, YouTube Premium, Github Copilot, Canva Pro, Netflix... chính hãng giá tốt nhất thị trường!</span>
-            <span class="marquee-item">⚠️ <strong>CẢNH BÁO:</strong> Hiện nay có rất nhiều đối tượng giả mạo Shop trên mạng xã hội. Quý khách vui lòng chỉ giao dịch qua các cổng liên hệ trên website! ZALO Admin: <?php echo htmlspecialchars($settings['zalo'] ?? ''); ?></span>
-            <span class="marquee-item">⚡ <strong>KHUYẾN MÃI:</strong> Giảm giá cực sâu cho khách hàng mua số lượng lớn hoặc khách sỉ. Liên hệ Zalo/Telegram để nhận ưu đãi!</span>
-            <span class="marquee-item">⏰ <strong>HỖ TRỢ KHÁCH HÀNG:</strong> Phục vụ liên tục từ 08:00 đến 23:30 hàng ngày (kể cả Thứ 7 và Chủ Nhật).</span>
+            <span class="marquee-item"><i class="fa-solid fa-fire text-danger me-1"></i> <strong>HỆ THỐNG TÀI KHOẢN PREMIUM TỰ ĐỘNG 24/7:</strong> Cung cấp ChatGPT Plus, API, YouTube Premium, Github Copilot, Canva Pro, Netflix... chính hãng giá tốt nhất thị trường!</span>
+            <span class="marquee-item"><i class="fa-solid fa-triangle-exclamation text-warning me-1"></i> <strong>CẢNH BÁO:</strong> Hiện nay có rất nhiều đối tượng giả mạo Shop trên mạng xã hội. Quý khách vui lòng chỉ giao dịch qua các cổng liên hệ trên website! ZALO Admin: <?php echo htmlspecialchars($settings['zalo'] ?? ''); ?></span>
+            <span class="marquee-item"><i class="fa-solid fa-bolt text-warning me-1"></i> <strong>KHUYẾN MÃI:</strong> Giảm giá cực sâu cho khách hàng mua số lượng lớn hoặc khách sỉ. Liên hệ Zalo/Telegram để nhận ưu đãi!</span>
+            <span class="marquee-item"><i class="fa-solid fa-clock text-info me-1"></i> <strong>HỖ TRỢ KHÁCH HÀNG:</strong> Phục vụ liên tục từ 08:00 đến 23:30 hàng ngày (kể cả Thứ 7 và Chủ Nhật).</span>
             <!-- Duplicate for infinite seamless scroll -->
-            <span class="marquee-item">🔥 <strong>HỆ THỐNG TÀI KHOẢN PREMIUM TỰ ĐỘNG 24/7:</strong> Cung cấp ChatGPT Plus, API, YouTube Premium, Github Copilot, Canva Pro, Netflix... chính hãng giá tốt nhất thị trường!</span>
-            <span class="marquee-item">⚠️ <strong>CẢNH BÁO:</strong> Hiện nay có rất nhiều đối tượng giả mạo Shop trên mạng xã hội. Quý khách vui lòng chỉ giao dịch qua các cổng liên hệ trên website! ZALO Admin: <?php echo htmlspecialchars($settings['zalo'] ?? ''); ?></span>
-            <span class="marquee-item">⚡ <strong>KHUYẾN MÃI:</strong> Giảm giá cực sâu cho khách hàng mua số lượng lớn hoặc khách sỉ. Liên hệ Zalo/Telegram để nhận ưu đãi!</span>
-            <span class="marquee-item">⏰ <strong>HỖ TRỢ KHÁCH HÀNG:</strong> Phục vụ liên tục từ 08:00 đến 23:30 hàng ngày (kể cả Thứ 7 và Chủ Nhật).</span>
+            <span class="marquee-item"><i class="fa-solid fa-fire text-danger me-1"></i> <strong>HỆ THỐNG TÀI KHOẢN PREMIUM TỰ ĐỘNG 24/7:</strong> Cung cấp ChatGPT Plus, API, YouTube Premium, Github Copilot, Canva Pro, Netflix... chính hãng giá tốt nhất thị trường!</span>
+            <span class="marquee-item"><i class="fa-solid fa-triangle-exclamation text-warning me-1"></i> <strong>CẢNH BÁO:</strong> Hiện nay có rất nhiều đối tượng giả mạo Shop trên mạng xã hội. Quý khách vui lòng chỉ giao dịch qua các cổng liên hệ trên website! ZALO Admin: <?php echo htmlspecialchars($settings['zalo'] ?? ''); ?></span>
+            <span class="marquee-item"><i class="fa-solid fa-bolt text-warning me-1"></i> <strong>KHUYẾN MÃI:</strong> Giảm giá cực sâu cho khách hàng mua số lượng lớn hoặc khách sỉ. Liên hệ Zalo/Telegram để nhận ưu đãi!</span>
+            <span class="marquee-item"><i class="fa-solid fa-clock text-info me-1"></i> <strong>HỖ TRỢ KHÁCH HÀNG:</strong> Phục vụ liên tục từ 08:00 đến 23:30 hàng ngày (kể cả Thứ 7 và Chủ Nhật).</span>
         </div>
     </div>
 
@@ -498,30 +498,76 @@
     <?php require_once APP_ROOT . '/app/Views/partials/chat_bubble.php'; ?>
 
     <!-- 5-Minute Guest Session Limit Overlay Modal -->
-    <?php if (!Auth::check() && !empty($_SESSION['guest_expired'])): ?>
-    <div class="modal fade" id="guestExpiredModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-hidden="true">
+    <?php if (!Auth::check()): ?>
+    <div class="modal fade" id="guestExpiredModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-hidden="true" style="z-index: 1060;">
         <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content p-4 text-center border-0 shadow-lg rounded-4">
+            <div class="modal-content p-4 text-center border-0 shadow-lg rounded-4" style="background: rgba(255, 255, 255, 0.98); backdrop-filter: blur(10px);">
                 <div class="mb-3 text-warning">
                     <i class="fa-solid fa-user-clock fa-3x"></i>
                 </div>
                 <h4 class="fw-bold mb-2">Hết thời gian trải nghiệm vãng lai (5 phút)</h4>
-                <p class="text-muted small mb-4">Bạn đã xem trang web 5 phút dưới dạng khách vãng lai. Vui lòng đăng nhập hoặc đăng ký tài khoản để tiếp tục thao tác trên hệ thống.</p>
+                <p class="text-muted small mb-4">Bạn đã xem trang web 5 phút dưới dạng khách vãng lai. Vui lòng đăng nhập hoặc tạo tài khoản mới để tiếp tục sử dụng hệ thống.</p>
                 <div class="d-grid gap-2">
-                    <button type="button" class="btn btn-dark py-2.5 rounded-3 fw-bold" onclick="switchModal('#guestExpiredModal', '#loginModal')">Đăng nhập ngay</button>
-                    <button type="button" class="btn btn-outline-dark py-2.5 rounded-3 fw-bold" onclick="switchModal('#guestExpiredModal', '#registerModal')">Tạo tài khoản mới</button>
+                    <button type="button" class="btn btn-dark py-2.5 rounded-3 fw-bold" onclick="switchModal('#guestExpiredModal', '#loginModal')">
+                        <i class="fa-solid fa-right-to-bracket me-2"></i>Đăng nhập ngay
+                    </button>
+                    <button type="button" class="btn btn-outline-dark py-2.5 rounded-3 fw-bold" onclick="switchModal('#guestExpiredModal', '#registerModal')">
+                        <i class="fa-solid fa-user-plus me-2"></i>Tạo tài khoản mới
+                    </button>
                 </div>
             </div>
         </div>
     </div>
     <script>
-    document.addEventListener('DOMContentLoaded', () => {
-        const guestModalEl = document.getElementById('guestExpiredModal');
-        if (guestModalEl && typeof bootstrap !== 'undefined') {
-            const guestModal = bootstrap.Modal.getOrCreateInstance(guestModalEl);
+    (function() {
+        const guestStartedAt = <?php echo (int)($_SESSION['guest_started_at'] ?? time()); ?>;
+        const serverNow = <?php echo time(); ?>;
+        const initialRemaining = Math.max(0, 300 - (serverNow - guestStartedAt));
+        let isExpired = <?php echo (!empty($_SESSION['guest_expired']) || ((time() - (int)($_SESSION['guest_started_at'] ?? time())) >= 300)) ? 'true' : 'false'; ?>;
+
+        function showGuestExpiredModal() {
+            if (window.APP_USER_LOGGED_IN) return;
+            const guestModalEl = document.getElementById('guestExpiredModal');
+            if (!guestModalEl || typeof bootstrap === 'undefined') return;
+
+            // Don't interrupt if login or register modal is currently shown
+            const loginEl = document.getElementById('loginModal');
+            const regEl = document.getElementById('registerModal');
+            if ((loginEl && loginEl.classList.contains('show')) || (regEl && regEl.classList.contains('show'))) {
+                return;
+            }
+
+            const guestModal = bootstrap.Modal.getOrCreateInstance(guestModalEl, {
+                backdrop: 'static',
+                keyboard: false
+            });
             guestModal.show();
         }
-    });
+
+        if (isExpired || initialRemaining <= 0) {
+            isExpired = true;
+            document.addEventListener('DOMContentLoaded', () => {
+                setTimeout(showGuestExpiredModal, 300);
+            });
+        } else {
+            setTimeout(() => {
+                isExpired = true;
+                showGuestExpiredModal();
+            }, initialRemaining * 1000);
+        }
+
+        // When loginModal or registerModal is closed, if user is not logged in and session expired, re-show expired modal
+        ['loginModal', 'registerModal'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) {
+                el.addEventListener('hidden.bs.modal', () => {
+                    if (!window.APP_USER_LOGGED_IN && isExpired) {
+                        setTimeout(showGuestExpiredModal, 150);
+                    }
+                });
+            }
+        });
+    })();
     </script>
     <?php endif; ?>
 

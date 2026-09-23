@@ -86,16 +86,8 @@ require_once APP_ROOT . '/app/Core/GoogleAuth.php';
 require_once APP_ROOT . '/app/Core/SmtpMailer.php';
 require_once APP_ROOT . '/app/Core/SecurityLogger.php';
 
-// Active Security Monitoring & WAF Filtering
-SecurityLogger::inspectAndFilter();
+// Bắt buộc login khi hết 5 phút sử dụng vãng lai
 SecurityLogger::checkGuestSession();
-
-// Track active online sessions & log user activity
-$uriPath = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH);
-if (!preg_match('/\.(js|css|png|jpg|jpeg|gif|ico|svg|woff2?)$/i', $uriPath)) {
-    SecurityLogger::touchSession($uriPath);
-    SecurityLogger::logActivity('VIEW_PAGE', 'Truy cập: ' . $uriPath);
-}
 
 // Load Models
 require_once APP_ROOT . '/app/Models/Product.php';
@@ -317,6 +309,33 @@ if ($isPost && !in_array($action, $csrfExempt, true)) {
             header('Location: ' . url());
         }
         exit;
+    }
+}
+
+// Bắt buộc login khi sử dụng quá 5 phút vãng lai (áp dụng cho POST và AJAX)
+if (!Auth::check() && !empty($_SESSION['guest_expired'])) {
+    $guestAllowedActions = [
+        'login', 'register', 'googleLogin', 'googleCallback',
+        'forgot_password', 'reset_password', 'logout',
+        'sepayWebhook', 'robots', 'sitemap'
+    ];
+    if (!in_array($action, $guestAllowedActions, true)) {
+        $isAjax = !empty($_SERVER['HTTP_X_REQUESTED_WITH']) || (strpos($_SERVER['HTTP_ACCEPT'] ?? '', 'application/json') !== false);
+        if ($isPost || $isAjax) {
+            http_response_code(401);
+            if ($isAjax) {
+                header('Content-Type: application/json');
+                echo json_encode([
+                    'success' => false,
+                    'guest_expired' => true,
+                    'message' => 'Thời gian trải nghiệm vãng lai (5 phút) đã hết. Vui lòng đăng nhập hoặc tạo tài khoản để tiếp tục!'
+                ]);
+            } else {
+                $_SESSION['flash_error'] = 'Thời gian trải nghiệm vãng lai (5 phút) đã hết. Vui lòng đăng nhập hoặc tạo tài khoản để tiếp tục!';
+                header('Location: ' . url());
+            }
+            exit;
+        }
     }
 }
 

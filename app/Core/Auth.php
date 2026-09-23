@@ -50,8 +50,8 @@ class Auth {
             'role'  => $user['role'],
         ];
         $_SESSION['user_checked_at'] = time();
-        // Reset rate-limit counter on success
-        unset($_SESSION['login_attempts']);
+        // Reset rate-limit counter and guest session on success
+        unset($_SESSION['login_attempts'], $_SESSION['guest_started_at'], $_SESSION['guest_expired']);
     }
 
     public static function logout(): void {

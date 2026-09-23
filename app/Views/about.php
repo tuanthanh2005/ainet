@@ -9,16 +9,21 @@
                     $aboutFeatures = json_decode($settings['about_features'] ?? '[]', true);
                     if (empty($aboutFeatures)) {
                         $aboutFeatures = [
-                            ['icon' => 'fa-bolt', 'color' => 'text-warning', 'title' => 'Nhanh chóng', 'desc' => 'Kích hoạt trong 5 phút'],
-                            ['icon' => 'fa-shield-check', 'color' => 'text-success', 'title' => 'Bảo mật', 'desc' => 'Cam kết an toàn 100%']
+                            ['icon' => 'fa-solid fa-bolt', 'color' => 'text-warning', 'title' => 'Nhanh chóng', 'desc' => 'Kích hoạt trong 5 phút'],
+                            ['icon' => 'fa-solid fa-shield-halved', 'color' => 'text-success', 'title' => 'Bảo mật', 'desc' => 'Cam kết an toàn 100%']
                         ];
                     }
                     foreach ($aboutFeatures as $feature): 
+                        $fIcon = trim($feature['icon'] ?? 'fa-solid fa-circle-check');
+                        if ($fIcon === 'fa-shield-check' || $fIcon === 'fa-solid fa-shield-check') $fIcon = 'fa-solid fa-shield-halved';
+                        if (!str_contains($fIcon, 'fa-solid') && !str_contains($fIcon, 'fa-brands') && !str_contains($fIcon, 'fa-regular')) {
+                            $fIcon = 'fa-solid ' . $fIcon;
+                        }
                     ?>
                     <div class="col-sm-6">
                         <div class="d-flex align-items-center gap-3">
                             <div class="feature-icon-sm bg-light rounded-circle d-flex align-items-center justify-content-center" style="width: 48px; height: 48px;">
-                                <i class="<?= htmlspecialchars($feature['icon']) ?> <?= htmlspecialchars($feature['color']) ?>"></i>
+                                <i class="<?= htmlspecialchars($fIcon) ?> <?= htmlspecialchars($feature['color']) ?>"></i>
                             </div>
                             <div>
                                 <h6 class="fw-bold mb-0"><?= htmlspecialchars($feature['title']) ?></h6>

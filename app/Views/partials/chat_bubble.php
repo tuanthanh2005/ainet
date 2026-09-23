@@ -20,12 +20,12 @@
         <!-- Body: Messages List -->
         <div class="chat-body" id="chat-messages-container">
             <div class="chat-welcome-notice">
-                <div class="notice-icon"><i class="fa-solid fa-sparkles"></i></div>
+                <div class="notice-icon"><i class="fa-solid fa-wand-magic-sparkles"></i></div>
                 <p class="mb-1"><strong>Chào mừng bạn đến với <?php echo htmlspecialchars(SITENAME); ?>!</strong></p>
                 <p class="small text-muted mb-2">Gửi mã đơn của bạn vào đây để Admin check nhanh nhất nhé!</p>
                 <div class="quick-replies-tags">
-                    <button type="button" class="quick-tag" onclick="ChatWidget.sendQuickMessage('Cần hỗ trợ bảo hành')">🛡️ Cần hỗ trợ bảo hành</button>
-                    <button type="button" class="quick-tag" onclick="ChatWidget.fillOrderCodePrompt()">📦 Gửi mã đơn hàng</button>
+                    <button type="button" class="quick-tag" onclick="ChatWidget.sendQuickMessage('Cần hỗ trợ bảo hành')"><i class="fa-solid fa-shield-halved text-primary me-1"></i> Cần hỗ trợ bảo hành</button>
+                    <button type="button" class="quick-tag" onclick="ChatWidget.fillOrderCodePrompt()"><i class="fa-solid fa-box text-warning me-1"></i> Gửi mã đơn hàng</button>
                 </div>
             </div>
             <div id="chat-messages-list"></div>

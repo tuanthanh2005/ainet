@@ -17,17 +17,25 @@
                         $contactMethods = json_decode($settings['contact_methods'] ?? '[]', true);
                         if (empty($contactMethods)) {
                             $contactMethods = [
-                                ['icon' => 'fa-envelope', 'text' => 'tetuongmmovn@gmail.com'],
-                                ['icon' => 'fa-telegram', 'text' => '@specademy'],
-                                ['icon' => 'fa-phone', 'text' => 'Zalo: 0967037906']
+                                ['icon' => 'fa-solid fa-envelope', 'text' => 'tetuongmmovn@gmail.com'],
+                                ['icon' => 'fa-brands fa-telegram', 'text' => '@specademy'],
+                                ['icon' => 'fa-solid fa-phone', 'text' => 'Zalo: 0967037906']
                             ];
                         }
                         foreach ($contactMethods as $method):
+                            $mIcon = trim($method['icon'] ?? 'fa-solid fa-envelope');
+                            if (!str_contains($mIcon, 'fa-solid') && !str_contains($mIcon, 'fa-brands') && !str_contains($mIcon, 'fa-regular')) {
+                                if (str_contains($mIcon, 'telegram') || str_contains($mIcon, 'zalo') || str_contains($mIcon, 'facebook')) {
+                                    $mIcon = 'fa-brands ' . $mIcon;
+                                } else {
+                                    $mIcon = 'fa-solid ' . $mIcon;
+                                }
+                            }
                             ?>
                             <div class="d-flex align-items-center gap-3">
                                 <div class="contact-icon bg-secondary bg-opacity-25 rounded-circle d-flex align-items-center justify-content-center"
                                     style="width: 40px; height: 40px;">
-                                    <i class="<?= htmlspecialchars($method['icon']) ?>"></i>
+                                    <i class="<?= htmlspecialchars($mIcon) ?>"></i>
                                 </div>
                                 <span><?= htmlspecialchars($method['text']) ?></span>
                             </div>

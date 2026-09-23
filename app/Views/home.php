@@ -2,7 +2,7 @@
     <!-- Hero / Intro Section -->
     <div class="row align-items-center g-5 py-5 mb-5 rounded-4 position-relative overflow-hidden fade-in-element" style="background: rgba(255,255,255,0.92); border: 1px solid var(--border-color); box-shadow: 0 10px 30px rgba(0,0,0,0.02); margin-left: 0; margin-right: 0;">
         <div class="col-lg-7 text-start ps-4 ps-md-5">
-            <span class="badge bg-primary bg-opacity-10 text-primary mb-3 px-3 py-2 rounded-pill fw-bold" style="letter-spacing:1px; font-size:0.75rem;"><i class="fa-solid fa-sparkles me-1"></i> HỆ SINH THÁI TÀI KHOẢN PREMIUM</span>
+            <span class="badge bg-primary bg-opacity-10 text-primary mb-3 px-3 py-2 rounded-pill fw-bold" style="letter-spacing:1px; font-size:0.75rem;"><i class="fa-solid fa-wand-magic-sparkles me-1"></i> HỆ SINH THÁI TÀI KHOẢN PREMIUM</span>
             <h1 class="display-5 fw-bold text-dark mb-3 lh-sm">Sở Hữu Tài Khoản AI <br><span class="text-gradient fw-extrabold" style="background: var(--vip-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Chính Hãng, Giá Rẻ</span></h1>
             <p class="lead text-muted mb-4 fs-6" style="line-height:1.7;">
                 <?php echo nl2br(htmlspecialchars($settings['heroDesc'] ?? 'Chào mừng bạn đến với AI CỦA TÔI - nền tảng hàng đầu cung cấp các tài khoản Premium (ChatGPT Plus, Claude Pro, Midjourney, YouTube Premium, GitHub Copilot...) tự động 24/7. Uy tín, an toàn, kích hoạt ngay lập tức với chế độ bảo hành 1 đổi 1 trọn gói.')); ?>
@@ -18,7 +18,13 @@
     </div>
     <!-- Product Showcase Section -->
     <?php
-    $renderProductList = function($productList) {
+    $cleanFaIcon = function($icon, $default = 'fa-circle-check') {
+        $icon = trim((string)$icon) ?: $default;
+        if ($icon === 'fa-sparkles') return 'fa-wand-magic-sparkles';
+        if ($icon === 'fa-shield-check') return 'fa-shield-halved';
+        return !str_contains($icon, 'fa-') ? 'fa-' . $icon : $icon;
+    };
+    $renderProductList = function($productList) use ($cleanFaIcon) {
         if (empty($productList)) {
             echo '<p class="text-center text-muted py-4">Chưa có sản phẩm.</p>';
             return;
@@ -64,7 +70,7 @@
                         $cardFeatures = array_values(array_filter((array) ($product['card_features'] ?? []), 'strlen'));
                     ?>
                     <?php if ($shortFeatureText !== ''): ?>
-                        <p class="text-muted small mb-2"><i class="fa-solid <?= htmlspecialchars($product['feature_icon'] ?? 'fa-circle-check') ?> me-1"></i><?= htmlspecialchars($shortFeatureText) ?></p>
+                        <p class="text-muted small mb-2"><i class="fa-solid <?= htmlspecialchars($cleanFaIcon($product['feature_icon'] ?? '')) ?> me-1"></i><?= htmlspecialchars($shortFeatureText) ?></p>
                     <?php endif; ?>
                     <div class="mt-auto">
                         <?php
@@ -122,7 +128,7 @@
             </li>
             <li class="nav-item" role="presentation">
                 <button class="nav-link rounded-pill px-4 fw-bold shadow-sm" id="newest-tab" data-bs-toggle="pill" data-bs-target="#newest" type="button" role="tab" aria-controls="newest" aria-selected="false">
-                    <i class="fa-solid fa-sparkles text-primary me-1"></i> Mới ra mắt
+                    <i class="fa-solid fa-wand-magic-sparkles text-primary me-1"></i> Mới ra mắt
                 </button>
             </li>
         </ul>
@@ -201,7 +207,7 @@
                     <div>
                         <span class="live-label mb-2"><i class="fa-solid fa-star"></i> Đánh Giá Hài Lòng</span>
                         <div class="fs-2 fw-extrabold text-primary" style="background: var(--vip-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 800;">
-                            <?= number_format($systemStats['average_rating'], 1) ?>/5 ★
+                            <?= number_format($systemStats['average_rating'], 1) ?>/5 <i class="fa-solid fa-star text-warning" style="font-size: 1.2rem; -webkit-text-fill-color: initial;"></i>
                         </div>
                     </div>
                     <div class="small text-muted mt-2 fw-medium">Chỉ số phản hồi thực tế từ người dùng</div>
@@ -217,9 +223,7 @@
         <div class="d-flex flex-wrap justify-content-center gap-3">
             <?php foreach ($categories as $cat): ?>
                 <a href="<?php echo Url::category($cat['seo_slug'] ?: $cat['slug']); ?>" class="text-decoration-none d-flex align-items-center gap-2 px-4 py-3 rounded-4 shadow-sm border border-light bg-white hover-up" style="transition: all 0.3s ease;">
-                    <?php if ($cat['icon']): ?>
-                        <i class="fa-solid <?= htmlspecialchars($cat['icon']) ?> <?= htmlspecialchars($cat['icon_color'] ?: 'text-primary') ?> fs-5"></i>
-                    <?php endif; ?>
+                    <i class="fa-solid <?= htmlspecialchars($cat['icon'] ?: 'fa-layer-group') ?> <?= htmlspecialchars($cat['icon_color'] ?: 'text-primary') ?> fs-5"></i>
                     <span class="fw-bold text-dark"><?= htmlspecialchars($cat['name']) ?></span>
                 </a>
             <?php endforeach; ?>
@@ -256,21 +260,21 @@
                         
                         <div class="mt-4 pt-3 border-top">
                             <div class="d-flex align-items-center justify-content-between mb-2">
-                                <span class="small text-muted" style="min-width: 60px;">5 ★</span>
+                                <span class="small text-muted" style="min-width: 60px;">5 <i class="fa-solid fa-star text-warning"></i></span>
                                 <div class="progress flex-grow-1 mx-3" style="height: 6px;">
                                     <div class="progress-bar bg-warning" role="progressbar" style="width: <?= $systemStats['pct_5'] ?>%;" aria-valuenow="<?= $systemStats['pct_5'] ?>" aria-valuemin="0" aria-valuemax="100"></div>
                                 </div>
                                 <span class="small text-muted font-monospace"><?= $systemStats['pct_5'] ?>%</span>
                             </div>
                             <div class="d-flex align-items-center justify-content-between mb-2">
-                                <span class="small text-muted" style="min-width: 60px;">4 ★</span>
+                                <span class="small text-muted" style="min-width: 60px;">4 <i class="fa-solid fa-star text-warning"></i></span>
                                 <div class="progress flex-grow-1 mx-3" style="height: 6px;">
                                     <div class="progress-bar bg-warning" role="progressbar" style="width: <?= $systemStats['pct_4'] ?>%;" aria-valuenow="<?= $systemStats['pct_4'] ?>" aria-valuemin="0" aria-valuemax="100"></div>
                                 </div>
                                 <span class="small text-muted font-monospace"><?= $systemStats['pct_4'] ?>%</span>
                             </div>
                             <div class="d-flex align-items-center justify-content-between">
-                                <span class="small text-muted" style="min-width: 60px;">1-3 ★</span>
+                                <span class="small text-muted" style="min-width: 60px;">1-3 <i class="fa-solid fa-star text-warning"></i></span>
                                 <div class="progress flex-grow-1 mx-3" style="height: 6px;">
                                     <div class="progress-bar bg-warning" role="progressbar" style="width: <?= $systemStats['pct_1_3'] ?>%;" aria-valuenow="<?= $systemStats['pct_1_3'] ?>" aria-valuemin="0" aria-valuemax="100"></div>
                                 </div>
@@ -389,9 +393,7 @@
             <?php $activeSlug = $cat['seo_slug'] ?: $cat['slug']; ?>
             <a href="<?php echo Url::category($activeSlug) . ($sortParam ? '?' . ltrim($sortParam, '&') : ''); ?>"
                class="cat-pill text-decoration-none <?= $cat['is_pro'] ? 'pro-glow' : '' ?> <?php echo ($currentCat === $cat['slug'] || $currentCat === $cat['seo_slug']) ? 'active' : ''; ?>">
-                <?php if ($cat['icon']): ?>
-                    <i class="fa-solid <?= htmlspecialchars($cat['icon']) ?> <?= htmlspecialchars($cat['icon_color'] ?: 'text-primary') ?>"></i>
-                <?php endif; ?>
+                <i class="fa-solid <?= htmlspecialchars($cat['icon'] ?: 'fa-layer-group') ?> <?= htmlspecialchars($cat['icon_color'] ?: 'text-primary') ?>"></i>
                 <?= htmlspecialchars($cat['name']) ?>
             </a>
         <?php endforeach; ?>
@@ -444,7 +446,7 @@
                         ?>
                         <?php if ($shortFeatureText !== ''): ?>
                             <p class="text-muted small mb-2"><i
-                                    class="fa-solid <?= htmlspecialchars($product['feature_icon'] ?? 'fa-circle-check') ?> me-1"></i>
+                                    class="fa-solid <?= htmlspecialchars($cleanFaIcon($product['feature_icon'] ?? '')) ?> me-1"></i>
                                 <?= htmlspecialchars($shortFeatureText) ?></p>
                         <?php endif; ?>
                         <?php if (!empty($cardFeatures)): ?>
@@ -455,7 +457,7 @@
                             </ul>
                         <?php elseif ($shortFeatureText === ''): ?>
                             <p class="text-muted small mb-3"><i
-                                    class="fa-solid <?= htmlspecialchars($product['feature_icon'] ?? 'fa-circle-check') ?> me-1"></i>
+                                    class="fa-solid <?= htmlspecialchars($cleanFaIcon($product['feature_icon'] ?? '')) ?> me-1"></i>
                                 <?= htmlspecialchars($product['feature_text'] ?? '') ?></p>
                         <?php endif; ?>
                         <div class="mt-auto">

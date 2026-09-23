@@ -895,7 +895,6 @@ class HomeController extends Controller {
         $spamDomains = ['meewignite.info', 'synthetic-lab.invalid', 'lab-synth.dev', 'tempmail', 'dispostable', 'guerrillamail', '10minutemail', '.invalid'];
         foreach ($spamDomains as $domain) {
             if (str_contains($email, $domain)) {
-                SecurityLogger::logActivity('SPAM_CONTACT_BLOCKED', "Chặn email spam domain: $email", true);
                 $_SESSION['flash_error'] = 'Địa chỉ email không hợp lệ.';
                 header('Location: ' . Url::contact());
                 exit;
@@ -906,7 +905,6 @@ class HomeController extends Controller {
         $isGibberishName = strlen($name) > 6 && !str_contains($name, ' ') && preg_match('/^[b-df-hj-np-tv-z]{5,}/i', $name);
         $isGibberishMessage = strlen($message) > 12 && !str_contains($message, ' ');
         if ($isGibberishName || $isGibberishMessage) {
-            SecurityLogger::logActivity('SPAM_CONTACT_BLOCKED', "Chặn bot spam rác: $name ($email)", true);
             $_SESSION['flash_error'] = 'Nội dung liên hệ không hợp lệ.';
             header('Location: ' . Url::contact());
             exit;
