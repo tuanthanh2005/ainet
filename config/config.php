@@ -72,7 +72,10 @@ function image_url($path = '') {
 
 function asset($path = '') {
     // Dùng đường dẫn gốc từ tên miền để đảm bảo luôn đúng ở mọi trang con
-    // Thêm ?v= để xóa cache trình duyệt khi bạn cập nhật code mới
-    $version = '1.3.9'; // Bump khi update CSS/JS để bypass cache trình duyệt
-    return url('assets/' . ltrim($path, '/') . '?v=' . $version);
+    // Tự động lấy filemtime để trình duyệt luôn tải file mới nhất ngay sau khi cập nhật
+    $cleanPath = ltrim($path, '/');
+    $filePath = public_path('assets/' . $cleanPath);
+    $version = is_file($filePath) ? filemtime($filePath) : '1.4.0';
+    return url('assets/' . $cleanPath . '?v=' . $version);
 }
+
