@@ -2266,6 +2266,25 @@
 
         const FALLBACK_PRODUCT_IMAGE = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60' viewBox='0 0 60 60'%3E%3Crect width='60' height='60' fill='%23f1f5f9' rx='6'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='sans-serif' font-size='9' fill='%2394a3b8'%3ENO IMAGE%3C/text%3E%3C/svg%3E";
 
+        function apiGet(action, params = {}) {
+            let url = '?action=';
+            if (typeof action === 'string') {
+                if (action.startsWith('?') || action.startsWith('action=')) {
+                    url = action.startsWith('?') ? action : ('?' + action);
+                } else {
+                    url = '?action=' + action;
+                }
+            }
+            if (params && Object.keys(params).length > 0) {
+                const sp = new URLSearchParams(params);
+                url += (url.includes('?') ? '&' : '?') + sp.toString();
+            }
+            return fetch(url, {
+                headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                credentials: 'same-origin'
+            }).then(res => res.json());
+        }
+
         function apiPost(action, formData) {
             if (!(formData instanceof FormData)) {
                 const fd = new FormData();
