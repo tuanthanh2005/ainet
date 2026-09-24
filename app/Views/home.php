@@ -1,6 +1,6 @@
 <div id="home-section" style="display: <?php echo ($tab === 'home') ? 'block' : 'none'; ?>;">
-    <!-- Hero / Intro Section -->
-    <div class="hero-banner-card position-relative overflow-hidden mb-5 rounded-4 p-4 p-md-5 border shadow-sm fade-in-element"
+    <!-- Hero / Intro Section (Chỉ hiển thị trên laptop / PC, ẩn trên mobile) -->
+    <div class="hero-banner-card d-none d-lg-block position-relative overflow-hidden mb-5 rounded-4 p-4 p-md-5 border shadow-sm fade-in-element"
          style="background: radial-gradient(circle at 90% 15%, rgba(99, 102, 241, 0.08) 0%, transparent 50%), radial-gradient(circle at 10% 85%, rgba(168, 85, 247, 0.05) 0%, transparent 50%), linear-gradient(135deg, #ffffff 0%, #fcfdfe 100%); border-color: rgba(226, 232, 240, 0.9) !important; box-shadow: 0 16px 36px -12px rgba(15, 23, 42, 0.05) !important;">
         <div class="row align-items-center g-4 g-lg-5">
             <div class="col-lg-7 text-start">
