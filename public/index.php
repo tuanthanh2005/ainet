@@ -213,6 +213,8 @@ if ($rawUrl !== '' && empty($_GET['action'])) {
         case 'admin':
             if ($second === 'system-indexing') {
                 $_GET['action'] = 'adminSystemIndexing';
+            } elseif ($second === '' || $second === 'dashboard') {
+                $_GET['action'] = 'adminDashboard';
             }
             break;
     }
@@ -242,6 +244,25 @@ function redirect_to_public_canonical_if_needed(string $action): void {
         return;
     }
 
+    // Skip AJAX
+    if (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) || (strpos($_SERVER['HTTP_ACCEPT'] ?? '', 'application/json') !== false)) {
+        return;
+    }
+
+    // Do NOT run canonical SEO redirection on admin, user account, or internal actions
+    $exemptPrefixes = ['admin', 'profile', 'orderHistory', 'login', 'logout', 'register', 'auth', 'sepay', 'checkout', 'webhook', 'stock', 'api'];
+    foreach ($exemptPrefixes as $prefix) {
+        if (stripos($action, $prefix) === 0) {
+            return;
+        }
+    }
+
+    // If an action parameter exists and is NOT a public SEO action, do not redirect
+    $publicSeoActions = ['index', 'productDetail', 'blogDetail', 'about', 'contact', 'cart'];
+    if (!in_array($action, $publicSeoActions, true)) {
+        return;
+    }
+
     $target = null;
     $query = [];
 
@@ -259,7 +280,7 @@ function redirect_to_public_canonical_if_needed(string $action): void {
         } elseif ($tab === 'products') {
             $target = Url::withQuery(Url::products(), $query);
         } elseif ($tab === 'blog') {
-            $target = Url::blogs();
+            $target = Url::withQuery(Url::blogs(), $query);
         } elseif ($tab === 'home') {
             $target = Url::home();
         }
@@ -282,7 +303,14 @@ function redirect_to_public_canonical_if_needed(string $action): void {
     }
 
     if (!$target) {
-        return;
+        // Only redirect bare index.php to root if there are NO query parameters and no action
+        $rawUri = $_SERVER['REQUEST_URI'] ?? '';
+        $pathOnly = parse_url($rawUri, PHP_URL_PATH) ?: '';
+        if (empty($_SERVER['QUERY_STRING']) && (substr($pathOnly, -9) === 'index.php' || substr($pathOnly, -10) === 'index.php/')) {
+            $target = Url::home();
+        } else {
+            return;
+        }
     }
 
     $current = current_request_url_for_redirect();
@@ -312,8 +340,8 @@ if ($isPost && !in_array($action, $csrfExempt, true)) {
     }
 }
 
-// Bắt buộc login khi sử dụng quá 5 phút vãng lai (áp dụng cho POST và AJAX)
-if (!Auth::check() && !empty($_SESSION['guest_expired'])) {
+// Bắt buộc login khi sử dụng quá 5 phút vãng lai (áp dụng cho POST và AJAX, bỏ qua bot tìm kiếm)
+if (!Auth::check() && !empty($_SESSION['guest_expired']) && !Seo::isBot()) {
     $guestAllowedActions = [
         'login', 'register', 'googleLogin', 'googleCallback',
         'forgot_password', 'reset_password', 'logout',

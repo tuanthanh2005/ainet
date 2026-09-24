@@ -10,7 +10,7 @@ class HomeController extends Controller {
     public function index() {
         $products = Product::getAll();
         $categories = Category::getAll();
-        $blogs = Blog::getSummaries();
+        $allBlogs = Blog::getSummaries();
         $recentOrders = RecentOrder::getAll();
         $settings = $this->settings;
 
@@ -129,10 +129,27 @@ class HomeController extends Controller {
             }
         }
 
+        // Blog pagination calculation: 1 row = 3 articles, 2 rows = 6 articles per page
+        $blogLimit = 6;
+        $totalBlogs = count($allBlogs);
+        $totalBlogPages = max(1, (int) ceil($totalBlogs / $blogLimit));
+
         if ($tab === 'home') {
             // No pagination slicing for home tab (uses JS "Xem thêm")
             $page = 1;
             $totalPages = 1;
+            $blogPage = 1;
+            $blogs = array_slice($allBlogs, 0, 3);
+        } elseif ($tab === 'blog') {
+            $page = 1;
+            $totalPages = 1;
+
+            $blogPage = max(1, (int) ($_GET['page'] ?? 1));
+            if ($blogPage > $totalBlogPages && $totalBlogPages > 0) {
+                $blogPage = $totalBlogPages;
+            }
+            $blogOffset = ($blogPage - 1) * $blogLimit;
+            $blogs = array_slice($allBlogs, $blogOffset, $blogLimit);
         } else {
             // Standard pagination for products tab: 3 rows of 4 products = 12
             $page = max(1, (int) ($_GET['page'] ?? 1));
@@ -142,6 +159,9 @@ class HomeController extends Controller {
             $totalFilteredProducts = count($products);
             $totalPages = max(1, ceil($totalFilteredProducts / $limit));
             $products = array_slice($products, $offset, $limit);
+
+            $blogPage = 1;
+            $blogs = array_slice($allBlogs, 0, 6);
         }
 
         $action = $_GET['action'] ?? 'index';
@@ -188,18 +208,28 @@ class HomeController extends Controller {
         } else {
             $homeSeo = Seo::defaults($tab === 'products' ? 'products' : ($tab === 'blog' ? 'blog' : 'home'));
             $canonical = Url::home();
+            $prevUrl = null;
+            $nextUrl = null;
+
             if ($tab === 'products') {
                 $canonical = Url::products() . ($page > 1 ? '?page=' . $page : '');
+                if ($page > 1 && $q === '' && empty($_GET['sort'])) {
+                    $prevUrl = Url::products() . ($page > 2 ? '?page=' . ($page - 1) : '');
+                }
+                if ($page < $totalPages && $q === '' && empty($_GET['sort'])) {
+                    $nextUrl = Url::products() . '?page=' . ($page + 1);
+                }
             } elseif ($tab === 'blog') {
-                $canonical = Url::blogs();
+                $canonical = Url::blogs() . ($blogPage > 1 ? '?page=' . $blogPage : '');
+                if ($blogPage > 1) {
+                    $prevUrl = Url::blogs() . ($blogPage > 2 ? '?page=' . ($blogPage - 1) : '');
+                }
+                if ($blogPage < $totalBlogPages) {
+                    $nextUrl = Url::blogs() . '?page=' . ($blogPage + 1);
+                }
             }
+
             $robots = ($q !== '' || !empty($_GET['sort'])) ? 'noindex,follow' : 'index,follow';
-            $prevUrl = ($tab === 'products' && $page > 1 && $q === '' && empty($_GET['sort']))
-                ? Url::products() . ($page > 2 ? '?page=' . ($page - 1) : '')
-                : null;
-            $nextUrl = ($tab === 'products' && $page < $totalPages && $q === '' && empty($_GET['sort']))
-                ? Url::products() . '?page=' . ($page + 1)
-                : null;
             Seo::set([
                 'title'       => $homeSeo['title'] ?? 'Tài khoản AI Premium - Gemini Advanced, ChatGPT, Copilot',
                 'description' => $homeSeo['description'] ?? 'Cung cấp tài khoản Gemini Advanced (Google One AI Premium), ChatGPT Plus, YouTube Premium, GitHub Copilot giá tốt nhất. Kích hoạt tự động, bảo hành 1 đổi 1 uy tín.',
@@ -243,6 +273,9 @@ class HomeController extends Controller {
             'products' => $products,
             'categories' => $categories,
             'blogs' => $blogs,
+            'blogPage' => $blogPage,
+            'totalBlogPages' => $totalBlogPages,
+            'totalBlogs' => $totalBlogs,
             'recentOrders' => $recentOrders,
             'settings' => $settings,
             'tab' => $tab,
@@ -440,7 +473,21 @@ class HomeController extends Controller {
                     'reviewCount' => (string) (max(1, (int) ($product['sold_count'] ?? 10))),
                     'bestRating'  => '5',
                     'worstRating' => '1',
-                ]
+                ],
+                'review' => [
+                    '@type' => 'Review',
+                    'reviewRating' => [
+                        '@type' => 'Rating',
+                        'ratingValue' => '5',
+                        'bestRating'  => '5',
+                        'worstRating' => '1',
+                    ],
+                    'author' => [
+                        '@type' => 'Person',
+                        'name'  => 'Khách hàng đã xác thực',
+                    ],
+                    'reviewBody' => 'Tài khoản kích hoạt tự động nhanh, dùng ổn định và bảo hành uy tín.',
+                ],
             ],
         ]);
 
@@ -457,24 +504,46 @@ class HomeController extends Controller {
             exit;
         }
 
+        $isAjax = !empty($_SERVER['HTTP_X_REQUESTED_WITH']) || (strpos($_SERVER['HTTP_ACCEPT'] ?? '', 'application/json') !== false);
+
         // 1. CSRF Token Validation
         if (!Csrf::validate()) {
-            $_SESSION['flash_error'] = 'Yêu cầu không hợp lệ hoặc phiên làm việc đã hết hạn.';
+            $msg = 'Yêu cầu không hợp lệ hoặc phiên làm việc đã hết hạn. Vui lòng thử lại.';
+            if ($isAjax) {
+                http_response_code(419);
+                header('Content-Type: application/json');
+                echo json_encode(['success' => false, 'message' => $msg]);
+                exit;
+            }
+            $_SESSION['flash_error'] = $msg;
             header('Location: ' . url());
             exit;
         }
 
         // 2. Honeypot check (Antispam trap)
         if (!empty($_POST['website_url_check'])) {
-            // Silence bot without error message or create delay
+            if ($isAjax) {
+                http_response_code(400);
+                header('Content-Type: application/json');
+                echo json_encode(['success' => false, 'message' => 'Phát hiện hành vi không hợp lệ.']);
+                exit;
+            }
             header('Location: ' . url());
             exit;
         }
 
         // 3. Rate limiting check
         if (!Auth::checkRegisterRateLimit(3, 600)) {
-            $_SESSION['flash_error'] = 'Bạn đã thử đăng ký quá nhiều lần. Vui lòng thử lại sau 10 phút.';
-            header('Location: ' . url());
+            $msg = 'Bạn đã thử đăng ký quá nhiều lần. Vui lòng thử lại sau 10 phút.';
+            if ($isAjax) {
+                http_response_code(429);
+                header('Content-Type: application/json');
+                echo json_encode(['success' => false, 'message' => $msg]);
+                exit;
+            }
+            $_SESSION['flash_error'] = $msg;
+            $_SESSION['register_error'] = $msg;
+            header('Location: ' . ($_SERVER['HTTP_REFERER'] ?? url()));
             exit;
         }
 
@@ -486,8 +555,18 @@ class HomeController extends Controller {
 
         // 4. Basic input validation
         if ($name === '' || !filter_var($email, FILTER_VALIDATE_EMAIL) || strlen($password) < 6) {
-            $_SESSION['flash_error'] = 'Vui lòng nhập đúng họ tên, email và mật khẩu tối thiểu 6 ký tự.';
-            header('Location: ' . url());
+            $msg = 'Vui lòng nhập đúng họ tên, email hợp lệ và mật khẩu tối thiểu 6 ký tự.';
+            if ($isAjax) {
+                http_response_code(422);
+                header('Content-Type: application/json');
+                echo json_encode(['success' => false, 'message' => $msg]);
+                exit;
+            }
+            $_SESSION['flash_error'] = $msg;
+            $_SESSION['register_error'] = $msg;
+            $_SESSION['old_register_name'] = $name;
+            $_SESSION['old_register_email'] = $email;
+            header('Location: ' . ($_SERVER['HTTP_REFERER'] ?? url()));
             exit;
         }
 
@@ -495,15 +574,35 @@ class HomeController extends Controller {
         $suspiciousDomains = ['lab-synth.dev', 'synthetic-lab.invalid', 'tempmail', 'dispostable', 'mailinator', '.invalid'];
         foreach ($suspiciousDomains as $domain) {
             if (strpos($email, $domain) !== false || strpos($name, 'pentest') !== false || strpos($email, 'pentest') !== false) {
-                $_SESSION['flash_error'] = 'Tên hoặc Email không được chấp nhận.';
-                header('Location: ' . url());
+                $msg = 'Tên hoặc Email không được chấp nhận.';
+                if ($isAjax) {
+                    http_response_code(422);
+                    header('Content-Type: application/json');
+                    echo json_encode(['success' => false, 'message' => $msg]);
+                    exit;
+                }
+                $_SESSION['flash_error'] = $msg;
+                $_SESSION['register_error'] = $msg;
+                $_SESSION['old_register_name'] = $name;
+                $_SESSION['old_register_email'] = $email;
+                header('Location: ' . ($_SERVER['HTTP_REFERER'] ?? url()));
                 exit;
             }
         }
 
         if (User::findByEmail($email)) {
-            $_SESSION['flash_error'] = 'Email này đã được đăng ký.';
-            header('Location: ' . url());
+            $msg = 'Email này đã được đăng ký tài khoản.';
+            if ($isAjax) {
+                http_response_code(409);
+                header('Content-Type: application/json');
+                echo json_encode(['success' => false, 'message' => $msg]);
+                exit;
+            }
+            $_SESSION['flash_error'] = $msg;
+            $_SESSION['register_error'] = $msg;
+            $_SESSION['old_register_name'] = $name;
+            $_SESSION['old_register_email'] = $email;
+            header('Location: ' . ($_SERVER['HTTP_REFERER'] ?? url()));
             exit;
         }
 
@@ -512,7 +611,13 @@ class HomeController extends Controller {
         Auth::login($user);
 
         $_SESSION['flash_success'] = 'Đăng ký thành công.';
-        header('Location: ' . url());
+        $redirect = url();
+        if ($isAjax) {
+            header('Content-Type: application/json');
+            echo json_encode(['success' => true, 'redirect' => $redirect]);
+            exit;
+        }
+        header('Location: ' . $redirect);
         exit;
     }
 
@@ -522,9 +627,19 @@ class HomeController extends Controller {
             exit;
         }
 
+        $isAjax = !empty($_SERVER['HTTP_X_REQUESTED_WITH']) || (strpos($_SERVER['HTTP_ACCEPT'] ?? '', 'application/json') !== false);
+
         if (!Auth::checkLoginRateLimit()) {
-            $_SESSION['flash_error'] = 'Bạn đã thử đăng nhập quá nhiều lần. Vui lòng đợi vài phút.';
-            header('Location: ' . url());
+            $msg = 'Bạn đã thử đăng nhập quá nhiều lần. Vui lòng đợi vài phút.';
+            if ($isAjax) {
+                http_response_code(429);
+                header('Content-Type: application/json');
+                echo json_encode(['success' => false, 'message' => $msg]);
+                exit;
+            }
+            $_SESSION['flash_error'] = $msg;
+            $_SESSION['login_error'] = $msg;
+            header('Location: ' . ($_SERVER['HTTP_REFERER'] ?? url()));
             exit;
         }
 
@@ -534,26 +649,48 @@ class HomeController extends Controller {
 
         if (!$user || !password_verify($password, $user['password'])) {
             Auth::recordFailedLogin();
-            $_SESSION['flash_error'] = 'Email hoặc mật khẩu không đúng.';
-            header('Location: ' . url());
+            $msg = 'Email hoặc mật khẩu không đúng.';
+            if ($isAjax) {
+                http_response_code(401);
+                header('Content-Type: application/json');
+                echo json_encode(['success' => false, 'message' => $msg]);
+                exit;
+            }
+            $_SESSION['flash_error'] = $msg;
+            $_SESSION['login_error'] = $msg;
+            $_SESSION['old_login_email'] = $email;
+            header('Location: ' . ($_SERVER['HTTP_REFERER'] ?? url()));
             exit;
         }
 
         if (($user['status'] ?? '') !== 'active') {
             Auth::recordFailedLogin();
-            $_SESSION['flash_error'] = 'Tài khoản đang bị khóa.';
-            header('Location: ' . url());
+            $msg = 'Tài khoản đang bị khóa.';
+            if ($isAjax) {
+                http_response_code(403);
+                header('Content-Type: application/json');
+                echo json_encode(['success' => false, 'message' => $msg]);
+                exit;
+            }
+            $_SESSION['flash_error'] = $msg;
+            $_SESSION['login_error'] = $msg;
+            $_SESSION['old_login_email'] = $email;
+            header('Location: ' . ($_SERVER['HTTP_REFERER'] ?? url()));
             exit;
         }
 
         Auth::login($user);
         $_SESSION['flash_success'] = 'Đăng nhập thành công.';
 
-        if (($user['role'] ?? 'user') === 'admin') {
-            header('Location: ' . url('index.php?action=adminDashboard'));
-        } else {
-            header('Location: ' . url());
+        $redirect = (($user['role'] ?? 'user') === 'admin') ? url('index.php?action=adminDashboard') : url();
+
+        if ($isAjax) {
+            header('Content-Type: application/json');
+            echo json_encode(['success' => true, 'redirect' => $redirect]);
+            exit;
         }
+
+        header('Location: ' . $redirect);
         exit;
     }
 

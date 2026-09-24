@@ -236,18 +236,26 @@ function switchModal(fromModal, toModal) {
 
     if (!toEl || typeof bootstrap === 'undefined') return;
 
-    const toInstance = bootstrap.Modal.getOrCreateInstance(toEl);
+    window.isSwitchingAuthModal = true;
+
+    const isLocked = !!(window.isGuestExpired && !window.APP_USER_LOGGED_IN);
+    const toInstance = bootstrap.Modal.getOrCreateInstance(toEl, {
+        backdrop: isLocked ? 'static' : true,
+        keyboard: !isLocked
+    });
 
     if (fromEl && fromEl.classList.contains('show')) {
         const fromInstance = bootstrap.Modal.getInstance(fromEl) || bootstrap.Modal.getOrCreateInstance(fromEl);
         const onHidden = function () {
             fromEl.removeEventListener('hidden.bs.modal', onHidden);
             toInstance.show();
+            setTimeout(() => { window.isSwitchingAuthModal = false; }, 150);
         };
         fromEl.addEventListener('hidden.bs.modal', onHidden);
         fromInstance.hide();
     } else {
         toInstance.show();
+        setTimeout(() => { window.isSwitchingAuthModal = false; }, 150);
     }
 }
 window.switchModal = switchModal;

@@ -4,7 +4,7 @@ if (empty($contactMethods)) {
     $contactMethods = [
         ['icon' => 'fa-solid fa-envelope', 'text' => 'tetuongmmovn@gmail.com'],
         ['icon' => 'fa-brands fa-telegram', 'text' => '@specademy'],
-        ['icon' => 'fa-solid fa-phone', 'text' => 'Zalo: 0967037906']
+        ['icon' => 'fa-solid fa-phone', 'text' => 'Zalo: 0772698113']
     ];
 }
 ?>

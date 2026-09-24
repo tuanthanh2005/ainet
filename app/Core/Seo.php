@@ -58,6 +58,12 @@ class Seo {
         $customTitle = self::$data['title'] ?? null;
         if ($customTitle !== null && $customTitle !== '') {
             $title = $customTitle;
+            // Format dangling "- AI" from database seeds to official brand "- AI CỦA TÔI"
+            if (preg_match('/\s*-\s*AI$/i', $title)) {
+                $title = preg_replace('/\s*-\s*AI$/i', ' - AI CỦA TÔI', $title);
+            } elseif (!preg_match('/(AI CỦA TÔI|aicuatoi)/i', $title) && mb_strlen($title) <= 50) {
+                $title .= ' | ' . $siteName;
+            }
         } else {
             $pTitle = $pageConfig['title'] ?? '';
             $title = $pTitle ? ($pTitle . ' | ' . $siteName) : ($siteName . ' - Cửa Hàng Dịch Vụ AI Cao Cấp');
@@ -84,6 +90,11 @@ class Seo {
         $baseUrl = rtrim(URLROOT, '/');
         $themeColor = $settings['theme_color'] ?? '#ec4899';
 
+        $robotsDirective = $robots;
+        if (strpos($robotsDirective, 'index') !== false && strpos($robotsDirective, 'max-image-preview') === false) {
+            $robotsDirective = 'index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1';
+        }
+
         $out  = "    <meta name=\"base-url\" content=\"{$h($baseUrl)}\">\n";
         $out .= "    <meta name=\"theme-color\" content=\"{$h($themeColor)}\">\n";
         $out .= "    <meta name=\"format-detection\" content=\"telephone=no\">\n";
@@ -92,8 +103,9 @@ class Seo {
         if ($keywords !== '') {
             $out .= "    <meta name=\"keywords\" content=\"{$h($keywords)}\">\n";
         }
-        $out .= "    <meta name=\"robots\" content=\"{$h($robots)}\">\n";
-        $out .= "    <meta name=\"googlebot\" content=\"{$h($robots . ',max-snippet:-1,max-image-preview:large,max-video-preview:-1')}\">\n";
+        $out .= "    <meta name=\"robots\" content=\"{$h($robotsDirective)}\">\n";
+        $out .= "    <meta name=\"googlebot\" content=\"{$h($robotsDirective)}\">\n";
+        $out .= "    <meta name=\"bingbot\" content=\"{$h($robotsDirective)}\">\n";
         $out .= "    <meta name=\"author\" content=\"{$h($siteName)}\">\n";
         $out .= "    <link rel=\"canonical\" href=\"{$h($canonical)}\">\n";
         if ($prevUrl) {
@@ -261,6 +273,29 @@ class Seo {
         return url(ltrim($path, '/'));
     }
 
+    /**
+     * Detect search engine bots and crawlers (Googlebot, Bingbot, etc.).
+     */
+    public static function isBot(): bool {
+        $ua = strtolower($_SERVER['HTTP_USER_AGENT'] ?? '');
+        if ($ua === '') return false;
+        $botTokens = [
+            'googlebot', 'google-inspectiontool', 'google-site-verification',
+            'mediapartners-google', 'adsbot-google', 'feedfetcher-google',
+            'bingbot', 'bingpreview', 'msnbot', 'yandexbot', 'baiduspider',
+            'duckduckbot', 'slurp', 'sogou', 'exabot', 'facebot',
+            'facebookexternalhit', 'ia_archiver', 'twitterbot', 'linkedinbot',
+            'pinterestbot', 'applebot', 'semrushbot', 'ahrefsbot', 'dotbot',
+            'mj12bot', 'screaming frog', 'lighthouse', 'chrome-lighthouse'
+        ];
+        foreach ($botTokens as $token) {
+            if (strpos($ua, $token) !== false) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public static function normalizeUrl(string $url): string {
         $url = trim($url);
         if ($url === '') return rtrim(URLROOT, '/') . '/';
@@ -271,13 +306,49 @@ class Seo {
             $parts = parse_url($url);
         }
 
-        $scheme = strtolower($parts['scheme'] ?? parse_url(URLROOT, PHP_URL_SCHEME) ?: 'https');
+        $scheme = strtolower($parts['scheme'] ?? parse_url(URLROOT, PHP_URL_SCHEME) ?: 'http');
         $host = strtolower($parts['host'] ?? parse_url(URLROOT, PHP_URL_HOST));
+
+        $isLocal = in_array($host, ['localhost', '127.0.0.1', '::1'], true) || (bool) preg_match('/\.local$/i', $host);
+
+        // In production on live domain, ensure HTTPS
+        if (!$isLocal && (APP_ENV === 'production' || strpos($host, 'aicuatoi.net') !== false)) {
+            $scheme = 'https';
+        }
+
+        // Preserve port if specified or if present in URLROOT for localhost
+        $port = '';
+        if (!empty($parts['port'])) {
+            $port = ':' . $parts['port'];
+        } elseif ($isLocal) {
+            $defaultPort = parse_url(URLROOT, PHP_URL_PORT);
+            if (!empty($defaultPort)) {
+                $port = ':' . $defaultPort;
+            }
+        }
+
         $path = '/' . ltrim($parts['path'] ?? '/', '/');
         $path = preg_replace('#/+#', '/', $path);
         $path = $path !== '/' ? rtrim($path, '/') : '/';
-        $query = isset($parts['query']) && $parts['query'] !== '' ? '?' . $parts['query'] : '';
-        return $scheme . '://' . $host . $path . $query;
+
+        // Filter tracking parameters from canonical URLs to prevent Google duplicate content warnings
+        $query = '';
+        if (isset($parts['query']) && $parts['query'] !== '') {
+            parse_str($parts['query'], $queryParams);
+            $trackingKeys = [
+                'fbclid', 'gclid', 'gbraid', 'wbraid', 'msclkid', 'dclid',
+                'utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content',
+                'ref', 'source', 'srsltid', 'session_id'
+            ];
+            foreach ($trackingKeys as $tk) {
+                unset($queryParams[$tk]);
+            }
+            if (!empty($queryParams)) {
+                $query = '?' . http_build_query($queryParams);
+            }
+        }
+
+        return $scheme . '://' . $host . $port . $path . $query;
     }
 
     private static function defaultBreadcrumb(string $canonical, string $title): array {

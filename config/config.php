@@ -38,6 +38,10 @@ define('GOOGLE_CLIENT_SECRET', getenv('GOOGLE_CLIENT_SECRET') ?: '');
 define('GOOGLE_REDIRECT_URI', getenv('GOOGLE_REDIRECT_URI') ?: '');
 
 // Path Helpers
+if (!defined('APP_ROOT')) {
+    define('APP_ROOT', dirname(__DIR__));
+}
+
 function base_path($path = '') {
     return __DIR__ . '/../' . ltrim($path, '/');
 }
@@ -69,6 +73,6 @@ function image_url($path = '') {
 function asset($path = '') {
     // Dùng đường dẫn gốc từ tên miền để đảm bảo luôn đúng ở mọi trang con
     // Thêm ?v= để xóa cache trình duyệt khi bạn cập nhật code mới
-    $version = '1.3.8'; // Bump khi update CSS/JS để bypass cache trình duyệt
+    $version = '1.3.9'; // Bump khi update CSS/JS để bypass cache trình duyệt
     return url('assets/' . ltrim($path, '/') . '?v=' . $version);
 }

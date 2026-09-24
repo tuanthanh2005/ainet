@@ -27,112 +27,170 @@
             background-color: var(--light-gray);
             color: var(--dark-gray);
             margin: 0;
-            overflow-x: hidden;
+            overflow: hidden;
+            height: 100vh;
         }
 
         /* ================= LAYOUT ================= */
         .admin-wrapper {
             display: flex;
             height: 100vh;
+            width: 100vw;
+            overflow: hidden;
+            background-color: var(--pure-black);
         }
 
         /* SIDEBAR */
         .sidebar {
             width: var(--sidebar-width);
+            min-width: var(--sidebar-width);
             background-color: var(--pure-black);
             color: var(--pure-white);
             display: flex;
             flex-direction: column;
             transition: 0.3s;
             z-index: 1000;
+            height: 100vh;
+            max-height: 100vh;
+            overflow: hidden;
+            flex-shrink: 0;
+            border-right: 1px solid #1f1f23;
         }
 
         .sidebar-brand {
-            padding: 20px;
-            font-size: 1.5rem;
+            padding: 16px 20px;
+            font-size: 1.25rem;
             font-weight: 700;
             text-align: center;
-            border-bottom: 1px solid #333;
-            letter-spacing: -1px;
+            border-bottom: 1px solid #222;
+            letter-spacing: -0.5px;
+            flex-shrink: 0;
+            background-color: var(--pure-black);
+            height: 64px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .nav-menu {
             list-style: none;
-            padding: 20px 0;
+            padding: 10px 8px;
             margin: 0;
-            flex-grow: 1;
+            flex: 1 1 auto;
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+
+        .nav-menu::-webkit-scrollbar {
+            width: 4px;
+        }
+        .nav-menu::-webkit-scrollbar-thumb {
+            background: #27272a;
+            border-radius: 4px;
+        }
+        .nav-menu::-webkit-scrollbar-thumb:hover {
+            background: #3f3f46;
+        }
+        .nav-menu::-webkit-scrollbar-track {
+            background: transparent;
         }
 
         .nav-item {
-            padding: 0 15px;
-            margin-bottom: 5px;
+            padding: 0;
+            margin-bottom: 2px;
         }
 
         .nav-link {
             color: #a1a1aa;
             text-decoration: none;
-            padding: 12px 20px;
+            padding: 9px 12px;
             display: flex;
             align-items: center;
             border-radius: 8px;
             transition: all 0.2s;
             font-weight: 500;
+            font-size: 0.88rem;
+            white-space: nowrap;
         }
         .nav-label {
             flex: 1;
             min-width: 0;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
         .nav-count-badge {
-            min-width: 24px;
-            height: 24px;
-            padding: 0 7px;
+            min-width: 20px;
+            height: 20px;
+            padding: 0 6px;
             border-radius: 999px;
             background: #f59e0b;
             color: #111;
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            font-size: 0.75rem;
+            font-size: 0.7rem;
             font-weight: 800;
             line-height: 1;
             box-shadow: 0 0 0 2px rgba(255,255,255,0.08);
+            margin-left: 6px;
         }
 
         .nav-link i {
-            width: 24px;
-            font-size: 1.1rem;
-            margin-right: 10px;
+            width: 20px;
+            font-size: 0.95rem;
+            margin-right: 8px;
+            text-align: center;
+            flex-shrink: 0;
         }
 
-        .nav-link:hover,
+        .nav-link:hover {
+            background-color: #1f1f23;
+            color: var(--pure-white);
+        }
         .nav-link.active {
             background-color: #27272a;
             color: var(--pure-white);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .sidebar-user-footer {
+            flex-shrink: 0;
+            background-color: #09090b;
+            border-top: 1px solid #1f1f23 !important;
+            padding: 12px 14px;
         }
 
         /* MAIN CONTENT */
         .main-content {
-            flex-grow: 1;
+            flex: 1 1 auto;
+            min-width: 0;
+            height: 100vh;
+            max-height: 100vh;
             display: flex;
             flex-direction: column;
             overflow-y: auto;
+            overflow-x: hidden;
+            background-color: var(--light-gray);
         }
 
         .topbar {
             background: var(--pure-white);
-            height: 70px;
-            padding: 0 30px;
+            height: 64px;
+            min-height: 64px;
+            padding: 0 28px;
             display: flex;
             align-items: center;
             justify-content: space-between;
             border-bottom: 1px solid var(--border-color);
             position: sticky;
             top: 0;
-            z-index: 999;
+            z-index: 99;
+            flex-shrink: 0;
         }
 
         .content-area {
-            padding: 30px;
+            padding: 24px;
+            flex: 1 0 auto;
         }
 
         /* ================= UI ELEMENTS ================= */
@@ -240,6 +298,52 @@
             font-weight: 600;
             font-size: 0.85rem;
             color: var(--dark-gray);
+        }
+
+        /* Custom sleek pagination & toolbars */
+        .pagination .page-link {
+            color: var(--dark-gray);
+            border-color: var(--border-color);
+            background-color: var(--pure-white);
+            border-radius: 6px !important;
+            margin: 0 2px;
+            padding: 5px 11px;
+            font-weight: 500;
+            font-size: 0.85rem;
+            transition: all 0.2s ease;
+        }
+
+        .pagination .page-link:hover {
+            background-color: #f1f5f9;
+            border-color: #cbd5e1;
+            color: var(--pure-black);
+        }
+
+        .pagination .page-item.active .page-link {
+            background-color: var(--pure-black);
+            border-color: var(--pure-black);
+            color: var(--pure-white);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+        }
+
+        .pagination .page-item.disabled .page-link {
+            color: #94a3b8;
+            background-color: #f8fafc;
+            border-color: var(--border-color);
+            cursor: not-allowed;
+        }
+
+        .table-empty-state {
+            padding: 3rem 1rem !important;
+            text-align: center !important;
+            color: var(--mid-gray) !important;
+        }
+
+        .table-empty-state i {
+            font-size: 2.2rem;
+            color: #cbd5e1;
+            margin-bottom: 0.75rem;
+            display: block;
         }
 
         /* Hide Views */
@@ -515,6 +619,7 @@
                 'indexing': 'Quản lý Index Google',
                 'keywords': 'Quản lý Từ khóa SEO',
                 'chat': 'Hộp thư hỗ trợ',
+                'chats': 'Quản lý Chat Box',
                 'security-logs': 'Log An Ninh & Session'
             };
             const pageTitle = document.getElementById('page-title');
@@ -523,6 +628,10 @@
             document.querySelectorAll('.view-section').forEach(view => view.classList.remove('active'));
             const targetView = document.getElementById('view-' + viewId);
             if (targetView) targetView.classList.add('active');
+
+            if (viewId === 'indexing') {
+                if (typeof refreshIndexingCounts === 'function') refreshIndexingCounts();
+            }
 
             if (viewId === 'security-logs') {
                 if (typeof loadSecurityLogs === 'function') loadSecurityLogs(true);
@@ -671,13 +780,13 @@
                 </li>
 
             </ul>
-            <div class="p-3 border-top" style="border-color: #333 !important;">
+            <div class="sidebar-user-footer">
                 <div class="d-flex align-items-center text-white">
                     <img src="https://ui-avatars.com/api/?name=Admin&background=fff&color=000"
-                        class="rounded-circle me-2" width="35">
-                    <div style="font-size: 0.85rem;">
-                        <div class="fw-bold"><?php echo htmlspecialchars($currentUser['name'] ?? 'Admin'); ?></div>
-                        <div class="text-secondary">
+                        class="rounded-circle me-2 flex-shrink-0" width="34" height="34" alt="Avatar">
+                    <div style="font-size: 0.82rem; min-width: 0;" class="flex-grow-1">
+                        <div class="fw-bold text-white text-truncate"><?php echo htmlspecialchars($currentUser['name'] ?? 'Admin'); ?></div>
+                        <div class="text-truncate" style="color: #94a3b8 !important; font-size: 0.72rem;">
                             <?php echo htmlspecialchars($currentUser['email'] ?? 'admin@aicualtoi.com'); ?></div>
                     </div>
                 </div>
@@ -696,10 +805,6 @@
                     <button class="btn btn-light border-0 shadow-sm" title="Thông báo"><i class="fa-regular fa-bell"></i></button>
                     <a href="index.php?action=logout" class="btn btn-light border shadow-sm" title="Đăng xuất">
                         <i class="fa-solid fa-right-from-bracket"></i>
-                        <span class="d-none d-sm-inline ms-1 ms-md-2">Đăng xuất</span>
-                    </a>
-                    <a href="index.php" target="_blank" class="btn btn-black" title="Xem Website">
-                        <i class="fa-solid fa-arrow-up-right-from-square"></i>
                         <span class="d-none d-sm-inline ms-1 ms-md-2">Xem Website</span>
                     </a>
                 </div>
@@ -709,7 +814,7 @@
 
                 <div id="view-products" class="view-section active">
                     <div class="card-custom">
-                        <div class="card-header-custom">
+                        <div class="card-header-custom d-flex justify-content-between align-items-center flex-wrap gap-2">
                             <div>
                                 <h6 class="mb-0 fw-bold">Danh sách Dịch vụ / Sản phẩm</h6>
                                 <small class="text-muted">Quản lý các sản phẩm hiển thị trên trang chủ</small>
@@ -719,12 +824,43 @@
                                     <i class="fa-solid fa-cloud-arrow-up me-1"></i> Push index
                                 </button>
                                 <button class="btn btn-black" onclick="openProductModal()">
-                                <i class="fa-solid fa-plus me-1"></i> Thêm mới
+                                    <i class="fa-solid fa-plus me-1"></i> Thêm mới
                                 </button>
                             </div>
                         </div>
+
+                        <!-- Filter & Search Toolbar -->
+                        <div class="p-3 border-bottom bg-light">
+                            <div class="row g-2 align-items-center">
+                                <div class="col-12 col-md-5">
+                                    <div class="input-group input-group-sm">
+                                        <span class="input-group-text bg-white border-end-0"><i class="fa-solid fa-magnifying-glass text-muted"></i></span>
+                                        <input type="text" id="product-search-input" class="form-control border-start-0" placeholder="Tìm kiếm sản phẩm theo tên, tính năng..." oninput="handleProductSearch()">
+                                    </div>
+                                </div>
+                                <div class="col-6 col-md-3">
+                                    <select class="form-select form-select-sm" id="product-filter-category" onchange="handleProductFilter()">
+                                        <option value="">Tất cả danh mục</option>
+                                    </select>
+                                </div>
+                                <div class="col-6 col-md-2">
+                                    <select class="form-select form-select-sm" id="product-filter-status" onchange="handleProductFilter()">
+                                        <option value="">Tất cả trạng thái</option>
+                                        <option value="active">Đang bán</option>
+                                        <option value="out_of_stock">Hết hàng</option>
+                                        <option value="hidden">Đã ẩn</option>
+                                    </select>
+                                </div>
+                                <div class="col-12 col-md-2 text-md-end">
+                                    <button class="btn btn-sm btn-outline-secondary w-100" onclick="resetProductFilter()">
+                                        <i class="fa-solid fa-rotate-left me-1"></i> Đặt lại
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
                         <div class="table-responsive">
-                            <table class="table table-hover table-custom mb-0">
+                            <table class="table table-hover table-custom align-middle mb-0">
                                 <thead>
                                     <tr>
                                         <th>Sản phẩm</th>
@@ -738,19 +874,63 @@
                                 </tbody>
                             </table>
                         </div>
+
+                        <!-- Pagination Footer -->
+                        <div class="d-flex justify-content-between align-items-center p-3 border-top bg-light flex-wrap gap-2">
+                            <span class="small text-muted" id="product-pagination-info">
+                                Hiển thị <span id="product-count-start" class="fw-bold text-dark">0</span> - <span id="product-count-end" class="fw-bold text-dark">0</span> / tổng số <span id="product-count-total" class="fw-bold text-dark">0</span> sản phẩm
+                            </span>
+                            <nav aria-label="Products navigation">
+                                <ul class="pagination pagination-sm mb-0 d-flex align-items-center gap-1" id="product-pagination-container">
+                                </ul>
+                            </nav>
+                        </div>
                     </div>
                 </div>
 
                 <div id="view-orders" class="view-section">
                     <div class="card-custom">
-                        <div class="card-header-custom">
+                        <div class="card-header-custom d-flex justify-content-between align-items-center flex-wrap gap-2">
                             <div>
                                 <h6 class="mb-0 fw-bold">Danh sách Đơn hàng</h6>
                                 <small class="text-muted">Quản lý trạng thái đơn hàng và giao hàng thủ công cho khách hàng</small>
                             </div>
+                            <div class="d-flex gap-2">
+                                <button class="btn btn-sm btn-light border" onclick="fetchOrders(ordersCurrentPage)">
+                                    <i class="fa-solid fa-rotate me-1"></i> Làm mới
+                                </button>
+                            </div>
                         </div>
+
+                        <!-- Filter & Search Toolbar -->
+                        <div class="p-3 border-bottom bg-light">
+                            <div class="row g-2 align-items-center">
+                                <div class="col-12 col-md-6">
+                                    <div class="input-group input-group-sm">
+                                        <span class="input-group-text bg-white border-end-0"><i class="fa-solid fa-magnifying-glass text-muted"></i></span>
+                                        <input type="text" id="order-search-input" class="form-control border-start-0" placeholder="Tìm theo mã đơn, email, SĐT, tên sản phẩm, mã GD..." onkeydown="if(event.key==='Enter'){handleOrderFilter();}">
+                                        <button class="btn btn-outline-secondary" type="button" onclick="handleOrderFilter()">Tìm</button>
+                                    </div>
+                                </div>
+                                <div class="col-8 col-md-4">
+                                    <select class="form-select form-select-sm" id="order-filter-status" onchange="handleOrderFilter()">
+                                        <option value="">Tất cả trạng thái đơn</option>
+                                        <option value="pending">Chờ thanh toán (Pending)</option>
+                                        <option value="processing">Đang xử lý (Processing)</option>
+                                        <option value="completed">Thành công (Completed)</option>
+                                        <option value="cancelled">Đã hủy (Cancelled)</option>
+                                    </select>
+                                </div>
+                                <div class="col-4 col-md-2 text-end">
+                                    <button class="btn btn-sm btn-outline-secondary w-100" onclick="resetOrderFilter()">
+                                        <i class="fa-solid fa-rotate-left me-1"></i> Đặt lại
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
                         <div class="table-responsive">
-                            <table class="table table-hover table-custom mb-0">
+                            <table class="table table-hover table-custom align-middle mb-0">
                                 <thead>
                                     <tr>
                                         <th>Mã đơn</th>
@@ -762,38 +942,59 @@
                                         <th class="text-end">Thao tác</th>
                                     </tr>
                                 </thead>
-                        <tbody id="order-table-body">
-                        </tbody>
-                    </table>
+                                <tbody id="order-table-body">
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div class="d-flex justify-content-between align-items-center p-3 border-top bg-light flex-wrap gap-2">
+                            <span class="small text-muted" id="orders-pagination-info">
+                                Hiển thị trang <span id="orders-current-page" class="fw-bold text-dark">1</span> / <span id="orders-total-pages" class="fw-bold text-dark">1</span> (Tổng <span id="orders-total-count" class="fw-bold text-dark">0</span> đơn)
+                            </span>
+                            <nav aria-label="Orders navigation">
+                                <ul class="pagination pagination-sm mb-0 d-flex align-items-center gap-1" id="orders-pagination-list">
+                                </ul>
+                            </nav>
+                        </div>
+                    </div>
                 </div>
-                <div class="d-flex justify-content-between align-items-center p-3 border-top bg-light">
-                    <span class="small text-muted" id="orders-pagination-info">
-                        Hiển thị trang <span id="orders-current-page" class="fw-bold text-dark">1</span> / <span id="orders-total-pages" class="fw-bold text-dark">1</span>
-                    </span>
-                    <nav aria-label="Orders navigation">
-                        <ul class="pagination pagination-sm mb-0" style="gap:4px;">
-                            <li class="page-item" id="orders-prev-li">
-                                <button class="btn btn-sm btn-outline-dark me-1 px-3" onclick="changeOrdersPage(-1)" id="orders-btn-prev">Trước</button>
-                            </li>
-                            <li class="page-item" id="orders-next-li">
-                                <button class="btn btn-sm btn-outline-dark px-3" onclick="changeOrdersPage(1)" id="orders-btn-next">Sau</button>
-                            </li>
-                        </ul>
-                    </nav>
-                </div>
-            </div>
-        </div>
 
                 <div id="view-contacts" class="view-section">
                     <div class="card-custom">
-                        <div class="card-header-custom">
+                        <div class="card-header-custom d-flex justify-content-between align-items-center flex-wrap gap-2">
                             <div>
                                 <h6 class="mb-0 fw-bold">Tin nhắn liên hệ</h6>
                                 <small class="text-muted">Các yêu cầu khách gửi từ trang Liên hệ</small>
                             </div>
+                            <div class="d-flex align-items-center gap-2">
+                                <button class="btn btn-sm btn-light border" onclick="renderContacts()">
+                                    <i class="fa-solid fa-rotate me-1"></i> Làm mới
+                                </button>
+                            </div>
                         </div>
+
+                        <!-- Filter Toolbar -->
+                        <div class="p-3 border-bottom bg-light">
+                            <div class="row g-2 align-items-center">
+                                <div class="col-12 col-md-6">
+                                    <div class="input-group input-group-sm">
+                                        <span class="input-group-text bg-white border-end-0"><i class="fa-solid fa-magnifying-glass text-muted"></i></span>
+                                        <input type="text" id="contact-search-input" class="form-control border-start-0" placeholder="Tìm theo người gửi, email, chủ đề, nội dung..." oninput="handleContactSearch()">
+                                    </div>
+                                </div>
+                                <div class="col-12 col-md-6 d-flex justify-content-md-end gap-1 flex-wrap">
+                                    <div class="btn-group btn-group-sm" role="group">
+                                        <button type="button" class="btn btn-outline-dark contact-tab-btn active" data-status="all" onclick="filterContactsByStatus('all', this)">Tất cả</button>
+                                        <button type="button" class="btn btn-outline-dark contact-tab-btn" data-status="new" onclick="filterContactsByStatus('new', this)">Mới</button>
+                                        <button type="button" class="btn btn-outline-dark contact-tab-btn" data-status="read" onclick="filterContactsByStatus('read', this)">Đã đọc</button>
+                                        <button type="button" class="btn btn-outline-dark contact-tab-btn" data-status="archived" onclick="filterContactsByStatus('archived', this)">Lưu trữ</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
                         <div class="table-responsive">
-                            <table class="table table-hover table-custom mb-0">
+                            <table class="table table-hover table-custom align-middle mb-0">
                                 <thead>
                                     <tr>
                                         <th>Khách gửi</th>
@@ -807,12 +1008,22 @@
                                 <tbody id="contact-table-body"></tbody>
                             </table>
                         </div>
+
+                        <div class="d-flex justify-content-between align-items-center p-3 border-top bg-light flex-wrap gap-2">
+                            <span class="small text-muted" id="contact-pagination-info">
+                                Hiển thị <span id="contact-count-start" class="fw-bold text-dark">0</span> - <span id="contact-count-end" class="fw-bold text-dark">0</span> / tổng số <span id="contact-count-total" class="fw-bold text-dark">0</span> tin nhắn
+                            </span>
+                            <nav aria-label="Contacts navigation">
+                                <ul class="pagination pagination-sm mb-0 d-flex align-items-center gap-1" id="contact-pagination-container">
+                                </ul>
+                            </nav>
+                        </div>
                     </div>
                 </div>
 
                 <div id="view-categories" class="view-section">
                     <div class="card-custom">
-                        <div class="card-header-custom">
+                        <div class="card-header-custom d-flex justify-content-between align-items-center flex-wrap gap-2">
                             <div>
                                 <h6 class="mb-0 fw-bold">Quản lý Danh mục (Pill Menu)</h6>
                                 <small class="text-muted">Cấu hình các nút lọc sản phẩm trên trang chủ</small>
@@ -821,8 +1032,18 @@
                                 <i class="fa-solid fa-plus me-1"></i> Thêm danh mục
                             </button>
                         </div>
+                        <div class="p-3 border-bottom bg-light">
+                            <div class="row g-2 align-items-center">
+                                <div class="col-12 col-md-6">
+                                    <div class="input-group input-group-sm">
+                                        <span class="input-group-text bg-white border-end-0"><i class="fa-solid fa-magnifying-glass text-muted"></i></span>
+                                        <input type="text" id="category-search-input" class="form-control border-start-0" placeholder="Lọc nhanh danh mục theo tên, slug..." oninput="handleCategorySearch()">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                         <div class="table-responsive">
-                            <table class="table table-hover table-custom mb-0">
+                            <table class="table table-hover table-custom align-middle mb-0">
                                 <thead>
                                     <tr>
                                         <th>Tên danh mục</th>
@@ -850,8 +1071,40 @@
                                 <i class="fa-solid fa-broom me-1"></i> Xoá tất cả User bị Block (Spam)
                             </button>
                         </div>
+
+                        <!-- Filter & Search Toolbar -->
+                        <div class="p-3 border-bottom bg-light">
+                            <div class="row g-2 align-items-center">
+                                <div class="col-12 col-md-5">
+                                    <div class="input-group input-group-sm">
+                                        <span class="input-group-text bg-white border-end-0"><i class="fa-solid fa-magnifying-glass text-muted"></i></span>
+                                        <input type="text" id="user-search-input" class="form-control border-start-0" placeholder="Tìm kiếm theo tên, email user..." oninput="handleUserSearch()">
+                                    </div>
+                                </div>
+                                <div class="col-6 col-md-3">
+                                    <select class="form-select form-select-sm" id="user-filter-role" onchange="handleUserFilter()">
+                                        <option value="">Tất cả quyền (Role)</option>
+                                        <option value="admin">Admin</option>
+                                        <option value="user">User</option>
+                                    </select>
+                                </div>
+                                <div class="col-6 col-md-2">
+                                    <select class="form-select form-select-sm" id="user-filter-status" onchange="handleUserFilter()">
+                                        <option value="">Tất cả trạng thái</option>
+                                        <option value="active">Active</option>
+                                        <option value="blocked">Blocked</option>
+                                    </select>
+                                </div>
+                                <div class="col-12 col-md-2 text-md-end">
+                                    <button class="btn btn-sm btn-outline-secondary w-100" onclick="resetUserFilter()">
+                                        <i class="fa-solid fa-rotate-left me-1"></i> Đặt lại
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
                         <div class="table-responsive">
-                            <table class="table table-hover table-custom mb-0">
+                            <table class="table table-hover table-custom align-middle mb-0">
                                 <thead>
                                     <tr>
                                         <th>User</th>
@@ -863,6 +1116,16 @@
                                 </thead>
                                 <tbody id="user-table-body"></tbody>
                             </table>
+                        </div>
+
+                        <div class="d-flex justify-content-between align-items-center p-3 border-top bg-light flex-wrap gap-2">
+                            <span class="small text-muted" id="user-pagination-info">
+                                Hiển thị <span id="user-count-start" class="fw-bold text-dark">0</span> - <span id="user-count-end" class="fw-bold text-dark">0</span> / tổng số <span id="user-count-total" class="fw-bold text-dark">0</span> user
+                            </span>
+                            <nav aria-label="Users navigation">
+                                <ul class="pagination pagination-sm mb-0 d-flex align-items-center gap-1" id="user-pagination-container">
+                                </ul>
+                            </nav>
                         </div>
                     </div>
                 </div>
@@ -973,17 +1236,32 @@
 
                 <div id="view-blogs" class="view-section">
                     <div class="card-custom">
-                        <div class="card-header-custom">
+                        <div class="card-header-custom d-flex justify-content-between align-items-center flex-wrap gap-2">
                             <div>
                                 <h6 class="mb-0 fw-bold">Danh sách Tin tức</h6>
                                 <small class="text-muted">Các bài viết hiển thị ở phần Tạp chí trên trang chủ</small>
                             </div>
-                            <button class="btn btn-black" onclick="openBlogModal()">
-                                <i class="fa-solid fa-plus me-1"></i> Viết bài mới
-                            </button>
+                            <div class="d-flex align-items-center gap-2">
+                                <button class="btn btn-black" onclick="openBlogModal()">
+                                    <i class="fa-solid fa-plus me-1"></i> Viết bài mới
+                                </button>
+                            </div>
                         </div>
+
+                        <!-- Filter Toolbar -->
+                        <div class="p-3 border-bottom bg-light">
+                            <div class="row g-2 align-items-center">
+                                <div class="col-12 col-md-6">
+                                    <div class="input-group input-group-sm">
+                                        <span class="input-group-text bg-white border-end-0"><i class="fa-solid fa-magnifying-glass text-muted"></i></span>
+                                        <input type="text" id="blog-search-input" class="form-control border-start-0" placeholder="Tìm bài viết theo tiêu đề..." oninput="handleBlogSearch()">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
                         <div class="table-responsive">
-                            <table class="table table-hover table-custom mb-0">
+                            <table class="table table-hover table-custom align-middle mb-0">
                                 <thead>
                                     <tr>
                                         <th>Bài viết</th>
@@ -995,59 +1273,200 @@
                                 </tbody>
                             </table>
                         </div>
+
+                        <div class="d-flex justify-content-between align-items-center p-3 border-top bg-light flex-wrap gap-2">
+                            <span class="small text-muted" id="blog-pagination-info">
+                                Hiển thị <span id="blog-count-start" class="fw-bold text-dark">0</span> - <span id="blog-count-end" class="fw-bold text-dark">0</span> / tổng số <span id="blog-count-total" class="fw-bold text-dark">0</span> bài viết
+                            </span>
+                            <nav aria-label="Blogs navigation">
+                                <ul class="pagination pagination-sm mb-0 d-flex align-items-center gap-1" id="blog-pagination-container">
+                                </ul>
+                            </nav>
+                        </div>
                     </div>
                 </div>
 
                 <div id="view-indexing" class="view-section">
-                    <div class="row">
-                        <!-- Manual Indexing -->
-                        <div class="col-lg-6 mb-4">
-                            <div class="card-custom p-4 h-100 border-success border-top" style="border-width: 4px !important;">
-                                <h5 class="fw-bold mb-3"><i class="fa-solid fa-paper-plane text-success me-2"></i>Index URL thủ công</h5>
-                                <p class="text-muted small">Nhập URL cần index riêng lẻ (bấm <strong class="text-success">+</strong> để thêm ô nhập).</p>
-                                
+                    <!-- Google Indexing API Status Bar -->
+                    <div class="card-custom p-3 p-md-4 mb-4 border-0 shadow-sm" style="background: linear-gradient(135deg, #09090b 0%, #18181b 100%); color: #fff;">
+                        <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3">
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 46px; height: 46px; background: rgba(34, 197, 94, 0.15); border: 1px solid rgba(34, 197, 94, 0.3);">
+                                    <i class="fa-solid fa-cloud-arrow-up text-success fs-5"></i>
+                                </div>
+                                <div>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <h5 class="fw-bold mb-0 text-white">Google Indexing API v3</h5>
+                                        <span class="badge bg-success rounded-pill px-2.5 py-1" style="font-size: 0.72rem;">
+                                            <i class="fa-solid fa-circle text-white me-1" style="font-size: 0.5rem;"></i> Đang hoạt động
+                                        </span>
+                                    </div>
+                                    <div class="small text-white-50 mt-1 d-flex flex-wrap align-items-center gap-3">
+                                        <span><i class="fa-regular fa-id-badge me-1"></i> Bot: <strong class="text-white">aicuatoi-bot@tuanpp.iam.gserviceaccount.com</strong></span>
+                                        <span><i class="fa-solid fa-globe me-1"></i> Canonical: <strong class="text-white">https://aicuatoi.net</strong></span>
+                                        <span><i class="fa-solid fa-gauge-high me-1"></i> Quota: <strong class="text-warning">200 URL/ngày</strong></span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="d-flex align-items-center gap-2">
+                                <button type="button" class="btn btn-outline-light btn-sm rounded-pill px-3" onclick="refreshIndexingCounts()">
+                                    <i class="fa-solid fa-rotate me-1"></i> Cập nhật số liệu
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row g-4 mb-4">
+                        <!-- Manual Indexing Card -->
+                        <div class="col-lg-6">
+                            <div class="card-custom p-4 h-100 border shadow-sm bg-white">
+                                <div class="d-flex align-items-center justify-content-between mb-3 pb-2 border-bottom">
+                                    <h5 class="fw-bold mb-0 text-dark">
+                                        <i class="fa-solid fa-paper-plane text-primary me-2"></i>Index URL Thủ Công
+                                    </h5>
+                                    <span class="badge bg-light text-muted border rounded-pill">Đơn lẻ</span>
+                                </div>
+                                <p class="text-muted small mb-2">Nhập URL trực tiếp hoặc bấm các nút thêm nhanh trang chính:</p>
+
+                                <!-- Quick Chips -->
+                                <div class="d-flex flex-wrap gap-1 mb-3">
+                                    <button type="button" class="btn btn-light btn-sm border rounded-pill px-2.5 py-1" style="font-size: 0.78rem;" onclick="addManualUrl('https://aicuatoi.net/')">
+                                        + Trang chủ
+                                    </button>
+                                    <button type="button" class="btn btn-light btn-sm border rounded-pill px-2.5 py-1" style="font-size: 0.78rem;" onclick="addManualUrl('https://aicuatoi.net/san-pham')">
+                                        + Sản phẩm
+                                    </button>
+                                    <button type="button" class="btn btn-light btn-sm border rounded-pill px-2.5 py-1" style="font-size: 0.78rem;" onclick="addManualUrl('https://aicuatoi.net/tap-chi')">
+                                        + Tạp chí
+                                    </button>
+                                    <button type="button" class="btn btn-light btn-sm border rounded-pill px-2.5 py-1" style="font-size: 0.78rem;" onclick="addManualUrl('https://aicuatoi.net/gioi-thieu')">
+                                        + Giới thiệu
+                                    </button>
+                                    <button type="button" class="btn btn-light btn-sm border rounded-pill px-2.5 py-1" style="font-size: 0.78rem;" onclick="addManualUrl('https://aicuatoi.net/lien-he')">
+                                        + Liên hệ
+                                    </button>
+                                </div>
+
                                 <div id="dashboard-index-url-rows" class="d-grid gap-2 mb-3">
                                     <div class="input-group dashboard-index-url-row">
-                                        <input type="url" class="form-control dashboard-index-url-input" placeholder="https://aicuatoi.net/tim-kiem/gpt">
+                                        <span class="input-group-text bg-light text-muted border-end-0"><i class="fa-solid fa-link"></i></span>
+                                        <input type="url" class="form-control dashboard-index-url-input border-start-0" placeholder="https://aicuatoi.net/tim-kiem/gpt" value="https://aicuatoi.net/tim-kiem/gpt">
                                         <button class="btn btn-light border text-danger" type="button" onclick="removeDashboardIndexUrlRow(this)" title="Xóa hàng">
                                             <i class="fa-solid fa-trash-can"></i>
                                         </button>
                                     </div>
                                 </div>
-                                <div class="d-flex align-items-center gap-2 flex-wrap mb-4">
-                                    <button type="button" class="btn btn-light btn-sm border" onclick="addDashboardIndexUrlRow()">
-                                        <i class="fa-solid fa-plus me-1 text-success"></i> Thêm hàng
-                                    </button>
-                                    <button type="button" class="btn btn-black btn-sm" onclick="pushDashboardIndexUrls()">
-                                        <i class="fa-solid fa-paper-plane me-1"></i> Index các URL này
+
+                                <div class="d-flex align-items-center justify-content-between gap-2 flex-wrap pt-3 border-top">
+                                    <div class="d-flex gap-2">
+                                        <button type="button" class="btn btn-light btn-sm border" onclick="addDashboardIndexUrlRow()">
+                                            <i class="fa-solid fa-plus me-1 text-success"></i> Thêm ô
+                                        </button>
+                                        <button type="button" class="btn btn-light btn-sm border" onclick="pasteMultipleUrlsPrompt()">
+                                            <i class="fa-solid fa-paste me-1 text-primary"></i> Dán nhiều URL
+                                        </button>
+                                    </div>
+                                    <button type="button" class="btn btn-dark btn-sm rounded-pill px-3 fw-semibold" id="btn-manual-submit" onclick="pushDashboardIndexUrls()">
+                                        <i class="fa-solid fa-paper-plane me-1.5"></i> Gửi Index ngay
                                     </button>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- Bulk Indexing -->
-                        <div class="col-lg-6 mb-4">
-                            <div class="card-custom p-4 h-100 border-warning border-top" style="border-width: 4px !important;">
-                                <h5 class="fw-bold mb-3"><i class="fa-solid fa-bolt text-warning me-2"></i>Index hàng loạt</h5>
-                                <p class="text-muted small">Gửi yêu cầu index Google Indexing API hàng loạt theo từng danh mục hoặc toàn hệ thống.</p>
-                                <div class="d-grid gap-2">
-                                    <button class="btn btn-outline-dark btn-sm text-start" onclick="pushIndexByType('products')">
-                                        <i class="fa-solid fa-box text-primary me-2"></i> Index toàn bộ sản phẩm
+                        <!-- Bulk Indexing Card -->
+                        <div class="col-lg-6">
+                            <div class="card-custom p-4 h-100 border shadow-sm bg-white">
+                                <div class="d-flex align-items-center justify-content-between mb-3 pb-2 border-bottom">
+                                    <h5 class="fw-bold mb-0 text-dark">
+                                        <i class="fa-solid fa-bolt text-warning me-2"></i>Index Hàng Loạt Tự Động
+                                    </h5>
+                                    <span class="badge bg-warning-subtle text-warning border border-warning-subtle rounded-pill">Batch Runner</span>
+                                </div>
+                                <p class="text-muted small mb-3">Gửi yêu cầu Google Indexing API mượt mà theo từng đợt, hiển thị tiến trình trực tiếp:</p>
+
+                                <div class="d-grid gap-2 mb-3">
+                                    <button class="btn btn-outline-dark btn-sm text-start d-flex align-items-center justify-content-between p-2.5 rounded-3 bulk-btn" onclick="startBatchIndexing('products')">
+                                        <span><i class="fa-solid fa-box text-primary me-2"></i> Toàn bộ sản phẩm</span>
+                                        <span class="badge bg-primary-subtle text-primary rounded-pill px-2.5 py-1" id="idx-count-products">...</span>
                                     </button>
-                                    <button class="btn btn-outline-dark btn-sm text-start" onclick="pushIndexByType('categories')">
-                                        <i class="fa-solid fa-list-ul text-info me-2"></i> Index toàn bộ danh mục
+                                    <button class="btn btn-outline-dark btn-sm text-start d-flex align-items-center justify-content-between p-2.5 rounded-3 bulk-btn" onclick="startBatchIndexing('categories')">
+                                        <span><i class="fa-solid fa-list-ul text-info me-2"></i> Toàn bộ danh mục</span>
+                                        <span class="badge bg-info-subtle text-info rounded-pill px-2.5 py-1" id="idx-count-categories">...</span>
                                     </button>
-                                    <button class="btn btn-outline-dark btn-sm text-start" onclick="pushIndexByType('blogs')">
-                                        <i class="fa-solid fa-newspaper text-success me-2"></i> Index toàn bộ tin tức
+                                    <button class="btn btn-outline-dark btn-sm text-start d-flex align-items-center justify-content-between p-2.5 rounded-3 bulk-btn" onclick="startBatchIndexing('blogs')">
+                                        <span><i class="fa-solid fa-newspaper text-success me-2"></i> Toàn bộ bài viết tin tức</span>
+                                        <span class="badge bg-success-subtle text-success rounded-pill px-2.5 py-1" id="idx-count-blogs">...</span>
                                     </button>
-                                    <button class="btn btn-outline-dark btn-sm text-start" onclick="pushIndexByType('keywords')">
-                                        <i class="fa-solid fa-tags text-purple me-2"></i> Index toàn bộ từ khóa SEO
-                                    </button>
-                                    <button class="btn btn-success btn-sm text-start fw-bold mt-2" onclick="pushIndexByType('all')">
-                                        <i class="fa-solid fa-cloud-arrow-up text-white me-2"></i> Index toàn bộ hệ thống
+                                    <button class="btn btn-outline-dark btn-sm text-start d-flex align-items-center justify-content-between p-2.5 rounded-3 bulk-btn" onclick="startBatchIndexing('keywords')">
+                                        <span><i class="fa-solid fa-tags text-purple me-2"></i> Toàn bộ từ khóa SEO</span>
+                                        <span class="badge bg-secondary-subtle text-dark rounded-pill px-2.5 py-1" id="idx-count-keywords">...</span>
                                     </button>
                                 </div>
+
+                                <button class="btn btn-success btn-sm w-100 fw-bold py-2.5 rounded-3 shadow-sm d-flex align-items-center justify-content-between px-3" onclick="startBatchIndexing('all')">
+                                    <span><i class="fa-solid fa-cloud-arrow-up text-white me-2"></i> Index toàn bộ hệ thống (Tất cả URL)</span>
+                                    <span class="badge bg-white text-success rounded-pill px-2.5 py-1" id="idx-count-all">...</span>
+                                </button>
                             </div>
+                        </div>
+                    </div>
+
+                    <!-- Live Progress & Log Terminal Card -->
+                    <div class="card-custom p-4 border shadow-sm bg-white mb-4">
+                        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3 pb-2 border-bottom">
+                            <div>
+                                <h6 class="fw-bold mb-0 text-dark d-flex align-items-center gap-2">
+                                    <i class="fa-solid fa-terminal text-dark"></i>
+                                    <span>Bảng Tiến Trình & Live Console</span>
+                                </h6>
+                                <small class="text-muted" id="indexing-live-status">Sẵn sàng thực hiện yêu cầu index.</small>
+                            </div>
+                            <div class="d-flex align-items-center gap-2">
+                                <button type="button" class="btn btn-outline-danger btn-sm rounded-pill px-3" id="btn-stop-indexing" onclick="stopBatchIndexing()" style="display: none;">
+                                    <i class="fa-solid fa-stop me-1"></i> Dừng lại
+                                </button>
+                                <button type="button" class="btn btn-light btn-sm border rounded-pill px-3" onclick="clearIndexingConsole()">
+                                    <i class="fa-solid fa-eraser me-1"></i> Xóa log
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Counters Row -->
+                        <div class="row g-3 text-center mb-3">
+                            <div class="col-3">
+                                <div class="p-2 border rounded-3 bg-light">
+                                    <div class="small text-muted">Tổng URL</div>
+                                    <div class="fs-5 fw-bold text-dark" id="console-stat-total">0</div>
+                                </div>
+                            </div>
+                            <div class="col-3">
+                                <div class="p-2 border rounded-3 bg-light">
+                                    <div class="small text-muted">Đang xử lý</div>
+                                    <div class="fs-5 fw-bold text-primary" id="console-stat-processed">0</div>
+                                </div>
+                            </div>
+                            <div class="col-3">
+                                <div class="p-2 border rounded-3 bg-light">
+                                    <div class="small text-muted">Thành công (200)</div>
+                                    <div class="fs-5 fw-bold text-success" id="console-stat-success">0</div>
+                                </div>
+                            </div>
+                            <div class="col-3">
+                                <div class="p-2 border rounded-3 bg-light">
+                                    <div class="small text-muted">Thất bại</div>
+                                    <div class="fs-5 fw-bold text-danger" id="console-stat-failed">0</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Animated Progress Bar -->
+                        <div class="progress mb-3" style="height: 10px; border-radius: 6px; background-color: #f1f5f9;">
+                            <div class="progress-bar progress-bar-striped progress-bar-animated bg-success" id="indexing-progress-bar" role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                        </div>
+
+                        <!-- Dark Terminal Console -->
+                        <div class="indexing-terminal p-3 rounded-3" id="indexing-terminal" style="background: #09090b; color: #a1a1aa; font-family: 'Consolas', 'Monaco', monospace; font-size: 0.82rem; height: 260px; overflow-y: auto; border: 1px solid #27272a;">
+                            <div class="text-secondary">// Google Indexing Console sẵn sàng. Bấm bắt đầu để xem tiến trình từng URL...</div>
                         </div>
                     </div>
                 </div>
@@ -1818,6 +2237,34 @@
 
         let ordersCurrentPage = 1;
         let ordersTotalPages = <?php echo $ordersTotalPages ?? 1; ?>;
+        let ordersTotalCount = <?php echo (int)($totalOrders ?? 0); ?>;
+        let ordersSearchQuery = '';
+        let ordersStatusFilter = '';
+
+        let productsCurrentPage = 1;
+        const productsPerPage = 10;
+        let productFilterKeyword = '';
+        let productFilterCategory = '';
+        let productFilterStatus = '';
+
+        let usersCurrentPage = 1;
+        const usersPerPage = 10;
+        let userFilterKeyword = '';
+        let userFilterRole = '';
+        let userFilterStatus = '';
+
+        let blogsCurrentPage = 1;
+        const blogsPerPage = 10;
+        let blogFilterKeyword = '';
+
+        let contactsCurrentPage = 1;
+        const contactsPerPage = 10;
+        let contactFilterKeyword = '';
+        let contactFilterStatus = 'all';
+
+        let categoryFilterKeyword = '';
+
+        const FALLBACK_PRODUCT_IMAGE = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60' viewBox='0 0 60 60'%3E%3Crect width='60' height='60' fill='%23f1f5f9' rx='6'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='sans-serif' font-size='9' fill='%2394a3b8'%3ENO IMAGE%3C/text%3E%3C/svg%3E";
 
         function apiPost(action, formData) {
             if (!(formData instanceof FormData)) {
@@ -2001,83 +2448,59 @@
             }
         });
 
-        function switchView(viewId, el) {
-            document.querySelectorAll('.nav-link').forEach(nav => nav.classList.remove('active'));
-            el.classList.add('active');
+        // ================= SHARED PAGINATION CONTROLLER =================
+        function renderPaginationControls(containerId, currentPage, totalPages, clickFnName) {
+            const container = document.getElementById(containerId);
+            if (!container) return;
+            if (totalPages <= 1) {
+                container.innerHTML = '';
+                return;
+            }
 
-            const titles = {
-                'dashboard': 'Tổng quan',
-                'products': 'Quản lý Sản phẩm',
-                'orders': 'Quản lý Đơn hàng',
-                'contacts': 'Quản lý Liên hệ',
-                'categories': 'Quản lý Danh mục',
-                'users': 'Quản lý User',
-                'blogs': 'Quản lý Tin tức',
-                'settings': 'Cấu hình Website',
-                'indexing': 'Quản lý Index Google',
-                'keywords': 'Quản lý Từ khóa SEO',
-                'chat': 'Hộp thư hỗ trợ',
-                'security-logs': 'Log An Ninh & Session'
-            };
-            document.getElementById('page-title').innerText = titles[viewId] || 'Quản trị';
+            let html = '';
+            // Previous button
+            html += `<li class="page-item ${currentPage <= 1 ? 'disabled' : ''}">
+                <button class="page-link shadow-none" onclick="${clickFnName}(${currentPage - 1})" aria-label="Previous" ${currentPage <= 1 ? 'disabled' : ''}>
+                    <i class="fa-solid fa-chevron-left small"></i>
+                </button>
+            </li>`;
 
-            document.querySelectorAll('.view-section').forEach(view => view.classList.remove('active'));
-            const targetView = document.getElementById('view-' + viewId);
-            if (targetView) targetView.classList.add('active');
+            // Dynamic numeric buttons with ellipsis
+            const maxButtons = 5;
+            let startPage = Math.max(1, currentPage - 2);
+            let endPage = Math.min(totalPages, startPage + maxButtons - 1);
+            if (endPage - startPage < maxButtons - 1) {
+                startPage = Math.max(1, endPage - maxButtons + 1);
+            }
 
-            if (viewId === 'security-logs') {
-                loadSecurityLogs(true);
-                if (!window.activeSessionsInterval) {
-                    window.activeSessionsInterval = setInterval(loadActiveSessionsOnly, 5000);
-                }
-                if (!window.historyLogsInterval) {
-                    window.historyLogsInterval = setInterval(() => loadSecurityLogs(true), 120000);
-                }
-            } else {
-                if (window.activeSessionsInterval) {
-                    clearInterval(window.activeSessionsInterval);
-                    window.activeSessionsInterval = null;
-                }
-                if (window.historyLogsInterval) {
-                    clearInterval(window.historyLogsInterval);
-                    window.historyLogsInterval = null;
+            if (startPage > 1) {
+                html += `<li class="page-item"><button class="page-link shadow-none" onclick="${clickFnName}(1)">1</button></li>`;
+                if (startPage > 2) {
+                    html += `<li class="page-item disabled"><span class="page-link shadow-none">...</span></li>`;
                 }
             }
 
-            // Close sidebar on mobile
-            if (window.innerWidth < 992) {
-                const sidebar = document.querySelector('.sidebar');
-                if (sidebar && sidebar.classList.contains('show')) {
-                    toggleSidebar();
+            for (let p = startPage; p <= endPage; p++) {
+                html += `<li class="page-item ${p === currentPage ? 'active' : ''}">
+                    <button class="page-link shadow-none" onclick="${clickFnName}(${p})">${p}</button>
+                </li>`;
+            }
+
+            if (endPage < totalPages) {
+                if (endPage < totalPages - 1) {
+                    html += `<li class="page-item disabled"><span class="page-link shadow-none">...</span></li>`;
                 }
-            }
-        }
-
-        function toggleSidebar() {
-            const sidebar = document.querySelector('.sidebar');
-            let backdrop = document.querySelector('.sidebar-backdrop');
-            if (!backdrop) {
-                backdrop = document.createElement('div');
-                backdrop.className = 'sidebar-backdrop';
-                backdrop.addEventListener('click', toggleSidebar);
-                document.body.appendChild(backdrop);
+                html += `<li class="page-item"><button class="page-link shadow-none" onclick="${clickFnName}(${totalPages})">${totalPages}</button></li>`;
             }
 
-            if (sidebar.classList.contains('show')) {
-                sidebar.classList.remove('show');
-                backdrop.classList.remove('show');
-                setTimeout(() => {
-                    if (!sidebar.classList.contains('show') && backdrop.parentNode) {
-                        backdrop.style.display = 'none';
-                    }
-                }, 300);
-            } else {
-                backdrop.style.display = 'block';
-                // Force reflow
-                backdrop.offsetHeight;
-                sidebar.classList.add('show');
-                backdrop.classList.add('show');
-            }
+            // Next button
+            html += `<li class="page-item ${currentPage >= totalPages ? 'disabled' : ''}">
+                <button class="page-link shadow-none" onclick="${clickFnName}(${currentPage + 1})" aria-label="Next" ${currentPage >= totalPages ? 'disabled' : ''}>
+                    <i class="fa-solid fa-chevron-right small"></i>
+                </button>
+            </li>`;
+
+            container.innerHTML = html;
         }
 
         // ================= GOOGLE INDEXING & SEO KEYWORDS JS =================
@@ -2473,18 +2896,92 @@
             });
         }
 
+        // ================= GOOGLE INDEXING API REALTIME RUNNER =================
+        window.indexingAbort = false;
+        window.indexingRunning = false;
+
+        function logToIndexingTerminal(msg, level = 'info') {
+            const terminal = document.getElementById('indexing-terminal');
+            if (!terminal) return;
+            const now = new Date().toTimeString().split(' ')[0];
+            const div = document.createElement('div');
+            div.style.marginBottom = '3px';
+            div.style.lineHeight = '1.45';
+
+            if (level === 'success') {
+                div.innerHTML = `<span style="color: #6ee7b7;">[${now}]</span> <span style="color: #22c55e; font-weight: bold;">✔ OK:</span> <span style="color: #f1f5f9;">${msg}</span>`;
+            } else if (level === 'error') {
+                div.innerHTML = `<span style="color: #fca5a5;">[${now}]</span> <span style="color: #ef4444; font-weight: bold;">✖ ERR:</span> <span style="color: #fecaca;">${msg}</span>`;
+            } else if (level === 'warn') {
+                div.innerHTML = `<span style="color: #fde68a;">[${now}]</span> <span style="color: #f59e0b; font-weight: bold;">⚠ WARN:</span> <span style="color: #fef3c7;">${msg}</span>`;
+            } else {
+                div.innerHTML = `<span style="color: #71717a;">[${now}]</span> <span style="color: #38bdf8;">➜</span> <span style="color: #e4e4e7;">${msg}</span>`;
+            }
+
+            terminal.appendChild(div);
+            terminal.scrollTop = terminal.scrollHeight;
+        }
+
+        function clearIndexingConsole() {
+            const terminal = document.getElementById('indexing-terminal');
+            if (terminal) {
+                terminal.innerHTML = '<div class="text-secondary">// Console đã được xóa. Sẵn sàng nhận lệnh mới...</div>';
+            }
+            document.getElementById('console-stat-total').innerText = '0';
+            document.getElementById('console-stat-processed').innerText = '0';
+            document.getElementById('console-stat-success').innerText = '0';
+            document.getElementById('console-stat-failed').innerText = '0';
+            document.getElementById('indexing-progress-bar').style.width = '0%';
+            document.getElementById('indexing-live-status').innerText = 'Sẵn sàng thực hiện yêu cầu index.';
+        }
+
+        function refreshIndexingCounts() {
+            apiGet('adminGetIndexStatus')
+                .then(data => {
+                    if (data && data.success && data.counts) {
+                        const c = data.counts;
+                        const elProd = document.getElementById('idx-count-products');
+                        const elCat = document.getElementById('idx-count-categories');
+                        const elBlog = document.getElementById('idx-count-blogs');
+                        const elKw = document.getElementById('idx-count-keywords');
+                        const elAll = document.getElementById('idx-count-all');
+                        if (elProd) elProd.innerText = `${c.products || 0} URL`;
+                        if (elCat) elCat.innerText = `${c.categories || 0} URL`;
+                        if (elBlog) elBlog.innerText = `${c.blogs || 0} URL`;
+                        if (elKw) elKw.innerText = `${c.keywords || 0} URL`;
+                        if (elAll) elAll.innerText = `${c.all || 0} URL`;
+                    }
+                })
+                .catch(() => {});
+        }
+
+        function addManualUrl(url) {
+            const inputs = document.querySelectorAll('.dashboard-index-url-input');
+            for (let input of inputs) {
+                if (input.value.trim() === '') {
+                    input.value = url;
+                    input.focus();
+                    return;
+                }
+            }
+            addDashboardIndexUrlRow(url);
+        }
+
         function addDashboardIndexUrlRow(value = '') {
             const wrap = document.getElementById('dashboard-index-url-rows');
             if (!wrap) return;
             const row = document.createElement('div');
             row.className = 'input-group dashboard-index-url-row';
             row.innerHTML = `
-                <input type="url" class="form-control dashboard-index-url-input" placeholder="https://aicuatoi.net/tim-kiem/gpt" value="${String(value).replace(/"/g, '&quot;')}">
+                <span class="input-group-text bg-light text-muted border-end-0"><i class="fa-solid fa-link"></i></span>
+                <input type="url" class="form-control dashboard-index-url-input border-start-0" placeholder="https://aicuatoi.net/..." value="${String(value).replace(/"/g, '&quot;')}">
                 <button class="btn btn-light border text-danger" type="button" onclick="removeDashboardIndexUrlRow(this)" title="Xóa hàng">
                     <i class="fa-solid fa-trash-can"></i>
                 </button>
             `;
             wrap.appendChild(row);
+            const input = row.querySelector('.dashboard-index-url-input');
+            if (input && !value) input.focus();
         }
 
         function removeDashboardIndexUrlRow(btn) {
@@ -2498,86 +2995,266 @@
             btn.closest('.dashboard-index-url-row')?.remove();
         }
 
+        function pasteMultipleUrlsPrompt() {
+            if (typeof Swal !== 'undefined') {
+                Swal.fire({
+                    title: 'Dán nhiều URL cần index',
+                    html: '<textarea id="swal-bulk-urls" class="form-control font-monospace" rows="6" placeholder="https://aicuatoi.net/san-pham/...\nhttps://aicuatoi.net/danh-muc/...\n(Mỗi URL một dòng)"></textarea>',
+                    showCancelButton: true,
+                    confirmButtonText: 'Thêm vào danh sách',
+                    cancelButtonText: 'Hủy',
+                    confirmButtonColor: '#111827',
+                    preConfirm: () => {
+                        const val = document.getElementById('swal-bulk-urls')?.value || '';
+                        return val.split(/\r?\n/).map(u => u.trim()).filter(Boolean);
+                    }
+                }).then(res => {
+                    if (res.isConfirmed && res.value && res.value.length) {
+                        res.value.forEach(url => addManualUrl(url));
+                        AppNotify.success(`Đã thêm ${res.value.length} URL vào ô nhập.`, 'Index thủ công');
+                    }
+                });
+            } else {
+                const raw = prompt('Dán danh sách URL (cách nhau bởi dấu phẩy hoặc dòng mới):');
+                if (raw) {
+                    const list = raw.split(/[\r\n,]+/).map(u => u.trim()).filter(Boolean);
+                    list.forEach(url => addManualUrl(url));
+                }
+            }
+        }
+
         function pushDashboardIndexUrls() {
+            if (window.indexingRunning) {
+                AppNotify.warning('Một tác vụ index khác đang chạy. Vui lòng chờ!', 'Đang bận');
+                return;
+            }
+
             const inputs = document.querySelectorAll('.dashboard-index-url-input');
             const urls = Array.from(inputs)
                 .map(input => input.value.trim())
                 .filter(Boolean);
+
             if (!urls.length) {
-                AppNotify.warning('Nhập ít nhất 1 URL cần index.', 'Thiếu URL');
+                AppNotify.warning('Vui lòng nhập ít nhất 1 URL cần index.', 'Thiếu URL');
                 return;
             }
-            
-            AppNotify.info('Đang gửi các URL đã chọn lên Google Indexing API...', 'Push index');
+
+            const btn = document.getElementById('btn-manual-submit');
+            const origHtml = btn ? btn.innerHTML : '';
+            if (btn) {
+                btn.disabled = true;
+                btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Đang gửi...';
+            }
+
+            logToIndexingTerminal(`Bắt đầu gửi ${urls.length} URL thủ công lên Google...`, 'info');
+            document.getElementById('console-stat-total').innerText = urls.length;
+            document.getElementById('console-stat-processed').innerText = '0';
+            document.getElementById('console-stat-success').innerText = '0';
+            document.getElementById('console-stat-failed').innerText = '0';
+            document.getElementById('indexing-progress-bar').style.width = '20%';
+
             apiPost('adminPushIndexUrls', { urls: JSON.stringify(urls) })
                 .then(data => {
-                    if (data.success) {
-                        AppNotify.success(`Đã gửi thành công ${data.submitted || 0}/${data.total || 0} URL.`, 'Push index');
-                        const wrap = document.getElementById('dashboard-index-url-rows');
-                        if (wrap) {
-                            wrap.innerHTML = `
-                                <div class="input-group dashboard-index-url-row">
-                                    <input type="url" class="form-control dashboard-index-url-input" placeholder="https://aicuatoi.net/tim-kiem/gpt">
-                                    <button class="btn btn-light border text-danger" type="button" onclick="removeDashboardIndexUrlRow(this)" title="Xóa hàng">
-                                        <i class="fa-solid fa-trash-can"></i>
-                                    </button>
-                                </div>
-                            `;
+                    if (data && data.success) {
+                        let successCount = data.submitted || 0;
+                        let totalCount = data.total || urls.length;
+                        let failedCount = totalCount - successCount;
+
+                        document.getElementById('console-stat-processed').innerText = totalCount;
+                        document.getElementById('console-stat-success').innerText = successCount;
+                        document.getElementById('console-stat-failed').innerText = failedCount;
+                        document.getElementById('indexing-progress-bar').style.width = '100%';
+
+                        if (data.results) {
+                            for (let [url, item] of Object.entries(data.results)) {
+                                if (item.success) {
+                                    logToIndexingTerminal(`${url} → 200 OK (${item.message || 'Google đã tiếp nhận'})`, 'success');
+                                } else {
+                                    logToIndexingTerminal(`${url} → Thất bại: ${item.message || 'Lỗi'}`, 'error');
+                                }
+                            }
                         }
+
+                        logToIndexingTerminal(`Hoàn tất gửi thủ công! Thành công: ${successCount}/${totalCount}`, successCount > 0 ? 'success' : 'warn');
+                        AppNotify.success(`Đã gửi thành công ${successCount}/${totalCount} URL lên Google!`, 'Index thành công');
                     } else {
-                        AppNotify.error(data.message || 'Không thể index URL.', 'Lỗi indexing');
+                        logToIndexingTerminal(`Lỗi: ${data.message || 'Không thể gửi index'}`, 'error');
+                        AppNotify.error(data.message || 'Không thể index URL.', 'Lỗi Indexing');
                     }
                 })
-                .catch(() => AppNotify.error('Không thể kết nối API index URL.', 'Lỗi indexing'));
+                .catch(err => {
+                    logToIndexingTerminal(`Lỗi kết nối máy chủ: ${err.message || 'Lỗi mạng'}`, 'error');
+                    AppNotify.error('Không thể kết nối API index.', 'Lỗi mạng');
+                })
+                .finally(() => {
+                    if (btn) {
+                        btn.disabled = false;
+                        btn.innerHTML = origHtml;
+                    }
+                });
         }
 
-        function pushIndexByType(type) {
-            let msg = 'Đang gửi yêu cầu index hàng loạt lên Google Indexing...';
-            if (type === 'products') msg = 'Đang gửi toàn bộ URL sản phẩm...';
-            else if (type === 'categories') msg = 'Đang gửi toàn bộ URL danh mục...';
-            else if (type === 'blogs') msg = 'Đang gửi toàn bộ URL bài viết tin tức...';
-            else if (type === 'keywords') msg = 'Đang gửi toàn bộ URL từ khóa SEO...';
-            else if (type === 'all') msg = 'Đang gửi toàn bộ URL hệ thống...';
+        async function startBatchIndexing(type) {
+            if (window.indexingRunning) {
+                AppNotify.warning('Một tác vụ index đang diễn ra. Vui lòng dừng hoặc chờ hoàn tất!', 'Đang chạy');
+                return;
+            }
 
-            AppNotify.info(msg, 'Push index');
-            
-            const fd = new FormData();
-            fd.append('type', type);
-            fd.append('csrf_token', APP_STATE.csrfToken);
+            window.indexingRunning = true;
+            window.indexingAbort = false;
 
-            fetch('?action=adminPushIndexByType', {
-                method: 'POST',
-                headers: { 'X-Requested-With': 'XMLHttpRequest', 'X-CSRF-Token': APP_STATE.csrfToken },
-                body: fd,
-                credentials: 'same-origin'
-            })
-            .then(res => res.json())
-            .then(data => {
-                if (data.success) {
-                    AppNotify.success(`Đã gửi thành công ${data.submitted || 0}/${data.total || 0} URL.`, 'Push index');
-                } else {
-                    AppNotify.error(data.message || 'Không thể index hàng loạt.', 'Lỗi indexing');
+            const btnStop = document.getElementById('btn-stop-indexing');
+            if (btnStop) btnStop.style.display = 'inline-block';
+
+            document.querySelectorAll('.bulk-btn').forEach(b => b.disabled = true);
+            const liveStatus = document.getElementById('indexing-live-status');
+            if (liveStatus) liveStatus.innerText = 'Đang chuẩn bị danh sách URL...';
+
+            logToIndexingTerminal(`Chuẩn bị nạp danh mục [${type.toUpperCase()}] từ hệ thống...`, 'info');
+
+            try {
+                const res = await apiGet(`adminGetIndexUrlsByType&type=${encodeURIComponent(type)}`);
+                if (!res || !res.success || !res.urls || !res.urls.length) {
+                    logToIndexingTerminal(`Không tìm thấy URL nào thuộc loại [${type}] để index.`, 'warn');
+                    AppNotify.warning(`Không có URL nào cần index cho danh mục [${type}].`, 'Danh sách rỗng');
+                    finishBatchIndexing();
+                    return;
                 }
-            })
-            .catch(() => AppNotify.error('Không thể kết nối server.', 'Lỗi indexing'));
+
+                const urlItems = res.urls;
+                const total = urlItems.length;
+                let processed = 0;
+                let success = 0;
+                let failed = 0;
+
+                document.getElementById('console-stat-total').innerText = total;
+                document.getElementById('console-stat-processed').innerText = '0';
+                document.getElementById('console-stat-success').innerText = '0';
+                document.getElementById('console-stat-failed').innerText = '0';
+                document.getElementById('indexing-progress-bar').style.width = '0%';
+
+                logToIndexingTerminal(`Bắt đầu chạy batch runner: Tổng cộng ${total} URL [${type}]...`, 'info');
+                if (liveStatus) liveStatus.innerText = `Đang gửi Google Indexing (0/${total})...`;
+
+                // Send in micro-batches of 2 URLs to avoid blocking and give real-time animated feedback
+                const batchSize = 2;
+                for (let i = 0; i < urlItems.length; i += batchSize) {
+                    if (window.indexingAbort) {
+                        logToIndexingTerminal('Tác vụ index đã bị người dùng dừng lại!', 'warn');
+                        AppNotify.info('Đã dừng tiến trình index.', 'Tạm dừng');
+                        break;
+                    }
+
+                    const batch = urlItems.slice(i, i + batchSize);
+                    const batchUrls = batch.map(b => b.url);
+
+                    try {
+                        const batchRes = await apiPost('adminPushIndexUrls', { urls: JSON.stringify(batchUrls) });
+                        if (batchRes && batchRes.success && batchRes.results) {
+                            for (let [url, result] of Object.entries(batchRes.results)) {
+                                processed++;
+                                if (result.success) {
+                                    success++;
+                                    logToIndexingTerminal(`${url} → 200 OK (${result.message || 'Tiếp nhận'})`, 'success');
+                                } else {
+                                    failed++;
+                                    logToIndexingTerminal(`${url} → 400: ${result.message || 'Thất bại'}`, 'error');
+                                }
+                            }
+                        } else {
+                            processed += batch.length;
+                            failed += batch.length;
+                            batch.forEach(b => logToIndexingTerminal(`${b.url} → Thất bại: ${batchRes.message || 'Lỗi'}`, 'error'));
+                        }
+                    } catch (batchErr) {
+                        processed += batch.length;
+                        failed += batch.length;
+                        batch.forEach(b => logToIndexingTerminal(`${b.url} → Lỗi mạng: ${batchErr.message || 'Timeout'}`, 'error'));
+                    }
+
+                    // Update live UI
+                    const pct = Math.round((processed / total) * 100);
+                    document.getElementById('console-stat-processed').innerText = processed;
+                    document.getElementById('console-stat-success').innerText = success;
+                    document.getElementById('console-stat-failed').innerText = failed;
+                    document.getElementById('indexing-progress-bar').style.width = `${pct}%`;
+                    if (liveStatus) liveStatus.innerText = `Đang xử lý ${processed}/${total} URL (${pct}%)...`;
+
+                    // Brief breathing gap (80ms) for UI smoothness
+                    await new Promise(r => setTimeout(r, 80));
+                }
+
+                if (!window.indexingAbort) {
+                    logToIndexingTerminal(`Hoàn thành toàn bộ! Thành công: ${success}/${total} URL.`, success > 0 ? 'success' : 'warn');
+                    AppNotify.success(`Đã gửi thành công ${success}/${total} URL lên Google!`, 'Hoàn tất Index');
+                    if (liveStatus) liveStatus.innerText = `Hoàn tất: Đã gửi ${success}/${total} URL thành công.`;
+                } else {
+                    if (liveStatus) liveStatus.innerText = `Đã dừng: ${success}/${processed} URL thành công.`;
+                }
+
+            } catch (err) {
+                logToIndexingTerminal(`Lỗi nghiêm trọng: ${err.message || 'Không thể tải danh sách URL'}`, 'error');
+                AppNotify.error('Không thể thực hiện tác vụ index.', 'Lỗi');
+            } finally {
+                finishBatchIndexing();
+            }
+        }
+
+        function stopBatchIndexing() {
+            window.indexingAbort = true;
+            logToIndexingTerminal('Đang gửi tín hiệu dừng...', 'warn');
+        }
+
+        function finishBatchIndexing() {
+            window.indexingRunning = false;
+            window.indexingAbort = false;
+            const btnStop = document.getElementById('btn-stop-indexing');
+            if (btnStop) btnStop.style.display = 'none';
+            document.querySelectorAll('.bulk-btn').forEach(b => b.disabled = false);
         }
 
         function renderCategoriesSelect() {
             const select = document.getElementById('p_category');
-            select.innerHTML = APP_STATE.categories.map(cat => `<option value="${cat.slug}">${cat.name}</option>`).join('');
+            if (select) {
+                select.innerHTML = (APP_STATE.categories || []).map(cat => `<option value="${cat.slug}">${cat.name}</option>`).join('');
+            }
+            const filterSelect = document.getElementById('product-filter-category');
+            if (filterSelect) {
+                let opts = '<option value="">Tất cả danh mục</option>';
+                (APP_STATE.categories || []).forEach(cat => {
+                    opts += `<option value="${cat.slug}">${cat.name}</option>`;
+                });
+                filterSelect.innerHTML = opts;
+            }
+        }
+
+        function handleCategorySearch() {
+            categoryFilterKeyword = (document.getElementById('category-search-input')?.value || '').toLowerCase().trim();
+            renderCategoriesTable();
         }
 
         function renderCategoriesTable() {
             const tbody = document.getElementById('category-table-body');
+            if (!tbody) return;
             tbody.innerHTML = '';
 
-            APP_STATE.categories.forEach(cat => {
+            let cats = APP_STATE.categories || [];
+            if (categoryFilterKeyword) {
+                cats = cats.filter(c => (c.name || '').toLowerCase().includes(categoryFilterKeyword) || (c.slug || '').toLowerCase().includes(categoryFilterKeyword));
+            }
+
+            if (cats.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="table-empty-state"><i class="fa-solid fa-folder-open"></i><div>Không tìm thấy danh mục phù hợp.</div></td></tr>`;
+                return;
+            }
+
+            cats.forEach(cat => {
                 tbody.innerHTML += `
                     <tr>
-                        <td class="fw-bold text-dark">${cat.name}</td>
-                        <td><code>${cat.slug}</code></td>
+                        <td class="fw-bold text-dark">${escapeHtml(cat.name)}</td>
+                        <td><code>${escapeHtml(cat.slug)}</code></td>
                         <td>${cat.is_pro ? '<span class="badge bg-primary rounded-pill">Có (Glow)</span>' : '<span class="text-muted">Không</span>'}</td>
-                        <td>${cat.icon ? `<i class="fa-solid ${cat.icon} ${cat.icon_color || ''}"></i>` : '-'}</td>
+                        <td>${cat.icon ? `<i class="fa-solid ${escapeHtml(cat.icon)} ${escapeHtml(cat.icon_color || '')}"></i>` : '-'}</td>
                         <td class="text-end">
                             <button class="btn-action" onclick="editCategory(${cat.id})" title="Sửa"><i class="fa-solid fa-pen"></i></button>
                             <button class="btn-action delete" onclick="deleteCategory(${cat.id})" title="Xóa"><i class="fa-solid fa-trash"></i></button>
@@ -2588,7 +3265,7 @@
         }
 
         function getCategoryName(id) {
-            const cat = APP_STATE.categories.find(c => c.id === id);
+            const cat = (APP_STATE.categories || []).find(c => c.id === id || c.slug === id);
             return cat ? cat.name : id;
         }
 
@@ -2598,18 +3275,81 @@
             }[ch]));
         }
 
+        function handleUserSearch() {
+            userFilterKeyword = (document.getElementById('user-search-input')?.value || '').toLowerCase().trim();
+            usersCurrentPage = 1;
+            renderUsers();
+        }
+
+        function handleUserFilter() {
+            userFilterRole = document.getElementById('user-filter-role')?.value || '';
+            userFilterStatus = document.getElementById('user-filter-status')?.value || '';
+            usersCurrentPage = 1;
+            renderUsers();
+        }
+
+        function resetUserFilter() {
+            userFilterKeyword = '';
+            userFilterRole = '';
+            userFilterStatus = '';
+            const sInput = document.getElementById('user-search-input');
+            const rSelect = document.getElementById('user-filter-role');
+            const stSelect = document.getElementById('user-filter-status');
+            if (sInput) sInput.value = '';
+            if (rSelect) rSelect.value = '';
+            if (stSelect) stSelect.value = '';
+            usersCurrentPage = 1;
+            renderUsers();
+        }
+
+        function changeUsersPage(page) {
+            usersCurrentPage = page;
+            renderUsers();
+        }
+
         function renderUsers() {
             const tbody = document.getElementById('user-table-body');
             if (!tbody) return;
             tbody.innerHTML = '';
 
-            const users = APP_STATE.users || [];
-            if (users.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted py-4">Chưa có user nào.</td></tr>';
+            let users = APP_STATE.users || [];
+
+            if (userFilterKeyword) {
+                users = users.filter(u => 
+                    (u.name || '').toLowerCase().includes(userFilterKeyword) || 
+                    (u.email || '').toLowerCase().includes(userFilterKeyword)
+                );
+            }
+            if (userFilterRole) {
+                users = users.filter(u => (u.role || 'user') === userFilterRole);
+            }
+            if (userFilterStatus) {
+                users = users.filter(u => (u.status || 'active') === userFilterStatus);
+            }
+
+            const total = users.length;
+            const totalPages = Math.max(1, Math.ceil(total / usersPerPage));
+            if (usersCurrentPage > totalPages) usersCurrentPage = totalPages;
+
+            const startIdx = (usersCurrentPage - 1) * usersPerPage;
+            const endIdx = Math.min(startIdx + usersPerPage, total);
+            const pagedUsers = users.slice(startIdx, endIdx);
+
+            const countStart = document.getElementById('user-count-start');
+            const countEnd = document.getElementById('user-count-end');
+            const countTotal = document.getElementById('user-count-total');
+            if (countStart) countStart.innerText = total === 0 ? 0 : startIdx + 1;
+            if (countEnd) countEnd.innerText = endIdx;
+            if (countTotal) countTotal.innerText = total;
+
+            renderPaginationControls('user-pagination-container', usersCurrentPage, totalPages, 'changeUsersPage');
+
+            if (pagedUsers.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" class="table-empty-state"><i class="fa-solid fa-users-slash"></i><div>Không tìm thấy người dùng nào.</div></td></tr>';
                 return;
             }
 
-            users.forEach(user => {
+            pagedUsers.forEach(user => {
                 const isActive = (user.status || 'active') === 'active';
                 const statusBadge = isActive
                     ? '<span class="badge bg-success rounded-pill">Active</span>'
@@ -3035,14 +3775,86 @@
         }
 
         function formatCurrency(amount) {
-            return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount);
+            const num = Number(amount) || 0;
+            return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(num);
+        }
+
+        function handleProductSearch() {
+            productFilterKeyword = (document.getElementById('product-search-input')?.value || '').toLowerCase().trim();
+            productsCurrentPage = 1;
+            renderProducts();
+        }
+
+        function handleProductFilter() {
+            productFilterCategory = document.getElementById('product-filter-category')?.value || '';
+            productFilterStatus = document.getElementById('product-filter-status')?.value || '';
+            productsCurrentPage = 1;
+            renderProducts();
+        }
+
+        function resetProductFilter() {
+            productFilterKeyword = '';
+            productFilterCategory = '';
+            productFilterStatus = '';
+            const sInput = document.getElementById('product-search-input');
+            const cSelect = document.getElementById('product-filter-category');
+            const stSelect = document.getElementById('product-filter-status');
+            if (sInput) sInput.value = '';
+            if (cSelect) cSelect.value = '';
+            if (stSelect) stSelect.value = '';
+            productsCurrentPage = 1;
+            renderProducts();
+        }
+
+        function changeProductsPage(page) {
+            productsCurrentPage = page;
+            renderProducts();
         }
 
         function renderProducts() {
             const tbody = document.getElementById('product-table-body');
+            if (!tbody) return;
             tbody.innerHTML = '';
 
-            APP_STATE.products.forEach(p => {
+            let prods = APP_STATE.products || [];
+
+            if (productFilterKeyword) {
+                prods = prods.filter(p => 
+                    (p.title || '').toLowerCase().includes(productFilterKeyword) ||
+                    (p.description || '').toLowerCase().includes(productFilterKeyword) ||
+                    (p.feature_text || '').toLowerCase().includes(productFilterKeyword)
+                );
+            }
+            if (productFilterCategory) {
+                prods = prods.filter(p => (p.category_slug || p.category) === productFilterCategory);
+            }
+            if (productFilterStatus) {
+                prods = prods.filter(p => p.status === productFilterStatus);
+            }
+
+            const total = prods.length;
+            const totalPages = Math.max(1, Math.ceil(total / productsPerPage));
+            if (productsCurrentPage > totalPages) productsCurrentPage = totalPages;
+
+            const startIdx = (productsCurrentPage - 1) * productsPerPage;
+            const endIdx = Math.min(startIdx + productsPerPage, total);
+            const pagedProducts = prods.slice(startIdx, endIdx);
+
+            const countStart = document.getElementById('product-count-start');
+            const countEnd = document.getElementById('product-count-end');
+            const countTotal = document.getElementById('product-count-total');
+            if (countStart) countStart.innerText = total === 0 ? 0 : startIdx + 1;
+            if (countEnd) countEnd.innerText = endIdx;
+            if (countTotal) countTotal.innerText = total;
+
+            renderPaginationControls('product-pagination-container', productsCurrentPage, totalPages, 'changeProductsPage');
+
+            if (pagedProducts.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" class="table-empty-state"><i class="fa-solid fa-box-open"></i><div>Không tìm thấy sản phẩm nào phù hợp.</div></td></tr>';
+                return;
+            }
+
+            pagedProducts.forEach(p => {
                 let badgeClass = p.status === 'active' ? 'bg-success' : (p.status === 'out_of_stock' ? 'bg-warning text-dark' : 'bg-secondary');
                 let statusText = p.status === 'active' ? 'Đang bán' : (p.status === 'out_of_stock' ? 'Hết hàng' : 'Đã ẩn');
 
@@ -3050,15 +3862,15 @@
                     <tr>
                         <td>
                             <div class="d-flex align-items-center">
-                                <img src="${p.image}" class="img-thumbnail-custom me-3" alt="${p.title}">
+                                <img src="${escapeHtml(p.image || '')}" class="img-thumbnail-custom me-3" alt="${escapeHtml(p.title)}" onerror="this.onerror=null; this.src=FALLBACK_PRODUCT_IMAGE;">
                                 <div>
-                                    <div class="fw-bold text-dark">${p.title}</div>
-                                    <div class="text-muted small">${p.feature_text || p.description}</div>
+                                    <div class="fw-bold text-dark">${escapeHtml(p.title)}</div>
+                                    <div class="text-muted small">${escapeHtml(p.feature_text || p.description)}</div>
                                 </div>
                             </div>
                         </td>
-                        <td>${getCategoryName(p.category_slug || p.category)}</td>
-                        <td class="fw-bold">${typeof p.price === 'number' ? formatCurrency(p.price) : p.price}</td>
+                        <td><span class="badge bg-light text-dark border px-2 py-1">${escapeHtml(getCategoryName(p.category_slug || p.category))}</span></td>
+                        <td class="fw-bold text-dark">${formatCurrency(p.price)}</td>
                         <td><span class="badge ${badgeClass} rounded-pill">${statusText}</span></td>
                         <td class="text-end">
                             <button class="btn-action" onclick="editProduct('${p.id}')" title="Chỉnh sửa"><i class="fa-solid fa-pen-to-square"></i></button>
@@ -3067,7 +3879,8 @@
                     </tr>
                 `;
             });
-            document.getElementById('dash-total-products').innerText = APP_STATE.products.length;
+            const dashTotal = document.getElementById('dash-total-products');
+            if (dashTotal) dashTotal.innerText = (APP_STATE.products || []).length;
         }
 
         function setProductImagePreview(url) {
@@ -3865,21 +4678,64 @@
                 }
             });
         }
+        function handleBlogSearch() {
+            blogFilterKeyword = (document.getElementById('blog-search-input')?.value || '').toLowerCase().trim();
+            blogsCurrentPage = 1;
+            renderBlogsTable();
+        }
+
+        function changeBlogsPage(page) {
+            blogsCurrentPage = page;
+            renderBlogsTable();
+        }
+
         function renderBlogsTable() {
             const tbody = document.getElementById('blog-table-body');
+            if (!tbody) return;
             tbody.innerHTML = '';
-            APP_STATE.blogs.forEach(blog => {
+
+            let blogs = APP_STATE.blogs || [];
+            if (blogFilterKeyword) {
+                blogs = blogs.filter(b => 
+                    (b.title || '').toLowerCase().includes(blogFilterKeyword) ||
+                    (b.description || '').toLowerCase().includes(blogFilterKeyword)
+                );
+            }
+
+            const total = blogs.length;
+            const totalPages = Math.max(1, Math.ceil(total / blogsPerPage));
+            if (blogsCurrentPage > totalPages) blogsCurrentPage = totalPages;
+
+            const startIdx = (blogsCurrentPage - 1) * blogsPerPage;
+            const endIdx = Math.min(startIdx + blogsPerPage, total);
+            const pagedBlogs = blogs.slice(startIdx, endIdx);
+
+            const countStart = document.getElementById('blog-count-start');
+            const countEnd = document.getElementById('blog-count-end');
+            const countTotal = document.getElementById('blog-count-total');
+            if (countStart) countStart.innerText = total === 0 ? 0 : startIdx + 1;
+            if (countEnd) countEnd.innerText = endIdx;
+            if (countTotal) countTotal.innerText = total;
+
+            renderPaginationControls('blog-pagination-container', blogsCurrentPage, totalPages, 'changeBlogsPage');
+
+            if (pagedBlogs.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="3" class="table-empty-state"><i class="fa-solid fa-newspaper"></i><div>Không tìm thấy bài viết nào.</div></td></tr>`;
+                return;
+            }
+
+            pagedBlogs.forEach(blog => {
                 const dateStr = blog.created_at ? new Date(blog.created_at.replace(' ', 'T')).toLocaleDateString('vi-VN') : '';
-                const escTitle = (blog.title || '').replace(/"/g, '&quot;');
+                const escTitle = escapeHtml(blog.title || '');
                 tbody.innerHTML += `
                     <tr>
                         <td>
                             <div class="d-flex align-items-center">
-                                <img src="${blog.image || ''}" class="img-thumbnail-custom me-3" style="width: 80px; height: 45px;" alt="${escTitle}">
+                                <img src="${escapeHtml(blog.image || '')}" class="img-thumbnail-custom me-3" style="width: 80px; height: 45px; object-fit: cover;" alt="${escTitle}" onerror="this.onerror=null; this.src=FALLBACK_PRODUCT_IMAGE;">
                                 <div class="fw-bold text-dark">${escTitle}</div>
                             </div>
                         </td>
-                        <td>${dateStr}</td>
+                        <td class="text-muted small">${dateStr}</td>
                         <td class="text-end">
                             <button class="btn-action" onclick="editBlog(${blog.id})" title="Sửa"><i class="fa-solid fa-pen"></i></button>
                             <button class="btn-action delete" onclick="deleteBlog(${blog.id})" title="Xóa"><i class="fa-solid fa-trash"></i></button>
@@ -4181,18 +5037,73 @@
             return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
         }
 
+        function filterContactsByStatus(status, btn) {
+            contactFilterStatus = status;
+            document.querySelectorAll('.contact-tab-btn').forEach(b => {
+                b.classList.remove('active', 'btn-dark');
+                b.classList.add('btn-outline-dark');
+            });
+            if (btn) {
+                btn.classList.add('active', 'btn-dark');
+                btn.classList.remove('btn-outline-dark');
+            }
+            contactsCurrentPage = 1;
+            renderContacts();
+        }
+
+        function handleContactSearch() {
+            contactFilterKeyword = (document.getElementById('contact-search-input')?.value || '').toLowerCase().trim();
+            contactsCurrentPage = 1;
+            renderContacts();
+        }
+
+        function changeContactsPage(page) {
+            contactsCurrentPage = page;
+            renderContacts();
+        }
+
         function renderContacts() {
             const tbody = document.getElementById('contact-table-body');
             if (!tbody) return;
-            const messages = [...(APP_STATE.contactMessages || [])].sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
 
-            if (messages.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="6" class="text-center text-muted py-4">Chưa có tin liên hệ nào.</td></tr>`;
+            let messages = [...(APP_STATE.contactMessages || [])].sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+
+            if (contactFilterStatus && contactFilterStatus !== 'all') {
+                messages = messages.filter(m => m.status === contactFilterStatus);
+            }
+            if (contactFilterKeyword) {
+                messages = messages.filter(m => 
+                    (m.name || '').toLowerCase().includes(contactFilterKeyword) ||
+                    (m.email || '').toLowerCase().includes(contactFilterKeyword) ||
+                    (m.subject || '').toLowerCase().includes(contactFilterKeyword) ||
+                    (m.message || '').toLowerCase().includes(contactFilterKeyword)
+                );
+            }
+
+            const total = messages.length;
+            const totalPages = Math.max(1, Math.ceil(total / contactsPerPage));
+            if (contactsCurrentPage > totalPages) contactsCurrentPage = totalPages;
+
+            const startIdx = (contactsCurrentPage - 1) * contactsPerPage;
+            const endIdx = Math.min(startIdx + contactsPerPage, total);
+            const pagedMessages = messages.slice(startIdx, endIdx);
+
+            const countStart = document.getElementById('contact-count-start');
+            const countEnd = document.getElementById('contact-count-end');
+            const countTotal = document.getElementById('contact-count-total');
+            if (countStart) countStart.innerText = total === 0 ? 0 : startIdx + 1;
+            if (countEnd) countEnd.innerText = endIdx;
+            if (countTotal) countTotal.innerText = total;
+
+            renderPaginationControls('contact-pagination-container', contactsCurrentPage, totalPages, 'changeContactsPage');
+
+            if (pagedMessages.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" class="table-empty-state"><i class="fa-solid fa-inbox"></i><div>Không tìm thấy tin liên hệ nào.</div></td></tr>`;
                 updateContactBadge();
                 return;
             }
 
-            tbody.innerHTML = messages.map(msg => {
+            tbody.innerHTML = pagedMessages.map(msg => {
                 const isNew = msg.status === 'new';
                 const statusBadge = isNew
                     ? '<span class="badge bg-warning text-dark rounded-pill">Mới</span>'
@@ -4371,20 +5282,38 @@
         }
 
         // ============== ADMIN ORDER MANAGEMENT ==============
+        function handleOrderFilter() {
+            ordersSearchQuery = (document.getElementById('order-search-input')?.value || '').trim();
+            ordersStatusFilter = document.getElementById('order-filter-status')?.value || '';
+            ordersCurrentPage = 1;
+            fetchOrders(1);
+        }
+
+        function resetOrderFilter() {
+            ordersSearchQuery = '';
+            ordersStatusFilter = '';
+            const sInput = document.getElementById('order-search-input');
+            const stSelect = document.getElementById('order-filter-status');
+            if (sInput) sInput.value = '';
+            if (stSelect) stSelect.value = '';
+            ordersCurrentPage = 1;
+            fetchOrders(1);
+        }
+
         function renderOrders() {
             const tbody = document.getElementById('order-table-body');
             if (!tbody) return;
             tbody.innerHTML = '';
 
-            const sortedOrders = [...(APP_STATE.orders || [])].sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+            const orders = APP_STATE.orders || [];
 
-            if (sortedOrders.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="7" class="text-center text-muted py-4">Chưa có đơn hàng nào.</td></tr>`;
+            if (orders.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="7" class="table-empty-state"><i class="fa-solid fa-receipt"></i><div>Không tìm thấy đơn hàng nào.</div></td></tr>`;
                 updateOrdersPaginationUI();
                 return;
             }
 
-            sortedOrders.forEach(o => {
+            orders.forEach(o => {
                 let statusCls = o.status === 'completed' ? 'bg-success' 
                               : (o.status === 'processing' ? 'bg-primary' 
                               : (o.status === 'pending' ? 'bg-warning text-dark' : 'bg-danger'));
@@ -4397,14 +5326,14 @@
 
                 tbody.innerHTML += `
                     <tr>
-                        <td><code class="fw-bold">#${o.id}</code></td>
+                        <td><code class="fw-bold">#${escapeHtml(o.id)}</code></td>
                         <td>
-                            <div class="fw-semibold text-dark">${o.customer_email}</div>
-                            <div class="text-muted small">${o.phone || '—'}</div>
+                            <div class="fw-semibold text-dark">${escapeHtml(o.customer_email)}</div>
+                            <div class="text-muted small">${escapeHtml(o.phone || '—')}</div>
                         </td>
                         <td>
-                            <div class="fw-semibold text-dark">${o.product_name}</div>
-                            <div class="text-muted small">${o.variant_name || '—'} (x${o.quantity})</div>
+                            <div class="fw-semibold text-dark">${escapeHtml(o.product_name)}</div>
+                            <div class="text-muted small">${escapeHtml(o.variant_name || '—')} (x${o.quantity})</div>
                         </td>
                         <td class="fw-bold">${formatCurrency(o.amount)}</td>
                         <td><span class="badge ${statusCls} rounded-pill">${statusText}</span></td>
@@ -4429,28 +5358,31 @@
             updateOrdersPaginationUI();
         }
 
-        function changeOrdersPage(dir) {
-            const targetPage = ordersCurrentPage + dir;
-            if (targetPage < 1 || targetPage > ordersTotalPages) return;
-            fetchOrders(targetPage);
-        }
-
         function fetchOrders(page) {
-            const btnPrev = document.getElementById('orders-btn-prev');
-            const btnNext = document.getElementById('orders-btn-next');
-            if (btnPrev) btnPrev.disabled = true;
-            if (btnNext) btnNext.disabled = true;
+            ordersCurrentPage = page;
+            const url = new URL(window.location.origin + window.location.pathname);
+            url.searchParams.set('action', 'adminOrdersList');
+            url.searchParams.set('page', page);
+            if (ordersStatusFilter) {
+                url.searchParams.set('status', ordersStatusFilter);
+            }
+            if (ordersSearchQuery) {
+                url.searchParams.set('search', ordersSearchQuery);
+            }
 
-            fetch(`?action=adminOrdersList&page=${page}`, {
+            fetch(url.toString(), {
                 headers: { 'X-Requested-With': 'XMLHttpRequest' }
             })
             .then(res => res.json())
             .then(data => {
                 if (data.success) {
-                    APP_STATE.orders = data.orders;
-                    ordersCurrentPage = data.currentPage;
-                    ordersTotalPages = data.totalPages;
+                    APP_STATE.orders = data.orders || [];
+                    ordersCurrentPage = Number(data.currentPage || 1);
+                    ordersTotalPages = Number(data.totalPages || 1);
+                    ordersTotalCount = Number(data.totalOrders || 0);
                     renderOrders();
+                } else {
+                    AppNotify.error(data.message || 'Không thể tải danh sách đơn hàng.', 'Lỗi');
                 }
             })
             .catch(() => AppNotify.error('Không thể tải danh sách đơn hàng.', 'Lỗi kết nối'))
@@ -4462,13 +5394,13 @@
         function updateOrdersPaginationUI() {
             const curPageEl = document.getElementById('orders-current-page');
             const totalPagesEl = document.getElementById('orders-total-pages');
-            const btnPrev = document.getElementById('orders-btn-prev');
-            const btnNext = document.getElementById('orders-btn-next');
+            const totalCountEl = document.getElementById('orders-total-count');
 
             if (curPageEl) curPageEl.innerText = ordersCurrentPage;
             if (totalPagesEl) totalPagesEl.innerText = ordersTotalPages;
-            if (btnPrev) btnPrev.disabled = (ordersCurrentPage <= 1);
-            if (btnNext) btnNext.disabled = (ordersCurrentPage >= ordersTotalPages);
+            if (totalCountEl) totalCountEl.innerText = ordersTotalCount;
+
+            renderPaginationControls('orders-pagination-list', ordersCurrentPage, ordersTotalPages, 'fetchOrders');
         }
 
         function viewOrderDetails(o) {
@@ -5135,14 +6067,14 @@ window.AdminChat = (function() {
 
     function init() {
         loadConversations();
-        startPolling(3000);
+        startPolling(15000);
 
         document.addEventListener('visibilitychange', () => {
             if (document.hidden) {
-                startPolling(15000);
+                startPolling(60000);
             } else {
                 loadConversations();
-                startPolling(3000);
+                startPolling(15000);
             }
         });
     }

@@ -73,14 +73,44 @@ class AdminController extends Controller {
         $page = max(1, (int) ($_GET['page'] ?? 1));
         $limit = 10;
         $offset = ($page - 1) * $limit;
+        $status = trim($_GET['status'] ?? '');
+        $search = trim($_GET['search'] ?? '');
 
         $db = Database::getInstance();
-        $total = (int) $db->query("SELECT COUNT(*) FROM orders")->fetchColumn();
-        $totalPages = max(1, ceil($total / $limit));
 
-        $stmt = $db->prepare("SELECT * FROM orders ORDER BY created_at DESC LIMIT ? OFFSET ?");
-        $stmt->bindValue(1, $limit, PDO::PARAM_INT);
-        $stmt->bindValue(2, $offset, PDO::PARAM_INT);
+        $where = [];
+        $params = [];
+
+        if ($status !== '' && in_array($status, ['completed', 'processing', 'pending', 'cancelled'], true)) {
+            $where[] = "status = ?";
+            $params[] = $status;
+        }
+
+        if ($search !== '') {
+            $where[] = "(id LIKE ? OR customer_email LIKE ? OR phone LIKE ? OR product_name LIKE ? OR transaction_id LIKE ?)";
+            $searchWild = '%' . $search . '%';
+            $params[] = $searchWild;
+            $params[] = $searchWild;
+            $params[] = $searchWild;
+            $params[] = $searchWild;
+            $params[] = $searchWild;
+        }
+
+        $whereSql = !empty($where) ? " WHERE " . implode(" AND ", $where) : "";
+
+        $countStmt = $db->prepare("SELECT COUNT(*) FROM orders" . $whereSql);
+        $countStmt->execute($params);
+        $total = (int) $countStmt->fetchColumn();
+        $totalPages = max(1, (int) ceil($total / $limit));
+
+        $sql = "SELECT * FROM orders" . $whereSql . " ORDER BY created_at DESC LIMIT ? OFFSET ?";
+        $stmt = $db->prepare($sql);
+        $paramIdx = 1;
+        foreach ($params as $val) {
+            $stmt->bindValue($paramIdx++, $val, PDO::PARAM_STR);
+        }
+        $stmt->bindValue($paramIdx++, $limit, PDO::PARAM_INT);
+        $stmt->bindValue($paramIdx++, $offset, PDO::PARAM_INT);
         $stmt->execute();
         $orders = $stmt->fetchAll();
 
@@ -458,24 +488,16 @@ class AdminController extends Controller {
             $urls = preg_split('/\r\n|\r|\n/', (string) $rawUrls);
         }
 
-        $siteHost = parse_url(URLROOT, PHP_URL_HOST);
         $cleanUrls = [];
         foreach ($urls as $url) {
             $url = trim((string) $url);
             if ($url === '') {
                 continue;
             }
-            if (strpos($url, '/') === 0) {
-                $url = url($url);
+            $canonical = IndexingService::canonicalizeForGoogle($url);
+            if ($canonical !== '') {
+                $cleanUrls[] = $canonical;
             }
-            if (!filter_var($url, FILTER_VALIDATE_URL)) {
-                continue;
-            }
-            $host = parse_url($url, PHP_URL_HOST);
-            if ($siteHost && $host !== $siteHost) {
-                continue;
-            }
-            $cleanUrls[] = $url;
         }
 
         $cleanUrls = array_values(array_unique($cleanUrls));
@@ -495,6 +517,38 @@ class AdminController extends Controller {
             'submitted' => $submitted,
             'total' => count($results),
             'results' => $results,
+        ]);
+    }
+
+    public function adminGetIndexStatus() {
+        $status = IndexingService::getStatus();
+        $counts = [
+            'products' => count(IndexingService::getUrlsByType('products')),
+            'categories' => count(IndexingService::getUrlsByType('categories')),
+            'blogs' => count(IndexingService::getUrlsByType('blogs')),
+            'keywords' => count(IndexingService::getUrlsByType('keywords')),
+            'all' => count(IndexingService::getUrlsByType('all')),
+        ];
+        $this->jsonSuccess([
+            'status' => $status,
+            'counts' => $counts
+        ]);
+    }
+
+    public function adminGetIndexUrlsByType() {
+        $type = $_GET['type'] ?? ($_POST['type'] ?? 'all');
+        if (!in_array($type, ['all', 'products', 'categories', 'blogs', 'keywords'], true)) {
+            $type = 'all';
+        }
+
+        $urls = IndexingService::getUrlsByType($type);
+        $status = IndexingService::getStatus();
+
+        $this->jsonSuccess([
+            'type' => $type,
+            'total' => count($urls),
+            'urls' => $urls,
+            'status' => $status
         ]);
     }
 
@@ -1129,47 +1183,8 @@ class AdminController extends Controller {
             $this->jsonError('Loại tài nguyên không hợp lệ.');
         }
 
-        if ($type === 'all') {
-            $results = IndexingService::submitAllPublicUrls();
-            $submitted = 0;
-            foreach ($results as $r) {
-                if (!empty($r['success'])) $submitted++;
-            }
-            $this->jsonSuccess(['submitted' => $submitted, 'total' => count($results), 'results' => $results]);
-        }
-
-        $urls = [];
-        $base = rtrim(URLROOT, '/');
-
-        if ($type === 'products') {
-            foreach (Product::getAll() as $product) {
-                if (($product['status'] ?? 'active') !== 'hidden') {
-                    $urls[] = Url::product($product);
-                }
-            }
-        } elseif ($type === 'categories') {
-            foreach (Category::getAll() as $cat) {
-                $slug = trim((string) ($cat['seo_slug'] ?: ($cat['slug'] ?? '')));
-                if ($slug !== '') {
-                    $urls[] = Url::category($slug);
-                }
-            }
-        } elseif ($type === 'blogs') {
-            foreach (Blog::getAll() as $blog) {
-                $urls[] = Url::blog($blog);
-            }
-        } elseif ($type === 'keywords') {
-            $path = APP_ROOT . '/config/seo_keywords.json';
-            if (file_exists($path)) {
-                $seoData = json_decode(file_get_contents($path), true);
-                $keywords = isset($seoData['keywords']) ? array_keys($seoData['keywords']) : [];
-                foreach ($keywords as $kw) {
-                    $urls[] = Url::search($kw);
-                }
-            }
-        }
-
-        $urls = array_values(array_unique(array_filter($urls)));
+        $items = IndexingService::getUrlsByType($type);
+        $urls = array_column($items, 'url');
         if (empty($urls)) {
             $this->jsonSuccess(['submitted' => 0, 'total' => 0, 'results' => []]);
         }

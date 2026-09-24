@@ -129,14 +129,42 @@ class SecurityLogger {
     public static function checkGuestSession(): bool {
         if (Auth::check()) {
             unset($_SESSION['guest_started_at'], $_SESSION['guest_expired']);
+            if (isset($_COOKIE['ainet_guest_started_at'])) {
+                setcookie('ainet_guest_started_at', '', time() - 3600, '/');
+                unset($_COOKIE['ainet_guest_started_at']);
+            }
             return false;
         }
 
-        if (empty($_SESSION['guest_started_at'])) {
-            $_SESSION['guest_started_at'] = time();
+        $sessionStarted = !empty($_SESSION['guest_started_at']) ? (int)$_SESSION['guest_started_at'] : 0;
+        $cookieStarted = !empty($_COOKIE['ainet_guest_started_at']) && is_numeric($_COOKIE['ainet_guest_started_at'])
+            ? (int)$_COOKIE['ainet_guest_started_at']
+            : 0;
+
+        $currentTime = time();
+
+        if ($sessionStarted > 0 && $cookieStarted > 0) {
+            $startedAt = min($sessionStarted, $cookieStarted);
+        } elseif ($sessionStarted > 0) {
+            $startedAt = $sessionStarted;
+        } elseif ($cookieStarted > 0 && $cookieStarted <= $currentTime) {
+            $startedAt = $cookieStarted;
+        } else {
+            $startedAt = $currentTime;
         }
 
-        $elapsedSeconds = time() - (int)$_SESSION['guest_started_at'];
+        $_SESSION['guest_started_at'] = $startedAt;
+
+        if (!isset($_COOKIE['ainet_guest_started_at']) || (int)$_COOKIE['ainet_guest_started_at'] !== $startedAt) {
+            setcookie('ainet_guest_started_at', (string)$startedAt, [
+                'expires' => $currentTime + 7 * 86400,
+                'path' => '/',
+                'httponly' => false,
+                'samesite' => 'Lax'
+            ]);
+        }
+
+        $elapsedSeconds = $currentTime - $startedAt;
         // 5 phút = 300 giây
         if ($elapsedSeconds >= 300) {
             $_SESSION['guest_expired'] = true;

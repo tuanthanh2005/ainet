@@ -52,6 +52,10 @@ class Auth {
         $_SESSION['user_checked_at'] = time();
         // Reset rate-limit counter and guest session on success
         unset($_SESSION['login_attempts'], $_SESSION['guest_started_at'], $_SESSION['guest_expired']);
+        if (isset($_COOKIE['ainet_guest_started_at'])) {
+            setcookie('ainet_guest_started_at', '', time() - 3600, '/');
+            unset($_COOKIE['ainet_guest_started_at']);
+        }
     }
 
     public static function logout(): void {
@@ -76,6 +80,16 @@ class Auth {
         // Re-start a fresh session for flash messages
         session_start();
         session_regenerate_id(true);
+
+        // Reset guest timer for the newly logged out guest
+        $_SESSION['guest_started_at'] = time();
+        unset($_SESSION['guest_expired']);
+        setcookie('ainet_guest_started_at', (string)$_SESSION['guest_started_at'], [
+            'expires' => time() + 7 * 86400,
+            'path' => '/',
+            'httponly' => false,
+            'samesite' => 'Lax'
+        ]);
     }
 
     public static function requireLogin(): void {

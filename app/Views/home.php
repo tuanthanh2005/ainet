@@ -1,19 +1,73 @@
 <div id="home-section" style="display: <?php echo ($tab === 'home') ? 'block' : 'none'; ?>;">
     <!-- Hero / Intro Section -->
-    <div class="row align-items-center g-5 py-5 mb-5 rounded-4 position-relative overflow-hidden fade-in-element" style="background: rgba(255,255,255,0.92); border: 1px solid var(--border-color); box-shadow: 0 10px 30px rgba(0,0,0,0.02); margin-left: 0; margin-right: 0;">
-        <div class="col-lg-7 text-start ps-4 ps-md-5">
-            <span class="badge bg-primary bg-opacity-10 text-primary mb-3 px-3 py-2 rounded-pill fw-bold" style="letter-spacing:1px; font-size:0.75rem;"><i class="fa-solid fa-wand-magic-sparkles me-1"></i> HỆ SINH THÁI TÀI KHOẢN PREMIUM</span>
-            <h1 class="display-5 fw-bold text-dark mb-3 lh-sm">Sở Hữu Tài Khoản AI <br><span class="text-gradient fw-extrabold" style="background: var(--vip-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Chính Hãng, Giá Rẻ</span></h1>
-            <p class="lead text-muted mb-4 fs-6" style="line-height:1.7;">
-                <?php echo nl2br(htmlspecialchars($settings['heroDesc'] ?? 'Chào mừng bạn đến với AI CỦA TÔI - nền tảng hàng đầu cung cấp các tài khoản Premium (ChatGPT Plus, Claude Pro, Midjourney, YouTube Premium, GitHub Copilot...) tự động 24/7. Uy tín, an toàn, kích hoạt ngay lập tức với chế độ bảo hành 1 đổi 1 trọn gói.')); ?>
-            </p>
-            <div class="d-flex gap-2 gap-md-3">
-                <a href="<?php echo Url::products(); ?>" class="btn btn-buy flex-fill px-2 px-md-4 py-2.5 fs-6 shadow-sm text-center" style="white-space: nowrap;"><i class="fa-solid fa-store me-1 me-md-2"></i>Xem sản phẩm</a>
-                <a href="<?php echo Url::about(); ?>" class="btn btn-outline-dark flex-fill px-2 px-md-4 py-2.5 fs-6 text-center" style="border-radius: 8px; white-space: nowrap;"><i class="fa-solid fa-circle-info me-1 me-md-2"></i>Về chúng tôi</a>
+    <div class="hero-banner-card position-relative overflow-hidden mb-5 rounded-4 p-4 p-md-5 border shadow-sm fade-in-element"
+         style="background: radial-gradient(circle at 90% 15%, rgba(99, 102, 241, 0.08) 0%, transparent 50%), radial-gradient(circle at 10% 85%, rgba(168, 85, 247, 0.05) 0%, transparent 50%), linear-gradient(135deg, #ffffff 0%, #fcfdfe 100%); border-color: rgba(226, 232, 240, 0.9) !important; box-shadow: 0 16px 36px -12px rgba(15, 23, 42, 0.05) !important;">
+        <div class="row align-items-center g-4 g-lg-5">
+            <div class="col-lg-7 text-start">
+                <div class="d-inline-flex align-items-center gap-2 px-3 py-1.5 rounded-pill mb-3 fw-bold"
+                     style="background: rgba(99, 102, 241, 0.08); border: 1px solid rgba(99, 102, 241, 0.18); color: #6366f1; font-size: 0.75rem; letter-spacing: 0.5px;">
+                    <i class="fa-solid fa-wand-magic-sparkles text-primary"></i>
+                    <span>HỆ SINH THÁI TÀI KHOẢN PREMIUM</span>
+                </div>
+                <h1 class="display-6 display-md-5 fw-extrabold text-dark mb-3" style="letter-spacing: -0.02em; line-height: 1.25;">
+                    Sở Hữu Tài Khoản AI <br>
+                    <span class="text-gradient" style="background: var(--vip-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Chính Hãng, Giá Rẻ</span>
+                </h1>
+                <p class="text-muted mb-4 fs-6" style="line-height: 1.7; max-width: 540px;">
+                    <?php echo nl2br(htmlspecialchars($settings['heroDesc'] ?? 'Chào mừng bạn đến với AI CỦA TÔI - nền tảng hàng đầu cung cấp các tài khoản Premium (ChatGPT Plus, Claude Pro, Midjourney, YouTube Premium, GitHub Copilot...) tự động 24/7. Uy tín, an toàn, kích hoạt ngay lập tức với chế độ bảo hành 1 đổi 1 trọn gói.')); ?>
+                </p>
+
+                <!-- Value Props / Feature Highlights -->
+                <div class="d-flex flex-wrap align-items-center gap-2 gap-md-3 mb-4 pt-1">
+                    <div class="d-inline-flex align-items-center px-3 py-1.5 rounded-pill shadow-xs" style="background: rgba(245, 158, 11, 0.08); border: 1px solid rgba(245, 158, 11, 0.2); font-size: 0.82rem; font-weight: 600; color: #b45309;">
+                        <i class="fa-solid fa-bolt text-warning me-2 fs-6"></i>
+                        <span>Kích hoạt 24/7</span>
+                    </div>
+                    <div class="d-inline-flex align-items-center px-3 py-1.5 rounded-pill shadow-xs" style="background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.2); font-size: 0.82rem; font-weight: 600; color: #047857;">
+                        <i class="fa-solid fa-shield-halved text-success me-2 fs-6"></i>
+                        <span>Bảo hành 1 đổi 1</span>
+                    </div>
+                    <div class="d-inline-flex align-items-center px-3 py-1.5 rounded-pill shadow-xs" style="background: rgba(99, 102, 241, 0.08); border: 1px solid rgba(99, 102, 241, 0.2); font-size: 0.82rem; font-weight: 600; color: #4338ca;">
+                        <i class="fa-solid fa-circle-check text-primary me-2 fs-6"></i>
+                        <span>Chính hãng 100%</span>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="d-flex flex-wrap align-items-center gap-3">
+                    <a href="<?php echo Url::products(); ?>" class="btn btn-buy px-4 py-2.5 rounded-3 fw-bold shadow-sm d-inline-flex align-items-center gap-2" style="font-size: 0.95rem; min-height: 44px;">
+                        <i class="fa-solid fa-store"></i>
+                        <span>Xem sản phẩm</span>
+                    </a>
+                    <a href="<?php echo Url::about(); ?>" class="btn btn-outline-dark px-4 py-2.5 rounded-3 fw-semibold d-inline-flex align-items-center gap-2" style="font-size: 0.95rem; min-height: 44px; border-color: #cbd5e1; background: #ffffff; color: #1e293b;">
+                        <i class="fa-solid fa-circle-info text-secondary"></i>
+                        <span>Về chúng tôi</span>
+                    </a>
+                </div>
             </div>
-        </div>
-        <div class="col-lg-5 text-center pe-4 pe-md-5 d-none d-lg-block">
-            <img src="<?php echo url('assets/images/gemini_share.webp'); ?>" width="1024" height="1024" class="img-fluid rounded-4 shadow-sm" alt="AI Của Tôi" loading="eager" fetchpriority="high" decoding="async" style="max-height: 280px; object-fit: cover; border: 1px solid var(--border-color);">
+
+            <div class="col-lg-5 d-none d-lg-flex justify-content-center align-items-center">
+                <div class="position-relative w-100" style="max-width: 420px;">
+                    <!-- Ambient Backlight -->
+                    <div class="position-absolute top-50 start-50 translate-middle w-100 h-100 rounded-4" style="background: radial-gradient(circle, rgba(99, 102, 241, 0.22) 0%, rgba(168, 85, 247, 0.12) 50%, transparent 75%); filter: blur(28px); z-index: 0; pointer-events: none; transform: scale(1.08);"></div>
+                    <!-- Image Showcase Card -->
+                    <div class="position-relative rounded-4 overflow-hidden shadow-sm border" style="border-color: rgba(226, 232, 240, 0.8) !important; z-index: 1; aspect-ratio: 16 / 10; background: #0f172a;">
+                        <img src="<?php echo url('assets/images/gemini_share.webp'); ?>" width="1024" height="1024" class="w-100 h-100" alt="AI Của Tôi" loading="eager" fetchpriority="high" decoding="async" style="object-fit: cover; transition: transform 0.4s ease;" onmouseover="this.style.transform='scale(1.03)'" onmouseout="this.style.transform='scale(1)'">
+                        <!-- Top-Right Chip -->
+                        <div class="position-absolute top-0 end-0 m-3 px-2.5 py-1 rounded-pill d-flex align-items-center gap-1.5 shadow-sm" style="background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(8px); border: 1px solid rgba(255, 255, 255, 0.15); font-size: 0.72rem; color: #38bdf8; font-weight: 600;">
+                            <span class="spinner-grow spinner-grow-sm text-success" style="width: 7px; height: 7px;" role="status"></span>
+                            <span>Auto 24/7</span>
+                        </div>
+                        <!-- Bottom Gradient Floating Caption -->
+                        <div class="position-absolute bottom-0 start-0 end-0 p-3" style="background: linear-gradient(to top, rgba(15, 23, 42, 0.88) 0%, rgba(15, 23, 42, 0.4) 60%, transparent 100%);">
+                            <div class="d-flex align-items-center justify-content-between text-white" style="font-size: 0.78rem;">
+                                <span class="fw-semibold"><i class="fa-solid fa-award text-warning me-1"></i>Hệ thống tự động uy tín</span>
+                                <span class="badge bg-primary bg-opacity-75 text-white fw-bold px-2 py-1" style="font-size: 0.7rem;">Chính hãng</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
     <!-- Product Showcase Section -->
@@ -110,40 +164,17 @@
     ?>
 
     <div class="mb-5 fade-in-element" style="animation-delay: 0.2s;">
-        <div class="text-center mb-4">
-            <span class="badge bg-primary bg-opacity-10 text-primary mb-3 px-3 py-2 rounded-pill fw-bold" style="letter-spacing:1px; font-size:0.75rem;"><i class="fa-solid fa-crown me-1 text-warning"></i> SẢN PHẨM NỔI BẬT</span>
-            <h2 class="display-6 fw-extrabold mb-2" style="background: linear-gradient(135deg, #1e293b, #4338ca); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Khám Phá Sản Phẩm</h2>
+        <div class="text-center mb-4 pb-2">
+            <h2 class="fw-extrabold mb-0 d-inline-flex align-items-center justify-content-center gap-2" style="font-size: 2.15rem; letter-spacing: -0.02em; color: #0f172a;">
+                <i class="fa-solid fa-crown text-warning"></i>
+                <span>Sản Phẩm <span class="text-gradient" style="background: var(--vip-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Nổi Bật</span></span>
+            </h2>
         </div>
 
-        <ul class="nav nav-pills justify-content-center mb-4 gap-2 showcase-tabs" id="productShowcaseTab" role="tablist">
-            <li class="nav-item" role="presentation">
-                <button class="nav-link active rounded-pill px-4 fw-bold shadow-sm" id="best-selling-tab" data-bs-toggle="pill" data-bs-target="#best-selling" type="button" role="tab" aria-controls="best-selling" aria-selected="true">
-                    <i class="fa-solid fa-fire text-danger me-1"></i> Bán chạy nhất
-                </button>
-            </li>
-            <li class="nav-item" role="presentation">
-                <button class="nav-link rounded-pill px-4 fw-bold shadow-sm" id="highest-rated-tab" data-bs-toggle="pill" data-bs-target="#highest-rated" type="button" role="tab" aria-controls="highest-rated" aria-selected="false">
-                    <i class="fa-solid fa-star text-warning me-1"></i> Đánh giá cao
-                </button>
-            </li>
-            <li class="nav-item" role="presentation">
-                <button class="nav-link rounded-pill px-4 fw-bold shadow-sm" id="newest-tab" data-bs-toggle="pill" data-bs-target="#newest" type="button" role="tab" aria-controls="newest" aria-selected="false">
-                    <i class="fa-solid fa-wand-magic-sparkles text-primary me-1"></i> Mới ra mắt
-                </button>
-            </li>
-        </ul>
-
-        <div class="tab-content" id="productShowcaseTabContent">
-            <div class="tab-pane fade show active" id="best-selling" role="tabpanel" aria-labelledby="best-selling-tab">
-                <?php $renderProductList($bestSellingProducts ?? []); ?>
-            </div>
-            <div class="tab-pane fade" id="highest-rated" role="tabpanel" aria-labelledby="highest-rated-tab">
-                <?php $renderProductList($highestRatedProducts ?? []); ?>
-            </div>
-            <div class="tab-pane fade" id="newest" role="tabpanel" aria-labelledby="newest-tab">
-                <?php $renderProductList($newestProducts ?? []); ?>
-            </div>
-        </div>
+        <?php
+            $featuredList = !empty($products) ? $products : (!empty($bestSellingProducts) ? $bestSellingProducts : []);
+            $renderProductList($featuredList);
+        ?>
         
         <div class="text-center mt-4 pt-2">
             <a href="<?php echo Url::products(); ?>" class="btn btn-outline-dark rounded-pill px-4 py-2 fw-bold shadow-sm" style="transition: all 0.3s ease;">
@@ -151,66 +182,81 @@
             </a>
         </div>
     </div>
-    
-    <style>
-        .showcase-tabs .nav-link {
-            background-color: rgba(255, 255, 255, 0.8);
-        }
-    </style>
 
-    <!-- Live System Operations Dashboard -->
+    <!-- Why Choose Us & Service Guarantees Section -->
     <div class="mb-5 fade-in-element" style="animation-delay: 0.1s;">
-        <div class="d-flex align-items-center justify-content-center gap-2 mb-4">
-            <span class="pulse-green"></span>
-            <span class="text-uppercase fw-extrabold text-muted small" style="letter-spacing: 1.5px; font-size: 0.7rem;">Hệ thống giám sát trạng thái & vận hành trực tuyến</span>
+        <div class="text-center mb-4">
+            <div class="d-inline-flex align-items-center gap-2 px-3 py-1.5 rounded-pill mb-2 fw-bold"
+                 style="background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.2); color: #059669; font-size: 0.75rem; letter-spacing: 0.8px;">
+                <i class="fa-solid fa-shield-halved"></i>
+                <span>CAM KẾT CHẤT LƯỢNG DỊCH VỤ</span>
+            </div>
+            <h2 class="fw-extrabold mb-2" style="font-size: 2.15rem; letter-spacing: -0.02em; color: #0f172a;">
+                Tại Sao Khách Hàng <span class="text-gradient" style="background: var(--vip-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Tin Tưởng Lựa Chọn?</span>
+            </h2>
+            <p class="text-muted mx-auto mb-0" style="max-width: 520px; font-size: 0.92rem; line-height: 1.6;">
+                Quy trình vận hành minh bạch, bàn giao tự động và bảo vệ tối đa quyền lợi khách hàng
+            </p>
         </div>
         
-        <div class="row g-4 text-center">
-            <div class="col-6 col-md-3">
-                <div class="p-4 system-monitor-card h-100 d-flex flex-column justify-content-between">
-                    <div>
-                        <span class="live-label mb-2"><i class="fa-solid fa-server"></i> Máy Chủ</span>
-                        <div class="fs-2 fw-extrabold text-success" style="font-weight: 800; display: inline-flex; align-items: center; gap: 6px;">
-                            <span class="pulse-green"></span> ONLINE
+        <div class="row g-4">
+            <div class="col-12 col-md-6 col-lg-3">
+                <div class="commitment-card h-100 d-flex flex-column text-start">
+                    <div class="d-flex align-items-center justify-content-between mb-3">
+                        <div class="commitment-icon rounded-3 d-inline-flex align-items-center justify-content-center shadow-xs" style="width: 48px; height: 48px; background: rgba(99, 102, 241, 0.1); color: #6366f1;">
+                            <i class="fa-solid fa-bolt-lightning fs-4"></i>
                         </div>
+                        <span class="badge rounded-pill fw-bold" style="background: rgba(99, 102, 241, 0.08); color: #6366f1; font-size: 0.7rem;">TỰ ĐỘNG</span>
                     </div>
-                    <div class="small text-muted mt-2 fw-medium">Tự động bàn giao 24/7/365</div>
+                    <h5 class="fw-bold mb-2 text-dark" style="font-size: 1.05rem;">Bàn Giao Tức Thì</h5>
+                    <p class="text-muted small mb-0 lh-base flex-grow-1">
+                        Kết nối trực tiếp cổng SePay ngân hàng. Hệ thống nhận diện thanh toán và gửi thông tin tài khoản ngay lập tức.
+                    </p>
                 </div>
             </div>
             
-            <div class="col-6 col-md-3">
-                <div class="p-4 system-monitor-card h-100 d-flex flex-column justify-content-between">
-                    <div>
-                        <span class="live-label mb-2"><i class="fa-solid fa-bolt"></i> Phản Hồi</span>
-                        <div class="fs-2 fw-extrabold text-primary" style="background: var(--vip-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 800;">
-                            ~5 Giây
+            <div class="col-12 col-md-6 col-lg-3">
+                <div class="commitment-card h-100 d-flex flex-column text-start">
+                    <div class="d-flex align-items-center justify-content-between mb-3">
+                        <div class="commitment-icon rounded-3 d-inline-flex align-items-center justify-content-center shadow-xs" style="width: 48px; height: 48px; background: rgba(16, 185, 129, 0.1); color: #10b981;">
+                            <i class="fa-solid fa-shield-heart fs-4"></i>
                         </div>
+                        <span class="badge rounded-pill fw-bold" style="background: rgba(16, 185, 129, 0.08); color: #059669; font-size: 0.7rem;">AN TÂM</span>
                     </div>
-                    <div class="small text-muted mt-2 fw-medium">Kích hoạt qua API SePay tức thì</div>
+                    <h5 class="fw-bold mb-2 text-dark" style="font-size: 1.05rem;">Bảo Hành 1 Đổi 1</h5>
+                    <p class="text-muted small mb-0 lh-base flex-grow-1">
+                        Bảo hành trọn vẹn toàn bộ thời hạn gói mua. Sẵn sàng đổi tài khoản mới hoặc xử lý nhanh gọn nếu có sự cố kỹ thuật.
+                    </p>
                 </div>
             </div>
             
-            <div class="col-6 col-md-3">
-                <div class="p-4 system-monitor-card h-100 d-flex flex-column justify-content-between">
-                    <div>
-                        <span class="live-label mb-2"><i class="fa-solid fa-cart-shopping"></i> Đơn Tự Động</span>
-                        <div class="fs-2 fw-extrabold text-primary" style="background: var(--vip-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 800;">
-                            <?= number_format($systemStats['completed_orders'], 0, ',', '.') ?>
+            <div class="col-12 col-md-6 col-lg-3">
+                <div class="commitment-card h-100 d-flex flex-column text-start">
+                    <div class="d-flex align-items-center justify-content-between mb-3">
+                        <div class="commitment-icon rounded-3 d-inline-flex align-items-center justify-content-center shadow-xs" style="width: 48px; height: 48px; background: rgba(245, 158, 11, 0.1); color: #f59e0b;">
+                            <i class="fa-solid fa-award fs-4"></i>
                         </div>
+                        <span class="badge rounded-pill fw-bold" style="background: rgba(245, 158, 11, 0.08); color: #b45309; font-size: 0.7rem;">CHÍNH HÃNG</span>
                     </div>
-                    <div class="small text-muted mt-2 fw-medium">Tổng giao dịch được xử lý thành công</div>
+                    <h5 class="fw-bold mb-2 text-dark" style="font-size: 1.05rem;">Tài Khoản Ổn Định</h5>
+                    <p class="text-muted small mb-0 lh-base flex-grow-1">
+                        Cung cấp tài khoản chính chủ, tạo lập an toàn với email chuẩn. Không dùng thẻ lậu/thẻ ảo đảm bảo sử dụng bền lâu.
+                    </p>
                 </div>
             </div>
             
-            <div class="col-6 col-md-3">
-                <div class="p-4 system-monitor-card h-100 d-flex flex-column justify-content-between">
-                    <div>
-                        <span class="live-label mb-2"><i class="fa-solid fa-star"></i> Đánh Giá Hài Lòng</span>
-                        <div class="fs-2 fw-extrabold text-primary" style="background: var(--vip-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 800;">
-                            <?= number_format($systemStats['average_rating'], 1) ?>/5 <i class="fa-solid fa-star text-warning" style="font-size: 1.2rem; -webkit-text-fill-color: initial;"></i>
+            <div class="col-12 col-md-6 col-lg-3">
+                <div class="commitment-card h-100 d-flex flex-column text-start">
+                    <div class="d-flex align-items-center justify-content-between mb-3">
+                        <div class="commitment-icon rounded-3 d-inline-flex align-items-center justify-content-center shadow-xs" style="width: 48px; height: 48px; background: rgba(14, 165, 233, 0.1); color: #0ea5e9;">
+                            <i class="fa-solid fa-headset fs-4"></i>
                         </div>
+                        <span class="badge rounded-pill fw-bold" style="background: rgba(14, 165, 233, 0.08); color: #0284c7; font-size: 0.7rem;">HỖ TRỢ</span>
                     </div>
-                    <div class="small text-muted mt-2 fw-medium">Chỉ số phản hồi thực tế từ người dùng</div>
+                    <h5 class="fw-bold mb-2 text-dark" style="font-size: 1.05rem;">Hỗ Trợ Kỹ Thuật 24/7</h5>
+                    <p class="text-muted small mb-0 lh-base flex-grow-1">
+                        Kênh hỗ trợ trực tiếp qua Zalo và Telegram có nhân viên trực thường xuyên, hướng dẫn đăng nhập và sử dụng chi tiết.
+                    </p>
                 </div>
             </div>
         </div>
@@ -644,6 +690,26 @@
 </div>
 
 <div id="blog-section" style="display: <?php echo ($tab === 'blog') ? 'block' : 'none'; ?>;">
+    <!-- Blog Section Header -->
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4 pb-3 border-bottom">
+        <div>
+            <div class="d-inline-flex align-items-center gap-2 px-3 py-1 rounded-pill mb-2 fw-semibold text-primary bg-primary bg-opacity-10 small"
+                 style="font-size: 0.78rem; letter-spacing: 0.5px;">
+                <i class="fa-solid fa-newspaper"></i>
+                <span>TẠP CHÍ & CẨM NANG AI</span>
+            </div>
+            <h1 class="h3 fw-extrabold mb-1 text-dark" style="letter-spacing: -0.02em;">Kiến Thức & Tin Tức Công Nghệ AI</h1>
+            <p class="text-muted small mb-0">Tổng hợp các bài viết hướng dẫn, thủ thuật Prompt và cẩm nang tài khoản bản quyền hữu ích</p>
+        </div>
+        <?php if (!empty($totalBlogs) && $totalBlogs > 0): ?>
+            <div class="d-flex align-items-center gap-2 text-muted small bg-light px-3 py-1.5 rounded-pill border">
+                <i class="fa-regular fa-file-lines text-primary"></i>
+                <span>Trang <strong><?= $blogPage ?? 1 ?></strong> / <strong><?= $totalBlogPages ?? 1 ?></strong> (Tổng <strong><?= $totalBlogs ?></strong> bài)</span>
+            </div>
+        <?php endif; ?>
+    </div>
+
+    <!-- Blog Grid: 3 articles per row, 6 articles per page (2 rows) -->
     <div class="row g-4">
         <?php if (empty($blogs)): ?>
             <div class="col-12 text-center text-muted py-5">
@@ -657,13 +723,21 @@
                     $blogTitle = $blog['title'] ?? '';
                     $blogImage = $blog['image'] ?? '';
                 ?>
-                <div class="col-12 col-md-6 col-lg-4 fade-in-element" style="animation-delay: <?= $index * 0.1 ?>s;">
+                <div class="col-12 col-md-6 col-lg-4 fade-in-element" style="animation-delay: <?= $index * 0.08 ?>s;">
                     <a href="<?= htmlspecialchars(Url::blog($blog)) ?>" class="text-decoration-none text-reset">
-                        <div class="blog-card h-100 bg-white shadow-sm border" style="border-radius:12px; overflow:hidden;">
-                            <img src="<?= htmlspecialchars(image_url($blogImage)) ?>" class="blog-img" loading="lazy" decoding="async" alt="<?= htmlspecialchars($blogTitle) ?>">
-                            <div class="blog-content p-3">
+                        <div class="blog-card h-100 bg-white shadow-sm border rounded-4 overflow-hidden">
+                            <div class="blog-img-wrap position-relative">
+                                <img src="<?= htmlspecialchars(image_url($blogImage)) ?>" class="blog-img" loading="lazy" decoding="async" alt="<?= htmlspecialchars($blogTitle) ?>">
+                                <span class="position-absolute bottom-0 start-0 m-3 px-2.5 py-1 rounded-pill small fw-semibold text-white bg-dark bg-opacity-75 shadow-xs" style="font-size: 0.72rem; backdrop-filter: blur(4px);">
+                                    <i class="fa-regular fa-clock me-1"></i> 3 phút đọc
+                                </span>
+                            </div>
+                            <div class="blog-content p-3.5">
                                 <?php if ($blogDate): ?>
-                                    <div class="blog-date small text-muted mb-1"><?= htmlspecialchars($blogDate) ?></div>
+                                    <div class="blog-date small text-muted mb-2 d-flex align-items-center gap-1.5" style="font-size: 0.78rem;">
+                                        <i class="fa-regular fa-calendar-days text-primary opacity-75"></i>
+                                        <span><?= htmlspecialchars($blogDate) ?></span>
+                                    </div>
                                 <?php endif; ?>
                                 <h3 class="blog-title mb-0 fw-bold fs-6 text-dark"><?= htmlspecialchars($blogTitle) ?></h3>
                             </div>
@@ -673,6 +747,47 @@
             <?php endforeach; ?>
         <?php endif; ?>
     </div>
+
+    <!-- Blog Pagination (6 articles per page = 2 rows of 3) -->
+    <?php if (($totalBlogPages ?? 1) > 1): ?>
+        <?php
+        $blogPageUrl = function($p) {
+            return Url::withQuery(Url::blogs(), ['page' => $p > 1 ? $p : null]);
+        };
+        ?>
+        <div class="d-flex justify-content-center mt-5 mb-4">
+            <nav aria-label="Blog pagination">
+                <ul class="pagination pagination-md shadow-sm border rounded-pill overflow-hidden bg-white px-2 py-1 mb-0" style="gap:4px; list-style: none;">
+                    <?php if (($blogPage ?? 1) > 1): ?>
+                        <li class="page-item">
+                            <a class="page-link border-0 rounded-circle text-dark d-flex align-items-center justify-content-center" 
+                               style="width:38px;height:38px;" href="<?= $blogPageUrl(($blogPage ?? 1) - 1) ?>" aria-label="Trang trước">
+                                <i class="fa-solid fa-chevron-left small"></i>
+                            </a>
+                        </li>
+                    <?php endif; ?>
+
+                    <?php for ($i = 1; $i <= ($totalBlogPages ?? 1); $i++): ?>
+                        <li class="page-item <?= $i === ($blogPage ?? 1) ? 'active' : '' ?>">
+                            <a class="page-link border-0 rounded-circle d-flex align-items-center justify-content-center <?= $i === ($blogPage ?? 1) ? 'bg-dark text-white fw-bold shadow-sm' : 'text-dark' ?>" 
+                               style="width:38px;height:38px;" href="<?= $blogPageUrl($i) ?>">
+                                <?= $i ?>
+                            </a>
+                        </li>
+                    <?php endfor; ?>
+
+                    <?php if (($blogPage ?? 1) < ($totalBlogPages ?? 1)): ?>
+                        <li class="page-item">
+                            <a class="page-link border-0 rounded-circle text-dark d-flex align-items-center justify-content-center" 
+                               style="width:38px;height:38px;" href="<?= $blogPageUrl(($blogPage ?? 1) + 1) ?>" aria-label="Trang sau">
+                                <i class="fa-solid fa-chevron-right small"></i>
+                            </a>
+                        </li>
+                    <?php endif; ?>
+                </ul>
+            </nav>
+        </div>
+    <?php endif; ?>
 </div>
 <script>
     const fakeOrders = <?php echo json_encode($recentOrders); ?>;
