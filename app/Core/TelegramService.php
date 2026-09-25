@@ -85,6 +85,7 @@ class TelegramService {
                 "👤 *Khách:* " . self::esc($order['name'] ?? $email),
                 "📧 *Email:* " . self::esc($email),
                 "📱 *SĐT:* " . self::esc($phone),
+                "💬 *Zalo/Tele:* `" . self::esc($order['contact_social'] ?? '—') . "`",
             ];
 
             if ($note !== '') {
@@ -144,6 +145,7 @@ class TelegramService {
                 "👤 *Khách:* " . self::esc($order['name'] ?? $email),
                 "📧 *Email:* " . self::esc($email),
                 "📱 *SĐT:* " . self::esc($phone),
+                "💬 *Zalo/Tele (gửi thủ công):* `" . self::esc($order['contact_social'] ?? '—') . "`",
             ];
 
             // Giao hàng tự động

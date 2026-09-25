@@ -10,6 +10,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 
     <style>
         :root {
@@ -602,10 +603,35 @@
         }
     </style>
     <script>
+        // Get saved admin tab from query param, hash, or localStorage (defaults to dashboard)
+        function getSavedAdminTab() {
+            try {
+                const urlParams = new URLSearchParams(window.location.search);
+                const paramTab = urlParams.get('tab');
+                if (paramTab && document.getElementById('view-' + paramTab)) return paramTab;
+
+                const hash = (window.location.hash || '').replace(/^#/, '');
+                if (hash && document.getElementById('view-' + hash)) return hash;
+
+                const saved = localStorage.getItem('admin_active_tab');
+                if (saved && document.getElementById('view-' + saved)) return saved;
+            } catch (e) {}
+            return 'dashboard';
+        }
+
         // Define core layout functions early so menu click handlers work immediately
-        function switchView(viewId, el) {
+        function switchView(viewId, el, updateHistory) {
+            if (!viewId) return;
+
             document.querySelectorAll('.nav-link').forEach(nav => nav.classList.remove('active'));
-            if (el) el.classList.add('active');
+            if (el) {
+                el.classList.add('active');
+            } else {
+                const targetNav = document.querySelector(`.nav-menu a[data-view="${viewId}"]`)
+                               || document.querySelector(`.nav-menu a[href="#${viewId}"]`)
+                               || document.querySelector(`.nav-menu a[onclick*="'${viewId}'"]`);
+                if (targetNav) targetNav.classList.add('active');
+            }
 
             const titles = {
                 'dashboard': 'Tổng quan',
@@ -628,6 +654,28 @@
             document.querySelectorAll('.view-section').forEach(view => view.classList.remove('active'));
             const targetView = document.getElementById('view-' + viewId);
             if (targetView) targetView.classList.add('active');
+
+            try {
+                localStorage.setItem('admin_active_tab', viewId);
+            } catch(e) {}
+
+            if (updateHistory !== false) {
+                try {
+                    if (window.location.hash !== '#' + viewId) {
+                        if (window.history && window.history.replaceState) {
+                            window.history.replaceState(null, '', '#' + viewId);
+                        } else {
+                            window.location.hash = viewId;
+                        }
+                    }
+                } catch(e) {}
+            }
+
+            if (viewId === 'dashboard') {
+                if (typeof renderDashboardChart === 'function') {
+                    setTimeout(renderDashboardChart, 50);
+                }
+            }
 
             if (viewId === 'indexing') {
                 if (typeof refreshIndexingCounts === 'function') refreshIndexingCounts();
@@ -703,17 +751,17 @@
             </div>
             <ul class="nav-menu">
                 <li class="nav-item">
-                    <a href="#" class="nav-link" onclick="switchView('dashboard', this)">
+                    <a href="#dashboard" data-view="dashboard" class="nav-link" onclick="switchView('dashboard', this); return false;">
                         <i class="fa-solid fa-chart-pie"></i> Tổng quan
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a href="#" class="nav-link active" onclick="switchView('products', this)">
+                    <a href="#products" data-view="products" class="nav-link" onclick="switchView('products', this); return false;">
                         <i class="fa-solid fa-box"></i> Quản lý Sản phẩm
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a href="#" class="nav-link" onclick="switchView('orders', this)">
+                    <a href="#orders" data-view="orders" class="nav-link" onclick="switchView('orders', this); return false;">
                         <i class="fa-solid fa-cart-shopping"></i>
                         <span class="nav-label">Quản lý Đơn hàng</span>
                         <?php if (!empty($pendingOrders)): ?>
@@ -722,7 +770,7 @@
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a href="#" class="nav-link" onclick="switchView('contacts', this)">
+                    <a href="#contacts" data-view="contacts" class="nav-link" onclick="switchView('contacts', this); return false;">
                         <i class="fa-solid fa-envelope"></i>
                         <span class="nav-label">Quản lý Liên hệ</span>
                         <?php if (!empty($unreadContacts)): ?>
@@ -733,7 +781,7 @@
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a href="#" class="nav-link" onclick="switchView('chats', this)">
+                    <a href="#chats" data-view="chats" class="nav-link" onclick="switchView('chats', this); return false;">
                         <i class="fa-solid fa-comments"></i>
                         <span class="nav-label">Quản lý Chat Box</span>
                         <?php if (!empty($unreadChats)): ?>
@@ -744,37 +792,37 @@
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a href="#" class="nav-link" onclick="switchView('users', this)">
+                    <a href="#users" data-view="users" class="nav-link" onclick="switchView('users', this); return false;">
                         <i class="fa-solid fa-users"></i> Quản lý User
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a href="#" class="nav-link" onclick="switchView('categories', this)">
+                    <a href="#categories" data-view="categories" class="nav-link" onclick="switchView('categories', this); return false;">
                         <i class="fa-solid fa-list-ul"></i> Quản lý Danh mục
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a href="#" class="nav-link" onclick="switchView('blogs', this)">
+                    <a href="#blogs" data-view="blogs" class="nav-link" onclick="switchView('blogs', this); return false;">
                         <i class="fa-solid fa-newspaper"></i> Quản lý Tin tức
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a href="#" class="nav-link" onclick="switchView('settings', this)">
+                    <a href="#settings" data-view="settings" class="nav-link" onclick="switchView('settings', this); return false;">
                         <i class="fa-solid fa-gear"></i> Cấu hình Website
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a href="#" class="nav-link" onclick="switchView('indexing', this)">
+                    <a href="#indexing" data-view="indexing" class="nav-link" onclick="switchView('indexing', this); return false;">
                         <i class="fa-solid fa-cloud-arrow-up"></i> Quản lý Index
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a href="#" class="nav-link" onclick="switchView('keywords', this)">
+                    <a href="#keywords" data-view="keywords" class="nav-link" onclick="switchView('keywords', this); return false;">
                         <i class="fa-solid fa-key"></i> Quản lý Từ khóa SEO
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a href="#" class="nav-link text-danger fw-bold" onclick="switchView('security-logs', this)">
+                    <a href="#security-logs" data-view="security-logs" class="nav-link text-danger fw-bold" onclick="switchView('security-logs', this); return false;">
                         <i class="fa-solid fa-shield-halved"></i> Log An Ninh & Session
                     </a>
                 </li>
@@ -799,7 +847,7 @@
                     <button class="btn btn-light border shadow-sm me-1 d-lg-none" onclick="toggleSidebar()" aria-label="Toggle Menu">
                         <i class="fa-solid fa-bars"></i>
                     </button>
-                    <h5 class="mb-0 fw-bold" id="page-title">Quản lý Sản phẩm</h5>
+                    <h5 class="mb-0 fw-bold" id="page-title">Tổng quan</h5>
                 </div>
                 <div class="d-flex align-items-center gap-1 gap-md-2">
                     <button class="btn btn-light border-0 shadow-sm" title="Thông báo"><i class="fa-regular fa-bell"></i></button>
@@ -812,7 +860,7 @@
 
             <div class="content-area">
 
-                <div id="view-products" class="view-section active">
+                <div id="view-products" class="view-section">
                     <div class="card-custom">
                         <div class="card-header-custom d-flex justify-content-between align-items-center flex-wrap gap-2">
                             <div>
@@ -1955,32 +2003,295 @@
                 </div>
 
                 <div id="view-dashboard" class="view-section">
-                    <div class="row g-4">
-                        <div class="col-md-3">
-                            <div class="card-custom p-4">
-                                <div class="text-muted fw-bold mb-2">DOANH THU</div>
-                                <h3 class="fw-bold text-dark">
-                                    <?php echo number_format($totalRevenue ?? 0, 0, ',', '.') . 'đ'; ?>
-                                </h3>
+                    <!-- Top Stat Cards -->
+                    <div class="row g-3 mb-4">
+                        <div class="col-12 col-sm-6 col-xl-3">
+                            <div class="card-custom p-3 p-md-4 h-100 position-relative overflow-hidden mb-0">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <div>
+                                        <div class="text-muted text-uppercase fw-semibold" style="font-size: 0.75rem; letter-spacing: 0.5px;">Tổng Doanh Thu</div>
+                                        <h3 class="fw-bold text-dark my-1" style="font-size: 1.45rem;">
+                                            <?php echo number_format($totalRevenue ?? 0, 0, ',', '.') . 'đ'; ?>
+                                        </h3>
+                                    </div>
+                                    <div class="rounded-3 p-2 text-white" style="background: linear-gradient(135deg, #111827 0%, #374151 100%); width: 42px; height: 42px; display: flex; align-items: center; justify-content: center;">
+                                        <i class="fa-solid fa-coins"></i>
+                                    </div>
+                                </div>
+                                <div class="pt-2 border-top d-flex flex-wrap gap-2 align-items-center justify-content-between text-muted" style="font-size: 0.76rem;">
+                                    <span>Hôm nay: <strong class="text-dark"><?php echo number_format($todayRevenue ?? 0, 0, ',', '.') . 'đ'; ?></strong></span>
+                                    <span>Tháng này: <strong class="text-dark"><?php echo number_format($monthRevenue ?? 0, 0, ',', '.') . 'đ'; ?></strong></span>
+                                </div>
                             </div>
                         </div>
-                        <div class="col-md-3">
-                            <div class="card-custom p-4">
-                                <div class="text-muted fw-bold mb-2">ĐƠN CẦN XỬ LÝ</div>
-                                <h3 class="fw-bold text-dark"><?php echo $pendingOrders ?? 0; ?></h3>
+
+                        <div class="col-12 col-sm-6 col-xl-3">
+                            <div class="card-custom p-3 p-md-4 h-100 position-relative overflow-hidden mb-0">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <div>
+                                        <div class="text-muted text-uppercase fw-semibold" style="font-size: 0.75rem; letter-spacing: 0.5px;">Tổng Đơn Hàng</div>
+                                        <h3 class="fw-bold text-dark my-1" style="font-size: 1.45rem;">
+                                            <?php echo number_format($totalOrders ?? 0); ?>
+                                        </h3>
+                                    </div>
+                                    <div class="rounded-3 p-2 text-white bg-primary" style="width: 42px; height: 42px; display: flex; align-items: center; justify-content: center;">
+                                        <i class="fa-solid fa-cart-shopping"></i>
+                                    </div>
+                                </div>
+                                <div class="pt-2 border-top d-flex flex-wrap gap-2 align-items-center justify-content-between" style="font-size: 0.76rem;">
+                                    <span class="text-success fw-medium"><i class="fa-solid fa-circle-check me-1"></i><?php echo number_format($completedOrders ?? 0); ?> thành công</span>
+                                    <span class="badge <?php echo (!empty($pendingOrders) && $pendingOrders > 0) ? 'bg-warning-subtle text-warning-emphasis border border-warning-subtle' : 'bg-light text-muted border'; ?>">
+                                        <?php echo (int)($pendingOrders ?? 0); ?> cần xử lý
+                                    </span>
+                                </div>
                             </div>
                         </div>
-                        <div class="col-md-3">
-                            <div class="card-custom p-4">
-                                <div class="text-muted fw-bold mb-2">KHÁCH HÀNG</div>
-                                <h3 class="fw-bold text-dark">1,024</h3>
+
+                        <div class="col-12 col-sm-6 col-xl-3">
+                            <div class="card-custom p-3 p-md-4 h-100 position-relative overflow-hidden mb-0">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <div>
+                                        <div class="text-muted text-uppercase fw-semibold" style="font-size: 0.75rem; letter-spacing: 0.5px;">Khách Hàng</div>
+                                        <h3 class="fw-bold text-dark my-1" style="font-size: 1.45rem;">
+                                            <?php echo number_format($totalCustomers ?? 0); ?>
+                                        </h3>
+                                    </div>
+                                    <div class="rounded-3 p-2 text-white bg-info" style="width: 42px; height: 42px; display: flex; align-items: center; justify-content: center;">
+                                        <i class="fa-solid fa-users"></i>
+                                    </div>
+                                </div>
+                                <div class="pt-2 border-top d-flex flex-wrap gap-2 align-items-center justify-content-between text-muted" style="font-size: 0.76rem;">
+                                    <span><i class="fa-solid fa-envelope me-1 text-secondary"></i>Khách mua hàng thực</span>
+                                    <span>User: <strong class="text-dark"><?php echo count($users ?? []); ?></strong></span>
+                                </div>
                             </div>
                         </div>
-                        <div class="col-md-3">
-                            <div class="card-custom p-4">
-                                <div class="text-muted fw-bold mb-2">TỔNG SẢN PHẨM</div>
-                                <h3 class="fw-bold text-dark" id="dash-total-products"><?php echo count($products); ?>
-                                </h3>
+
+                        <div class="col-12 col-sm-6 col-xl-3">
+                            <div class="card-custom p-3 p-md-4 h-100 position-relative overflow-hidden mb-0">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <div>
+                                        <div class="text-muted text-uppercase fw-semibold" style="font-size: 0.75rem; letter-spacing: 0.5px;">Sản Phẩm & Dịch Vụ</div>
+                                        <h3 class="fw-bold text-dark my-1" id="dash-total-products" style="font-size: 1.45rem;">
+                                            <?php echo count($products ?? []); ?>
+                                        </h3>
+                                    </div>
+                                    <div class="rounded-3 p-2 text-white bg-success" style="width: 42px; height: 42px; display: flex; align-items: center; justify-content: center;">
+                                        <i class="fa-solid fa-cubes"></i>
+                                    </div>
+                                </div>
+                                <div class="pt-2 border-top d-flex flex-wrap gap-2 align-items-center justify-content-between text-muted" style="font-size: 0.76rem;">
+                                    <span><i class="fa-solid fa-layer-group me-1 text-secondary"></i><?php echo count($categories ?? []); ?> danh mục</span>
+                                    <?php if (!empty($unreadContacts)): ?>
+                                        <span class="badge bg-danger-subtle text-danger border border-danger-subtle"><?php echo (int)$unreadContacts; ?> tin mới</span>
+                                    <?php else: ?>
+                                        <span class="text-success"><i class="fa-solid fa-check me-1"></i>Hệ thống ổn định</span>
+                                    <?php endif; ?>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 6-Month Chart & Monthly Breakdown Table -->
+                    <div class="row g-4 mb-4">
+                        <div class="col-12 col-lg-8">
+                            <div class="card-custom p-4 h-100 mb-0">
+                                <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+                                    <div>
+                                        <h6 class="fw-bold mb-1 text-dark"><i class="fa-solid fa-chart-column me-2 text-primary"></i>Biểu đồ Thống kê 6 tháng gần nhất</h6>
+                                        <small class="text-muted">Doanh thu thực tế (VNĐ) và số đơn hoàn thành theo từng tháng</small>
+                                    </div>
+                                    <div>
+                                        <span class="badge bg-dark text-white px-2 py-1" style="font-size: 0.75rem;">
+                                            <?php 
+                                                $firstM = !empty($monthlyStats) ? $monthlyStats[0]['label'] : '';
+                                                $lastM = !empty($monthlyStats) ? end($monthlyStats)['label'] : '';
+                                                echo htmlspecialchars($firstM . ' — ' . $lastM);
+                                            ?>
+                                        </span>
+                                    </div>
+                                </div>
+                                <div style="position: relative; height: 320px; width: 100%;">
+                                    <canvas id="dashboardMonthlyChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-12 col-lg-4">
+                            <div class="card-custom p-4 h-100 d-flex flex-column mb-0">
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <h6 class="fw-bold mb-0 text-dark"><i class="fa-solid fa-table-list me-2 text-info"></i>Chi tiết Doanh số 6 tháng</h6>
+                                </div>
+                                <div class="table-responsive flex-grow-1">
+                                    <table class="table table-sm table-hover align-middle mb-0" style="font-size: 0.85rem;">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th class="border-0">Tháng</th>
+                                                <th class="border-0 text-end">Doanh thu</th>
+                                                <th class="border-0 text-end">Đơn</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <?php 
+                                                $sum6mRev = 0;
+                                                $sum6mOrders = 0;
+                                                if (!empty($monthlyStats)): 
+                                                    foreach ($monthlyStats as $ms): 
+                                                        $sum6mRev += (float)($ms['revenue'] ?? 0);
+                                                        $sum6mOrders += (int)($ms['successful_orders'] ?? 0);
+                                            ?>
+                                                <tr>
+                                                    <td class="fw-semibold text-dark">
+                                                        <?php echo htmlspecialchars($ms['label'] ?? ''); ?>
+                                                    </td>
+                                                    <td class="text-end fw-bold text-dark">
+                                                        <?php echo number_format($ms['revenue'] ?? 0, 0, ',', '.') . 'đ'; ?>
+                                                    </td>
+                                                    <td class="text-end">
+                                                        <span class="badge bg-light text-dark border"><?php echo (int)($ms['successful_orders'] ?? 0); ?></span>
+                                                    </td>
+                                                </tr>
+                                            <?php 
+                                                    endforeach; 
+                                                endif; 
+                                            ?>
+                                        </tbody>
+                                        <tfoot class="table-light fw-bold">
+                                            <tr>
+                                                <td class="text-dark">Tổng 6T</td>
+                                                <td class="text-end text-success"><?php echo number_format($sum6mRev, 0, ',', '.') . 'đ'; ?></td>
+                                                <td class="text-end"><span class="badge bg-success"><?php echo $sum6mOrders; ?></span></td>
+                                            </tr>
+                                        </tfoot>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Bottom Row: Recent Orders & Top Selling Products -->
+                    <div class="row g-4 mb-4">
+                        <!-- Recent 5 Orders -->
+                        <div class="col-12 col-lg-7">
+                            <div class="card-custom h-100 mb-0">
+                                <div class="card-header-custom d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="mb-0 fw-bold"><i class="fa-solid fa-clock-rotate-left me-2 text-primary"></i>5 Đơn hàng gần nhất</h6>
+                                        <small class="text-muted">Các đơn hàng vừa phát sinh trên hệ thống</small>
+                                    </div>
+                                    <button type="button" class="btn btn-sm btn-outline-dark" onclick="switchView('orders'); return false;">
+                                        Xem tất cả <i class="fa-solid fa-arrow-right ms-1"></i>
+                                    </button>
+                                </div>
+                                <div class="table-responsive">
+                                    <table class="table table-hover align-middle mb-0" style="font-size: 0.85rem;">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th class="px-3">Mã đơn</th>
+                                                <th>Khách hàng</th>
+                                                <th>Sản phẩm</th>
+                                                <th class="text-end">Số tiền</th>
+                                                <th class="text-center">Trạng thái</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <?php if (empty($recentOrders)): ?>
+                                                <tr>
+                                                    <td colspan="5" class="text-center text-muted py-4">Chưa có đơn hàng nào</td>
+                                                </tr>
+                                            <?php else: ?>
+                                                <?php foreach ($recentOrders as $ro): 
+                                                    $roStatus = $ro['status'] ?? 'pending';
+                                                    $roBadgeCls = $roStatus === 'completed' ? 'bg-success' 
+                                                                : ($roStatus === 'processing' ? 'bg-primary' 
+                                                                : ($roStatus === 'pending' ? 'bg-warning text-dark' : 'bg-danger'));
+                                                    $roStatusLabel = $roStatus === 'completed' ? 'Thành công' 
+                                                                   : ($roStatus === 'processing' ? 'Đang xử lý' 
+                                                                   : ($roStatus === 'pending' ? 'Chờ thanh toán' : 'Đã hủy'));
+                                                ?>
+                                                    <tr>
+                                                        <td class="px-3">
+                                                            <a href="#" class="fw-bold text-dark text-decoration-none" onclick='viewOrderDetails(<?php echo htmlspecialchars(json_encode($ro), ENT_QUOTES, "UTF-8"); ?>); return false;'>
+                                                                #<?php echo htmlspecialchars($ro['id']); ?>
+                                                            </a>
+                                                        </td>
+                                                        <td>
+                                                            <div class="fw-semibold text-truncate" style="max-width: 160px;" title="<?php echo htmlspecialchars($ro['customer_email'] ?? ''); ?>">
+                                                                <?php echo htmlspecialchars($ro['customer_email'] ?? '—'); ?>
+                                                            </div>
+                                                            <small class="text-muted"><?php echo htmlspecialchars($ro['phone'] ?? ''); ?></small>
+                                                        </td>
+                                                        <td>
+                                                            <div class="text-truncate fw-medium" style="max-width: 170px;" title="<?php echo htmlspecialchars($ro['product_name'] ?? ''); ?>">
+                                                                <?php echo htmlspecialchars($ro['product_name'] ?? '—'); ?>
+                                                            </div>
+                                                            <small class="text-muted"><?php echo !empty($ro['variant_name']) ? htmlspecialchars($ro['variant_name']) : ''; ?></small>
+                                                        </td>
+                                                        <td class="text-end fw-bold text-dark">
+                                                            <?php echo number_format($ro['amount'] ?? 0, 0, ',', '.') . 'đ'; ?>
+                                                        </td>
+                                                        <td class="text-center">
+                                                            <span class="badge <?php echo $roBadgeCls; ?> rounded-pill" style="font-size: 0.72rem;">
+                                                                <?php echo $roStatusLabel; ?>
+                                                            </span>
+                                                        </td>
+                                                    </tr>
+                                                <?php endforeach; ?>
+                                            <?php endif; ?>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Top 5 Products -->
+                        <div class="col-12 col-lg-5">
+                            <div class="card-custom h-100 mb-0">
+                                <div class="card-header-custom d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="mb-0 fw-bold"><i class="fa-solid fa-fire me-2 text-danger"></i>Top Sản phẩm doanh số cao</h6>
+                                        <small class="text-muted">Tính trên đơn hoàn thành</small>
+                                    </div>
+                                    <button type="button" class="btn btn-sm btn-outline-dark" onclick="switchView('products'); return false;">
+                                        Xem SP <i class="fa-solid fa-arrow-right ms-1"></i>
+                                    </button>
+                                </div>
+                                <div class="table-responsive">
+                                    <table class="table table-hover align-middle mb-0" style="font-size: 0.85rem;">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th class="px-3">#</th>
+                                                <th>Sản phẩm</th>
+                                                <th class="text-center">Đã bán</th>
+                                                <th class="text-end">Doanh thu</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <?php if (empty($topProducts)): ?>
+                                                <tr>
+                                                    <td colspan="4" class="text-center text-muted py-4">Chưa có dữ liệu bán hàng</td>
+                                                </tr>
+                                            <?php else: ?>
+                                                <?php foreach ($topProducts as $idx => $tp): ?>
+                                                    <tr>
+                                                        <td class="px-3 fw-bold text-muted"><?php echo $idx + 1; ?></td>
+                                                        <td>
+                                                            <div class="fw-semibold text-truncate" style="max-width: 170px;" title="<?php echo htmlspecialchars($tp['product_name'] ?? ''); ?>">
+                                                                <?php echo htmlspecialchars($tp['product_name'] ?? '—'); ?>
+                                                            </div>
+                                                        </td>
+                                                        <td class="text-center">
+                                                            <span class="badge bg-light text-dark border"><?php echo (int)($tp['total_sold'] ?? 0); ?></span>
+                                                        </td>
+                                                        <td class="text-end fw-bold text-success">
+                                                            <?php echo number_format($tp['total_revenue'] ?? 0, 0, ',', '.') . 'đ'; ?>
+                                                        </td>
+                                                    </tr>
+                                                <?php endforeach; ?>
+                                            <?php endif; ?>
+                                        </tbody>
+                                    </table>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -2232,6 +2543,9 @@
             users: <?php echo safeAdminJson($users ?? [], $jsonFlags); ?>,
             blogs: <?php echo safeAdminJson($blogs ?? [], $jsonFlags); ?>,
             contactMessages: <?php echo safeAdminJson($contactMessages ?? [], $jsonFlags); ?>,
+            monthlyStats: <?php echo safeAdminJson($monthlyStats ?? [], $jsonFlags); ?>,
+            topProducts: <?php echo safeAdminJson($topProducts ?? [], $jsonFlags); ?>,
+            recentOrders: <?php echo safeAdminJson($recentOrders ?? [], $jsonFlags); ?>,
             csrfToken: <?php echo safeAdminJson(Csrf::token(), $jsonFlags); ?>
         };
 
@@ -2455,17 +2769,150 @@
             setupBlogModal();
             renderKeywords();
 
-            // Handle active tab from URL parameter if present
-            const urlParams = new URLSearchParams(window.location.search);
-            const tabParam = urlParams.get('tab');
-            if (tabParam) {
-                const targetLink = document.querySelector(`.nav-link[onclick*="switchView('${tabParam}'"]`) 
-                                || document.querySelector(`.nav-link[onclick*="switchView('${tabParam}',"]`);
-                if (targetLink) {
-                    targetLink.click();
+            // Restore active tab (URL param > Hash > localStorage > Default 'dashboard')
+            const initialTab = getSavedAdminTab();
+            switchView(initialTab, null, false);
+
+            window.addEventListener('hashchange', () => {
+                const hash = (window.location.hash || '').replace(/^#/, '');
+                if (hash && document.getElementById('view-' + hash)) {
+                    switchView(hash, null, false);
                 }
-            }
+            });
         });
+
+        // ================= 6-MONTH DASHBOARD CHART =================
+        let monthlyChartInstance = null;
+        function renderDashboardChart() {
+            const canvas = document.getElementById('dashboardMonthlyChart');
+            if (!canvas || typeof Chart === 'undefined') return;
+
+            const stats = APP_STATE.monthlyStats || [];
+            if (!Array.isArray(stats) || stats.length === 0) return;
+
+            const labels = stats.map(s => s.label || s.short_label || s.ym);
+            const revenues = stats.map(s => Number(s.revenue || 0));
+            const successfulOrders = stats.map(s => Number(s.successful_orders || 0));
+
+            if (monthlyChartInstance) {
+                try { monthlyChartInstance.destroy(); } catch(e) {}
+            }
+
+            const ctx = canvas.getContext('2d');
+            const revGradient = ctx.createLinearGradient(0, 0, 0, 300);
+            revGradient.addColorStop(0, 'rgba(17, 24, 39, 0.95)');
+            revGradient.addColorStop(1, 'rgba(55, 65, 81, 0.45)');
+
+            monthlyChartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'Doanh thu (VNĐ)',
+                            data: revenues,
+                            backgroundColor: revGradient,
+                            borderRadius: 6,
+                            borderSkipped: false,
+                            yAxisID: 'yRevenue',
+                            order: 2,
+                            barPercentage: 0.52
+                        },
+                        {
+                            label: 'Đơn thành công',
+                            data: successfulOrders,
+                            type: 'line',
+                            borderColor: '#10b981',
+                            backgroundColor: '#10b981',
+                            borderWidth: 3,
+                            pointBackgroundColor: '#ffffff',
+                            pointBorderColor: '#10b981',
+                            pointBorderWidth: 2,
+                            pointRadius: 5,
+                            pointHoverRadius: 7,
+                            tension: 0.35,
+                            yAxisID: 'yOrders',
+                            order: 1
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: {
+                        mode: 'index',
+                        intersect: false
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                            align: 'end',
+                            labels: {
+                                boxWidth: 12,
+                                usePointStyle: true,
+                                pointStyle: 'circle',
+                                font: { family: 'Inter', size: 12, weight: '600' },
+                                padding: 16
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: '#111827',
+                            titleFont: { family: 'Inter', size: 13, weight: '700' },
+                            bodyFont: { family: 'Inter', size: 12 },
+                            padding: 12,
+                            cornerRadius: 8,
+                            callbacks: {
+                                label: function(context) {
+                                    if (context.dataset.yAxisID === 'yRevenue') {
+                                        return ' Doanh thu: ' + new Intl.NumberFormat('vi-VN').format(context.parsed.y) + ' đ';
+                                    } else {
+                                        return ' Đơn thành công: ' + context.parsed.y + ' đơn';
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: { display: false },
+                            ticks: { font: { family: 'Inter', size: 12 } }
+                        },
+                        yRevenue: {
+                            type: 'linear',
+                            position: 'left',
+                            grid: { color: '#f1f5f9' },
+                            ticks: {
+                                font: { family: 'Inter', size: 11 },
+                                callback: function(value) {
+                                    if (value >= 1000000) return (value / 1000000).toFixed(1) + 'M';
+                                    if (value >= 1000) return (value / 1000).toFixed(0) + 'k';
+                                    return value;
+                                }
+                            },
+                            title: {
+                                display: true,
+                                text: 'Doanh thu (VNĐ)',
+                                font: { family: 'Inter', size: 11, weight: '600' }
+                            }
+                        },
+                        yOrders: {
+                            type: 'linear',
+                            position: 'right',
+                            grid: { drawOnChartArea: false },
+                            ticks: {
+                                stepSize: 1,
+                                font: { family: 'Inter', size: 11 }
+                            },
+                            title: {
+                                display: true,
+                                text: 'Số đơn',
+                                font: { family: 'Inter', size: 11, weight: '600' }
+                            }
+                        }
+                    }
+                }
+            });
+        }
 
         // ================= SHARED PAGINATION CONTROLLER =================
         function renderPaginationControls(containerId, currentPage, totalPages, clickFnName) {
@@ -5349,6 +5796,7 @@
                         <td>
                             <div class="fw-semibold text-dark">${escapeHtml(o.customer_email)}</div>
                             <div class="text-muted small">${escapeHtml(o.phone || '—')}</div>
+                            ${o.contact_social ? `<div class="badge bg-primary-subtle text-primary border border-primary-subtle mt-1 text-start" style="font-size:0.75rem;"><i class="fa-solid fa-paper-plane me-1"></i>${escapeHtml(o.contact_social)}</div>` : ''}
                         </td>
                         <td>
                             <div class="fw-semibold text-dark">${escapeHtml(o.product_name)}</div>
@@ -5451,6 +5899,7 @@
                         <div class="row">
                             <div class="col-6 mb-2"><strong>Khách hàng:</strong> ${o.customer_email}</div>
                             <div class="col-6 mb-2"><strong>SĐT:</strong> ${o.phone || '—'}</div>
+                            <div class="col-12 mb-2"><strong>Zalo / Telegram (gửi thủ công):</strong> <span class="badge bg-primary-subtle text-primary border border-primary-subtle fs-6">${o.contact_social || '—'}</span></div>
                             <div class="col-12 mb-2"><strong>Sản phẩm:</strong> ${o.product_name} (${o.variant_name})</div>
                             <div class="col-6 mb-2"><strong>Số lượng:</strong> ${o.quantity}</div>
                             <div class="col-6 mb-2"><strong>Số tiền:</strong> ${formatCurrency(o.amount)}</div>

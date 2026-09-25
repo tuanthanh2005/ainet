@@ -1,30 +1,78 @@
 <?php
 
 class Order {
+    private static function ensureContactSocialColumn(PDO $db): void {
+        static $checked = false;
+        if ($checked) return;
+        try {
+            $cols = $db->query("SHOW COLUMNS FROM orders LIKE 'contact_social'")->fetchAll();
+            if (empty($cols)) {
+                $db->exec("ALTER TABLE orders ADD COLUMN contact_social VARCHAR(255) NULL AFTER phone");
+            }
+        } catch (Throwable $e) {}
+        $checked = true;
+    }
+
     public static function create($data) {
         $db = Database::getInstance();
-        $stmt = $db->prepare(
-            "INSERT INTO orders
-                (id, product_id, product_name, variant_name, variant_idx, amount, quantity,
-                 customer_email, status, phone, note, upgrade_email, upgrade_pass, upgrade_link)
-             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
-        );
-        $created = $stmt->execute([
-            $data['id'],
-            $data['product_id'],
-            $data['product_name'],
-            $data['variant_name'],
-            (int) ($data['variant_idx'] ?? 0),
-            $data['amount'],
-            max(1, (int) ($data['quantity'] ?? 1)),
-            $data['customer_email'],
-            'pending',
-            $data['phone'] ?? null,
-            $data['note'] ?? null,
-            $data['upgrade_email'] ?? null,
-            $data['upgrade_pass'] ?? null,
-            $data['upgrade_link'] ?? null,
-        ]);
+        self::ensureContactSocialColumn($db);
+
+        $contactSocial = !empty($data['contact_social']) ? trim($data['contact_social']) : null;
+        $note = $data['note'] ?? null;
+        if (!empty($contactSocial) && (empty($note) || !str_contains($note, $contactSocial))) {
+            $note = ($note ? $note . "\n" : "") . "[Zalo/Telegram: " . $contactSocial . "]";
+        }
+
+        try {
+            $stmt = $db->prepare(
+                "INSERT INTO orders
+                    (id, product_id, product_name, variant_name, variant_idx, amount, quantity,
+                     customer_email, status, phone, contact_social, note, upgrade_email, upgrade_pass, upgrade_link)
+                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+            );
+            $created = $stmt->execute([
+                $data['id'],
+                $data['product_id'],
+                $data['product_name'],
+                $data['variant_name'],
+                (int) ($data['variant_idx'] ?? 0),
+                $data['amount'],
+                max(1, (int) ($data['quantity'] ?? 1)),
+                $data['customer_email'],
+                'pending',
+                $data['phone'] ?? null,
+                $contactSocial,
+                $note,
+                $data['upgrade_email'] ?? null,
+                $data['upgrade_pass'] ?? null,
+                $data['upgrade_link'] ?? null,
+            ]);
+        } catch (Throwable $e) {
+            // Fallback if contact_social column does not exist yet
+            $stmt = $db->prepare(
+                "INSERT INTO orders
+                    (id, product_id, product_name, variant_name, variant_idx, amount, quantity,
+                     customer_email, status, phone, note, upgrade_email, upgrade_pass, upgrade_link)
+                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+            );
+            $created = $stmt->execute([
+                $data['id'],
+                $data['product_id'],
+                $data['product_name'],
+                $data['variant_name'],
+                (int) ($data['variant_idx'] ?? 0),
+                $data['amount'],
+                max(1, (int) ($data['quantity'] ?? 1)),
+                $data['customer_email'],
+                'pending',
+                $data['phone'] ?? null,
+                $note,
+                $data['upgrade_email'] ?? null,
+                $data['upgrade_pass'] ?? null,
+                $data['upgrade_link'] ?? null,
+            ]);
+        }
+
         if ($created) {
             Cache::forget('home.stats');
             Cache::forget('orders.recent');

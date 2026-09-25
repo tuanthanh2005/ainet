@@ -15,9 +15,66 @@ class AdminController extends Controller {
         
         // Calculate statistics via SQL aggregates (highly optimized, avoids loading all rows)
         $totalRevenue = (float) $db->query("SELECT SUM(amount) FROM orders WHERE status IN ('completed', 'processing')")->fetchColumn();
+        $todayRevenue = (float) $db->query("SELECT SUM(amount) FROM orders WHERE status IN ('completed', 'processing') AND DATE(created_at) = CURDATE()")->fetchColumn();
+        $monthRevenue = (float) $db->query("SELECT SUM(amount) FROM orders WHERE status IN ('completed', 'processing') AND YEAR(created_at) = YEAR(CURDATE()) AND MONTH(created_at) = MONTH(CURDATE())")->fetchColumn();
+
         $totalOrders = (int) $db->query("SELECT COUNT(*) FROM orders")->fetchColumn();
+        $completedOrders = (int) $db->query("SELECT COUNT(*) FROM orders WHERE status IN ('completed', 'processing')")->fetchColumn();
         $pendingOrders = (int) $db->query("SELECT COUNT(*) FROM orders WHERE status IN ('pending', 'processing')")->fetchColumn();
         
+        $totalCustomers = (int) $db->query("SELECT COUNT(DISTINCT customer_email) FROM orders WHERE customer_email IS NOT NULL AND customer_email != ''")->fetchColumn();
+
+        // 6 Months statistics calculation for chart
+        $monthlyStats = [];
+        for ($i = 5; $i >= 0; $i--) {
+            $time = strtotime("-$i months");
+            $ym = date('Y-m', $time);
+            $monthlyStats[$ym] = [
+                'ym'                => $ym,
+                'label'             => 'Tháng ' . date('n/Y', $time),
+                'short_label'       => 'T' . date('n', $time),
+                'revenue'           => 0.0,
+                'successful_orders' => 0,
+                'total_orders'      => 0,
+            ];
+        }
+
+        try {
+            $stmt = $db->query("
+                SELECT 
+                    DATE_FORMAT(created_at, '%Y-%m') AS ym,
+                    SUM(CASE WHEN status IN ('completed', 'processing') THEN amount ELSE 0 END) AS revenue,
+                    COUNT(CASE WHEN status IN ('completed', 'processing') THEN 1 END) AS successful_orders,
+                    COUNT(*) AS total_orders
+                FROM orders
+                WHERE created_at >= DATE_SUB(DATE_FORMAT(NOW(), '%Y-%m-01'), INTERVAL 5 MONTH)
+                GROUP BY ym
+                ORDER BY ym ASC
+            ");
+            while ($row = $stmt->fetch()) {
+                $ym = $row['ym'] ?? '';
+                if (isset($monthlyStats[$ym])) {
+                    $monthlyStats[$ym]['revenue']           = (float) ($row['revenue'] ?? 0);
+                    $monthlyStats[$ym]['successful_orders'] = (int) ($row['successful_orders'] ?? 0);
+                    $monthlyStats[$ym]['total_orders']      = (int) ($row['total_orders'] ?? 0);
+                }
+            }
+        } catch (Throwable $e) {}
+        $monthlyStats = array_values($monthlyStats);
+
+        // Top 5 products by revenue
+        $topProducts = [];
+        try {
+            $topProducts = $db->query("
+                SELECT product_name, COUNT(*) AS total_sold, SUM(amount) AS total_revenue
+                FROM orders
+                WHERE status IN ('completed', 'processing')
+                GROUP BY product_name
+                ORDER BY total_revenue DESC
+                LIMIT 5
+            ")->fetchAll();
+        } catch (Throwable $e) {}
+
         // Load first page of orders (limit 10)
         $stmt = $db->prepare("SELECT * FROM orders ORDER BY created_at DESC LIMIT 10");
         $stmt->execute();
@@ -27,6 +84,9 @@ class AdminController extends Controller {
             $o['delivered_items'] = is_array($decoded) ? $decoded : [];
         }
         unset($o);
+
+        // 5 recent orders for dashboard overview table
+        $recentOrders = array_slice($firstPageOrders, 0, 5);
 
         $settings   = Setting::getAll();
         $products   = Product::getAll();
@@ -42,14 +102,21 @@ class AdminController extends Controller {
             'products'         => $products,
             'categories'       => $categories,
             'orders'           => $firstPageOrders,
+            'recentOrders'     => $recentOrders,
             'blogs'            => $blogs,
             'users'            => $users,
             'contactMessages'  => $contactMessages,
             'unreadContacts'   => $unreadContacts,
             'unreadChats'      => $unreadChats,
             'totalRevenue'     => $totalRevenue,
+            'todayRevenue'     => $todayRevenue,
+            'monthRevenue'     => $monthRevenue,
             'totalOrders'      => $totalOrders,
+            'completedOrders'  => $completedOrders,
             'pendingOrders'    => $pendingOrders,
+            'totalCustomers'   => $totalCustomers,
+            'monthlyStats'     => $monthlyStats,
+            'topProducts'      => $topProducts,
             'ordersTotalPages' => max(1, ceil($totalOrders / 10)),
             'currentUser'      => $_SESSION['user'],
         ]);

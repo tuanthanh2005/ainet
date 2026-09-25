@@ -59,6 +59,15 @@ class CheckoutController extends Controller {
                 exit;
             }
 
+            $phone = trim($_POST['phone'] ?? '');
+            $contactSocial = trim($_POST['contact_social'] ?? '');
+
+            if ($contactSocial === '') {
+                $_SESSION['flash_error'] = 'Vui lòng nhập Zalo hoặc Telegram để admin liên hệ gửi thủ công.';
+                header('Location: ' . url('index.php?action=checkoutPage&product_id=' . urlencode($productId) . '&variant_idx=' . urlencode($variantIdx)));
+                exit;
+            }
+
             $amount = (float)($variant['price'] ?? 0) * $quantity;
             $variantName = $variant['name'] ?? 'Mặc định';
             
@@ -73,7 +82,8 @@ class CheckoutController extends Controller {
                 'amount' => $amount,
                 'quantity' => $quantity,
                 'customer_email' => $email,
-                'phone' => $_POST['phone'] ?? '',
+                'phone' => $phone,
+                'contact_social' => $contactSocial,
                 'note' => $_POST['note'] ?? '',
                 'upgrade_email' => $_POST['upgrade_email'] ?? null,
                 'upgrade_pass' => $_POST['upgrade_pass'] ?? null,
