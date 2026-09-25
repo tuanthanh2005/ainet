@@ -393,34 +393,37 @@ if (is_array($contactMethods)) {
     </section>
 
     <!-- Bottom CTA Card -->
-    <section class="fade-in-element">
-        <div class="contact-cta-banner p-4 p-md-5 rounded-4 shadow-lg text-center text-md-start position-relative overflow-hidden"
+    <section class="fade-in-element mb-2">
+        <div class="contact-cta-banner py-4 px-4 px-md-5 rounded-4 shadow-lg text-center text-lg-start position-relative overflow-hidden"
              style="background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 55%, #312e81 100%) !important; color: #ffffff !important; border: 1px solid rgba(99, 102, 241, 0.3) !important;">
-            <div class="row align-items-center gy-4 position-relative" style="z-index: 2;">
-                <div class="col-lg-8">
-                    <span class="badge rounded-pill px-3 py-1.5 mb-3 d-inline-flex align-items-center gap-1.5"
-                          style="background: rgba(99, 102, 241, 0.3) !important; color: #e0e7ff !important; border: 1px solid rgba(165, 180, 252, 0.4) !important; font-size: 0.78rem; font-weight: 600;">
-                        <i class="fa-solid fa-headset text-warning"></i> KẾT NỐI TRỰC TIẾP 24/7
-                    </span>
-                    <h3 class="fw-bold mb-2" style="color: #ffffff !important; font-size: calc(1.35rem + 0.6vw); letter-spacing: -0.3px;">
+            <div class="row align-items-center gy-4 gx-lg-5 position-relative" style="z-index: 2;">
+                <div class="col-lg-7 col-xl-8">
+                    <div class="d-inline-flex align-items-center px-3 py-1.5 mb-3 rounded-pill"
+                         style="background: rgba(99, 102, 241, 0.25); border: 1px solid rgba(165, 180, 252, 0.35); font-size: 0.78rem; font-weight: 600; color: #e0e7ff;">
+                        <i class="fa-solid fa-headset text-warning me-2" style="font-size: 0.85rem;"></i>
+                        <span>KẾT NỐI TRỰC TIẾP 24/7</span>
+                    </div>
+                    <h3 class="fw-bold mb-2.5 text-white" style="font-size: calc(1.3rem + 0.5vw); letter-spacing: -0.3px; line-height: 1.3;">
                         Bạn cần hỗ trợ ngay bây giờ?
                     </h3>
-                    <p class="mb-0 fs-6" style="color: #cbd5e1 !important; line-height: 1.6; max-width: 620px;">
+                    <p class="mb-0 fs-6" style="color: #cbd5e1 !important; line-height: 1.65; max-width: 620px;">
                         Nhắn tin trực tiếp qua <strong>Zalo</strong> hoặc nhấp vào biểu tượng <strong>Chat Trực Tuyến</strong> ở góc phải màn hình để được nhân viên tiếp nhận và xử lý yêu cầu tức thì.
                     </p>
                 </div>
-                <div class="col-lg-4 text-lg-end">
-                    <div class="d-inline-flex flex-column flex-sm-row flex-lg-column gap-2.5 w-100 w-lg-auto justify-content-center">
+                <div class="col-lg-5 col-xl-4 text-center text-lg-end">
+                    <div class="d-inline-flex flex-column gap-3 w-100 w-sm-auto align-items-stretch align-items-lg-end" style="min-width: 230px;">
                         <a href="<?= htmlspecialchars($zaloLink) ?>" target="_blank" rel="noopener noreferrer" 
-                           class="btn fw-bold rounded-pill px-4 py-2.5 shadow-sm d-inline-flex align-items-center justify-content-center gap-2"
-                           style="background: #ffffff !important; color: #0068ff !important; border: none !important; font-size: 0.95rem;">
-                            <i class="fa-solid fa-comment-dots fs-5"></i> Chat Zalo Admin
+                           class="btn fw-bold rounded-pill px-4 py-2.5 shadow-sm d-inline-flex align-items-center justify-content-center gap-2 w-100"
+                           style="background: #ffffff !important; color: #0068ff !important; border: none !important; font-size: 0.95rem; min-height: 46px;">
+                            <i class="fa-solid fa-comment-dots fs-5 text-primary"></i>
+                            <span>Chat Zalo Admin</span>
                         </a>
                         <button type="button" 
-                                class="btn fw-semibold rounded-pill px-4 py-2.5 d-inline-flex align-items-center justify-content-center gap-2"
-                                style="background: rgba(255, 255, 255, 0.12) !important; color: #ffffff !important; border: 1px solid rgba(255, 255, 255, 0.35) !important; font-size: 0.95rem; backdrop-filter: blur(4px);"
+                                class="btn fw-semibold rounded-pill px-4 py-2.5 d-inline-flex align-items-center justify-content-center gap-2 w-100"
+                                style="background: rgba(255, 255, 255, 0.14) !important; color: #ffffff !important; border: 1px solid rgba(255, 255, 255, 0.35) !important; font-size: 0.95rem; min-height: 46px; backdrop-filter: blur(4px);"
                                 onclick="document.getElementById('chat-bubble-toggle')?.click();">
-                            <i class="fa-solid fa-comments text-warning fs-5"></i> Mở Chat Trực Tuyến
+                            <i class="fa-solid fa-comments text-warning fs-5"></i>
+                            <span>Mở Chat Trực Tuyến</span>
                         </button>
                     </div>
                 </div>

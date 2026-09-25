@@ -164,21 +164,23 @@
     ?>
 
     <div class="mb-5 fade-in-element" style="animation-delay: 0.2s;">
-        <div class="text-center mb-4 pb-2">
-            <h2 class="fw-extrabold mb-0 d-inline-flex align-items-center justify-content-center gap-2" style="font-size: 2.15rem; letter-spacing: -0.02em; color: #0f172a;">
-                <i class="fa-solid fa-crown text-warning"></i>
+        <div class="text-center mb-3 mb-md-4 pb-md-2">
+            <h2 class="fw-extrabold mb-0 d-inline-flex align-items-center justify-content-center gap-2" style="font-size: clamp(1.25rem, 4.5vw, 2.15rem); letter-spacing: -0.02em; color: #0f172a;">
+                <i class="fa-solid fa-crown text-warning" style="font-size: 0.9em;"></i>
                 <span>Sản Phẩm <span class="text-gradient" style="background: var(--vip-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Nổi Bật</span></span>
             </h2>
         </div>
 
         <?php
             $featuredList = !empty($products) ? $products : (!empty($bestSellingProducts) ? $bestSellingProducts : []);
+            $featuredList = array_slice($featuredList, 0, 8);
             $renderProductList($featuredList);
         ?>
         
-        <div class="text-center mt-4 pt-2">
-            <a href="<?php echo Url::products(); ?>" class="btn btn-outline-dark rounded-pill px-4 py-2 fw-bold shadow-sm" style="transition: all 0.3s ease;">
-                Xem tất cả sản phẩm <i class="fa-solid fa-arrow-right ms-2"></i>
+        <div class="text-center mt-4 pt-3">
+            <a href="<?php echo Url::products(); ?>" class="btn btn-outline-dark rounded-pill px-5 py-2.5 fw-bold shadow-sm d-inline-flex align-items-center gap-2" style="transition: all 0.3s ease; font-size: 0.95rem; border-width: 1.5px;">
+                <span>Xem tất cả sản phẩm</span>
+                <i class="fa-solid fa-arrow-right"></i>
             </a>
         </div>
     </div>
@@ -191,7 +193,7 @@
                 <i class="fa-solid fa-shield-halved"></i>
                 <span>CAM KẾT CHẤT LƯỢNG DỊCH VỤ</span>
             </div>
-            <h2 class="fw-extrabold mb-2" style="font-size: 2.15rem; letter-spacing: -0.02em; color: #0f172a;">
+            <h2 class="fw-extrabold mb-2" style="font-size: clamp(1.25rem, 4.5vw, 2.15rem); letter-spacing: -0.02em; color: #0f172a;">
                 Tại Sao Khách Hàng <span class="text-gradient" style="background: var(--vip-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Tin Tưởng Lựa Chọn?</span>
             </h2>
             <p class="text-muted mx-auto mb-0" style="max-width: 520px; font-size: 0.92rem; line-height: 1.6;">
