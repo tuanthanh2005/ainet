@@ -394,24 +394,33 @@ if (is_array($contactMethods)) {
 
     <!-- Bottom CTA Card -->
     <section class="fade-in-element">
-        <div class="contact-cta-banner p-4 p-md-5 text-white shadow-lg text-center text-md-start">
-            <div class="row align-items-center gy-4 position-relative" style="z-index: 1;">
-                <div class="col-md-8">
-                    <span class="badge bg-primary bg-opacity-25 text-white border border-light border-opacity-25 rounded-pill px-3 py-1 mb-3 small">
-                        KẾT NỐI NGAY
+        <div class="contact-cta-banner p-4 p-md-5 rounded-4 shadow-lg text-center text-md-start position-relative overflow-hidden"
+             style="background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 55%, #312e81 100%) !important; color: #ffffff !important; border: 1px solid rgba(99, 102, 241, 0.3) !important;">
+            <div class="row align-items-center gy-4 position-relative" style="z-index: 2;">
+                <div class="col-lg-8">
+                    <span class="badge rounded-pill px-3 py-1.5 mb-3 d-inline-flex align-items-center gap-1.5"
+                          style="background: rgba(99, 102, 241, 0.3) !important; color: #e0e7ff !important; border: 1px solid rgba(165, 180, 252, 0.4) !important; font-size: 0.78rem; font-weight: 600;">
+                        <i class="fa-solid fa-headset text-warning"></i> KẾT NỐI TRỰC TIẾP 24/7
                     </span>
-                    <h3 class="fw-bold mb-2 text-white">Bạn cần hỗ trợ ngay bây giờ?</h3>
-                    <p class="text-light opacity-75 mb-0 fs-6">
-                        Nhắn tin trực tiếp qua Zalo hoặc nhấp vào biểu tượng Chat Trực Tuyến ở góc phải để bắt đầu trò chuyện với nhân viên chăm sóc khách hàng.
+                    <h3 class="fw-bold mb-2" style="color: #ffffff !important; font-size: calc(1.35rem + 0.6vw); letter-spacing: -0.3px;">
+                        Bạn cần hỗ trợ ngay bây giờ?
+                    </h3>
+                    <p class="mb-0 fs-6" style="color: #cbd5e1 !important; line-height: 1.6; max-width: 620px;">
+                        Nhắn tin trực tiếp qua <strong>Zalo</strong> hoặc nhấp vào biểu tượng <strong>Chat Trực Tuyến</strong> ở góc phải màn hình để được nhân viên tiếp nhận và xử lý yêu cầu tức thì.
                     </p>
                 </div>
-                <div class="col-md-4 text-md-end">
-                    <div class="d-inline-flex flex-column flex-sm-row flex-md-column gap-2 w-100 w-md-auto">
-                        <a href="<?= htmlspecialchars($zaloLink) ?>" target="_blank" rel="noopener noreferrer" class="btn btn-light text-dark fw-bold rounded-pill px-4 py-2.5 shadow">
-                            <i class="fa-solid fa-comment-dots text-primary me-1"></i> Chat Zalo Admin
+                <div class="col-lg-4 text-lg-end">
+                    <div class="d-inline-flex flex-column flex-sm-row flex-lg-column gap-2.5 w-100 w-lg-auto justify-content-center">
+                        <a href="<?= htmlspecialchars($zaloLink) ?>" target="_blank" rel="noopener noreferrer" 
+                           class="btn fw-bold rounded-pill px-4 py-2.5 shadow-sm d-inline-flex align-items-center justify-content-center gap-2"
+                           style="background: #ffffff !important; color: #0068ff !important; border: none !important; font-size: 0.95rem;">
+                            <i class="fa-solid fa-comment-dots fs-5"></i> Chat Zalo Admin
                         </a>
-                        <button type="button" class="btn btn-outline-light rounded-pill px-4 py-2.5 fw-semibold" onclick="document.getElementById('chat-bubble-toggle')?.click();">
-                            <i class="fa-solid fa-headset me-1"></i> Mở Chat Trực Tuyến
+                        <button type="button" 
+                                class="btn fw-semibold rounded-pill px-4 py-2.5 d-inline-flex align-items-center justify-content-center gap-2"
+                                style="background: rgba(255, 255, 255, 0.12) !important; color: #ffffff !important; border: 1px solid rgba(255, 255, 255, 0.35) !important; font-size: 0.95rem; backdrop-filter: blur(4px);"
+                                onclick="document.getElementById('chat-bubble-toggle')?.click();">
+                            <i class="fa-solid fa-comments text-warning fs-5"></i> Mở Chat Trực Tuyến
                         </button>
                     </div>
                 </div>
@@ -419,3 +428,112 @@ if (is_array($contactMethods)) {
         </div>
     </section>
 </div>
+
+<style>
+/* Scoped styles for Contact Page */
+.contact-page-wrapper {
+    width: 100%;
+}
+.contact-hero {
+    background: #ffffff !important;
+    border: 1px solid var(--border-color, #e2e8f0) !important;
+}
+.contact-channel-card {
+    background: #ffffff !important;
+    border: 1px solid var(--border-color, #e2e8f0) !important;
+    border-radius: 1.25rem !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    position: relative;
+    overflow: hidden;
+}
+.contact-channel-card:hover {
+    transform: translateY(-4px) !important;
+    box-shadow: 0 16px 36px rgba(15, 23, 42, 0.08) !important;
+    border-color: rgba(99, 102, 241, 0.35) !important;
+}
+.contact-channel-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: var(--channel-accent, linear-gradient(135deg, #6366f1, #a855f7));
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+.contact-channel-card:hover::before {
+    opacity: 1;
+}
+.channel-icon-wrap {
+    width: 52px;
+    height: 52px;
+    border-radius: 14px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.45rem;
+    color: #fff;
+    flex-shrink: 0;
+    box-shadow: 0 8px 18px rgba(0, 0, 0, 0.12);
+}
+.channel-icon-zalo {
+    background: linear-gradient(135deg, #0068ff 0%, #0091ff 100%) !important;
+}
+.channel-icon-telegram {
+    background: linear-gradient(135deg, #229ED9 0%, #0088cc 100%) !important;
+}
+.channel-icon-hotline {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
+}
+.channel-icon-email {
+    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%) !important;
+}
+.contact-step-card {
+    background: #ffffff !important;
+    border: 1px solid var(--border-color, #e2e8f0) !important;
+    border-radius: 1.25rem !important;
+    padding: 1.75rem 1.5rem !important;
+    position: relative;
+    height: 100%;
+    transition: all 0.3s ease !important;
+}
+.contact-step-card:hover {
+    transform: translateY(-4px) !important;
+    box-shadow: 0 14px 28px rgba(15, 23, 42, 0.06) !important;
+    border-color: rgba(99, 102, 241, 0.3) !important;
+}
+.contact-step-badge {
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+    background: rgba(99, 102, 241, 0.1) !important;
+    color: #6366f1 !important;
+    font-weight: 700;
+    font-size: 1.1rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1.25rem;
+}
+.contact-cta-banner::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -20%;
+    width: 450px;
+    height: 450px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(99, 102, 241, 0.35) 0%, transparent 70%);
+    pointer-events: none;
+}
+.contact-faq-item .accordion-button:not(.collapsed) {
+    background-color: rgba(99, 102, 241, 0.06) !important;
+    color: #4f46e5 !important;
+    box-shadow: none !important;
+}
+.contact-faq-item .accordion-button:focus {
+    box-shadow: none !important;
+    border-color: rgba(99, 102, 241, 0.2) !important;
+}
+</style>
