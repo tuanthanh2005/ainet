@@ -217,6 +217,47 @@ class TelegramService {
     }
 
     /**
+     * Thông báo khi có thành viên / khách hàng đăng ký mới.
+     */
+    public static function notifyNewUser(array $user, string $source = 'Đăng ký tài khoản'): void {
+        try {
+            $id    = $user['id'] ?? '';
+            $name  = $user['name'] ?? 'Khách hàng';
+            $email = $user['email'] ?? '';
+            $time  = date('d/m/Y H:i:s');
+
+            $totalUsers = 0;
+            if (class_exists('User') && method_exists('User', 'countAll')) {
+                $totalUsers = User::countAll();
+            } else {
+                try {
+                    $db = Database::getInstance();
+                    $totalUsers = (int) $db->query('SELECT COUNT(*) FROM users')->fetchColumn();
+                } catch (Throwable $t) {}
+            }
+
+            $lines = [
+                "👤 *KHÁCH HÀNG ĐĂNG KÝ MỚI*",
+                "",
+                "📛 *Họ tên:* " . self::esc($name),
+                "📧 *Email:* " . self::esc($email),
+                $id ? "🆔 *User ID:* `#{$id}`" : "",
+                "🌐 *Hình thức:* " . self::esc($source),
+                "⏰ *Thời gian:* {$time}",
+                "",
+                "👥 *Tổng số User hiện tại:* *" . number_format($totalUsers, 0, ',', '.') . "* thành viên",
+            ];
+
+            $lines = array_filter($lines, fn($l) => $l !== "");
+            if (!self::sendRaw(implode("\n", array_values($lines)))) {
+                self::log('Telegram new user registration notification failed or is not configured.');
+            }
+        } catch (Throwable $e) {
+            self::log("notifyNewUser error: " . $e->getMessage() . "\n" . $e->getTraceAsString());
+        }
+    }
+
+    /**
      * Gửi tin nhắn test đến Telegram để kiểm tra cấu hình.
      * Trả về mảng ['success' => bool, 'message' => string]
      */

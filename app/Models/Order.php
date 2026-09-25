@@ -116,4 +116,15 @@ class Order {
         $stmt = $db->query("SELECT * FROM orders ORDER BY created_at DESC");
         return $stmt->fetchAll();
     }
+
+    public static function delete(string $id): bool {
+        $db = Database::getInstance();
+        $stmt = $db->prepare("DELETE FROM orders WHERE id = ?");
+        $deleted = $stmt->execute([$id]);
+        if ($deleted) {
+            Cache::forget('home.stats');
+            Cache::forget('orders.recent');
+        }
+        return $deleted;
+    }
 }

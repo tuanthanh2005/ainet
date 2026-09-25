@@ -129,5 +129,17 @@ class User extends Model {
         $stmt = $db->prepare('UPDATE users SET google_id = :gid, avatar = COALESCE(NULLIF(avatar,""), :avatar) WHERE id = :id');
         $stmt->execute(['gid' => $googleId, 'avatar' => $avatar, 'id' => $userId]);
     }
+
+    /**
+     * Đếm tổng số user hiện có trong hệ thống.
+     */
+    public static function countAll(): int {
+        try {
+            $db = Database::getInstance();
+            return (int) $db->query('SELECT COUNT(*) FROM users')->fetchColumn();
+        } catch (Throwable $e) {
+            return 0;
+        }
+    }
 }
 

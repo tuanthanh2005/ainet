@@ -5816,6 +5816,7 @@
                                     <li><a class="dropdown-item small" href="#" onclick="updateOrderStatus('${o.id}', 'completed')">Thành công</a></li>
                                     <li><a class="dropdown-item small" href="#" onclick="updateOrderStatus('${o.id}', 'cancelled')">Đã hủy</a></li>
                                 </ul>
+                                <button class="btn btn-sm btn-outline-danger" onclick="deleteOrder('${o.id}')" title="Xóa đơn hàng"><i class="fa-solid fa-trash"></i></button>
                             </div>
                         </td>
                     </tr>
@@ -5911,7 +5912,14 @@
                     </div>
                 `,
                 confirmButtonColor: '#111',
-                confirmButtonText: 'Đóng'
+                confirmButtonText: 'Đóng',
+                showCancelButton: true,
+                cancelButtonColor: '#dc2626',
+                cancelButtonText: '<i class="fa-solid fa-trash me-1"></i> Xóa đơn này'
+            }).then((result) => {
+                if (result.dismiss === Swal.DismissReason.cancel) {
+                    deleteOrder(o.id);
+                }
             });
         }
 
@@ -6074,6 +6082,46 @@
                         }
                     })
                     .catch(() => AppNotify.error('Không thể kết nối server.'));
+                }
+            });
+        }
+
+        function deleteOrder(orderId) {
+            Swal.fire({
+                title: 'Xóa đơn hàng?',
+                html: `Bạn có chắc chắn muốn xóa đơn hàng <b>#${orderId}</b>?<br><small class="text-danger">Dữ liệu đơn hàng này sẽ bị xóa vĩnh viễn khỏi hệ thống.</small>`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#dc2626',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: '<i class="fa-solid fa-trash me-1"></i> Xóa đơn',
+                cancelButtonText: 'Hủy'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    const fd = new FormData();
+                    fd.append('id', orderId);
+                    fd.append('csrf_token', APP_STATE.csrfToken);
+
+                    fetch('?action=adminDeleteOrder', {
+                        method: 'POST',
+                        headers: { 'X-Requested-With': 'XMLHttpRequest', 'X-CSRF-Token': APP_STATE.csrfToken },
+                        body: fd,
+                        credentials: 'same-origin'
+                    })
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.success) {
+                            AppNotify.success('Đã xóa đơn hàng thành công!');
+                            if (typeof fetchOrders === 'function') {
+                                fetchOrders(ordersCurrentPage);
+                            } else {
+                                location.reload();
+                            }
+                        } else {
+                            AppNotify.error(data.message || 'Không thể xóa đơn hàng.');
+                        }
+                    })
+                    .catch(() => AppNotify.error('Không thể kết nối máy chủ.'));
                 }
             });
         }

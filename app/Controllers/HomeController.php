@@ -610,6 +610,11 @@ class HomeController extends Controller {
         $user = User::findByEmail($email);
         Auth::login($user);
 
+        // Thông báo Telegram khi có khách hàng đăng ký mới
+        if (!empty($user)) {
+            TelegramService::notifyNewUser($user, 'Đăng ký tài khoản');
+        }
+
         $_SESSION['flash_success'] = 'Đăng ký thành công.';
         $redirect = url();
         if ($isAjax) {
@@ -770,6 +775,8 @@ class HomeController extends Controller {
                     header('Location: ' . url());
                     exit;
                 }
+                // Thông báo Telegram khi có khách hàng mới đăng ký qua Google
+                TelegramService::notifyNewUser($user, 'Đăng nhập Google lần đầu');
             }
         }
 

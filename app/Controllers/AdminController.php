@@ -701,6 +701,23 @@ class AdminController extends Controller {
         }
     }
 
+    public function adminDeleteOrder() {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            $this->jsonError('Method not allowed', 405);
+        }
+
+        $id = trim($_POST['id'] ?? '');
+        if ($id === '') {
+            $this->jsonError('Thiếu mã đơn hàng.');
+        }
+
+        if (Order::delete($id)) {
+            $this->jsonSuccess(['message' => 'Đã xóa đơn hàng thành công.']);
+        } else {
+            $this->jsonError('Không thể xóa đơn hàng. Vui lòng thử lại.');
+        }
+    }
+
     public function adminUpdateOrderDelivery() {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             $this->jsonError('Method not allowed', 405);
