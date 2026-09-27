@@ -247,11 +247,18 @@ class IndexingService {
         $isAbsolute = preg_match('/^[A-Za-z]:[\/\\\\]|^\//', $path);
         $withoutPublicHtml = preg_replace('/^public_html[\/\\\\]/', '', $path);
 
+        $fileName = basename($path);
         $candidates = $isAbsolute ? [$path] : [
             base_path($path),
             public_path($path),
             public_path($withoutPublicHtml),
             dirname(public_path()) . DIRECTORY_SEPARATOR . $path,
+            base_path('storage' . DIRECTORY_SEPARATOR . 'private' . DIRECTORY_SEPARATOR . $fileName),
+            base_path('storage' . DIRECTORY_SEPARATOR . $fileName),
+            public_path('storage' . DIRECTORY_SEPARATOR . 'private' . DIRECTORY_SEPARATOR . $fileName),
+            public_path('storage' . DIRECTORY_SEPARATOR . $fileName),
+            dirname(public_path()) . DIRECTORY_SEPARATOR . 'storage' . DIRECTORY_SEPARATOR . 'private' . DIRECTORY_SEPARATOR . $fileName,
+            dirname(public_path()) . DIRECTORY_SEPARATOR . 'storage' . DIRECTORY_SEPARATOR . $fileName,
         ];
 
         foreach (array_unique($candidates) as $candidate) {
