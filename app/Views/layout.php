@@ -7,6 +7,7 @@
     <meta name="csrf-token" content="<?php echo htmlspecialchars(Csrf::token(), ENT_QUOTES, 'UTF-8'); ?>">
     <meta name="app-base" content="<?php echo htmlspecialchars(rtrim(URLROOT, '/') . '/', ENT_QUOTES, 'UTF-8'); ?>">
     <meta name="google-site-verification" content="79jdDTXZY_GoXLNG1lAAbYH-B8Zeay309QOFuS31NX8">
+    <meta name="google-site-verification" content="1gjTYrRzQb_FlsYEZ3ES-ni3DB8U_nxQ2IQVFmdUjRM">
 <?php echo Seo::render($settings ?? []); ?>
 <?php if (!empty($metaRefresh)): ?>
     <meta http-equiv="refresh" content="5">
