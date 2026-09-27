@@ -2653,6 +2653,11 @@
             csrfToken: <?php echo safeAdminJson(Csrf::token(), $jsonFlags); ?>
         };
 
+        const SITE_URL = <?php echo json_encode(rtrim(URLROOT, '/')); ?>;
+        function url(path = '') {
+            return SITE_URL + '/' + String(path || '').replace(/^\/+/, '');
+        }
+
         let ordersCurrentPage = 1;
         let ordersTotalPages = <?php echo $ordersTotalPages ?? 1; ?>;
         let ordersTotalCount = <?php echo (int)($totalOrders ?? 0); ?>;
@@ -5790,6 +5795,7 @@
                 const escTitle = escapeHtml(blog.title || '');
                 const blogPublicUrl = url('tap-chi/' + (blog.seo_slug || blog.id));
                 const hasImage = Boolean(blog.image && blog.image.trim() !== '');
+                const imgSrc = hasImage ? (blog.image.startsWith('http') || blog.image.startsWith('/') ? blog.image : url(blog.image)) : '';
 
                 tbody.innerHTML += `
                     <tr>
@@ -5809,7 +5815,7 @@
                         <td>
                             <div id="blog-current-thumb-${blog.id}" class="d-inline-block">
                                 ${hasImage ? `
-                                    <img src="${escapeHtml(blog.image)}" class="rounded border shadow-sm" style="width: 75px; height: 46px; object-fit: cover;" alt="${escTitle}" onerror="this.onerror=null; this.src=FALLBACK_PRODUCT_IMAGE;">
+                                    <img src="${escapeHtml(imgSrc)}" class="rounded border shadow-sm" style="width: 75px; height: 46px; object-fit: cover;" alt="${escTitle}" onerror="this.onerror=null; this.src=FALLBACK_PRODUCT_IMAGE;">
                                 ` : `
                                     <div class="rounded border border-dashed d-flex flex-column align-items-center justify-content-center bg-light text-muted" style="width: 75px; height: 46px; font-size: 0.7rem;">
                                         <i class="fa-regular fa-image mb-0.5 text-secondary"></i>
@@ -5906,14 +5912,8 @@
                 const formData = new FormData();
                 formData.append('id', blogId);
                 formData.append('image_file', file);
-                formData.append('csrf_token', CSRF_TOKEN);
 
-                const res = await fetch(url('index.php?action=adminQuickUploadBlogImage'), {
-                    method: 'POST',
-                    body: formData,
-                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
-                });
-                const data = await res.json();
+                const data = await apiPost('adminQuickUploadBlogImage', formData);
 
                 if (data && data.success) {
                     // Cập nhật lại trong APP_STATE
