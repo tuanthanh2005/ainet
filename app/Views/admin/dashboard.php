@@ -1290,6 +1290,10 @@
                                 <small class="text-muted">Các bài viết hiển thị ở phần Tạp chí trên trang chủ</small>
                             </div>
                             <div class="d-flex align-items-center gap-2">
+                                <button class="btn btn-outline-primary fw-semibold shadow-sm d-flex align-items-center gap-1.5" onclick="openBulkBlogModal()" style="border-radius: 8px;">
+                                    <i class="fa-solid fa-wand-magic-sparkles text-primary"></i>
+                                    <span>Viết hàng loạt AI</span>
+                                </button>
                                 <button class="btn btn-black" onclick="openBlogModal()">
                                     <i class="fa-solid fa-plus me-1"></i> Viết bài mới
                                 </button>
@@ -1312,9 +1316,11 @@
                             <table class="table table-hover table-custom align-middle mb-0">
                                 <thead>
                                     <tr>
-                                        <th>Bài viết</th>
-                                        <th>Ngày đăng</th>
-                                        <th class="text-end">Thao tác</th>
+                                        <th style="min-width: 280px;">Bài viết</th>
+                                        <th style="width: 100px;">Xem ảnh</th>
+                                        <th style="min-width: 250px;">Tải ảnh nhanh & Google Index</th>
+                                        <th style="width: 110px;">Ngày đăng</th>
+                                        <th class="text-end" style="width: 100px;">Thao tác</th>
                                     </tr>
                                 </thead>
                                 <tbody id="blog-table-body">
@@ -5775,20 +5781,52 @@
             renderPaginationControls('blog-pagination-container', blogsCurrentPage, totalPages, 'changeBlogsPage');
 
             if (pagedBlogs.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="3" class="table-empty-state"><i class="fa-solid fa-newspaper"></i><div>Không tìm thấy bài viết nào.</div></td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="5" class="table-empty-state"><i class="fa-solid fa-newspaper"></i><div>Không tìm thấy bài viết nào.</div></td></tr>`;
                 return;
             }
 
             pagedBlogs.forEach(blog => {
                 const dateStr = blog.created_at ? new Date(blog.created_at.replace(' ', 'T')).toLocaleDateString('vi-VN') : '';
                 const escTitle = escapeHtml(blog.title || '');
+                const blogPublicUrl = url('tap-chi/' + (blog.seo_slug || blog.id));
+                const hasImage = Boolean(blog.image && blog.image.trim() !== '');
+
                 tbody.innerHTML += `
                     <tr>
                         <td>
-                            <div class="d-flex align-items-center">
-                                <img src="${escapeHtml(blog.image || '')}" class="img-thumbnail-custom me-3" style="width: 80px; height: 45px; object-fit: cover;" alt="${escTitle}" onerror="this.onerror=null; this.src=FALLBACK_PRODUCT_IMAGE;">
-                                <div class="fw-bold text-dark">${escTitle}</div>
+                            <div class="fw-bold text-dark mb-1" style="font-size: 0.95rem;">${escTitle}</div>
+                            <div class="d-flex align-items-center gap-2">
+                                <a href="${blogPublicUrl}" target="_blank" class="text-primary text-decoration-none small d-inline-flex align-items-center gap-1" style="font-size: 0.75rem;">
+                                    <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                                    <span>Xem bài viết</span>
+                                </a>
+                                ${hasImage ? 
+                                    '<span class="badge bg-success-subtle text-success border border-success-subtle" style="font-size: 0.65rem;"><i class="fa-solid fa-check me-0.5"></i>Đã có ảnh</span>' : 
+                                    '<span class="badge bg-warning-subtle text-warning border border-warning-subtle" style="font-size: 0.65rem;"><i class="fa-solid fa-triangle-exclamation me-0.5"></i>Chưa có ảnh</span>'
+                                }
                             </div>
+                        </td>
+                        <td>
+                            <div id="blog-current-thumb-${blog.id}" class="d-inline-block">
+                                ${hasImage ? `
+                                    <img src="${escapeHtml(blog.image)}" class="rounded border shadow-sm" style="width: 75px; height: 46px; object-fit: cover;" alt="${escTitle}" onerror="this.onerror=null; this.src=FALLBACK_PRODUCT_IMAGE;">
+                                ` : `
+                                    <div class="rounded border border-dashed d-flex flex-column align-items-center justify-content-center bg-light text-muted" style="width: 75px; height: 46px; font-size: 0.7rem;">
+                                        <i class="fa-regular fa-image mb-0.5 text-secondary"></i>
+                                        <span class="text-danger fw-semibold" style="font-size: 0.62rem;">Chưa có ảnh</span>
+                                    </div>
+                                `}
+                            </div>
+                        </td>
+                        <td>
+                            <div class="d-flex align-items-center gap-2">
+                                <input type="file" id="blog-quick-file-${blog.id}" class="form-control form-control-sm shadow-sm" accept="image/png,image/jpeg,image/webp,image/gif" style="max-width: 165px; font-size: 0.75rem; border-radius: 6px;" onchange="handleBlogQuickFileSelect(${blog.id}, this)">
+                                <button type="button" class="btn btn-sm btn-primary px-2.5 py-1 d-none align-items-center gap-1 shadow-sm fw-semibold" id="blog-quick-save-${blog.id}" onclick="saveQuickBlogImage(${blog.id})" title="Lưu ảnh & Gửi Google Indexing" style="border-radius: 6px; font-size: 0.75rem;">
+                                    <i class="fa-solid fa-cloud-arrow-up"></i>
+                                    <span>Lưu</span>
+                                </button>
+                            </div>
+                            <small class="text-muted d-block mt-0.5" style="font-size: 0.68rem;">Chọn tệp &rarr; Bấm <b>Lưu</b> để up và auto Index Google</small>
                         </td>
                         <td class="text-muted small">${dateStr}</td>
                         <td class="text-end">
@@ -5798,6 +5836,250 @@
                     </tr>
                 `;
             });
+        }
+
+        const blogQuickSelectedFiles = {};
+
+        function handleBlogQuickFileSelect(blogId, input) {
+            const file = input.files && input.files[0];
+            const saveBtn = document.getElementById('blog-quick-save-' + blogId);
+            const thumbWrap = document.getElementById('blog-current-thumb-' + blogId);
+
+            if (!file) {
+                if (saveBtn) {
+                    saveBtn.classList.add('d-none');
+                    saveBtn.classList.remove('d-inline-flex');
+                }
+                delete blogQuickSelectedFiles[blogId];
+                return;
+            }
+
+            if (file.size > 10 * 1024 * 1024) {
+                AppNotify.warning('Tệp ảnh quá lớn, tối đa 10MB.', 'Tệp quá lớn');
+                input.value = '';
+                if (saveBtn) {
+                    saveBtn.classList.add('d-none');
+                    saveBtn.classList.remove('d-inline-flex');
+                }
+                return;
+            }
+
+            blogQuickSelectedFiles[blogId] = file;
+
+            // Preview tức thì hình ảnh trên cột Xem ảnh
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                if (thumbWrap) {
+                    thumbWrap.innerHTML = `
+                        <div class="position-relative">
+                            <img src="${e.target.result}" class="rounded border border-primary shadow-sm" style="width: 75px; height: 46px; object-fit: cover;" alt="Preview">
+                            <span class="badge bg-primary position-absolute top-0 start-0 translate-middle-y px-1" style="font-size: 0.55rem;">Mới</span>
+                        </div>
+                    `;
+                }
+            };
+            reader.readAsDataURL(file);
+
+            // Hiện nút Lưu
+            if (saveBtn) {
+                saveBtn.classList.remove('d-none');
+                saveBtn.classList.add('d-inline-flex');
+            }
+        }
+
+        async function saveQuickBlogImage(blogId) {
+            const file = blogQuickSelectedFiles[blogId];
+            if (!file) {
+                AppNotify.warning('Vui lòng chọn tệp ảnh trước khi bấm Lưu.', 'Chưa có ảnh');
+                return;
+            }
+
+            const saveBtn = document.getElementById('blog-quick-save-' + blogId);
+            const originalHtml = saveBtn ? saveBtn.innerHTML : '';
+
+            if (saveBtn) {
+                saveBtn.disabled = true;
+                saveBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Đang lưu...';
+            }
+
+            try {
+                const formData = new FormData();
+                formData.append('id', blogId);
+                formData.append('image_file', file);
+                formData.append('csrf_token', CSRF_TOKEN);
+
+                const res = await fetch(url('index.php?action=adminQuickUploadBlogImage'), {
+                    method: 'POST',
+                    body: formData,
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                });
+                const data = await res.json();
+
+                if (data && data.success) {
+                    // Cập nhật lại trong APP_STATE
+                    const blog = APP_STATE.blogs.find(b => b.id == blogId);
+                    if (blog) {
+                        blog.image = data.image_url;
+                    }
+                    delete blogQuickSelectedFiles[blogId];
+
+                    if (saveBtn) {
+                        saveBtn.classList.add('d-none');
+                        saveBtn.classList.remove('d-inline-flex');
+                        saveBtn.disabled = false;
+                        saveBtn.innerHTML = originalHtml;
+                    }
+
+                    const fileInput = document.getElementById('blog-quick-file-' + blogId);
+                    if (fileInput) fileInput.value = '';
+
+                    AppNotify.success('Đã lưu ảnh và gửi Google Indexing thành công!', 'Cập nhật thành công ⚡');
+                    renderBlogsTable();
+                } else {
+                    AppNotify.error((data && data.message) || 'Lỗi khi lưu ảnh.', 'Lỗi');
+                    if (saveBtn) {
+                        saveBtn.disabled = false;
+                        saveBtn.innerHTML = originalHtml;
+                    }
+                }
+            } catch (err) {
+                console.error(err);
+                AppNotify.error(err.message || 'Lỗi kết nối máy chủ', 'Lỗi');
+                if (saveBtn) {
+                    saveBtn.disabled = false;
+                    saveBtn.innerHTML = originalHtml;
+                }
+            }
+        }
+
+        function getBulkBlogModal() {
+            let m = bootstrap.Modal.getInstance(document.getElementById('bulkBlogModal'));
+            if (!m) m = new bootstrap.Modal(document.getElementById('bulkBlogModal'));
+            return m;
+        }
+
+        function openBulkBlogModal() {
+            document.getElementById('bulk_blog_titles').value = '';
+            document.getElementById('bulk_blog_common_prompt').value = '';
+            updateBulkBlogLineCount();
+
+            // Reset progress box
+            document.getElementById('bulk-blog-progress-box').classList.add('d-none');
+            document.getElementById('bulk-blog-input-panel').classList.remove('d-none');
+            document.getElementById('bulk-blog-log-list').innerHTML = '';
+            document.getElementById('bulk-blog-progress-bar').style.width = '0%';
+            document.getElementById('bulk-blog-progress-badge').textContent = '0%';
+
+            const btn = document.getElementById('btn-start-bulk-blog');
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fa-solid fa-bolt me-1"></i> Bắt đầu tạo bài viết';
+            btn.onclick = startBulkBlogGeneration;
+            document.getElementById('bulk-blog-cancel-btn').disabled = false;
+            document.getElementById('bulk-blog-close-btn').disabled = false;
+
+            getBulkBlogModal().show();
+        }
+
+        function updateBulkBlogLineCount() {
+            const raw = document.getElementById('bulk_blog_titles').value;
+            const lines = raw.split('\n').map(l => l.trim()).filter(Boolean);
+            const badge = document.getElementById('bulk-blog-line-count');
+            if (badge) badge.textContent = lines.length + ' bài';
+        }
+
+        async function startBulkBlogGeneration() {
+            const raw = document.getElementById('bulk_blog_titles').value;
+            const lines = raw.split('\n').map(l => l.trim()).filter(Boolean);
+
+            if (lines.length === 0) {
+                AppNotify.warning('Vui lòng nhập ít nhất 1 tiêu đề bài viết để tạo!', 'Chưa có tiêu đề');
+                document.getElementById('bulk_blog_titles').focus();
+                return;
+            }
+
+            const model = document.getElementById('bulk_blog_model_select').value;
+            const commonPrompt = document.getElementById('bulk_blog_common_prompt').value.trim();
+
+            const btn = document.getElementById('btn-start-bulk-blog');
+            const cancelBtn = document.getElementById('bulk-blog-cancel-btn');
+            const closeBtn = document.getElementById('bulk-blog-close-btn');
+
+            btn.disabled = true;
+            cancelBtn.disabled = true;
+            closeBtn.disabled = true;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Đang tạo...';
+
+            // Hiện progress box
+            document.getElementById('bulk-blog-progress-box').classList.remove('d-none');
+            const statusText = document.getElementById('bulk-blog-status-text');
+            const progressBar = document.getElementById('bulk-blog-progress-bar');
+            const progressBadge = document.getElementById('bulk-blog-progress-badge');
+            const logList = document.getElementById('bulk-blog-log-list');
+            logList.innerHTML = '';
+
+            let successCount = 0;
+            let failCount = 0;
+
+            for (let i = 0; i < lines.length; i++) {
+                const title = lines[i];
+                const currentIdx = i + 1;
+                const total = lines.length;
+                const pct = Math.round(((i) / total) * 100);
+
+                progressBar.style.width = pct + '%';
+                progressBadge.textContent = pct + '%';
+                statusText.innerHTML = `<span class="spinner-border spinner-border-sm text-primary me-1"></span> Đang viết (${currentIdx}/${total}): <b>${escapeHtml(title)}</b>`;
+
+                try {
+                    const data = await apiPost('adminCreateBulkBlogPost', {
+                        title: title,
+                        prompt: commonPrompt,
+                        model: model
+                    });
+
+                    if (data && data.success && data.blog) {
+                        successCount++;
+                        // Thêm vào danh sách bài viết hiện tại
+                        APP_STATE.blogs.unshift(data.blog);
+                        renderBlogsTable();
+
+                        const item = document.createElement('div');
+                        item.className = 'text-success d-flex align-items-center gap-1.5 mb-1';
+                        item.innerHTML = `<i class="fa-solid fa-circle-check"></i> <span>[${currentIdx}/${total}] Đã tạo &amp; Google Index: <b>${escapeHtml(data.blog.title)}</b></span>`;
+                        logList.appendChild(item);
+                        logList.scrollTop = logList.scrollHeight;
+                    } else {
+                        failCount++;
+                        const errMsg = (data && data.message) || 'Lỗi không xác định';
+                        const item = document.createElement('div');
+                        item.className = 'text-danger d-flex align-items-center gap-1.5 mb-1';
+                        item.innerHTML = `<i class="fa-solid fa-circle-xmark"></i> <span>[${currentIdx}/${total}] Thất bại "${escapeHtml(title)}": ${escapeHtml(errMsg)}</span>`;
+                        logList.appendChild(item);
+                        logList.scrollTop = logList.scrollHeight;
+                    }
+                } catch (err) {
+                    failCount++;
+                    const item = document.createElement('div');
+                    item.className = 'text-danger d-flex align-items-center gap-1.5 mb-1';
+                    item.innerHTML = `<i class="fa-solid fa-circle-xmark"></i> <span>[${currentIdx}/${total}] Lỗi kết nối "${escapeHtml(title)}": ${escapeHtml(err.message)}</span>`;
+                    logList.appendChild(item);
+                    logList.scrollTop = logList.scrollHeight;
+                }
+            }
+
+            // Hoàn tất
+            progressBar.style.width = '100%';
+            progressBadge.textContent = '100%';
+            progressBar.classList.remove('progress-bar-animated');
+            statusText.innerHTML = `<i class="fa-solid fa-circle-check text-success me-1"></i> Hoàn tất! Đã tạo thành công <b>${successCount}/${lines.length}</b> bài viết và gửi Google Index.`;
+
+            btn.disabled = false;
+            cancelBtn.disabled = false;
+            closeBtn.disabled = false;
+            btn.innerHTML = '<i class="fa-solid fa-check me-1"></i> Xong';
+            btn.onclick = () => getBulkBlogModal().hide();
+
+            AppNotify.success(`Đã hoàn tất tạo ${successCount} bài viết và gửi Google Indexing!`, 'Thành công ⚡');
         }
 
         function openBlogModal() {
@@ -6940,9 +7222,85 @@
         </div>
     </div>
 
+    <!-- Modal Viết hàng loạt bài viết bằng AI -->
+    <div class="modal fade" id="bulkBlogModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content border-0 shadow" style="border-radius: 16px;">
+                <div class="modal-header border-bottom p-4">
+                    <div class="d-flex align-items-center gap-2">
+                        <div class="d-flex align-items-center justify-content-center bg-primary text-white rounded-circle shadow-sm" style="width: 40px; height: 40px;">
+                            <i class="fa-solid fa-wand-magic-sparkles"></i>
+                        </div>
+                        <div>
+                            <h5 class="modal-title fw-bold mb-0">Viết hàng loạt bài viết bằng AI (Gemini 3.1)</h5>
+                            <small class="text-muted">Tự động viết bài bán hàng chuẩn SEO Google &amp; tự động gửi Google Index 100% cho từng bài</small>
+                        </div>
+                    </div>
+                    <button type="button" class="btn-close shadow-none" data-bs-dismiss="modal" id="bulk-blog-close-btn"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <div id="bulk-blog-input-panel">
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold small">Mô hình AI Gemini</label>
+                                <select id="bulk_blog_model_select" class="form-select form-select-sm shadow-sm" style="border-radius: 8px;">
+                                    <option value="gemini-3.1-flash" selected>Gemini 3.1 Flash (Tối ưu &amp; Nhanh)</option>
+                                    <option value="gemini-3.1-flash-lite">Gemini 3.1 Flash-Lite</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold small">Định hướng bán hàng chung (tùy chọn)</label>
+                                <input type="text" class="form-control form-control-sm shadow-sm" id="bulk_blog_common_prompt" 
+                                    placeholder="VD: Nhấn mạnh giá rẻ nhất, bảo hành 1 đổi 1, cấp tốc 5 phút..." style="border-radius: 8px;">
+                            </div>
+                        </div>
 
+                        <div class="mb-3">
+                            <div class="d-flex align-items-center justify-content-between mb-1">
+                                <label class="form-label fw-semibold small mb-0">
+                                    <i class="fa-solid fa-list-ol text-primary me-1"></i> Danh sách tiêu đề / Tên sản phẩm (Mỗi dòng 1 bài):
+                                </label>
+                                <span class="badge bg-primary-subtle text-primary border border-primary-subtle" id="bulk-blog-line-count">0 bài</span>
+                            </div>
+                            <textarea id="bulk_blog_titles" class="form-control font-monospace" rows="8" style="font-size: 0.88rem; line-height: 1.6; border-radius: 10px;"
+                                placeholder="Mua tài khoản ChatGPT Plus giá rẻ chính chủ&#10;Nâng cấp Midjourney Pro giá sinh viên&#10;Bảng giá Canva Pro bản quyền 2026&#10;Mua tài khoản Claude 3.7 Sonnet uy tín&#10;Bán tài khoản CapCut Pro trọn gói"
+                                oninput="updateBulkBlogLineCount()"></textarea>
+                            <small class="text-muted d-block mt-1.5" style="font-size: 0.78rem;">
+                                &bull; Mỗi dòng sẽ lập tức được tạo thành 1 bài viết thật trên website.<br>
+                                &bull; Bài viết sẽ có đầy đủ nội dung bán hàng chuyển đổi cao, bảng giá, CTA và chuẩn SEO Google 100%.<br>
+                                &bull; Ảnh đại diện bài viết có thể up nhanh ngay ngoài bảng danh sách bằng cột <b>Tải ảnh nhanh</b> mà không cần sửa thủ công từng bài!
+                            </small>
+                        </div>
+                    </div>
 
-    <!-- Stock manager modal -->
+                    <!-- Progress Box -->
+                    <div id="bulk-blog-progress-box" class="d-none border rounded-3 p-3 bg-light">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="fw-bold small text-dark d-flex align-items-center gap-1.5" id="bulk-blog-status-text">
+                                <span class="spinner-border spinner-border-sm text-primary" role="status"></span>
+                                <span>Đang khởi tạo tiến trình AI...</span>
+                            </span>
+                            <span class="badge bg-primary px-2.5 py-1.5" id="bulk-blog-progress-badge">0%</span>
+                        </div>
+                        <div class="progress mb-3" style="height: 10px; border-radius: 8px;">
+                            <div id="bulk-blog-progress-bar" class="progress-bar progress-bar-striped progress-bar-animated bg-primary" role="progressbar" style="width: 0%"></div>
+                        </div>
+                        <div class="small fw-semibold text-muted mb-1">Nhật ký tạo bài viết &amp; Gửi Google Index:</div>
+                        <div id="bulk-blog-log-list" class="bg-white border rounded-2 p-2.5 overflow-auto" style="max-height: 200px; font-size: 0.8rem; line-height: 1.6;">
+                            <!-- Log items appended here -->
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer border-top p-4 d-flex justify-content-between">
+                    <button type="button" class="btn btn-light border px-3" data-bs-dismiss="modal" id="bulk-blog-cancel-btn">Đóng</button>
+                    <button type="button" class="btn btn-primary px-4 fw-semibold shadow-sm d-flex align-items-center gap-1.5" id="btn-start-bulk-blog" onclick="startBulkBlogGeneration()">
+                        <i class="fa-solid fa-bolt"></i>
+                        <span>Bắt đầu tạo bài viết</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
     <div class="modal fade" id="stockModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-lg modal-dialog-centered">
             <div class="modal-content border-0 shadow" style="border-radius: 16px;">

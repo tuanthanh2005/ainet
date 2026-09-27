@@ -406,6 +406,121 @@ class AdminController extends Controller {
         }
     }
 
+    public function adminCreateBulkBlogPost() {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            $this->jsonError('Method not allowed', 405);
+        }
+
+        $title = trim($_POST['title'] ?? '');
+        $prompt = trim($_POST['prompt'] ?? '');
+        $model = trim($_POST['model'] ?? 'gemini-3.1-flash');
+
+        if ($title === '') {
+            $this->jsonError('Tiêu đề không được để trống.');
+        }
+
+        try {
+            // 1. Tạo bài viết bán hàng bằng GeminiService
+            $generated = GeminiService::generateBlogPost($title, $model, $prompt);
+
+            $blogTitle       = trim($generated['title'] ?? $title);
+            $blogDesc        = trim(strip_tags($generated['description'] ?? ''));
+            $blogContent     = Upload::sanitizeHtml($generated['content'] ?? '');
+            $blogSeoTitle    = trim($generated['seo_title'] ?? '');
+            $blogSeoDesc     = trim($generated['seo_description'] ?? '');
+            $blogSeoKeywords = trim($generated['seo_keywords'] ?? '');
+            $blogSeoSlug     = trim($generated['seo_slug'] ?? '');
+            if ($blogSeoSlug === '') {
+                $blogSeoSlug = Seo::slugify($blogTitle);
+            }
+
+            // 2. Lưu trực tiếp vào CSDL (để trống ảnh để admin thêm sau)
+            $db = Database::getInstance();
+            $stmt = $db->prepare('INSERT INTO blogs (title, image, description, content, seo_title, seo_description, seo_keywords, seo_slug) VALUES (?, ?, ?, ?, ?, ?, ?, ?)');
+            $stmt->execute([$blogTitle, '', $blogDesc, $blogContent, $blogSeoTitle ?: null, $blogSeoDesc ?: null, $blogSeoKeywords ?: null, $blogSeoSlug ?: null]);
+            $blogId = (int)$db->lastInsertId();
+
+            Cache::forget('blogs.summaries');
+
+            // 3. Tự động gửi Google Indexing API
+            $blogUrl = Url::blog([
+                'id'       => $blogId,
+                'title'    => $blogTitle,
+                'seo_slug' => $blogSeoSlug,
+            ]);
+            $indexing = IndexingService::submitUrl($blogUrl, 'URL_UPDATED');
+
+            $newBlog = [
+                'id'              => $blogId,
+                'title'           => $blogTitle,
+                'image'           => '',
+                'description'     => $blogDesc,
+                'content'         => $blogContent,
+                'seo_title'       => $blogSeoTitle,
+                'seo_description' => $blogSeoDesc,
+                'seo_keywords'    => $blogSeoKeywords,
+                'seo_slug'        => $blogSeoSlug,
+                'created_at'      => date('Y-m-d H:i:s'),
+                'url'             => $blogUrl,
+            ];
+
+            $this->jsonSuccess([
+                'blog'     => $newBlog,
+                'indexing' => $indexing,
+                'message'  => "Đã tạo và gửi Index Google thành công: {$blogTitle}"
+            ]);
+        } catch (Throwable $e) {
+            $this->jsonError('Lỗi khi tạo bài "' . $title . '": ' . $e->getMessage());
+        }
+    }
+
+    public function adminQuickUploadBlogImage() {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            $this->jsonError('Method not allowed', 405);
+        }
+
+        $id = (int)($_POST['id'] ?? 0);
+        if ($id <= 0) {
+            $this->jsonError('ID bài viết không hợp lệ.');
+        }
+
+        $blog = Blog::getById($id);
+        if (!$blog) {
+            $this->jsonError('Không tìm thấy bài viết này.');
+        }
+
+        if (empty($_FILES['image_file']['name'])) {
+            $this->jsonError('Vui lòng chọn tệp hình ảnh để tải lên.');
+        }
+
+        try {
+            $stored = Upload::store($_FILES['image_file'], 'blogs', Upload::IMAGE_MIMES);
+            $imageUrl = $stored['url'];
+
+            $db = Database::getInstance();
+            $stmt = $db->prepare('UPDATE blogs SET image = ? WHERE id = ?');
+            $stmt->execute([$imageUrl, $id]);
+
+            Cache::forget('blogs.summaries');
+
+            // Cập nhật lại thông tin blog để lấy link chính xác
+            $blog['image'] = $imageUrl;
+            $blogUrl = Url::blog($blog);
+
+            // Gửi Google Indexing API ngay khi cập nhật hình ảnh
+            $indexing = IndexingService::submitUrl($blogUrl, 'URL_UPDATED');
+
+            $this->jsonSuccess([
+                'id'        => $id,
+                'image_url' => $imageUrl,
+                'indexing'  => $indexing,
+                'message'   => 'Đã lưu ảnh và gửi cập nhật Index Google thành công!'
+            ]);
+        } catch (Throwable $e) {
+            $this->jsonError('Lỗi tải ảnh: ' . $e->getMessage());
+        }
+    }
+
     public function adminSaveGeminiApiKey() {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             $this->jsonError('Method not allowed', 405);
