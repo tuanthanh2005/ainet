@@ -28,7 +28,13 @@ class GeminiService {
             throw new RuntimeException('Vui lòng nhập Gemini API Key để kiểm tra.');
         }
 
-        $candidates = ['gemini-2.5-flash', 'gemini-1.5-flash', 'gemini-2.0-flash'];
+        $candidates = [
+            'gemini-3.1-flash',
+            'gemini-3.1-flash-lite',
+            'gemini-3.1-pro',
+            'gemini-3.8-flash',
+            'gemini-3.5-flash',
+        ];
         $lastError = '';
 
         foreach ($candidates as $model) {
@@ -92,33 +98,31 @@ class GeminiService {
     }
 
     /**
-     * Trả về danh sách model dự phòng theo thứ tự ưu tiên
+     * Trả về danh sách model dự phòng theo thứ tự ưu tiên (ưu tiên dòng 3.1)
      */
     public static function resolveModelCandidates(string $model): array {
         $model = strtolower(trim($model));
-        if ($model === 'gemini-3.1-flash-lite' || $model === 'gemini-3.1-flash-lite-preview' || $model === 'gemini-3.5-flash-lite') {
+        if ($model === 'gemini-3.1-flash-lite' || strpos($model, 'lite') !== false) {
             return [
                 'gemini-3.1-flash-lite',
-                'gemini-3.5-flash-lite',
-                'gemini-2.5-flash-lite',
-                'gemini-2.0-flash-lite',
-                'gemini-2.5-flash',
-                'gemini-1.5-flash',
+                'gemini-3.1-flash',
+                'gemini-3.8-flash',
+                'gemini-3.5-flash',
             ];
         }
 
         return [
+            'gemini-3.1-flash',
+            'gemini-3.1-flash-lite',
+            'gemini-3.8-flash',
             'gemini-3.5-flash',
-            'gemini-2.5-flash',
-            'gemini-2.0-flash',
-            'gemini-1.5-flash',
         ];
     }
 
     /**
      * Gọi Gemini API tạo toàn bộ thông tin sản phẩm và SEO
      */
-    public static function generateProduct(string $title, string $requestedModel = 'gemini-3.5-flash', ?string $currentCategory = null): array {
+    public static function generateProduct(string $title, string $requestedModel = 'gemini-3.1-flash', ?string $currentCategory = null): array {
         $apiKey = self::getApiKey();
         if ($apiKey === '') {
             throw new RuntimeException('Chưa có Gemini API Key. Vui lòng bấm vào biểu tượng chìa khóa bên cạnh để nhập API Key từ Google AI Studio (aistudio.google.com).');

@@ -345,7 +345,7 @@ class AdminController extends Controller {
         }
 
         $title = trim($_POST['title'] ?? '');
-        $model = trim($_POST['model'] ?? 'gemini-3.5-flash');
+        $model = trim($_POST['model'] ?? 'gemini-3.1-flash');
         $category = trim($_POST['category'] ?? '');
 
         if ($title === '') {

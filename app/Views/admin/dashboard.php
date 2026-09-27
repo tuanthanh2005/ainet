@@ -2431,7 +2431,7 @@
                                     </div>
                                     <div class="d-flex align-items-center gap-2 flex-grow-1 flex-sm-grow-0 justify-content-end">
                                         <select id="gemini_model_select" class="form-select form-select-sm shadow-sm" style="min-width: 175px; font-weight: 500; border-radius: 8px;">
-                                            <option value="gemini-3.5-flash" selected>Gemini 3.5 Flash</option>
+                                            <option value="gemini-3.1-flash" selected>Gemini 3.1 Flash</option>
                                             <option value="gemini-3.1-flash-lite">Gemini 3.1 Flash-Lite</option>
                                         </select>
                                         <button type="button" class="btn btn-sm btn-primary text-white px-3 fw-semibold shadow-sm d-flex align-items-center gap-1.5" id="btn-gemini-auto-fill" onclick="aiAutoFillProduct()" style="border-radius: 8px;">
@@ -4627,7 +4627,7 @@
             }
 
             const modelSelect = document.getElementById('gemini_model_select');
-            const model = modelSelect ? modelSelect.value : 'gemini-3.5-flash';
+            const model = modelSelect ? modelSelect.value : 'gemini-3.1-flash';
             const catSelect = document.getElementById('p_category');
             const category = catSelect ? catSelect.value : '';
 
