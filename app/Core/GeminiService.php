@@ -17,6 +17,81 @@ class GeminiService {
     }
 
     /**
+     * Kiểm tra tính hợp lệ và độ trễ của Gemini API Key
+     */
+    public static function testConnection(?string $apiKey = null): array {
+        if ($apiKey === null || trim($apiKey) === '') {
+            $apiKey = self::getApiKey();
+        }
+        $apiKey = trim((string)$apiKey);
+        if ($apiKey === '') {
+            throw new RuntimeException('Vui lòng nhập Gemini API Key để kiểm tra.');
+        }
+
+        $candidates = ['gemini-2.5-flash', 'gemini-1.5-flash', 'gemini-2.0-flash'];
+        $lastError = '';
+
+        foreach ($candidates as $model) {
+            $url = self::API_BASE . urlencode($model) . ':generateContent?key=' . urlencode($apiKey);
+            $payload = [
+                'contents' => [
+                    ['parts' => [['text' => 'Hi, reply with: OK']]]
+                ],
+                'generationConfig' => [
+                    'temperature' => 0.1,
+                    'maxOutputTokens' => 10
+                ]
+            ];
+
+            $ch = curl_init($url);
+            curl_setopt_array($ch, [
+                CURLOPT_POST => true,
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_HTTPHEADER => [
+                    'Content-Type: application/json',
+                    'User-Agent: AiCuaToi-Admin/1.0'
+                ],
+                CURLOPT_POSTFIELDS => json_encode($payload),
+                CURLOPT_TIMEOUT => 15,
+                CURLOPT_CONNECTTIMEOUT => 8,
+                CURLOPT_SSL_VERIFYPEER => true,
+            ]);
+
+            $start = microtime(true);
+            $response = curl_exec($ch);
+            $duration = round((microtime(true) - $start) * 1000);
+            $code = (int) curl_getinfo($ch, CURLINFO_HTTP_CODE);
+            $err = curl_error($ch);
+            curl_close($ch);
+
+            if ($response === false) {
+                $lastError = 'Lỗi mạng khi kết nối Google: ' . $err;
+                continue;
+            }
+
+            $decoded = json_decode((string)$response, true);
+            if ($code >= 200 && $code < 300) {
+                $reply = trim($decoded['candidates'][0]['content']['parts'][0]['text'] ?? 'OK');
+                return [
+                    'success' => true,
+                    'model' => $model,
+                    'latency_ms' => $duration,
+                    'reply' => $reply,
+                    'message' => 'Kết nối thành công tới Google Gemini AI (' . $model . ')!',
+                ];
+            }
+
+            $errMsg = $decoded['error']['message'] ?? ('HTTP ' . $code);
+            $lastError = $errMsg;
+            if (stripos($errMsg, 'API key') !== false || stripos($errMsg, 'PERMISSION_DENIED') !== false) {
+                throw new RuntimeException('API Key không hợp lệ hoặc bị từ chối: ' . $errMsg);
+            }
+        }
+
+        throw new RuntimeException('Không thể kết nối Gemini API: ' . $lastError);
+    }
+
+    /**
      * Trả về danh sách model dự phòng theo thứ tự ưu tiên
      */
     public static function resolveModelCandidates(string $model): array {

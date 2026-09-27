@@ -393,6 +393,28 @@ class AdminController extends Controller {
         }
     }
 
+    public function adminTestGemini() {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            $this->jsonError('Method not allowed', 405);
+        }
+
+        try {
+            $apiKey = trim($_POST['gemini_api_key'] ?? '');
+            if ($apiKey === '') {
+                $settings = Setting::getAll();
+                $apiKey = trim((string)($settings['gemini_api_key'] ?? ''));
+            }
+            if ($apiKey === '') {
+                $this->jsonError('Vui lòng nhập hoặc lưu Gemini API Key trước khi test kết nối.');
+            }
+
+            $result = GeminiService::testConnection($apiKey);
+            $this->jsonSuccess($result);
+        } catch (Throwable $e) {
+            $this->jsonError($e->getMessage());
+        }
+    }
+
     public function adminDeleteProduct() {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             $this->jsonError('Method not allowed', 405);

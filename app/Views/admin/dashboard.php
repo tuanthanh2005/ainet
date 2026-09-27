@@ -2034,6 +2034,9 @@
                                     <button class="btn btn-black px-4" id="btnSaveGeminiKey" onclick="saveGeminiSettings()">
                                         <i class="fa-solid fa-floppy-disk me-2"></i>Lưu Gemini Key
                                     </button>
+                                    <button class="btn btn-outline-primary px-4" id="btnGeminiTest" onclick="testGemini()">
+                                        <i class="fa-solid fa-vial-circle-check me-2"></i>Test kết nối
+                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -5335,6 +5338,73 @@
                 if (btn) {
                     btn.disabled = false;
                     btn.innerHTML = originalHtml || '<i class="fa-solid fa-floppy-disk me-2"></i>Lưu Gemini Key';
+                }
+            }
+        }
+
+        async function testGemini() {
+            const btn = document.getElementById('btnGeminiTest');
+            const originalHtml = btn ? btn.innerHTML : '';
+            const keyInput = document.getElementById('st_gemini_api_key');
+            const key = keyInput ? keyInput.value.trim() : '';
+
+            if (!key) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Chưa có API Key',
+                    text: 'Vui lòng dán Google Gemini API Key vào ô nhập trước khi bấm Test kết nối.',
+                    confirmButtonColor: '#111'
+                });
+                return;
+            }
+
+            if (btn) {
+                btn.disabled = true;
+                btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Đang kiểm tra...';
+            }
+
+            try {
+                const res = await apiPost('adminTestGemini', { gemini_api_key: key });
+                if (res && res.success) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Kết nối Google Gemini AI thành công! 🎉',
+                        html: `
+                            <div class="text-start mt-2 p-3 rounded bg-light border">
+                                <div class="mb-2"><strong class="text-success"><i class="fa-solid fa-circle-check me-2"></i>Trạng thái:</strong> Hoạt động bình thường (Ready)</div>
+                                <div class="mb-2"><strong><i class="fa-solid fa-microchip me-2 text-primary"></i>Model test:</strong> <span class="badge bg-primary fs-6">${res.model || 'gemini-flash'}</span></div>
+                                <div class="mb-2"><strong><i class="fa-solid fa-bolt me-2 text-warning"></i>Độ trễ:</strong> <code>${res.latency_ms || 0} ms</code></div>
+                                <div><strong><i class="fa-solid fa-comment-dots me-2 text-secondary"></i>Phản hồi:</strong> <code>${res.reply || 'OK'}</code></div>
+                            </div>
+                            <p class="small text-muted mt-3 mb-0">API Key của bạn hợp lệ. Giờ bạn có thể dùng tính năng Tự động điền sản phẩm & viết bài chuẩn SEO!</p>
+                        `,
+                        confirmButtonText: 'Tuyệt vời',
+                        confirmButtonColor: '#111'
+                    });
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Kiểm tra thất bại ❌',
+                        html: `
+                            <p class="text-danger mb-2 fw-semibold">${(res && res.message) || 'Không thể kết nối tới Google Gemini.'}</p>
+                            <small class="text-muted">Vui lòng kiểm tra lại API Key lấy từ <a href="https://aistudio.google.com/app/apikey" target="_blank">Google AI Studio</a>.</small>
+                        `,
+                        confirmButtonText: 'Đóng',
+                        confirmButtonColor: '#111'
+                    });
+                }
+            } catch (err) {
+                console.error(err);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Lỗi kiểm tra',
+                    text: 'Đã xảy ra sự cố khi kiểm tra kết nối Gemini API.',
+                    confirmButtonColor: '#111'
+                });
+            } finally {
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerHTML = originalHtml || '<i class="fa-solid fa-vial-circle-check me-2"></i>Test kết nối';
                 }
             }
         }
