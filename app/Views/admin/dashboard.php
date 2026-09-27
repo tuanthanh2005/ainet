@@ -4772,6 +4772,109 @@
             }
         }
 
+        async function aiAutoFillBlog() {
+            const titleInput = document.getElementById('blog_title');
+            const title = (titleInput ? titleInput.value : '').trim();
+            const customPromptInput = document.getElementById('gemini_blog_custom_prompt');
+            const prompt = (customPromptInput ? customPromptInput.value : '').trim();
+
+            if (!title && !prompt) {
+                AppNotify.warning('Vui lòng nhập Tiêu đề bài viết HOẶC Mô tả / Định hướng bán hàng trước khi bấm Auto Viết Bài!', 'Cần thông tin');
+                if (customPromptInput) customPromptInput.focus();
+                else if (titleInput) titleInput.focus();
+                return;
+            }
+
+            const modelSelect = document.getElementById('gemini_blog_model_select');
+            const model = modelSelect ? modelSelect.value : 'gemini-3.1-flash';
+
+            // Thu thập dữ liệu hiện có trên form bài viết (nếu có)
+            const existing_data = {
+                desc: document.getElementById('blog_desc')?.value || '',
+                seo_slug: document.getElementById('blog_seo_slug')?.value || '',
+                seo_keywords: document.getElementById('blog_seo_keywords')?.value || ''
+            };
+
+            const btn = document.getElementById('btn-gemini-blog-auto');
+            const originalHtml = btn ? btn.innerHTML : '';
+
+            if (btn) {
+                btn.disabled = true;
+                btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span> Gemini 3.1 đang viết bài bán hàng...';
+            }
+
+            AppNotify.info('Gemini 3.1 đang sáng tạo bài viết bán hàng chuyển đổi cao...', 'AI Copywriting ⚡');
+
+            try {
+                const data = await apiPost('adminAiGenerateBlog', { 
+                    title, 
+                    prompt, 
+                    model, 
+                    existing_data: JSON.stringify(existing_data)
+                });
+
+                if (data && data.success && data.blog) {
+                    const b = data.blog;
+
+                    // 1. Tiêu đề bài viết bán hàng
+                    if (b.title) {
+                        document.getElementById('blog_title').value = b.title;
+                    }
+
+                    // 2. Mô tả ngắn (excerpt)
+                    if (b.description) {
+                        document.getElementById('blog_desc').value = b.description;
+                    }
+
+                    // 3. Nội dung bài viết chi tiết dạng HTML
+                    if (b.content) {
+                        document.getElementById('blog_content').value = b.content;
+                        const editor = document.getElementById('blog_content_editor');
+                        if (editor) editor.innerHTML = b.content;
+                    }
+
+                    // 4. Cấu hình SEO
+                    if (b.seo_slug) document.getElementById('blog_seo_slug').value = b.seo_slug;
+                    if (b.seo_title) document.getElementById('blog_seo_title').value = b.seo_title;
+                    if (b.seo_description) document.getElementById('blog_seo_description').value = b.seo_description;
+                    if (b.seo_keywords) document.getElementById('blog_seo_keywords').value = b.seo_keywords;
+
+                    // 5. Cập nhật ngay checklist SEO
+                    if (typeof updateBlogSeoChecklist === 'function') {
+                        updateBlogSeoChecklist();
+                    }
+
+                    AppNotify.success('Đã tự động viết bài bán hàng hấp dẫn, đa dạng tiêu đề và chuẩn SEO!', 'Hoàn tất Auto ⚡');
+                } else {
+                    const errMsg = (data && data.message) ? data.message : 'Không thể tạo bài viết tự động bằng Gemini.';
+                    if (errMsg.includes('API Key') || errMsg.includes('chìa khóa')) {
+                        Swal.fire({
+                            icon: 'warning',
+                            title: 'Chưa có Gemini API Key',
+                            text: errMsg,
+                            showCancelButton: true,
+                            confirmButtonText: 'Cài đặt API Key ngay',
+                            cancelButtonText: 'Để sau'
+                        }).then(res => {
+                            if (res.isConfirmed) {
+                                configureGeminiKeyModal();
+                            }
+                        });
+                    } else {
+                        AppNotify.error(errMsg, 'Lỗi AI');
+                    }
+                }
+            } catch (err) {
+                console.error(err);
+                AppNotify.error('Không thể kết nối đến máy chủ: ' + err.message, 'Lỗi kết nối');
+            } finally {
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerHTML = originalHtml;
+                }
+            }
+        }
+
         function configureGeminiKeyModal() {
             apiPost('adminGetGeminiConfig', {})
                 .then(res => {
@@ -5708,6 +5811,8 @@
             document.getElementById('blog_seo_title').value = '';
             document.getElementById('blog_seo_description').value = '';
             document.getElementById('blog_seo_keywords').value = '';
+            const promptEl = document.getElementById('gemini_blog_custom_prompt');
+            if (promptEl) promptEl.value = '';
             setBlogImagePreview('');
             updateBlogSeoChecklist();
             document.querySelector('#blogModal .modal-title').innerText = 'Thêm bài viết mới';
@@ -5727,6 +5832,8 @@
             document.getElementById('blog_seo_title').value = blog.seo_title || '';
             document.getElementById('blog_seo_description').value = blog.seo_description || '';
             document.getElementById('blog_seo_keywords').value = blog.seo_keywords || '';
+            const promptEl = document.getElementById('gemini_blog_custom_prompt');
+            if (promptEl) promptEl.value = '';
             setBlogImagePreview(blog.image || '');
             updateBlogSeoChecklist();
             document.querySelector('#blogModal .modal-title').innerText = 'Chỉnh sửa bài viết';
@@ -6689,9 +6796,60 @@
                         <input type="hidden" id="blog_id">
                         <input type="hidden" id="blog_image_url">
 
+                        <!-- Gemini AI Auto-Fill Bar for Blog -->
+                        <div class="mb-3">
+                            <div class="p-3 rounded-3 border shadow-sm" style="background: linear-gradient(135deg, #f8faff 0%, #edf2fe 100%); border-color: #c7d8fe !important;">
+                                <div class="d-flex flex-wrap align-items-center justify-content-between gap-2">
+                                    <div class="d-flex align-items-center gap-2">
+                                        <div class="d-flex align-items-center justify-content-center bg-primary text-white rounded-circle shadow-sm" style="width: 34px; height: 34px;">
+                                            <i class="fa-solid fa-wand-magic-sparkles"></i>
+                                        </div>
+                                        <div>
+                                            <div class="fw-bold small text-dark d-flex align-items-center gap-1.5">
+                                                <span>AI Auto Viết Bài Bán Hàng (Google Gemini 3.1)</span>
+                                                <span class="badge bg-success-subtle text-success border border-success-subtle" style="font-size: 0.68rem;">Dạng Bán Hàng &bull; Đa Dạng Tiêu Đề</span>
+                                            </div>
+                                            <div class="text-muted" style="font-size: 0.75rem;">Nhập tên sản phẩm hoặc định hướng bán hàng &rarr; Bấm <b>Auto Viết Bài</b> để tạo bài bán hàng chuyển đổi cao</div>
+                                        </div>
+                                    </div>
+                                    <div class="d-flex align-items-center gap-2 flex-grow-1 flex-sm-grow-0 justify-content-end">
+                                        <select id="gemini_blog_model_select" class="form-select form-select-sm shadow-sm" style="min-width: 175px; font-weight: 500; border-radius: 8px;">
+                                            <option value="gemini-3.1-flash" selected>Gemini 3.1 Flash</option>
+                                            <option value="gemini-3.1-flash-lite">Gemini 3.1 Flash-Lite</option>
+                                        </select>
+                                        <button type="button" class="btn btn-sm btn-primary text-white px-3 fw-semibold shadow-sm d-flex align-items-center gap-1.5" id="btn-gemini-blog-auto" onclick="aiAutoFillBlog()" style="border-radius: 8px;">
+                                            <i class="fa-solid fa-bolt"></i>
+                                            <span id="btn-gemini-blog-text">Auto Viết Bài</span>
+                                        </button>
+                                        <button type="button" class="btn btn-sm btn-light border shadow-sm" onclick="configureGeminiKeyModal()" title="Cài đặt Gemini API Key" style="border-radius: 8px;">
+                                            <i class="fa-solid fa-key text-secondary"></i>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- Custom Prompt / Sales Direction Box -->
+                                <div class="mt-2.5 pt-2 border-top" style="border-color: rgba(99, 102, 241, 0.15) !important;">
+                                    <div class="d-flex align-items-center justify-content-between mb-1">
+                                        <label for="gemini_blog_custom_prompt" class="form-label small fw-semibold text-dark mb-0 d-flex align-items-center gap-1.5">
+                                            <i class="fa-solid fa-bullhorn text-primary"></i>
+                                            <span>Mô tả / Yêu cầu viết bài bán hàng (Định hướng nội dung đa dạng):</span>
+                                        </label>
+                                        <span class="text-muted" style="font-size: 0.72rem;">Không bị gò bó bởi tiêu đề &bull; Nhập giá ưu đãi, quà tặng kèm, điểm mạnh để AI chốt sale...</span>
+                                    </div>
+                                    <textarea class="form-control form-control-sm bg-white border shadow-sm" id="gemini_blog_custom_prompt" rows="2" 
+                                        placeholder="VD: Viết bài bán tài khoản Midjourney Pro chính chủ, giá chỉ từ 290k/tháng, bảo hành 1 đổi 1 suốt 30 ngày, tặng kèm 1000+ prompt Master, hướng dẫn mua nhanh trong 3 phút..."></textarea>
+                                </div>
+                            </div>
+                        </div>
+
                         <div class="mb-3">
                             <label class="form-label">Tiêu đề bài viết</label>
-                            <input type="text" class="form-control" id="blog_title" required>
+                            <div class="input-group">
+                                <input type="text" class="form-control" id="blog_title" placeholder="VD: Mua tài khoản ChatGPT Plus giá rẻ hoặc tên sản phẩm..." required>
+                                <button class="btn btn-outline-primary" type="button" onclick="aiAutoFillBlog()" title="Dùng AI viết bài bán hàng tự động từ tiêu đề này">
+                                    <i class="fa-solid fa-wand-magic-sparkles me-1"></i>Auto
+                                </button>
+                            </div>
                         </div>
 
                         <div class="mb-3">

@@ -123,10 +123,6 @@ class GeminiService {
      * Gọi Gemini API tạo toàn bộ thông tin sản phẩm và SEO
      * Hỗ trợ kết hợp tiêu đề, định hướng mô tả của Admin và dữ liệu sẵn có trên form
      */
-    /**
-     * Gọi Gemini API tạo toàn bộ thông tin sản phẩm và SEO
-     * Hỗ trợ kết hợp tiêu đề, định hướng mô tả của Admin và dữ liệu sẵn có trên form
-     */
     public static function generateProduct(string $title, string $requestedModel = 'gemini-3.1-flash', ?string $currentCategory = null, string $customPrompt = '', array $existingData = [], int $variantCount = 0): array {
         $apiKey = self::getApiKey();
         if ($apiKey === '') {
@@ -266,6 +262,134 @@ PROMPT;
                     continue;
                 }
                 // Nếu API key sai hoặc hết hạn mức thì dừng báo lỗi ngay
+                if (stripos($lastError, 'API key') !== false || stripos($lastError, 'PERMISSION_DENIED') !== false || stripos($lastError, 'RESOURCE_EXHAUSTED') !== false) {
+                    throw $e;
+                }
+            }
+        }
+
+        throw new RuntimeException($lastError);
+    }
+
+    /**
+     * Gọi Gemini API viết bài bán hàng (Sales Copywriting / Advertorial) cho blog
+     * Trực tiếp định hướng bán hàng, đa dạng tiêu đề theo các công thức chốt sale đỉnh cao
+     */
+    public static function generateBlogPost(string $title, string $requestedModel = 'gemini-3.1-flash', string $customPrompt = '', array $existingData = []): array {
+        $apiKey = self::getApiKey();
+        if ($apiKey === '') {
+            throw new RuntimeException('Chưa có Gemini API Key. Vui lòng bấm vào biểu tượng chìa khóa bên cạnh để nhập API Key từ Google AI Studio (aistudio.google.com).');
+        }
+
+        $title = trim($title);
+        $customPrompt = trim($customPrompt);
+        if ($title === '' && $customPrompt === '') {
+            throw new RuntimeException('Vui lòng nhập Tiêu đề bài viết hoặc Mô tả/Yêu cầu bán hàng trước khi tạo tự động.');
+        }
+
+        $extraContext = [];
+        if ($customPrompt !== '') {
+            $extraContext[] = "=== YÊU CẦU & ĐỊNH HƯỚNG BÁN HÀNG CỦA ADMIN (RẤT QUAN TRỌNG) ===\n" . $customPrompt;
+        }
+
+        if (!empty($existingData)) {
+            $existingLines = [];
+            if (!empty($existingData['desc'])) $existingLines[] = "- Mô tả ban đầu: " . $existingData['desc'];
+            if (!empty($existingData['seo_slug'])) $existingLines[] = "- Slug mong muốn: " . $existingData['seo_slug'];
+            if (!empty($existingData['seo_keywords'])) $existingLines[] = "- Từ khóa gợi ý: " . $existingData['seo_keywords'];
+            if (!empty($existingLines)) {
+                $extraContext[] = "=== DỮ LIỆU CŨ TRÊN FORM ===\n" . implode("\n", $existingLines);
+            }
+        }
+        $extraContextText = !empty($extraContext) ? ("\n\n" . implode("\n\n", $extraContext) . "\n") : '';
+
+        $effectiveTopic = $title !== '' ? $title : ('Dịch vụ / Sản phẩm: ' . substr($customPrompt, 0, 80));
+
+        // Random xáo trộn các công thức tiêu đề để AI luôn biến hóa phong phú, không bao giờ trùng lặp
+        $formulas = [
+            'Công thức 1 (Trực diện): Mua Tài Khoản [Tên Sản Phẩm] Giá Rẻ Chính Chủ - Kích Hoạt Tức Thì',
+            'Công thức 2 (Bảng giá & Tiết kiệm): Bảng Giá & Địa Chỉ Mua [Tên Sản Phẩm] Uy Tín 2026 - Tiết Kiệm Đến 70%',
+            'Công thức 3 (Nâng cấp & Bảo hành): Nâng Cấp [Tên Sản Phẩm] Bản Quyền Giá Sinh Viên - Bảo Hành 1 Đổi 1 Trọn Gói',
+            'Công thức 4 (Ưu đãi & Quà tặng): Bán Tài Khoản [Tên Sản Phẩm] Premium Siêu Rẻ - Tặng Kèm Quà Tặng / Tài Liệu VIP',
+            'Công thức 5 (Review & Hướng dẫn): Có Nên Mua [Tên Sản Phẩm]? Hướng Dẫn Mua & Bảng Giá Chi Tiết Tại AiCuaToi',
+            'Công thức 6 (Uy tín số 1): Top 1 Nơi Mua [Tên Sản Phẩm] Giá Rẻ, Uy Tín, Kích Hoạt Nhanh Trong 3 Phút',
+            'Công thức 7 (Thanh toán dễ dàng): Cách Mua [Tên Sản Phẩm] Bản Quyền Không Cần Thẻ Visa - Hỗ Trợ 24/7',
+            'Công thức 8 (Đánh giá chuyên sâu): Đánh Giá [Tên Sản Phẩm] & Địa Chỉ Mua Tài Khoản Bản Quyền Uy Tín Hàng Đầu'
+        ];
+        shuffle($formulas);
+        $formulaList = implode("\n- ", $formulas);
+
+        $prompt = <<<PROMPT
+Bạn là chuyên gia Copywriting bán hàng thương mại điện tử (Sales Copywriter & SEO Master) chuyên về tài khoản AI Premium, bản quyền phần mềm, dịch vụ số tại Việt Nam cho website aicuatoi.net.
+
+NHIỆM VỤ: Hãy viết một BÀI VIẾT BÁN HÀNG / BÀI PR SẢN PHẨM CHUYỂN ĐỔI CAO (High-Converting Sales Article / Advertorial) - TUYỆT ĐỐI KHÔNG VIẾT DẠNG BLOG THÔNG TIN LÝ THUYẾT KHÔ KHAN!
+Mục tiêu cao nhất của bài viết là KÍCH THÍCH KHÁCH HÀNG BẤM MUA NGAY, tạo niềm tin tuyệt đối về giá rẻ, chất lượng chính chủ và chính sách bảo hành uy tín số 1 tại aicuatoi.net.
+
+THÔNG TIN ĐẦU VÀO:
+- Tên sản phẩm / Chủ đề cần bán: "{$effectiveTopic}"
+{$extraContextText}
+
+QUY TẮC BẮT BUỘC:
+
+1. ĐA DẠNG HÓA TIÊU ĐỀ BÁN HÀNG ("title"):
+Tiêu đề BẮT BUỘC phải mang tính chất BÁN HÀNG & THƯƠNG MẠI MẠNH MẼ (Buyer Search Intent). Hãy biến hóa sáng tạo theo một trong các công thức bán hàng hấp dẫn dưới đây, TUYỆT ĐỐI KHÔNG ĐƯỢC RẬP KHUÔN, mỗi lần viết phải có nét độc đáo riêng:
+- {$formulaList}
+* Yêu cầu độ dài tiêu đề bài viết: Từ 35 đến 68 ký tự (đạt chuẩn SEO vàng 20-70 ký tự).
+
+2. MÔ TẢ NGẮN ("description"):
+Viết tóm tắt ngắn từ 100 đến 160 ký tự (chuẩn SEO 80-180 ký tự): Mang phong cách chào hàng lôi cuốn, nêu bật giá rẻ bất ngờ, kích hoạt tức thì trong 5 phút, bảo hành 1 đổi 1 và thôi thúc khách đặt mua ngay.
+
+3. NỘI DUNG CHI TIẾT BÀI VIẾT ("content"):
+Viết bằng mã HTML đẹp mắt (tối thiểu 800 - 1500 từ), cấu trúc chuẩn bài bán hàng chuyển đổi cao:
+- Mở đầu: Đánh trúng nỗi đau (Mua trực tiếp đắt đỏ, cần thẻ Visa/Mastercard phức tạp, dễ bị lừa đảo mua phải tài khoản lậu) -> Giới thiệu giải pháp mua tài khoản bản quyền giá rẻ, an toàn tại aicuatoi.net.
+- Vì sao sản phẩm này là "trợ thủ đắc lực": Tóm tắt các tính năng đỉnh cao và lợi ích mang lại tiền bạc, thời gian cho khách hàng.
+- Bảng giá ưu đãi & So sánh chi phí: Tạo bảng HTML so sánh giá mua tại hãng vs giá siêu rẻ tại AiCuaToi (tiết kiệm đến 70-80%).
+- 5 Cam kết vàng khi mua tại aicuatoi.net: Kích hoạt 5 phút, tài khoản ổn định chính chủ, bảo hành 1 đổi 1 suốt thời gian sử dụng, hoàn tiền nếu lỗi, support nhiệt tình 24/7.
+- Quy trình mua hàng 3 bước siêu tốc: 1. Chọn gói -> 2. Quét mã QR thanh toán an toàn -> 3. Nhận tài khoản/kích hoạt và dùng ngay.
+- Khung Kêu Gọi Hành Động (CTA Box): Thiết kế bằng HTML có viền, nền nổi bật: "👉 ĐẶT MUA NGAY ĐỂ NHẬN ƯU ĐÃI & QUÀ TẶNG KÈM".
+- Giải đáp thắc mắc thường gặp (FAQ): 3-4 câu hỏi đáp thực tế về cách sử dụng, chính sách bảo hành, cấp mới nếu có sự cố.
+(Dùng thẻ <h2>, <h3>, <p>, <strong>, <ul>, <li>, <div class="alert alert-primary">, <table class="table table-bordered">... Không dùng <html> hay <body>).
+
+4. CẤU HÌNH SEO CHUYÊN NGHIỆP:
+- "seo_slug": Tự động tạo slug thân thiện chuẩn SEO, không dấu, ngăn cách bằng dấu gạch ngang (VD: mua-tai-khoan-chatgpt-plus-gia-re).
+- "seo_title": Tiêu đề hiển thị Google từ 48 đến 62 ký tự (chuẩn 45-65 ký tự), chứa từ khóa mua hàng chính + thương hiệu aicuatoi.net.
+- "seo_description": Thẻ mô tả Google từ 130 đến 160 ký tự (chuẩn 120-165 ký tự), hấp dẫn, chuẩn CTR cao.
+- "seo_keywords": Ít nhất 4 đến 8 từ khóa mua bán tìm kiếm cao, cách nhau bằng dấu phẩy (VD: mua tai khoan [ten], [ten] gia re, ban tai khoan [ten], nang cap [ten] uy tin, aicuatoi).
+
+Yêu cầu trả về DUY NHẤT một chuỗi JSON hợp lệ (không kèm markdown ```json hay giải thích nào khác) với cấu trúc:
+{
+  "title": "Tiêu đề bài viết bán hàng giật tít hấp dẫn theo công thức trên",
+  "description": "Mô tả ngắn gọn 100-160 ký tự giật tít bán hàng",
+  "content": "Nội dung bài viết bán hàng chi tiết bằng mã HTML chuẩn SEO",
+  "seo_slug": "duong-dan-than-thien-khong-dau",
+  "seo_title": "Tiêu đề SEO Google từ 48-62 ký tự",
+  "seo_description": "Mô tả SEO Google từ 130-160 ký tự",
+  "seo_keywords": "mua tai khoan, gia re, uy tin, aicuatoi..."
+}
+PROMPT;
+
+        $candidates = self::resolveModelCandidates($requestedModel);
+        $lastError = 'Không thể kết nối đến Gemini API.';
+
+        foreach ($candidates as $modelName) {
+            try {
+                $rawResult = self::callGeminiApi($modelName, $apiKey, $prompt);
+                if (!empty($rawResult)) {
+                    // Chuẩn hóa seo_slug nếu có dấu hoặc ký tự lạ
+                    if (!empty($rawResult['seo_slug'])) {
+                        $rawResult['seo_slug'] = Seo::slugify($rawResult['seo_slug']);
+                    } elseif (!empty($rawResult['title'])) {
+                        $rawResult['seo_slug'] = Seo::slugify($rawResult['title']);
+                    }
+
+                    $rawResult['used_model'] = $modelName;
+                    return $rawResult;
+                }
+            } catch (Throwable $e) {
+                $lastError = $e->getMessage();
+                if (stripos($lastError, 'not found') !== false || stripos($lastError, '404') !== false) {
+                    continue;
+                }
                 if (stripos($lastError, 'API key') !== false || stripos($lastError, 'PERMISSION_DENIED') !== false || stripos($lastError, 'RESOURCE_EXHAUSTED') !== false) {
                     throw $e;
                 }

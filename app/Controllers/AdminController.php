@@ -374,6 +374,38 @@ class AdminController extends Controller {
         }
     }
 
+    public function adminAiGenerateBlog() {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            $this->jsonError('Method not allowed', 405);
+        }
+
+        $title = trim($_POST['title'] ?? '');
+        $prompt = trim($_POST['prompt'] ?? '');
+        $model = trim($_POST['model'] ?? 'gemini-3.1-flash');
+        $rawExisting = $_POST['existing_data'] ?? null;
+        $existingData = [];
+
+        if (is_string($rawExisting)) {
+            $decoded = json_decode($rawExisting, true);
+            if (is_array($decoded)) {
+                $existingData = $decoded;
+            }
+        } elseif (is_array($rawExisting)) {
+            $existingData = $rawExisting;
+        }
+
+        if ($title === '' && $prompt === '') {
+            $this->jsonError('Vui lòng nhập Tiêu đề bài viết HOẶC Mô tả / Định hướng bán hàng trước khi tạo.');
+        }
+
+        try {
+            $data = GeminiService::generateBlogPost($title, $model, $prompt, $existingData);
+            $this->jsonSuccess(['blog' => $data]);
+        } catch (Throwable $e) {
+            $this->jsonError($e->getMessage());
+        }
+    }
+
     public function adminSaveGeminiApiKey() {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             $this->jsonError('Method not allowed', 405);
