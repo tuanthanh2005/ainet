@@ -345,15 +345,27 @@ class AdminController extends Controller {
         }
 
         $title = trim($_POST['title'] ?? '');
+        $prompt = trim($_POST['prompt'] ?? '');
         $model = trim($_POST['model'] ?? 'gemini-3.1-flash');
         $category = trim($_POST['category'] ?? '');
 
-        if ($title === '') {
-            $this->jsonError('Vui lòng nhập Tên sản phẩm trước khi tạo.');
+        $rawExisting = $_POST['existing_data'] ?? '';
+        $existingData = [];
+        if (is_string($rawExisting) && $rawExisting !== '') {
+            $decoded = json_decode($rawExisting, true);
+            if (is_array($decoded)) {
+                $existingData = $decoded;
+            }
+        } elseif (is_array($rawExisting)) {
+            $existingData = $rawExisting;
+        }
+
+        if ($title === '' && $prompt === '') {
+            $this->jsonError('Vui lòng nhập Tên sản phẩm hoặc Mô tả / Yêu cầu cho AI trước khi tạo.');
         }
 
         try {
-            $data = GeminiService::generateProduct($title, $model, $category);
+            $data = GeminiService::generateProduct($title, $model, $category, $prompt, $existingData);
             $this->jsonSuccess(['product' => $data]);
         } catch (Throwable $e) {
             $this->jsonError($e->getMessage());

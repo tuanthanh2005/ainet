@@ -121,16 +121,18 @@ class GeminiService {
 
     /**
      * Gọi Gemini API tạo toàn bộ thông tin sản phẩm và SEO
+     * Hỗ trợ kết hợp tiêu đề, định hướng mô tả của Admin và dữ liệu sẵn có trên form
      */
-    public static function generateProduct(string $title, string $requestedModel = 'gemini-3.1-flash', ?string $currentCategory = null): array {
+    public static function generateProduct(string $title, string $requestedModel = 'gemini-3.1-flash', ?string $currentCategory = null, string $customPrompt = '', array $existingData = []): array {
         $apiKey = self::getApiKey();
         if ($apiKey === '') {
             throw new RuntimeException('Chưa có Gemini API Key. Vui lòng bấm vào biểu tượng chìa khóa bên cạnh để nhập API Key từ Google AI Studio (aistudio.google.com).');
         }
 
         $title = trim($title);
-        if ($title === '') {
-            throw new RuntimeException('Vui lòng nhập Tên sản phẩm trước khi tạo tự động.');
+        $customPrompt = trim($customPrompt);
+        if ($title === '' && $customPrompt === '') {
+            throw new RuntimeException('Vui lòng nhập Tên sản phẩm hoặc Mô tả/Yêu cầu trước khi tạo tự động.');
         }
 
         $categories = Category::getAll();
@@ -140,12 +142,38 @@ class GeminiService {
         }
         $catListText = implode("\n", $catDescriptions);
 
+        $extraContext = [];
+        if ($customPrompt !== '') {
+            $extraContext[] = "=== YÊU CẦU & ĐỊNH HƯỚNG MÔ TẢ CỦA ADMIN (RẤT QUAN TRỌNG) ===\n" . $customPrompt;
+        }
+
+        if (!empty($existingData)) {
+            $existingLines = [];
+            if (!empty($existingData['price'])) $existingLines[] = "- Giá bán mong muốn: " . number_format((float)$existingData['price']) . " VNĐ";
+            if (!empty($existingData['original_price'])) $existingLines[] = "- Giá gốc: " . number_format((float)$existingData['original_price']) . " VNĐ";
+            if (!empty($existingData['desc'])) $existingLines[] = "- Ý tưởng mô tả ngắn: " . $existingData['desc'];
+            if (!empty($existingData['category_name'])) $existingLines[] = "- Danh mục đang chọn: " . $existingData['category_name'];
+            if (!empty($existingLines)) {
+                $extraContext[] = "=== DỮ LIỆU ĐANG CÓ TRÊN FORM ===\n" . implode("\n", $existingLines);
+            }
+        }
+        $extraContextText = !empty($extraContext) ? ("\n\n" . implode("\n\n", $extraContext) . "\n") : '';
+
+        $effectiveTitle = $title !== '' ? $title : ('Dịch vụ số / Tài khoản theo yêu cầu: ' . substr($customPrompt, 0, 80));
+
         $prompt = <<<PROMPT
 Bạn là chuyên gia marketing thương mại điện tử chuyên về sản phẩm phần mềm, tài khoản AI Premium, dịch vụ số tại Việt Nam (aicuatoi.net).
-Hãy tạo nội dung sản phẩm hoàn chỉnh, hấp dẫn, chuẩn phong cách Việt Nam và chuẩn SEO Google dựa trên tên sản phẩm sau: "{$title}".
-
+Hãy tạo nội dung sản phẩm hoàn chỉnh, lôi cuốn, bán chạy, chuẩn phong cách Việt Nam và chuẩn SEO Google dựa trên thông tin sau:
+- Tên / Chủ đề sản phẩm: "{$effectiveTitle}"
+{$extraContextText}
 Danh sách danh mục có sẵn trên website (hãy chọn slug danh mục phù hợp nhất):
 {$catListText}
+
+HƯỚNG DẪN XỬ LÝ (QUAN TRỌNG):
+1. ĐA DẠNG NỘI DUNG & BÁM SÁT MÔ TẢ ADMIN: Không chỉ rập khuôn theo tiêu đề ngắn, mà hãy phát triển sâu theo mọi ý tưởng, định hướng, ưu đãi, quà tặng, thời hạn, chính sách bảo hành được Admin mô tả trong phần YÊU CẦU & ĐỊNH HƯỚNG.
+2. NỘI DUNG BÀI VIẾT ("description"): Viết bằng mã HTML đẹp mắt (dùng <h2>, <h3>, <ul>, <li>, <strong>, bảng tính năng, cam kết bảo hành, lưu ý sử dụng).
+3. CÁC GÓI / BIẾN THỂ ("variants"): Tạo 2 đến 3 gói dịch vụ thực tế phù hợp với mô tả (VD: Gói 1 Tháng, Gói 3 Tháng, Gói 1 Năm hoặc Tài khoản cấp sẵn / Nâng cấp chính chủ), có giá bán, giá gốc hợp lý.
+4. ĐIỀU CHỈNH TIÊU ĐỀ ("title"): Nếu tiêu đề ban đầu chưa đủ hấp dẫn hoặc chưa có, hãy tạo một tiêu đề thương mại điện tử thật chuyên nghiệp và thu hút.
 
 Yêu cầu trả về DUY NHẤT một chuỗi JSON hợp lệ (không kèm markdown ```json hay giải thích nào khác) với cấu trúc chính xác sau:
 {
