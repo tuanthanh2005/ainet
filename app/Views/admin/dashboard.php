@@ -2000,6 +2000,44 @@
                             </div>
                         </div>
                     </div>
+
+                    <!-- Google Gemini AI Settings -->
+                    <div class="row mt-4">
+                        <div class="col-12">
+                            <div class="card-custom p-4 mb-4" style="border: 2px solid #e0e7ff; background: linear-gradient(135deg, rgba(99,102,241,0.04) 0%, rgba(129,140,248,0.04) 100%);">
+                                <div class="d-flex align-items-center gap-3 mb-4">
+                                    <div style="width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,#4f46e5,#6366f1);display:flex;align-items:center;justify-content:center;">
+                                        <i class="fa-solid fa-wand-magic-sparkles text-white fs-5"></i>
+                                    </div>
+                                    <div>
+                                        <h5 class="fw-bold mb-0">Cấu hình Google Gemini AI</h5>
+                                        <small class="text-muted">Cung cấp API Key từ Google AI Studio để kích hoạt tính năng tự động viết bài, auto-fill sản phẩm & tối ưu SEO</small>
+                                    </div>
+                                </div>
+
+                                <div class="row g-3">
+                                    <div class="col-md-8">
+                                        <label class="form-label fw-semibold">Gemini API Key</label>
+                                        <div class="input-group">
+                                            <input type="password" class="form-control" id="st_gemini_api_key"
+                                                placeholder="Dán Google Gemini API Key (AIzaSy...)"
+                                                value="<?php echo htmlspecialchars($settings['gemini_api_key'] ?? ''); ?>">
+                                            <button class="btn btn-outline-secondary" type="button" onclick="const input = document.getElementById('st_gemini_api_key'); input.type = input.type === 'password' ? 'text' : 'password';">
+                                                <i class="fa-regular fa-eye"></i>
+                                            </button>
+                                        </div>
+                                        <small class="text-muted d-block mt-1">Lấy API Key hoàn toàn miễn phí tại <a href="https://aistudio.google.com/app/apikey" target="_blank" class="fw-bold text-primary">Google AI Studio (aistudio.google.com)</a>.</small>
+                                    </div>
+                                </div>
+
+                                <div class="mt-4 pt-3 border-top d-flex gap-2">
+                                    <button class="btn btn-black px-4" onclick="saveGeminiSettings()">
+                                        <i class="fa-solid fa-floppy-disk me-2"></i>Lưu Gemini Key
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <div id="view-dashboard" class="view-section">
@@ -5270,6 +5308,19 @@
                 btn.disabled = false;
                 btn.innerHTML = '<i class="fa-brands fa-telegram me-2"></i>Test kết nối';
             });
+        }
+
+        function saveGeminiSettings() {
+            const key = document.getElementById('st_gemini_api_key').value.trim();
+            apiPost('adminSaveGeminiApiKey', { gemini_api_key: key })
+                .then(res => {
+                    if (res && res.success) {
+                        APP_STATE.settings['gemini_api_key'] = key;
+                        AppNotify.success('Đã lưu Gemini API Key thành công!', 'Cài đặt');
+                    } else {
+                        AppNotify.error((res && res.message) || 'Không thể lưu key.', 'Lỗi');
+                    }
+                });
         }
 
         function addAboutFeatureRow(data = { icon: 'fa-bolt', color: 'text-warning', title: '', desc: '' }) {
