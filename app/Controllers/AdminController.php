@@ -200,58 +200,62 @@ class AdminController extends Controller {
             $this->jsonError('Method not allowed', 405);
         }
 
-        $allowed = [
-            'bannerText', 'zalo', 'footerDesc', 'heroDesc', 'socialLink', 'copyright',
-            'sepay_active', 'sepay_mode', 'sepay_token', 'sepay_merchant_id',
-            'sepay_api_key', 'bank_id', 'bank_account', 'bank_name',
-            'about_title', 'about_desc', 'about_image', 'about_stat_value',
-            'about_stat_label', 'about_features', 'contact_title', 'contact_desc',
-            'contact_methods', 'social_links_json', 'terms_of_service', 'privacy_policy',
-            'demo_payment_active',
-            'telegram_bot_token', 'telegram_chat_id',
-            'smtp_host', 'smtp_port', 'smtp_secure', 'smtp_from_name',
-            'smtp_user', 'smtp_pass', 'smtp_from_email',
-            'smtp_default_subject', 'smtp_default_body',
-            'gemini_api_key',
-        ];
+        try {
+            $allowed = [
+                'bannerText', 'zalo', 'footerDesc', 'heroDesc', 'socialLink', 'copyright',
+                'sepay_active', 'sepay_mode', 'sepay_token', 'sepay_merchant_id',
+                'sepay_api_key', 'bank_id', 'bank_account', 'bank_name',
+                'about_title', 'about_desc', 'about_image', 'about_stat_value',
+                'about_stat_label', 'about_features', 'contact_title', 'contact_desc',
+                'contact_methods', 'social_links_json', 'terms_of_service', 'privacy_policy',
+                'demo_payment_active',
+                'telegram_bot_token', 'telegram_chat_id',
+                'smtp_host', 'smtp_port', 'smtp_secure', 'smtp_from_name',
+                'smtp_user', 'smtp_pass', 'smtp_from_email',
+                'smtp_default_subject', 'smtp_default_body',
+                'gemini_api_key',
+            ];
 
-        $data = [];
-        foreach ($allowed as $key) {
-            if (isset($_POST[$key])) {
-                $data[$key] = $_POST[$key];
-            }
-        }
-
-        // Validate JSON-shaped fields to avoid stored garbage
-        foreach (['about_features', 'contact_methods', 'social_links_json'] as $jsonKey) {
-            if (isset($data[$jsonKey])) {
-                if ($data[$jsonKey] === '') {
-                    $data[$jsonKey] = '[]';
-                    continue;
-                }
-                $decoded = json_decode($data[$jsonKey], true);
-                if (!is_array($decoded)) {
-                    $data[$jsonKey] = '[]';
+            $data = [];
+            foreach ($allowed as $key) {
+                if (isset($_POST[$key])) {
+                    $data[$key] = $_POST[$key];
                 }
             }
-        }
 
-        // Sepay flags
-        if (isset($data['sepay_active'])) {
-            $data['sepay_active'] = ($data['sepay_active'] === '1') ? '1' : '0';
-        }
-        if (isset($data['demo_payment_active'])) {
-            $data['demo_payment_active'] = ($data['demo_payment_active'] === '1') ? '1' : '0';
-        }
-        if (isset($data['sepay_mode'])) {
-            if (!in_array($data['sepay_mode'], ['production', 'sandbox'], true)) {
-                $data['sepay_mode'] = 'production';
+            // Validate JSON-shaped fields to avoid stored garbage
+            foreach (['about_features', 'contact_methods', 'social_links_json'] as $jsonKey) {
+                if (isset($data[$jsonKey])) {
+                    if ($data[$jsonKey] === '') {
+                        $data[$jsonKey] = '[]';
+                        continue;
+                    }
+                    $decoded = json_decode($data[$jsonKey], true);
+                    if (!is_array($decoded)) {
+                        $data[$jsonKey] = '[]';
+                    }
+                }
             }
+
+            // Sepay flags
+            if (isset($data['sepay_active'])) {
+                $data['sepay_active'] = ($data['sepay_active'] === '1') ? '1' : '0';
+            }
+            if (isset($data['demo_payment_active'])) {
+                $data['demo_payment_active'] = ($data['demo_payment_active'] === '1') ? '1' : '0';
+            }
+            if (isset($data['sepay_mode'])) {
+                if (!in_array($data['sepay_mode'], ['production', 'sandbox'], true)) {
+                    $data['sepay_mode'] = 'production';
+                }
+            }
+
+            Setting::saveAll($data);
+
+            $this->jsonSuccess(['message' => 'Cấu hình đã được lưu thành công!']);
+        } catch (Throwable $e) {
+            $this->jsonError('Lỗi khi lưu cấu hình: ' . $e->getMessage());
         }
-
-        Setting::saveAll($data);
-
-        $this->jsonSuccess();
     }
 
     public function adminSaveProduct() {
@@ -361,21 +365,32 @@ class AdminController extends Controller {
             $this->jsonError('Method not allowed', 405);
         }
 
-        $apiKey = trim($_POST['gemini_api_key'] ?? '');
-        if ($apiKey === '') {
-            $this->jsonError('Vui lòng nhập Gemini API Key.');
+        try {
+            $apiKey = trim($_POST['gemini_api_key'] ?? '');
+            Setting::saveAll(['gemini_api_key' => $apiKey]);
+            $this->jsonSuccess([
+                'message' => $apiKey !== '' ? 'Đã lưu Google Gemini API Key thành công!' : 'Đã xóa Gemini API Key.',
+                'has_key' => $apiKey !== '',
+            ]);
+        } catch (Throwable $e) {
+            $this->jsonError('Lỗi khi lưu Gemini API Key: ' . $e->getMessage());
         }
-
-        GeminiService::setApiKey($apiKey);
-        $this->jsonSuccess(['message' => 'Đã lưu Gemini API Key thành công!']);
     }
 
     public function adminGetGeminiConfig() {
-        $key = GeminiService::getApiKey();
-        $this->jsonSuccess([
-            'has_key' => $key !== '',
-            'masked_key' => $key !== '' ? (substr($key, 0, 6) . '...' . substr($key, -4)) : '',
-        ]);
+        try {
+            $settings = Setting::getAll();
+            $key = trim((string)($settings['gemini_api_key'] ?? ''));
+            if ($key === '') {
+                $key = trim((string)(getenv('GEMINI_API_KEY') ?: ''));
+            }
+            $this->jsonSuccess([
+                'has_key' => $key !== '',
+                'masked_key' => $key !== '' ? (substr($key, 0, 6) . '...' . substr($key, -4)) : '',
+            ]);
+        } catch (Throwable $e) {
+            $this->jsonError('Không thể lấy cấu hình Gemini: ' . $e->getMessage());
+        }
     }
 
     public function adminDeleteProduct() {

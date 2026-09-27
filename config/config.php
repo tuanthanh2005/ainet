@@ -42,6 +42,22 @@ if (!defined('APP_ROOT')) {
     define('APP_ROOT', dirname(__DIR__));
 }
 
+// Auto-load core services, models and controllers if not yet required
+spl_autoload_register(function ($className) {
+    $searchDirs = [
+        APP_ROOT . '/app/Core/',
+        APP_ROOT . '/app/Models/',
+        APP_ROOT . '/app/Controllers/',
+    ];
+    foreach ($searchDirs as $dir) {
+        $file = $dir . $className . '.php';
+        if (file_exists($file)) {
+            require_once $file;
+            return;
+        }
+    }
+});
+
 function base_path($path = '') {
     return __DIR__ . '/../' . ltrim($path, '/');
 }

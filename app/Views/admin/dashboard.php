@@ -1833,7 +1833,7 @@
                         </div>
                     </div>
                     <div class="text-end">
-                        <button class="btn btn-black px-5 py-2 fs-6" onclick="saveSettings()">
+                        <button class="btn btn-black px-5 py-2 fs-6" id="btnSaveAllSettings" onclick="saveSettings()">
                             <i class="fa-solid fa-floppy-disk me-2"></i>Lưu toàn bộ cấu hình
                         </button>
                     </div>
@@ -1896,7 +1896,7 @@
                                 </div>
 
                                 <div class="d-flex gap-2 mt-3">
-                                    <button class="btn btn-black px-4" onclick="saveTelegramSettings()">
+                                    <button class="btn btn-black px-4" id="btnSaveTelegram" onclick="saveTelegramSettings()">
                                         <i class="fa-solid fa-floppy-disk me-2"></i>Lưu Telegram
                                     </button>
                                     <button class="btn btn-outline-primary px-4" id="btnTelegramTest" onclick="testTelegram()">
@@ -1990,7 +1990,7 @@
                                 </div>
 
                                 <div class="d-flex gap-2 mt-4">
-                                    <button class="btn btn-black px-4" onclick="saveSmtpSettings()">
+                                    <button class="btn btn-black px-4" id="btnSaveSmtp" onclick="saveSmtpSettings()">
                                         <i class="fa-solid fa-floppy-disk me-2"></i>Lưu cấu hình Email
                                     </button>
                                     <button class="btn btn-outline-primary px-4" id="btnSmtpTest" onclick="testSmtp()">
@@ -2031,7 +2031,7 @@
                                 </div>
 
                                 <div class="mt-4 pt-3 border-top d-flex gap-2">
-                                    <button class="btn btn-black px-4" onclick="saveGeminiSettings()">
+                                    <button class="btn btn-black px-4" id="btnSaveGeminiKey" onclick="saveGeminiSettings()">
                                         <i class="fa-solid fa-floppy-disk me-2"></i>Lưu Gemini Key
                                     </button>
                                 </div>
@@ -2679,19 +2679,58 @@
             }).then(res => res.json());
         }
 
-        function apiPost(action, formData) {
+        async function apiPost(action, formData) {
             if (!(formData instanceof FormData)) {
                 const fd = new FormData();
-                Object.entries(formData || {}).forEach(([k, v]) => fd.append(k, v));
+                Object.entries(formData || {}).forEach(([k, v]) => {
+                    if (v !== undefined && v !== null) {
+                        fd.append(k, v);
+                    }
+                });
                 formData = fd;
             }
-            formData.append('csrf_token', APP_STATE.csrfToken);
-            return fetch('?action=' + action, {
-                method: 'POST',
-                headers: { 'X-Requested-With': 'XMLHttpRequest', 'X-CSRF-Token': APP_STATE.csrfToken },
-                body: formData,
-                credentials: 'same-origin'
-            }).then(res => res.json());
+            if (!formData.has('csrf_token')) {
+                formData.append('csrf_token', APP_STATE.csrfToken || '');
+            }
+
+            const targetUrl = 'index.php?action=' + encodeURIComponent(action);
+
+            try {
+                const res = await fetch(targetUrl, {
+                    method: 'POST',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'X-CSRF-Token': APP_STATE.csrfToken || ''
+                    },
+                    body: formData,
+                    credentials: 'same-origin'
+                });
+
+                const text = await res.text();
+                let json;
+                try {
+                    json = JSON.parse(text);
+                } catch (parseErr) {
+                    console.error('Non-JSON response for action ' + action + ':', text);
+                    return {
+                        success: false,
+                        message: res.status === 419 
+                            ? 'Phiên làm việc đã hết hạn. Vui lòng tải lại trang (F5).' 
+                            : `Lỗi máy chủ (${res.status}). Vui lòng kiểm tra lại.`
+                    };
+                }
+
+                if (!res.ok && json && !json.message) {
+                    json.message = `Lỗi hệ thống (${res.status})`;
+                }
+                return json;
+            } catch (networkErr) {
+                console.error('Network error calling ' + action + ':', networkErr);
+                return {
+                    success: false,
+                    message: 'Lỗi kết nối mạng hoặc máy chủ không phản hồi.'
+                };
+            }
         }
 
         function pushIndexAll() {
@@ -5030,197 +5069,110 @@
                 });
         }
 
-        function saveSettings() {
-            const formData = new FormData();
-            formData.append('heroDesc', document.getElementById('st_heroDesc').value);
-            formData.append('bannerText', document.getElementById('st_bannerText').value);
-            formData.append('zalo', document.getElementById('st_zalo').value);
-            formData.append('footerDesc', document.getElementById('st_footerDesc').value);
-            formData.append('socialLink', document.getElementById('st_socialLink').value);
-            formData.append('copyright', document.getElementById('st_copyright').value);
-            formData.append('terms_of_service', document.getElementById('st_terms_of_service').value);
-            formData.append('privacy_policy', document.getElementById('st_privacy_policy').value);
+        async function saveSettings() {
+            const btn = document.getElementById('btnSaveAllSettings') || document.querySelector('button[onclick="saveSettings()"]');
+            const originalHtml = btn ? btn.innerHTML : '';
+            if (btn) {
+                btn.disabled = true;
+                btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Đang lưu toàn bộ cấu hình...';
+            }
 
-            // SePay Settings
-            formData.append('sepay_active', document.getElementById('st_sepay_active').checked ? '1' : '0');
-            formData.append('demo_payment_active', document.getElementById('st_demo_payment_active').checked ? '1' : '0');
-            formData.append('sepay_mode', document.getElementById('st_sepay_mode').value);
-            formData.append('sepay_token', document.getElementById('st_sepay_token').value);
-            formData.append('sepay_merchant_id', document.getElementById('st_sepay_merchant_id').value);
-            formData.append('sepay_api_key', document.getElementById('st_sepay_api_key').value);
-            formData.append('bank_id', document.getElementById('st_bank_id').value);
-            formData.append('bank_account', document.getElementById('st_bank_account').value);
-            formData.append('bank_name', document.getElementById('st_bank_name').value);
+            try {
+                const formData = new FormData();
+                formData.append('heroDesc', document.getElementById('st_heroDesc')?.value || '');
+                formData.append('bannerText', document.getElementById('st_bannerText')?.value || '');
+                formData.append('zalo', document.getElementById('st_zalo')?.value || '');
+                formData.append('footerDesc', document.getElementById('st_footerDesc')?.value || '');
+                formData.append('socialLink', document.getElementById('st_socialLink')?.value || '');
+                formData.append('copyright', document.getElementById('st_copyright')?.value || '');
+                formData.append('terms_of_service', document.getElementById('st_terms_of_service')?.value || '');
+                formData.append('privacy_policy', document.getElementById('st_privacy_policy')?.value || '');
 
-            // About & Contact Settings
-            formData.append('about_title', document.getElementById('st_about_title').value);
-            formData.append('about_desc', document.getElementById('st_about_desc').value);
-            formData.append('about_image', document.getElementById('st_about_image').value);
-            formData.append('about_stat_value', document.getElementById('st_about_stat_value').value);
-            formData.append('about_stat_label', document.getElementById('st_about_stat_label').value);
+                // SePay Settings
+                formData.append('sepay_active', document.getElementById('st_sepay_active')?.checked ? '1' : '0');
+                formData.append('demo_payment_active', document.getElementById('st_demo_payment_active')?.checked ? '1' : '0');
+                formData.append('sepay_mode', document.getElementById('st_sepay_mode')?.value || 'production');
+                formData.append('sepay_token', document.getElementById('st_sepay_token')?.value || '');
+                formData.append('sepay_merchant_id', document.getElementById('st_sepay_merchant_id')?.value || '');
+                formData.append('sepay_api_key', document.getElementById('st_sepay_api_key')?.value || '');
+                formData.append('bank_id', document.getElementById('st_bank_id')?.value || '');
+                formData.append('bank_account', document.getElementById('st_bank_account')?.value || '');
+                formData.append('bank_name', document.getElementById('st_bank_name')?.value || '');
 
-            const aboutFeatures = [];
-            document.querySelectorAll('.about-feature-row').forEach(row => {
-                aboutFeatures.push({
-                    icon: row.querySelector('.af-icon').value,
-                    color: row.querySelector('.af-color').value,
-                    title: row.querySelector('.af-title').value,
-                    desc: row.querySelector('.af-desc').value
+                // About & Contact Settings
+                formData.append('about_title', document.getElementById('st_about_title')?.value || '');
+                formData.append('about_desc', document.getElementById('st_about_desc')?.value || '');
+                formData.append('about_image', document.getElementById('st_about_image')?.value || '');
+                formData.append('about_stat_value', document.getElementById('st_about_stat_value')?.value || '');
+                formData.append('about_stat_label', document.getElementById('st_about_stat_label')?.value || '');
+
+                const aboutFeatures = [];
+                document.querySelectorAll('.about-feature-row').forEach(row => {
+                    aboutFeatures.push({
+                        icon: row.querySelector('.af-icon')?.value || '',
+                        color: row.querySelector('.af-color')?.value || '',
+                        title: row.querySelector('.af-title')?.value || '',
+                        desc: row.querySelector('.af-desc')?.value || ''
+                    });
                 });
-            });
-            formData.append('about_features', JSON.stringify(aboutFeatures));
+                formData.append('about_features', JSON.stringify(aboutFeatures));
 
-            formData.append('contact_title', document.getElementById('st_contact_title').value);
-            formData.append('contact_desc', document.getElementById('st_contact_desc').value);
+                formData.append('contact_title', document.getElementById('st_contact_title')?.value || '');
+                formData.append('contact_desc', document.getElementById('st_contact_desc')?.value || '');
 
-            const contactMethods = [];
-            document.querySelectorAll('.contact-method-row').forEach(row => {
-                contactMethods.push({
-                    icon: row.querySelector('.cm-icon').value,
-                    text: row.querySelector('.cm-text').value
+                const contactMethods = [];
+                document.querySelectorAll('.contact-method-row').forEach(row => {
+                    contactMethods.push({
+                        icon: row.querySelector('.cm-icon')?.value || '',
+                        text: row.querySelector('.cm-text')?.value || ''
+                    });
                 });
-            });
-            formData.append('contact_methods', JSON.stringify(contactMethods));
+                formData.append('contact_methods', JSON.stringify(contactMethods));
 
-            const socialLinks = [];
-            document.querySelectorAll('.social-link-row').forEach(row => {
-                socialLinks.push({
-                    icon: row.querySelector('.sl-icon').value,
-                    url: row.querySelector('.sl-url').value
+                const socialLinks = [];
+                document.querySelectorAll('.social-link-row').forEach(row => {
+                    socialLinks.push({
+                        icon: row.querySelector('.sl-icon')?.value || '',
+                        url: row.querySelector('.sl-url')?.value || ''
+                    });
                 });
-            });
-            formData.append('social_links_json', JSON.stringify(socialLinks));
+                formData.append('social_links_json', JSON.stringify(socialLinks));
 
-            // Telegram Bot settings
-            const botToken = document.getElementById('st_telegram_bot_token').value;
-            const chatId = document.getElementById('st_telegram_chat_id').value;
-            formData.append('telegram_bot_token', botToken);
-            formData.append('telegram_chat_id', chatId);
+                // Telegram Bot settings
+                const botToken = document.getElementById('st_telegram_bot_token')?.value || '';
+                const chatId = document.getElementById('st_telegram_chat_id')?.value || '';
+                formData.append('telegram_bot_token', botToken);
+                formData.append('telegram_chat_id', chatId);
 
-            // SMTP Settings
-            const smtpHost = document.getElementById('st_smtp_host').value;
-            const smtpPort = document.getElementById('st_smtp_port').value;
-            const smtpSecure = document.getElementById('st_smtp_secure').value;
-            const smtpFromName = document.getElementById('st_smtp_from_name').value;
-            const smtpUser = document.getElementById('st_smtp_user').value;
-            const smtpPass = document.getElementById('st_smtp_pass').value;
-            const smtpFromEmail = document.getElementById('st_smtp_from_email').value;
-            const smtpDefaultSubject = document.getElementById('st_smtp_default_subject').value;
-            const smtpDefaultBody = document.getElementById('st_smtp_default_body').value;
+                // SMTP Settings
+                const smtpHost = document.getElementById('st_smtp_host')?.value || '';
+                const smtpPort = document.getElementById('st_smtp_port')?.value || '';
+                const smtpSecure = document.getElementById('st_smtp_secure')?.value || '';
+                const smtpFromName = document.getElementById('st_smtp_from_name')?.value || '';
+                const smtpUser = document.getElementById('st_smtp_user')?.value || '';
+                const smtpPass = document.getElementById('st_smtp_pass')?.value || '';
+                const smtpFromEmail = document.getElementById('st_smtp_from_email')?.value || '';
+                const smtpDefaultSubject = document.getElementById('st_smtp_default_subject')?.value || '';
+                const smtpDefaultBody = document.getElementById('st_smtp_default_body')?.value || '';
 
-            formData.append('smtp_host', smtpHost);
-            formData.append('smtp_port', smtpPort);
-            formData.append('smtp_secure', smtpSecure);
-            formData.append('smtp_from_name', smtpFromName);
-            formData.append('smtp_user', smtpUser);
-            formData.append('smtp_pass', smtpPass);
-            formData.append('smtp_from_email', smtpFromEmail);
-            formData.append('smtp_default_subject', smtpDefaultSubject);
-            formData.append('smtp_default_body', smtpDefaultBody);
+                formData.append('smtp_host', smtpHost);
+                formData.append('smtp_port', smtpPort);
+                formData.append('smtp_secure', smtpSecure);
+                formData.append('smtp_from_name', smtpFromName);
+                formData.append('smtp_user', smtpUser);
+                formData.append('smtp_pass', smtpPass);
+                formData.append('smtp_from_email', smtpFromEmail);
+                formData.append('smtp_default_subject', smtpDefaultSubject);
+                formData.append('smtp_default_body', smtpDefaultBody);
 
-            fetch('?action=adminSaveSettings', {
-                method: 'POST',
-                headers: { 'X-Requested-With': 'XMLHttpRequest', 'X-CSRF-Token': APP_STATE.csrfToken },
-                body: (() => { formData.append('csrf_token', APP_STATE.csrfToken); return formData; })(),
-                credentials: 'same-origin'
-            })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        APP_STATE.settings['telegram_bot_token'] = botToken;
-                        APP_STATE.settings['telegram_chat_id'] = chatId;
-                        APP_STATE.settings['smtp_host'] = smtpHost;
-                        APP_STATE.settings['smtp_port'] = smtpPort;
-                        APP_STATE.settings['smtp_secure'] = smtpSecure;
-                        APP_STATE.settings['smtp_from_name'] = smtpFromName;
-                        APP_STATE.settings['smtp_user'] = smtpUser;
-                        APP_STATE.settings['smtp_pass'] = smtpPass;
-                        APP_STATE.settings['smtp_from_email'] = smtpFromEmail;
-                        APP_STATE.settings['smtp_default_subject'] = smtpDefaultSubject;
-                        APP_STATE.settings['smtp_default_body'] = smtpDefaultBody;
-                        AppNotify.success('Cấu hình website đã được cập nhật.', 'Lưu thành công');
-                    } else {
-                        AppNotify.error(data.message || 'Không thể lưu cấu hình.', 'Lỗi lưu');
-                    }
-                });
-        }
+                // Google Gemini API Key
+                const geminiKey = document.getElementById('st_gemini_api_key')?.value.trim() || '';
+                formData.append('gemini_api_key', geminiKey);
 
-        function saveTelegramSettings() {
-            const fd = new FormData();
-            const botToken = document.getElementById('st_telegram_bot_token').value;
-            const chatId = document.getElementById('st_telegram_chat_id').value;
-            fd.append('telegram_bot_token', botToken);
-            fd.append('telegram_chat_id', chatId);
-            
-            // Must include all allowed keys - send current values for everything else
-            ['bannerText','zalo','footerDesc','heroDesc','socialLink','copyright','terms_of_service','privacy_policy',
-             'sepay_active','sepay_mode','sepay_token','sepay_merchant_id','sepay_api_key',
-             'bank_id','bank_account','bank_name','about_title','about_desc','about_image',
-             'about_stat_value','about_stat_label','about_features','contact_title','contact_desc',
-             'contact_methods','social_links_json','demo_payment_active',
-             'smtp_host','smtp_port','smtp_secure','smtp_from_name','smtp_user','smtp_pass',
-             'smtp_from_email','smtp_default_subject','smtp_default_body'].forEach(k => {
-                const el = document.getElementById('st_' + k);
-                if (el) fd.append(k, el.type === 'checkbox' ? (el.checked ? '1' : '0') : el.value);
-                else fd.append(k, APP_STATE.settings[k] || '');
-            });
-            fd.append('csrf_token', APP_STATE.csrfToken);
-            fetch('?action=adminSaveSettings', {
-                method: 'POST',
-                headers: { 'X-Requested-With': 'XMLHttpRequest', 'X-CSRF-Token': APP_STATE.csrfToken },
-                body: fd, credentials: 'same-origin'
-            }).then(r => r.json()).then(d => {
-                if (d.success) {
+                const data = await apiPost('adminSaveSettings', formData);
+                if (data && data.success) {
                     APP_STATE.settings['telegram_bot_token'] = botToken;
                     APP_STATE.settings['telegram_chat_id'] = chatId;
-                    AppNotify.success('Cấu hình Telegram đã được lưu.', 'Lưu thành công');
-                } else {
-                    AppNotify.error(d.message || 'Không thể lưu.', 'Lỗi');
-                }
-            });
-        }
-
-        function saveSmtpSettings() {
-            const fd = new FormData();
-            const smtpHost = document.getElementById('st_smtp_host').value;
-            const smtpPort = document.getElementById('st_smtp_port').value;
-            const smtpSecure = document.getElementById('st_smtp_secure').value;
-            const smtpFromName = document.getElementById('st_smtp_from_name').value;
-            const smtpUser = document.getElementById('st_smtp_user').value;
-            const smtpPass = document.getElementById('st_smtp_pass').value;
-            const smtpFromEmail = document.getElementById('st_smtp_from_email').value;
-            const smtpDefaultSubject = document.getElementById('st_smtp_default_subject').value;
-            const smtpDefaultBody = document.getElementById('st_smtp_default_body').value;
-
-            fd.append('smtp_host', smtpHost);
-            fd.append('smtp_port', smtpPort);
-            fd.append('smtp_secure', smtpSecure);
-            fd.append('smtp_from_name', smtpFromName);
-            fd.append('smtp_user', smtpUser);
-            fd.append('smtp_pass', smtpPass);
-            fd.append('smtp_from_email', smtpFromEmail);
-            fd.append('smtp_default_subject', smtpDefaultSubject);
-            fd.append('smtp_default_body', smtpDefaultBody);
-            
-            // Send existing values for other fields
-            ['bannerText','zalo','footerDesc','heroDesc','socialLink','copyright','terms_of_service','privacy_policy',
-             'sepay_active','sepay_mode','sepay_token','sepay_merchant_id','sepay_api_key',
-             'bank_id','bank_account','bank_name','about_title','about_desc','about_image',
-             'about_stat_value','about_stat_label','about_features','contact_title','contact_desc',
-             'contact_methods','social_links_json','demo_payment_active',
-             'telegram_bot_token','telegram_chat_id'].forEach(k => {
-                const el = document.getElementById('st_' + k);
-                if (el) fd.append(k, el.type === 'checkbox' ? (el.checked ? '1' : '0') : el.value);
-                else fd.append(k, APP_STATE.settings[k] || '');
-            });
-            fd.append('csrf_token', APP_STATE.csrfToken);
-            
-            fetch('?action=adminSaveSettings', {
-                method: 'POST',
-                headers: { 'X-Requested-With': 'XMLHttpRequest', 'X-CSRF-Token': APP_STATE.csrfToken },
-                body: fd, credentials: 'same-origin'
-            }).then(r => r.json()).then(d => {
-                if (d.success) {
                     APP_STATE.settings['smtp_host'] = smtpHost;
                     APP_STATE.settings['smtp_port'] = smtpPort;
                     APP_STATE.settings['smtp_secure'] = smtpSecure;
@@ -5230,97 +5182,161 @@
                     APP_STATE.settings['smtp_from_email'] = smtpFromEmail;
                     APP_STATE.settings['smtp_default_subject'] = smtpDefaultSubject;
                     APP_STATE.settings['smtp_default_body'] = smtpDefaultBody;
-                    AppNotify.success('Cấu hình Email SMTP đã được lưu.', 'Lưu thành công');
+                    APP_STATE.settings['gemini_api_key'] = geminiKey;
+                    AppNotify.success('Toàn bộ cấu hình website đã được lưu thành công!', 'Lưu thành công');
                 } else {
-                    AppNotify.error(d.message || 'Không thể lưu.', 'Lỗi');
+                    AppNotify.error((data && data.message) || 'Không thể lưu cấu hình.', 'Lỗi lưu');
                 }
-            });
+            } catch (err) {
+                console.error(err);
+                AppNotify.error('Đã xảy ra lỗi khi lưu cấu hình.', 'Lỗi');
+            } finally {
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerHTML = originalHtml || '<i class="fa-solid fa-floppy-disk me-2"></i>Lưu toàn bộ cấu hình';
+                }
+            }
         }
 
-        function testSmtp() {
-            Swal.fire({
-                title: 'Gửi Email thử nghiệm',
-                text: 'Nhập địa chỉ email nhận thư thử nghiệm:',
-                input: 'email',
-                inputPlaceholder: 'email_cua_ban@example.com',
-                showCancelButton: true,
-                confirmButtonText: 'Gửi thử',
-                cancelButtonText: 'Hủy',
-                confirmButtonColor: '#111',
-                preConfirm: (email) => {
-                    if (!email) {
-                        Swal.showValidationMessage('Vui lòng nhập địa chỉ email hợp lệ');
-                    }
-                    return email;
-                }
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    const email = result.value;
-                    const btn = document.getElementById('btnSmtpTest');
-                    btn.disabled = true;
-                    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Đang gửi...';
+        async function saveTelegramSettings() {
+            const btn = document.getElementById('btnSaveTelegram') || document.querySelector('button[onclick="saveTelegramSettings()"]');
+            const originalHtml = btn ? btn.innerHTML : '';
+            if (btn) {
+                btn.disabled = true;
+                btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Đang lưu Telegram...';
+            }
 
-                    const fd = new FormData();
-                    fd.append('test_email', email);
-                    fd.append('csrf_token', APP_STATE.csrfToken);
-
-                    fetch('?action=adminSmtpTest', {
-                        method: 'POST',
-                        headers: { 'X-Requested-With': 'XMLHttpRequest', 'X-CSRF-Token': APP_STATE.csrfToken },
-                        body: fd,
-                        credentials: 'same-origin'
-                    })
-                    .then(res => res.json())
-                    .then(data => {
-                        if (data.success) {
-                            AppNotify.success(data.message || 'Đã gửi email thử nghiệm thành công! Vui lòng kiểm tra hộp thư.');
-                        } else {
-                            AppNotify.error(data.message || 'Lỗi gửi email thử nghiệm.');
-                        }
-                    })
-                    .catch(() => AppNotify.error('Không thể kết nối server.'))
-                    .finally(() => {
-                        btn.disabled = false;
-                        btn.innerHTML = '<i class="fa-solid fa-paper-plane me-2"></i>Gửi thử Email';
-                    });
-                }
-            });
-        }
-
-        function testTelegram() {
-            const btn = document.getElementById('btnTelegramTest');
-            btn.disabled = true;
-            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Đang gửi...';
-            const fd = new FormData();
-            fd.append('csrf_token', APP_STATE.csrfToken);
-            fetch('?action=adminTelegramTest', {
-                method: 'POST',
-                headers: { 'X-Requested-With': 'XMLHttpRequest', 'X-CSRF-Token': APP_STATE.csrfToken },
-                body: fd, credentials: 'same-origin'
-            }).then(r => r.json()).then(d => {
-                if (d.success) {
-                    AppNotify.success(d.message || 'Gửi test thành công!', 'Telegram OK ✅');
-                } else {
-                    AppNotify.error(d.message || 'Gửi thất bại.', 'Telegram lỗi ❌');
-                }
-            }).catch(() => AppNotify.error('Không thể kết nối server.', 'Lỗi mạng'))
-            .finally(() => {
-                btn.disabled = false;
-                btn.innerHTML = '<i class="fa-brands fa-telegram me-2"></i>Test kết nối';
-            });
-        }
-
-        function saveGeminiSettings() {
-            const key = document.getElementById('st_gemini_api_key').value.trim();
-            apiPost('adminSaveGeminiApiKey', { gemini_api_key: key })
-                .then(res => {
-                    if (res && res.success) {
-                        APP_STATE.settings['gemini_api_key'] = key;
-                        AppNotify.success('Đã lưu Gemini API Key thành công!', 'Cài đặt');
-                    } else {
-                        AppNotify.error((res && res.message) || 'Không thể lưu key.', 'Lỗi');
-                    }
+            try {
+                const fd = new FormData();
+                const botToken = document.getElementById('st_telegram_bot_token')?.value || '';
+                const chatId = document.getElementById('st_telegram_chat_id')?.value || '';
+                fd.append('telegram_bot_token', botToken);
+                fd.append('telegram_chat_id', chatId);
+                
+                ['bannerText','zalo','footerDesc','heroDesc','socialLink','copyright','terms_of_service','privacy_policy',
+                 'sepay_active','sepay_mode','sepay_token','sepay_merchant_id','sepay_api_key',
+                 'bank_id','bank_account','bank_name','about_title','about_desc','about_image',
+                 'about_stat_value','about_stat_label','about_features','contact_title','contact_desc',
+                 'contact_methods','social_links_json','demo_payment_active',
+                 'smtp_host','smtp_port','smtp_secure','smtp_from_name','smtp_user','smtp_pass',
+                 'smtp_from_email','smtp_default_subject','smtp_default_body','gemini_api_key'].forEach(k => {
+                    const el = document.getElementById('st_' + k);
+                    if (el) fd.append(k, el.type === 'checkbox' ? (el.checked ? '1' : '0') : el.value);
+                    else if (APP_STATE.settings && APP_STATE.settings[k] !== undefined) fd.append(k, APP_STATE.settings[k] || '');
                 });
+
+                const d = await apiPost('adminSaveSettings', fd);
+                if (d && d.success) {
+                    APP_STATE.settings['telegram_bot_token'] = botToken;
+                    APP_STATE.settings['telegram_chat_id'] = chatId;
+                    AppNotify.success('Cấu hình Telegram đã được lưu thành công!', 'Lưu thành công');
+                } else {
+                    AppNotify.error((d && d.message) || 'Không thể lưu cấu hình Telegram.', 'Lỗi');
+                }
+            } catch (err) {
+                console.error(err);
+                AppNotify.error('Đã xảy ra lỗi khi lưu Telegram.', 'Lỗi');
+            } finally {
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerHTML = originalHtml || '<i class="fa-solid fa-floppy-disk me-2"></i>Lưu Telegram';
+                }
+            }
+        }
+
+        async function saveSmtpSettings() {
+            const btn = document.getElementById('btnSaveSmtp') || document.querySelector('button[onclick="saveSmtpSettings()"]');
+            const originalHtml = btn ? btn.innerHTML : '';
+            if (btn) {
+                btn.disabled = true;
+                btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Đang lưu Email...';
+            }
+
+            try {
+                const fd = new FormData();
+                const smtpHost = document.getElementById('st_smtp_host')?.value || '';
+                const smtpPort = document.getElementById('st_smtp_port')?.value || '';
+                const smtpSecure = document.getElementById('st_smtp_secure')?.value || '';
+                const smtpFromName = document.getElementById('st_smtp_from_name')?.value || '';
+                const smtpUser = document.getElementById('st_smtp_user')?.value || '';
+                const smtpPass = document.getElementById('st_smtp_pass')?.value || '';
+                const smtpFromEmail = document.getElementById('st_smtp_from_email')?.value || '';
+                const smtpDefaultSubject = document.getElementById('st_smtp_default_subject')?.value || '';
+                const smtpDefaultBody = document.getElementById('st_smtp_default_body')?.value || '';
+
+                fd.append('smtp_host', smtpHost);
+                fd.append('smtp_port', smtpPort);
+                fd.append('smtp_secure', smtpSecure);
+                fd.append('smtp_from_name', smtpFromName);
+                fd.append('smtp_user', smtpUser);
+                fd.append('smtp_pass', smtpPass);
+                fd.append('smtp_from_email', smtpFromEmail);
+                fd.append('smtp_default_subject', smtpDefaultSubject);
+                fd.append('smtp_default_body', smtpDefaultBody);
+                
+                ['bannerText','zalo','footerDesc','heroDesc','socialLink','copyright','terms_of_service','privacy_policy',
+                 'sepay_active','sepay_mode','sepay_token','sepay_merchant_id','sepay_api_key',
+                 'bank_id','bank_account','bank_name','about_title','about_desc','about_image',
+                 'about_stat_value','about_stat_label','about_features','contact_title','contact_desc',
+                 'contact_methods','social_links_json','demo_payment_active',
+                 'telegram_bot_token','telegram_chat_id','gemini_api_key'].forEach(k => {
+                    const el = document.getElementById('st_' + k);
+                    if (el) fd.append(k, el.type === 'checkbox' ? (el.checked ? '1' : '0') : el.value);
+                    else if (APP_STATE.settings && APP_STATE.settings[k] !== undefined) fd.append(k, APP_STATE.settings[k] || '');
+                });
+                
+                const d = await apiPost('adminSaveSettings', fd);
+                if (d && d.success) {
+                    APP_STATE.settings['smtp_host'] = smtpHost;
+                    APP_STATE.settings['smtp_port'] = smtpPort;
+                    APP_STATE.settings['smtp_secure'] = smtpSecure;
+                    APP_STATE.settings['smtp_from_name'] = smtpFromName;
+                    APP_STATE.settings['smtp_user'] = smtpUser;
+                    APP_STATE.settings['smtp_pass'] = smtpPass;
+                    APP_STATE.settings['smtp_from_email'] = smtpFromEmail;
+                    APP_STATE.settings['smtp_default_subject'] = smtpDefaultSubject;
+                    APP_STATE.settings['smtp_default_body'] = smtpDefaultBody;
+                    AppNotify.success('Cấu hình Email (SMTP) đã được lưu thành công!', 'Lưu thành công');
+                } else {
+                    AppNotify.error((d && d.message) || 'Không thể lưu Email.', 'Lỗi');
+                }
+            } catch (err) {
+                console.error(err);
+                AppNotify.error('Đã xảy ra lỗi khi lưu cấu hình Email.', 'Lỗi');
+            } finally {
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerHTML = originalHtml || '<i class="fa-solid fa-floppy-disk me-2"></i>Lưu cấu hình Email';
+                }
+            }
+        }
+
+        async function saveGeminiSettings() {
+            const btn = document.getElementById('btnSaveGeminiKey') || document.querySelector('button[onclick="saveGeminiSettings()"]');
+            const originalHtml = btn ? btn.innerHTML : '';
+            if (btn) {
+                btn.disabled = true;
+                btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Đang lưu...';
+            }
+
+            try {
+                const key = document.getElementById('st_gemini_api_key')?.value.trim() || '';
+                const res = await apiPost('adminSaveGeminiApiKey', { gemini_api_key: key });
+                if (res && res.success) {
+                    APP_STATE.settings['gemini_api_key'] = key;
+                    AppNotify.success(res.message || 'Đã lưu Google Gemini API Key thành công!', 'Cấu hình Gemini');
+                } else {
+                    AppNotify.error((res && res.message) || 'Không thể lưu Gemini API Key.', 'Lỗi');
+                }
+            } catch (err) {
+                console.error(err);
+                AppNotify.error('Đã xảy ra lỗi khi lưu Gemini Key.', 'Lỗi');
+            } finally {
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerHTML = originalHtml || '<i class="fa-solid fa-floppy-disk me-2"></i>Lưu Gemini Key';
+                }
+            }
         }
 
         function addAboutFeatureRow(data = { icon: 'fa-bolt', color: 'text-warning', title: '', desc: '' }) {
