@@ -44,33 +44,35 @@ $reviewCount = count($reviews);
     ?>
 
     <div class="product-detail-container">
-        <div class="row align-items-center">
-            <div class="col-lg-6 mb-4 mb-lg-0 text-center">
-                <img src="<?= htmlspecialchars(image_url($product['image'])) ?>" class="detail-image shadow-sm w-100 rounded-4"
-                    alt="<?= htmlspecialchars($product['title'] ?? 'Sản phẩm') ?>" loading="eager" fetchpriority="high" decoding="async" style="height: auto; object-fit: cover; border: 1px solid var(--border-color);">
+        <div class="row align-items-start">
+            <div class="col-lg-6 mb-4 mb-lg-0 text-center product-gallery-col">
+                <div class="product-gallery-sticky">
+                    <img src="<?= htmlspecialchars(image_url($product['image'])) ?>" class="detail-image shadow-sm w-100 rounded-4"
+                        alt="<?= htmlspecialchars($product['title'] ?? 'Sản phẩm') ?>" loading="eager" fetchpriority="high" decoding="async" style="height: auto; object-fit: cover; border: 1px solid var(--border-color);">
 
-                <!-- Trust Badges Under Image -->
-                <div class="trust-badges-container">
-                    <div class="trust-badge-card">
-                        <div class="trust-icon-circle">
-                            <i class="fa-solid fa-shield-halved"></i>
+                    <!-- Trust Badges Under Image -->
+                    <div class="trust-badges-container">
+                        <div class="trust-badge-card">
+                            <div class="trust-icon-circle">
+                                <i class="fa-solid fa-shield-halved"></i>
+                            </div>
+                            <div class="trust-badge-title">Bảo Hành</div>
+                            <div class="trust-badge-desc">1 đổi 1 trọn đời</div>
                         </div>
-                        <div class="trust-badge-title">Bảo Hành</div>
-                        <div class="trust-badge-desc">1 đổi 1 trọn đời</div>
-                    </div>
-                    <div class="trust-badge-card">
-                        <div class="trust-icon-circle">
-                            <i class="fa-solid fa-truck-fast"></i>
+                        <div class="trust-badge-card">
+                            <div class="trust-icon-circle">
+                                <i class="fa-solid fa-truck-fast"></i>
+                            </div>
+                            <div class="trust-badge-title">Giao Hàng</div>
+                            <div class="trust-badge-desc">Tự động 5 phút</div>
                         </div>
-                        <div class="trust-badge-title">Giao Hàng</div>
-                        <div class="trust-badge-desc">Tự động 5 phút</div>
-                    </div>
-                    <div class="trust-badge-card">
-                        <div class="trust-icon-circle">
-                            <i class="fa-solid fa-clock"></i>
+                        <div class="trust-badge-card">
+                            <div class="trust-icon-circle">
+                                <i class="fa-solid fa-clock"></i>
+                            </div>
+                            <div class="trust-badge-title">Hỗ Trợ</div>
+                            <div class="trust-badge-desc">24/7 mọi lúc</div>
                         </div>
-                        <div class="trust-badge-title">Hỗ Trợ</div>
-                        <div class="trust-badge-desc">24/7 mọi lúc</div>
                     </div>
                 </div>
             </div>
@@ -386,6 +388,19 @@ $reviewCount = count($reviews);
 </div>
 
 <style>
+/* Product Gallery Desktop Top Alignment & Sticky */
+@media (min-width: 992px) {
+    .product-gallery-col {
+        align-self: flex-start !important;
+    }
+    .product-gallery-sticky {
+        position: -webkit-sticky;
+        position: sticky;
+        top: 24px;
+        z-index: 5;
+    }
+}
+
 .product-detail-description h1,
 .product-detail-description h2,
 .product-detail-description h3 {
