@@ -2580,7 +2580,7 @@
                                     <div class="d-flex align-items-center gap-2">
                                         <div class="input-group input-group-sm" style="width: 215px;" title="Nhập số gói để tự động tạo sẵn 2 gói hoặc 3 gói">
                                             <span class="input-group-text bg-white px-2 small text-muted"><i class="fa-solid fa-layer-group text-primary me-1"></i>Tạo nhanh:</span>
-                                            <input type="number" id="p_variant_auto_count" class="form-control text-center px-1" min="1" max="6" placeholder="2 hoặc 3" oninput="autoGenerateVariantsOnInput(this.value)">
+                                            <input type="number" id="p_variant_auto_count" class="form-control text-center px-1" min="1" max="30" placeholder="Số gói" oninput="autoGenerateVariantsOnInput(this.value)">
                                             <button type="button" class="btn btn-outline-primary" onclick="autoGenerateVariantsByCount(document.getElementById('p_variant_auto_count').value)">Tạo</button>
                                         </div>
                                         <button type="button" class="btn btn-sm btn-outline-dark" onclick="addVariantRow()">
@@ -4545,7 +4545,7 @@
                 AppNotify.warning('Vui lòng nhập số gói hợp lệ (ví dụ: 2, 3...)', 'Variants');
                 return;
             }
-            const finalCount = Math.min(count, 10);
+            const finalCount = Math.min(count, 30);
 
             let basePrice = parseFloat(document.getElementById('p_price').value) || 120000;
             if (basePrice <= 0) basePrice = 120000;
@@ -4651,6 +4651,10 @@
             const category = catSelect ? catSelect.value : '';
             const categoryName = (catSelect && catSelect.selectedIndex >= 0) ? catSelect.options[catSelect.selectedIndex].text : '';
 
+            // Số gói mong muốn nếu có nhập ở ô Tạo nhanh
+            const countInput = document.getElementById('p_variant_auto_count');
+            const variant_count = countInput ? (parseInt(countInput.value, 10) || 0) : 0;
+
             // Thu thập dữ liệu hiện có trên form (nếu có)
             const existing_data = {
                 price: document.getElementById('p_price')?.value || '',
@@ -4675,6 +4679,7 @@
                     prompt, 
                     model, 
                     category,
+                    variant_count,
                     existing_data: JSON.stringify(existing_data)
                 });
 

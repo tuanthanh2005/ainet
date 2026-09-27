@@ -123,7 +123,11 @@ class GeminiService {
      * Gọi Gemini API tạo toàn bộ thông tin sản phẩm và SEO
      * Hỗ trợ kết hợp tiêu đề, định hướng mô tả của Admin và dữ liệu sẵn có trên form
      */
-    public static function generateProduct(string $title, string $requestedModel = 'gemini-3.1-flash', ?string $currentCategory = null, string $customPrompt = '', array $existingData = []): array {
+    /**
+     * Gọi Gemini API tạo toàn bộ thông tin sản phẩm và SEO
+     * Hỗ trợ kết hợp tiêu đề, định hướng mô tả của Admin và dữ liệu sẵn có trên form
+     */
+    public static function generateProduct(string $title, string $requestedModel = 'gemini-3.1-flash', ?string $currentCategory = null, string $customPrompt = '', array $existingData = [], int $variantCount = 0): array {
         $apiKey = self::getApiKey();
         if ($apiKey === '') {
             throw new RuntimeException('Chưa có Gemini API Key. Vui lòng bấm vào biểu tượng chìa khóa bên cạnh để nhập API Key từ Google AI Studio (aistudio.google.com).');
@@ -134,6 +138,10 @@ class GeminiService {
         if ($title === '' && $customPrompt === '') {
             throw new RuntimeException('Vui lòng nhập Tên sản phẩm hoặc Mô tả/Yêu cầu trước khi tạo tự động.');
         }
+
+        // Tự động phân tích xem admin có liệt kê sẵn danh sách các gói trong mô tả không
+        $extractedVariants = self::extractVariantsFromText($customPrompt . "\n" . $title);
+        $extractedCount = count($extractedVariants);
 
         $categories = Category::getAll();
         $catDescriptions = [];
@@ -161,6 +169,14 @@ class GeminiService {
 
         $effectiveTitle = $title !== '' ? $title : ('Dịch vụ số / Tài khoản theo yêu cầu: ' . substr($customPrompt, 0, 80));
 
+        if ($extractedCount > 0) {
+            $variantInstruction = "3. CÁC GÓI / BIẾN THỂ (\"variants\"): ADMIN ĐÃ LIỆT KÊ RÕ {$extractedCount} GÓI TRONG MÔ TẢ. BẮT BUỘC PHẢI TẠO ĐẦY ĐỦ 100% CẢ {$extractedCount} GÓI NÀY, TUYỆT ĐỐI KHÔNG ĐƯỢC BỎ BỚT HOẶC RÚT GỌN! Chuyển đổi chính xác giá tiền sang số nguyên VNĐ (VD: 1980k -> 1980000, 470k -> 470000). Giá gốc tính cao hơn giá bán 20-35%. Nếu có 'random số lượng' thì gán kho ngẫu nhiên 20-99.";
+        } elseif ($variantCount > 0) {
+            $variantInstruction = "3. CÁC GÓI / BIẾN THỂ (\"variants\"): Hãy tạo đúng {$variantCount} gói dịch vụ thực tế phù hợp với mô tả và sản phẩm (VD: Gói 1 Tháng, Gói 3 Tháng, Gói 6 Tháng, Gói 1 Năm...), có giá bán, giá gốc hợp lý.";
+        } else {
+            $variantInstruction = "3. CÁC GÓI / BIẾN THỂ (\"variants\"): Tạo các gói dịch vụ thực tế phù hợp với mô tả (VD: Gói 1 Tháng, Gói 3 Tháng, Gói 1 Năm hoặc Tài khoản cấp sẵn / Nâng cấp chính chủ), có giá bán, giá gốc hợp lý.";
+        }
+
         $prompt = <<<PROMPT
 Bạn là chuyên gia marketing thương mại điện tử chuyên về sản phẩm phần mềm, tài khoản AI Premium, dịch vụ số tại Việt Nam (aicuatoi.net).
 Hãy tạo nội dung sản phẩm hoàn chỉnh, lôi cuốn, bán chạy, chuẩn phong cách Việt Nam và chuẩn SEO Google dựa trên thông tin sau:
@@ -172,7 +188,7 @@ Danh sách danh mục có sẵn trên website (hãy chọn slug danh mục phù 
 HƯỚNG DẪN XỬ LÝ (QUAN TRỌNG):
 1. ĐA DẠNG NỘI DUNG & BÁM SÁT MÔ TẢ ADMIN: Không chỉ rập khuôn theo tiêu đề ngắn, mà hãy phát triển sâu theo mọi ý tưởng, định hướng, ưu đãi, quà tặng, thời hạn, chính sách bảo hành được Admin mô tả trong phần YÊU CẦU & ĐỊNH HƯỚNG.
 2. NỘI DUNG BÀI VIẾT ("description"): Viết bằng mã HTML đẹp mắt (dùng <h2>, <h3>, <ul>, <li>, <strong>, bảng tính năng, cam kết bảo hành, lưu ý sử dụng).
-3. CÁC GÓI / BIẾN THỂ ("variants"): Tạo 2 đến 3 gói dịch vụ thực tế phù hợp với mô tả (VD: Gói 1 Tháng, Gói 3 Tháng, Gói 1 Năm hoặc Tài khoản cấp sẵn / Nâng cấp chính chủ), có giá bán, giá gốc hợp lý.
+{$variantInstruction}
 4. ĐIỀU CHỈNH TIÊU ĐỀ ("title"): Nếu tiêu đề ban đầu chưa đủ hấp dẫn hoặc chưa có, hãy tạo một tiêu đề thương mại điện tử thật chuyên nghiệp và thu hút.
 
 Yêu cầu trả về DUY NHẤT một chuỗi JSON hợp lệ (không kèm markdown ```json hay giải thích nào khác) với cấu trúc chính xác sau:
@@ -195,25 +211,9 @@ Yêu cầu trả về DUY NHẤT một chuỗi JSON hợp lệ (không kèm mark
   "seo_keywords": "tu khoa 1, tu khoa 2, tu khoa 3, mua tai khoan...",
   "variants": [
     {
-      "name": "Gói 1 Tháng",
+      "name": "Tên gói dịch vụ",
       "price": 150000,
       "original_price": 250000,
-      "stock": 99,
-      "is_upgrade": 0,
-      "require_password": 1
-    },
-    {
-      "name": "Gói 3 Tháng",
-      "price": 390000,
-      "original_price": 600000,
-      "stock": 99,
-      "is_upgrade": 0,
-      "require_password": 1
-    },
-    {
-      "name": "Gói 1 Năm",
-      "price": 1390000,
-      "original_price": 2200000,
       "stock": 99,
       "is_upgrade": 0,
       "require_password": 1
@@ -229,6 +229,33 @@ PROMPT;
             try {
                 $rawResult = self::callGeminiApi($modelName, $apiKey, $prompt);
                 if (!empty($rawResult)) {
+                    // Nếu Admin đã cung cấp danh sách gói cụ thể, ưu tiên bảo toàn 100%
+                    if ($extractedCount > 0) {
+                        $aiVariants = is_array($rawResult['variants'] ?? null) ? $rawResult['variants'] : [];
+                        if (count($aiVariants) < $extractedCount) {
+                            $rawResult['variants'] = $extractedVariants;
+                        } else {
+                            $rawResult['variants'] = $extractedVariants;
+                        }
+                    }
+
+                    // Tự động đồng bộ giá bán của sản phẩm chính bằng giá của gói rẻ nhất
+                    if (!empty($rawResult['variants']) && is_array($rawResult['variants'])) {
+                        $prices = array_filter(array_column($rawResult['variants'], 'price'), fn($p) => is_numeric($p) && $p > 0);
+                        if (!empty($prices)) {
+                            $minPrice = min($prices);
+                            if (empty($rawResult['price']) || $rawResult['price'] <= 0 || $rawResult['price'] > $minPrice) {
+                                $rawResult['price'] = (int)$minPrice;
+                                foreach ($rawResult['variants'] as $v) {
+                                    if (($v['price'] ?? 0) == $minPrice && !empty($v['original_price'])) {
+                                        $rawResult['original_price'] = (int)$v['original_price'];
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                    }
+
                     $rawResult['used_model'] = $modelName;
                     return $rawResult;
                 }
@@ -246,6 +273,145 @@ PROMPT;
         }
 
         throw new RuntimeException($lastError);
+    }
+
+    /**
+     * Tự động trích xuất các gói dịch vụ (variants) từ mô tả hoặc yêu cầu của Admin
+     * Hỗ trợ định dạng: "Tên gói | Giá | Kho" hoặc "Tên gói: Giá" hoặc dạng copy từ Telegram/Zalo
+     */
+    public static function extractVariantsFromText(string $text): array {
+        $hasRandomStock = (bool)preg_match('/random\s*(s[ôố]\s*l[ưư][ơợ]ng|kho|stock)/iu', $text);
+
+        // Chuẩn hóa dòng
+        $cleanText = str_replace(["\r\n", "\r"], "\n", $text);
+        $rawLines = explode("\n", $cleanText);
+        $candidateLines = [];
+
+        foreach ($rawLines as $line) {
+            $line = trim($line);
+            if ($line === '') continue;
+
+            // Bỏ qua câu chỉ thị như "có thể random số lượng"
+            if (preg_match('/^(có\s*thể|random|lưu\s*ý|chú\s*ý|ghi\s*chú|note|yêu\s*cầu)\b/iu', $line)) {
+                continue;
+            }
+
+            // Nếu trên cùng 1 dòng có nhiều gói phân cách bằng khoảng trắng hoặc icon gói hàng 📦
+            if (substr_count($line, '|') >= 3) {
+                $subItems = preg_split('/(?<=[📦\d\w\x{221e}…\.\)])\s{2,}(?=[A-ZÀ-Ỹa-z0-9])/u', $line);
+                if (count($subItems) > 1) {
+                    foreach ($subItems as $sub) {
+                        if (trim($sub) !== '') $candidateLines[] = trim($sub);
+                    }
+                    continue;
+                }
+            }
+
+            $candidateLines[] = $line;
+        }
+
+        $variants = [];
+
+        foreach ($candidateLines as $cand) {
+            // Định dạng 1: Phân cách bằng dấu '|' (Ví dụ: "Slot Veo3 Ultra Riêng 25K Credits 1 tháng BHF | 1980k | 📦 ∞")
+            if (str_contains($cand, '|')) {
+                $parts = array_map('trim', explode('|', $cand));
+                if (count($parts) >= 2) {
+                    $name = $parts[0];
+                    $priceRaw = $parts[1];
+                    $stockRaw = $parts[2] ?? '';
+
+                    $price = self::parsePriceNumber($priceRaw);
+                    if ($price > 0 && mb_strlen($name) >= 2) {
+                        $orig = self::parsePriceNumber($parts[3] ?? '') ?: (int)(ceil(($price * 1.3) / 10000) * 10000);
+                        $stock = 99;
+                        if ($hasRandomStock) {
+                            $stock = rand(20, 95);
+                        } elseif (preg_match('/(\d+)/', $stockRaw, $sm)) {
+                            $stock = (int)$sm[1];
+                        }
+
+                        $isUpgrade = (bool)preg_match('/(nâng\s*cấp|nang\s*cap|chính\s*chủ|chinh\s*chu|upgrade)/iu', $name);
+
+                        $variants[] = [
+                            'name' => self::cleanVariantName($name),
+                            'price' => $price,
+                            'original_price' => $orig,
+                            'stock' => $stock,
+                            'is_upgrade' => $isUpgrade ? 1 : 0,
+                            'require_password' => 1
+                        ];
+                        continue;
+                    }
+                }
+            }
+
+            // Định dạng 2: Phân cách bằng dấu ':' hoặc '-' (Ví dụ: "- Gói 1 tháng: 150k")
+            if (preg_match('/^[-*•]?\s*(.+?)[\s:=-]+([0-9\.,]+\s*(?:k|tr|m|đ|₫|vnđ|vnd)?)\s*(?:[-|]\s*kho\s*(\d+|∞))?/iu', $cand, $m)) {
+                $name = trim($m[1], " \t\n\r\0\x0B-:*•");
+                $priceRaw = $m[2];
+                $stockRaw = $m[3] ?? '';
+
+                $price = self::parsePriceNumber($priceRaw);
+                if ($price >= 1000 && mb_strlen($name) >= 2 && !preg_match('/^(giá|giá bán|giá gốc)/iu', $name)) {
+                    $orig = (int)(ceil(($price * 1.3) / 10000) * 10000);
+                    $stock = $hasRandomStock ? rand(20, 95) : 99;
+                    if (is_numeric($stockRaw)) {
+                        $stock = (int)$stockRaw;
+                    }
+                    $isUpgrade = (bool)preg_match('/(nâng\s*cấp|nang\s*cap|chính\s*chủ|chinh\s*chu|upgrade)/iu', $name);
+
+                    $variants[] = [
+                        'name' => self::cleanVariantName($name),
+                        'price' => $price,
+                        'original_price' => $orig,
+                        'stock' => $stock,
+                        'is_upgrade' => $isUpgrade ? 1 : 0,
+                        'require_password' => 1
+                    ];
+                }
+            }
+        }
+
+        return $variants;
+    }
+
+    private static function parsePriceNumber(string $raw): int {
+        $raw = trim($raw);
+        if ($raw === '') return 0;
+
+        if (preg_match('/([\d\.,]+)\s*([kmtrđ₫vnđvnd]*)/iu', $raw, $m)) {
+            $numPart = $m[1];
+            $unit = mb_strtolower(trim($m[2] ?? ''));
+
+            if (str_contains($numPart, '.') || str_contains($numPart, ',')) {
+                if (preg_match('/^\d{1,3}(?:[\.,]\d{3})+$/', $numPart)) {
+                    $valFloat = (float)str_replace(['.', ','], '', $numPart);
+                } else {
+                    $valFloat = (float)str_replace(',', '.', $numPart);
+                }
+            } else {
+                $valFloat = (float)$numPart;
+            }
+
+            if (str_starts_with($unit, 'k')) {
+                return (int)round($valFloat * 1000);
+            } elseif (str_starts_with($unit, 'tr') || str_starts_with($unit, 'm')) {
+                return (int)round($valFloat * 1000000);
+            } else {
+                if ($valFloat > 0 && $valFloat < 1000 && ($unit === '' || $unit === 'k')) {
+                    return (int)round($valFloat * 1000);
+                }
+                return (int)round($valFloat);
+            }
+        }
+        return 0;
+    }
+
+    private static function cleanVariantName(string $name): string {
+        $name = trim($name, " \t\n\r\0\x0B-|:•*");
+        $name = preg_replace('/^[-*•\d\.\)]\s*/u', '', $name);
+        return trim($name);
     }
 
     private static function callGeminiApi(string $model, string $apiKey, string $prompt): array {

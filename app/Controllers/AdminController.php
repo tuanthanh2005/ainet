@@ -364,8 +364,10 @@ class AdminController extends Controller {
             $this->jsonError('Vui lòng nhập Tên sản phẩm hoặc Mô tả / Yêu cầu cho AI trước khi tạo.');
         }
 
+        $variantCount = (int)($_POST['variant_count'] ?? 0);
+
         try {
-            $data = GeminiService::generateProduct($title, $model, $category, $prompt, $existingData);
+            $data = GeminiService::generateProduct($title, $model, $category, $prompt, $existingData, $variantCount);
             $this->jsonSuccess(['product' => $data]);
         } catch (Throwable $e) {
             $this->jsonError($e->getMessage());
