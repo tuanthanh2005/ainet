@@ -2373,9 +2373,44 @@
                     <form id="productForm">
                         <input type="hidden" id="p_id">
                         <div class="row">
+                            <!-- Gemini AI Auto-Fill Bar -->
+                            <div class="col-12 mb-3">
+                                <div class="p-3 rounded-3 border d-flex flex-wrap align-items-center justify-content-between gap-2 shadow-sm" style="background: linear-gradient(135deg, #f8faff 0%, #edf2fe 100%); border-color: #c7d8fe !important;">
+                                    <div class="d-flex align-items-center gap-2">
+                                        <div class="d-flex align-items-center justify-content-center bg-primary text-white rounded-circle shadow-sm" style="width: 34px; height: 34px;">
+                                            <i class="fa-solid fa-wand-magic-sparkles"></i>
+                                        </div>
+                                        <div>
+                                            <div class="fw-bold small text-dark d-flex align-items-center gap-1.5">
+                                                <span>AI Auto-Fill (Google Gemini)</span>
+                                                <span class="badge bg-primary-subtle text-primary border border-primary-subtle" style="font-size: 0.68rem;">Tự động điền 100%</span>
+                                            </div>
+                                            <div class="text-muted" style="font-size: 0.75rem;">Nhập tên sản phẩm &rarr; Bấm <b>Auto Điền</b> để tạo tự động mô tả, tính năng, SEO &amp; các gói</div>
+                                        </div>
+                                    </div>
+                                    <div class="d-flex align-items-center gap-2 flex-grow-1 flex-sm-grow-0 justify-content-end">
+                                        <select id="gemini_model_select" class="form-select form-select-sm shadow-sm" style="min-width: 175px; font-weight: 500; border-radius: 8px;">
+                                            <option value="gemini-3.5-flash" selected>Gemini 3.5 Flash</option>
+                                            <option value="gemini-3.1-flash-lite">Gemini 3.1 Flash-Lite</option>
+                                        </select>
+                                        <button type="button" class="btn btn-sm btn-primary text-white px-3 fw-semibold shadow-sm d-flex align-items-center gap-1.5" id="btn-gemini-auto-fill" onclick="aiAutoFillProduct()" style="border-radius: 8px;">
+                                            <i class="fa-solid fa-bolt"></i>
+                                            <span id="btn-gemini-text">Auto Điền</span>
+                                        </button>
+                                        <button type="button" class="btn btn-sm btn-light border shadow-sm" onclick="configureGeminiKeyModal()" title="Cài đặt Gemini API Key" style="border-radius: 8px;">
+                                            <i class="fa-solid fa-key text-secondary"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
                             <div class="col-md-8 mb-3">
                                 <label class="form-label">Tên sản phẩm</label>
-                                <input type="text" class="form-control" id="p_title" required>
+                                <div class="input-group">
+                                    <input type="text" class="form-control" id="p_title" placeholder="VD: Tài khoản ChatGPT Plus 1 Tháng" required>
+                                    <button class="btn btn-outline-primary" type="button" onclick="aiAutoFillProduct()" title="Dùng AI điền tự động form từ tên sản phẩm này">
+                                        <i class="fa-solid fa-wand-magic-sparkles me-1"></i>Auto
+                                    </button>
+                                </div>
                             </div>
                             <div class="col-md-4 mb-3">
                                 <label class="form-label">Danh mục</label>
@@ -2484,11 +2519,18 @@
                             </div>
 
                             <div class="col-12">
-                                <div class="d-flex justify-content-between align-items-center mb-2">
-                                    <label class="form-label mb-0">Các loại / Gói dịch vụ (Variants)</label>
-                                    <button type="button" class="btn btn-sm btn-outline-dark" onclick="addVariantRow()">
-                                        <i class="fa-solid fa-plus me-1"></i> Thêm loại
-                                    </button>
+                                <div class="d-flex justify-content-between align-items-center mb-2 flex-wrap gap-2">
+                                    <label class="form-label mb-0 fw-semibold">Các loại / Gói dịch vụ (Variants)</label>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <div class="input-group input-group-sm" style="width: 215px;" title="Nhập số gói để tự động tạo sẵn 2 gói hoặc 3 gói">
+                                            <span class="input-group-text bg-white px-2 small text-muted"><i class="fa-solid fa-layer-group text-primary me-1"></i>Tạo nhanh:</span>
+                                            <input type="number" id="p_variant_auto_count" class="form-control text-center px-1" min="1" max="6" placeholder="2 hoặc 3" oninput="autoGenerateVariantsOnInput(this.value)">
+                                            <button type="button" class="btn btn-outline-primary" onclick="autoGenerateVariantsByCount(document.getElementById('p_variant_auto_count').value)">Tạo</button>
+                                        </div>
+                                        <button type="button" class="btn btn-sm btn-outline-dark" onclick="addVariantRow()">
+                                            <i class="fa-solid fa-plus me-1"></i> Thêm loại
+                                        </button>
+                                    </div>
                                 </div>
                                 <div class="row g-2 mb-1 px-1 small text-muted fw-semibold d-none d-md-flex">
                                     <div class="col-md-3">Tên gói</div>
@@ -4392,6 +4434,267 @@
             });
         }
 
+        let variantAutoTimer = null;
+        function autoGenerateVariantsOnInput(val) {
+            clearTimeout(variantAutoTimer);
+            const num = parseInt(val, 10);
+            if (!num || num < 1) return;
+            variantAutoTimer = setTimeout(() => {
+                autoGenerateVariantsByCount(num);
+            }, 300);
+        }
+
+        function autoGenerateVariantsByCount(num) {
+            const count = parseInt(num, 10);
+            if (!count || count < 1) {
+                AppNotify.warning('Vui lòng nhập số gói hợp lệ (ví dụ: 2, 3...)', 'Variants');
+                return;
+            }
+            const finalCount = Math.min(count, 10);
+
+            let basePrice = parseFloat(document.getElementById('p_price').value) || 120000;
+            if (basePrice <= 0) basePrice = 120000;
+            let baseOriginal = parseFloat(document.getElementById('p_original_price').value) || Math.round((basePrice * 1.35) / 1000) * 1000;
+
+            const templates = [
+                { name: 'Gói 1 Tháng', multPrice: 1, multOrig: 1.35, is_upgrade: 0 },
+                { name: 'Gói 3 Tháng', multPrice: 2.7, multOrig: 3.8, is_upgrade: 0 },
+                { name: 'Gói 6 Tháng', multPrice: 5.0, multOrig: 7.2, is_upgrade: 0 },
+                { name: 'Gói 1 Năm', multPrice: 9.2, multOrig: 14.5, is_upgrade: 0 },
+                { name: 'Gói 2 Năm', multPrice: 16.5, multOrig: 26.0, is_upgrade: 0 },
+                { name: 'Gói Vĩnh Viễn', multPrice: 24.0, multOrig: 38.0, is_upgrade: 0 },
+            ];
+
+            let newVariants = [];
+            if (finalCount === 1) {
+                newVariants.push({
+                    name: 'Gói 1 Tháng',
+                    price: basePrice,
+                    original_price: baseOriginal,
+                    stock: 99,
+                    is_upgrade: 0,
+                    require_password: 1
+                });
+            } else if (finalCount === 2) {
+                newVariants.push({
+                    name: 'Gói 1 Tháng',
+                    price: basePrice,
+                    original_price: baseOriginal,
+                    stock: 99,
+                    is_upgrade: 0,
+                    require_password: 1
+                });
+                newVariants.push({
+                    name: 'Gói 3 Tháng',
+                    price: Math.round((basePrice * 2.7) / 1000) * 1000,
+                    original_price: Math.round((baseOriginal * 3.0) / 1000) * 1000,
+                    stock: 99,
+                    is_upgrade: 0,
+                    require_password: 1
+                });
+            } else if (finalCount === 3) {
+                newVariants.push({
+                    name: 'Gói 1 Tháng',
+                    price: basePrice,
+                    original_price: baseOriginal,
+                    stock: 99,
+                    is_upgrade: 0,
+                    require_password: 1
+                });
+                newVariants.push({
+                    name: 'Gói 3 Tháng',
+                    price: Math.round((basePrice * 2.7) / 1000) * 1000,
+                    original_price: Math.round((baseOriginal * 3.0) / 1000) * 1000,
+                    stock: 99,
+                    is_upgrade: 0,
+                    require_password: 1
+                });
+                newVariants.push({
+                    name: 'Gói 1 Năm',
+                    price: Math.round((basePrice * 9.2) / 1000) * 1000,
+                    original_price: Math.round((baseOriginal * 12.0) / 1000) * 1000,
+                    stock: 99,
+                    is_upgrade: 0,
+                    require_password: 1
+                });
+            } else {
+                for (let i = 0; i < finalCount; i++) {
+                    const t = templates[i] || { name: 'Gói ' + (i + 1), multPrice: (i + 1) * 1.8, multOrig: (i + 1) * 2.5, is_upgrade: 0 };
+                    newVariants.push({
+                        name: t.name,
+                        price: Math.round((basePrice * t.multPrice) / 1000) * 1000,
+                        original_price: Math.round((baseOriginal * t.multOrig) / 1000) * 1000,
+                        stock: 99,
+                        is_upgrade: t.is_upgrade || 0,
+                        require_password: 1
+                    });
+                }
+            }
+
+            renderVariants(newVariants);
+            const inputCount = document.getElementById('p_variant_auto_count');
+            if (inputCount) inputCount.value = finalCount;
+            AppNotify.info('Đã tự động tạo sẵn ' + finalCount + ' gói dịch vụ mẫu!', 'Variants');
+        }
+
+        function aiAutoFillProduct() {
+            const titleInput = document.getElementById('p_title');
+            const title = (titleInput ? titleInput.value : '').trim();
+            if (!title) {
+                AppNotify.warning('Vui lòng nhập Tên sản phẩm trước khi bấm Auto Điền!', 'Cần nhập tên');
+                if (titleInput) titleInput.focus();
+                return;
+            }
+
+            const modelSelect = document.getElementById('gemini_model_select');
+            const model = modelSelect ? modelSelect.value : 'gemini-3.5-flash';
+            const catSelect = document.getElementById('p_category');
+            const category = catSelect ? catSelect.value : '';
+
+            const btn = document.getElementById('btn-gemini-auto-fill');
+            const originalHtml = btn ? btn.innerHTML : '';
+
+            if (btn) {
+                btn.disabled = true;
+                btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span> Gemini đang viết...';
+            }
+
+            AppNotify.info('Gemini (' + (modelSelect ? modelSelect.options[modelSelect.selectedIndex].text : model) + ') đang tạo nội dung sản phẩm, vui lòng đợi vài giây...', 'AI Auto-Fill');
+
+            apiPost('adminAiGenerateProduct', { title, model, category })
+                .then(data => {
+                    if (data && data.success && data.product) {
+                        const p = data.product;
+
+                        // 1. Tên sản phẩm
+                        if (p.title && !document.getElementById('p_id').value) {
+                            document.getElementById('p_title').value = p.title;
+                        }
+
+                        // 2. Danh mục
+                        if (p.category_slug && catSelect) {
+                            const targetSlug = p.category_slug.toLowerCase();
+                            for (let i = 0; i < catSelect.options.length; i++) {
+                                const optVal = catSelect.options[i].value.toLowerCase();
+                                const optTxt = catSelect.options[i].text.toLowerCase();
+                                if (optVal === targetSlug || optTxt.includes(targetSlug) || targetSlug.includes(optVal)) {
+                                    catSelect.selectedIndex = i;
+                                    break;
+                                }
+                            }
+                        }
+
+                        // 3. Giá bán & Giá gốc
+                        if (p.price) document.getElementById('p_price').value = p.price;
+                        if (p.original_price) document.getElementById('p_original_price').value = p.original_price;
+
+                        // 4. Mô tả ngắn
+                        if (p.desc) document.getElementById('p_desc').value = p.desc;
+
+                        // 5. 4 dòng card features
+                        if (Array.isArray(p.card_features)) {
+                            p.card_features.forEach((feat, idx) => {
+                                const input = document.getElementById('p_card_feature_' + (idx + 1));
+                                if (input) input.value = feat;
+                            });
+                        }
+
+                        // 6. Mô tả chi tiết HTML
+                        if (p.description) {
+                            document.getElementById('p_detail_desc').value = p.description;
+                            const editor = document.getElementById('p_detail_desc_editor');
+                            if (editor) editor.innerHTML = p.description;
+                        }
+
+                        // 7. Cấu hình SEO
+                        if (p.seo_slug) document.getElementById('p_seo_slug').value = p.seo_slug;
+                        if (p.seo_title) document.getElementById('p_seo_title').value = p.seo_title;
+                        if (p.seo_description) document.getElementById('p_seo_description').value = p.seo_description;
+                        if (p.seo_keywords) document.getElementById('p_seo_keywords').value = p.seo_keywords;
+
+                        // 8. Variants
+                        if (Array.isArray(p.variants) && p.variants.length > 0) {
+                            renderVariants(p.variants);
+                            const countInput = document.getElementById('p_variant_auto_count');
+                            if (countInput) countInput.value = p.variants.length;
+                        }
+
+                        AppNotify.success('Đã tự động điền đầy đủ form sản phẩm & tối ưu SEO!', 'Hoàn tất Auto');
+                    } else {
+                        const errMsg = (data && data.message) ? data.message : 'Không thể tạo tự động bằng Gemini.';
+                        if (errMsg.includes('API Key') || errMsg.includes('chìa khóa')) {
+                            Swal.fire({
+                                icon: 'warning',
+                                title: 'Chưa có Gemini API Key',
+                                text: errMsg,
+                                showCancelButton: true,
+                                confirmButtonText: 'Cài đặt API Key ngay',
+                                cancelButtonText: 'Để sau'
+                            }).then(res => {
+                                if (res.isConfirmed) {
+                                    configureGeminiKeyModal();
+                                }
+                            });
+                        } else {
+                            AppNotify.error(errMsg, 'Lỗi AI');
+                        }
+                    }
+                })
+                .catch(err => {
+                    AppNotify.error('Không thể kết nối đến máy chủ: ' + err.message, 'Lỗi kết nối');
+                })
+                .finally(() => {
+                    if (btn) {
+                        btn.disabled = false;
+                        btn.innerHTML = originalHtml;
+                    }
+                });
+        }
+
+        function configureGeminiKeyModal() {
+            apiPost('adminGetGeminiConfig', {})
+                .then(res => {
+                    const hasKey = res && res.has_key;
+                    const masked = res && res.masked_key;
+                    Swal.fire({
+                        title: 'Cài đặt Gemini API Key',
+                        html: `
+                            <div class="text-start small text-muted mb-2">
+                                Lấy API Key miễn phí từ <a href="https://aistudio.google.com/app/apikey" target="_blank" class="fw-bold text-primary">Google AI Studio</a>.
+                                ${hasKey ? '<br><span class="badge bg-success-subtle text-success border border-success-subtle mt-1.5"><i class="fa-solid fa-check me-1"></i>Đã có Key: ' + masked + '</span>' : '<br><span class="badge bg-warning-subtle text-warning border border-warning-subtle mt-1.5"><i class="fa-solid fa-triangle-exclamation me-1"></i>Chưa lưu API Key</span>'}
+                            </div>
+                            <input type="password" id="swal_gemini_key" class="form-control" placeholder="Dán Gemini API Key vào đây (AIzaSy...)" value="">
+                        `,
+                        showCancelButton: true,
+                        confirmButtonText: 'Lưu API Key',
+                        cancelButtonText: 'Đóng',
+                        confirmButtonColor: '#2563eb',
+                        preConfirm: () => {
+                            const key = document.getElementById('swal_gemini_key').value.trim();
+                            if (!key) {
+                                Swal.showValidationMessage('Vui lòng nhập API Key.');
+                                return false;
+                            }
+                            return key;
+                        }
+                    }).then(result => {
+                        if (result.isConfirmed && result.value) {
+                            apiPost('adminSaveGeminiApiKey', { gemini_api_key: result.value })
+                                .then(saveRes => {
+                                    if (saveRes && saveRes.success) {
+                                        AppNotify.success('Đã lưu Gemini API Key thành công!', 'Cấu hình');
+                                    } else {
+                                        AppNotify.error((saveRes && saveRes.message) || 'Không thể lưu key.', 'Lỗi');
+                                    }
+                                });
+                        }
+                    });
+                })
+                .catch(() => {
+                    AppNotify.error('Không thể kiểm tra cấu hình Gemini API.', 'Lỗi');
+                });
+        }
+
         function openProductModal() {
             document.getElementById('productForm').reset();
             document.getElementById('p_id').value = '';
@@ -4405,6 +4708,7 @@
             document.getElementById('p_seo_title').value = '';
             document.getElementById('p_seo_description').value = '';
             document.getElementById('p_seo_keywords').value = '';
+            if (document.getElementById('p_variant_auto_count')) document.getElementById('p_variant_auto_count').value = '';
             document.getElementById('modalTitle').innerText = "Thêm Sản phẩm mới";
             renderVariants([]);
             getProductModal().show();
@@ -4449,6 +4753,10 @@
                 document.getElementById('p_seo_title').value = p.seo_title || '';
                 document.getElementById('p_seo_description').value = p.seo_description || '';
                 document.getElementById('p_seo_keywords').value = p.seo_keywords || '';
+
+                if (document.getElementById('p_variant_auto_count')) {
+                    document.getElementById('p_variant_auto_count').value = (p.options && p.options.length) ? p.options.length : '';
+                }
 
                 renderVariants(p.options || []);
 

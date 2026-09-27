@@ -212,6 +212,7 @@ class AdminController extends Controller {
             'smtp_host', 'smtp_port', 'smtp_secure', 'smtp_from_name',
             'smtp_user', 'smtp_pass', 'smtp_from_email',
             'smtp_default_subject', 'smtp_default_body',
+            'gemini_api_key',
         ];
 
         $data = [];
@@ -332,6 +333,49 @@ class AdminController extends Controller {
         Product::saveAll($products);
         $indexing = IndexingService::submitUrl(Url::product($data), ($data['status'] ?? 'active') === 'hidden' ? 'URL_DELETED' : 'URL_UPDATED');
         $this->jsonSuccess(['indexing' => $indexing]);
+    }
+
+    public function adminAiGenerateProduct() {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            $this->jsonError('Method not allowed', 405);
+        }
+
+        $title = trim($_POST['title'] ?? '');
+        $model = trim($_POST['model'] ?? 'gemini-3.5-flash');
+        $category = trim($_POST['category'] ?? '');
+
+        if ($title === '') {
+            $this->jsonError('Vui lòng nhập Tên sản phẩm trước khi tạo.');
+        }
+
+        try {
+            $data = GeminiService::generateProduct($title, $model, $category);
+            $this->jsonSuccess(['product' => $data]);
+        } catch (Throwable $e) {
+            $this->jsonError($e->getMessage());
+        }
+    }
+
+    public function adminSaveGeminiApiKey() {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            $this->jsonError('Method not allowed', 405);
+        }
+
+        $apiKey = trim($_POST['gemini_api_key'] ?? '');
+        if ($apiKey === '') {
+            $this->jsonError('Vui lòng nhập Gemini API Key.');
+        }
+
+        GeminiService::setApiKey($apiKey);
+        $this->jsonSuccess(['message' => 'Đã lưu Gemini API Key thành công!']);
+    }
+
+    public function adminGetGeminiConfig() {
+        $key = GeminiService::getApiKey();
+        $this->jsonSuccess([
+            'has_key' => $key !== '',
+            'masked_key' => $key !== '' ? (substr($key, 0, 6) . '...' . substr($key, -4)) : '',
+        ]);
     }
 
     public function adminDeleteProduct() {

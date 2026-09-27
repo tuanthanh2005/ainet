@@ -20,6 +20,7 @@ class Setting {
             'smtp_user' => 'SMTP_USER',
             'smtp_pass' => 'SMTP_PASS',
             'smtp_from_email' => 'SMTP_FROM_EMAIL',
+            'gemini_api_key' => 'GEMINI_API_KEY',
         ];
         foreach ($envKeys as $setKey => $envKey) {
             $val = getenv($envKey);
