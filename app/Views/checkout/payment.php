@@ -110,7 +110,53 @@ if ($isSuccess && !empty($_SESSION['user']['id'])) {
                             </div>
                         <?php endif; ?>
 
-                        <div class="d-flex gap-3 justify-content-center mt-5 flex-wrap">
+                        <!-- ĐÁNH GIÁ TRỰC TIẾP TẠI TRANG THÀNH CÔNG -->
+                        <?php if ($hasReviewed): ?>
+                            <div class="alert alert-success border-0 rounded-4 p-3 d-flex align-items-center justify-content-center gap-2 mt-4 shadow-sm">
+                                <i class="fa-solid fa-circle-check fs-5 text-success"></i>
+                                <span class="fw-semibold">Cảm ơn bạn đã gửi đánh giá cho đơn hàng này!</span>
+                            </div>
+                        <?php elseif (!empty($_SESSION['user']['id'])): ?>
+                            <div class="card border-0 rounded-4 p-4 mt-4 text-start shadow-sm bg-light border">
+                                <form action="<?= url('index.php?action=submitReview') ?>" method="POST">
+                                    <?php echo Csrf::field(); ?>
+                                    <input type="hidden" name="order_id" value="<?= htmlspecialchars($order['id']) ?>">
+                                    <input type="hidden" name="product_id" value="<?= htmlspecialchars($order['product_id']) ?>">
+                                    <input type="hidden" name="redirect_to" value="<?= url('index.php?action=success&id=' . urlencode($order['id'])) ?>">
+
+                                    <div class="d-flex align-items-center gap-3 mb-3">
+                                        <div class="rounded-circle bg-warning bg-opacity-25 text-warning d-flex align-items-center justify-content-center flex-shrink-0" style="width:40px;height:40px;">
+                                            <i class="fa-solid fa-star fs-5"></i>
+                                        </div>
+                                        <div>
+                                            <h6 class="fw-bold mb-0 text-dark">Đánh giá sản phẩm</h6>
+                                            <small class="text-muted">Bạn cảm thấy sản phẩm <strong><?= htmlspecialchars($order['product_name']) ?></strong> thế nào?</small>
+                                        </div>
+                                    </div>
+
+                                    <div class="d-flex align-items-center justify-content-between p-2 px-3 rounded-3 bg-white border mb-3 flex-wrap gap-2">
+                                        <span class="small fw-bold text-dark">Đánh giá sao:</span>
+                                        <div class="rating-stars" dir="rtl">
+                                            <input type="radio" id="inline_star5" name="rating" value="5" checked><label for="inline_star5" class="fs-2 text-warning mx-1" style="cursor:pointer;" title="5 sao - Rất hài lòng"><i class="fa-solid fa-star"></i></label>
+                                            <input type="radio" id="inline_star4" name="rating" value="4"><label for="inline_star4" class="fs-2 text-warning mx-1" style="cursor:pointer;" title="4 sao - Hài lòng"><i class="fa-solid fa-star"></i></label>
+                                            <input type="radio" id="inline_star3" name="rating" value="3"><label for="inline_star3" class="fs-2 text-warning mx-1" style="cursor:pointer;" title="3 sao - Bình thường"><i class="fa-solid fa-star"></i></label>
+                                            <input type="radio" id="inline_star2" name="rating" value="2"><label for="inline_star2" class="fs-2 text-warning mx-1" style="cursor:pointer;" title="2 sao - Chưa hài lòng"><i class="fa-solid fa-star"></i></label>
+                                            <input type="radio" id="inline_star1" name="rating" value="1"><label for="inline_star1" class="fs-2 text-warning mx-1" style="cursor:pointer;" title="1 sao - Rất tệ"><i class="fa-solid fa-star"></i></label>
+                                        </div>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <textarea name="content" class="form-control rounded-3" rows="2" placeholder="Chia sẻ thêm cảm nhận của bạn (không bắt buộc)..."></textarea>
+                                    </div>
+
+                                    <button type="submit" class="btn btn-warning w-100 py-2 rounded-3 fw-bold shadow-sm">
+                                        <i class="fa-solid fa-paper-plane me-2"></i> Gửi đánh giá ngay
+                                    </button>
+                                </form>
+                            </div>
+                        <?php endif; ?>
+
+                        <div class="d-flex gap-3 justify-content-center mt-4 flex-wrap">
                             <?php if (!$hasReviewed && !empty($_SESSION['user']['id'])): ?>
                                 <button type="button" class="btn btn-warning px-4 py-3 rounded-4 fw-bold shadow" data-bs-toggle="modal" data-bs-target="#reviewModal">
                                     <i class="fa-solid fa-star me-2"></i> ĐÁNH GIÁ SẢN PHẨM
@@ -132,15 +178,15 @@ if ($isSuccess && !empty($_SESSION['user']['id'])) {
                     <div class="modal-content rounded-4 border-0 shadow">
                         <form action="<?= url('index.php?action=submitReview') ?>" method="POST">
                             <?php echo Csrf::field(); ?>
+                            <input type="hidden" name="order_id" value="<?= htmlspecialchars($order['id']) ?>">
+                            <input type="hidden" name="product_id" value="<?= htmlspecialchars($order['product_id']) ?>">
+                            <input type="hidden" name="redirect_to" value="<?= url('index.php?action=success&id=' . urlencode($order['id'])) ?>">
                             <div class="modal-header border-bottom-0 pb-0">
                                 <h5 class="modal-title fw-bold" id="reviewModalLabel">Đánh giá sản phẩm</h5>
                                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                             </div>
                             <div class="modal-body text-center pt-2">
                                 <p class="text-muted small mb-4">Bạn cảm thấy sản phẩm <strong><?= htmlspecialchars($order['product_name']) ?></strong> như thế nào?</p>
-                                
-                                <input type="hidden" name="order_id" value="<?= htmlspecialchars($order['id']) ?>">
-                                <input type="hidden" name="product_id" value="<?= htmlspecialchars($order['product_id']) ?>">
                                 
                                 <div class="rating-stars mb-4" dir="rtl">
                                     <input type="radio" id="star5" name="rating" value="5" checked><label for="star5" class="fs-1 text-warning mx-1" style="cursor:pointer;"><i class="fa-solid fa-star"></i></label>

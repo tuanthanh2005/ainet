@@ -79,7 +79,7 @@
                             $imageUrl   = $order['product_image'] ?? null; // optional, may not be set
                             
                             $hasReviewed = false;
-                            if ($status === 'completed') {
+                            if (in_array($status, ['completed', 'processing'], true)) {
                                 $hasReviewed = Review::hasReviewed($order['id'], $order['product_id']);
                             }
                         ?>
@@ -158,6 +158,12 @@
                                             <span>Chi tiết</span>
                                             <i class="fa-solid fa-chevron-down chev"></i>
                                         </button>
+                                        <?php if (!$hasReviewed): ?>
+                                            <button type="button" class="oh-cta oh-cta-warning mt-1 btn-review" data-order="<?= htmlspecialchars($order['id']) ?>" data-product="<?= htmlspecialchars($order['product_id']) ?>" data-name="<?= htmlspecialchars($order['product_name']) ?>">
+                                                <i class="fa-solid fa-star"></i>
+                                                <span>Đánh giá</span>
+                                            </button>
+                                        <?php endif; ?>
                                     <?php elseif ($status === 'pending'): ?>
                                         <a href="<?= url('index.php?action=payment&id=' . urlencode($order['id'])) ?>"
                                            class="oh-cta oh-cta-warning">
@@ -341,6 +347,7 @@
                     
                     <input type="hidden" name="order_id" id="reviewOrderId" value="">
                     <input type="hidden" name="product_id" id="reviewProductId" value="">
+                    <input type="hidden" name="redirect_to" value="<?= url('index.php?action=orderHistory') ?>">
                     
                     <div class="rating-stars mb-4" dir="rtl">
                         <input type="radio" id="oh_star5" name="rating" value="5" checked><label for="oh_star5" class="fs-1 text-warning mx-1" style="cursor:pointer;"><i class="fa-solid fa-star"></i></label>

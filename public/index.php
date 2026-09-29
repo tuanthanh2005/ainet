@@ -85,6 +85,7 @@ require_once APP_ROOT . '/app/Core/GeminiService.php';
 require_once APP_ROOT . '/app/Core/TelegramService.php';
 require_once APP_ROOT . '/app/Core/GoogleAuth.php';
 require_once APP_ROOT . '/app/Core/SmtpMailer.php';
+require_once APP_ROOT . '/app/Core/OrderEmailService.php';
 require_once APP_ROOT . '/app/Core/SecurityLogger.php';
 require_once APP_ROOT . '/app/Core/Captcha.php';
 

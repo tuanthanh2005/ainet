@@ -260,6 +260,12 @@ class CheckoutController extends Controller {
                     } catch (Throwable $e) {
                         if (APP_DEBUG) @file_put_contents($logFile, 'Stock claim error: ' . $e->getMessage() . "\n", FILE_APPEND);
                     }
+
+                    try {
+                        $order['status'] = 'completed';
+                        OrderEmailService::sendOrderCompletedEmail($order, $delivered ?? []);
+                    } catch (Throwable $ignored) {}
+
                     if (APP_DEBUG) @file_put_contents($logFile, "SUCCESS: Order $orderId completed\n", FILE_APPEND);
                     echo json_encode(['success' => true]);
                     exit;
@@ -408,6 +414,17 @@ class CheckoutController extends Controller {
                     try {
                         TelegramService::notifyOrderCompleted($order);
                     } catch (Throwable $ignored) {}
+
+                    // Notify customer via Email
+                    try {
+                        if ($status === 'processing') {
+                            OrderEmailService::sendOrderProcessingEmail($order);
+                        } elseif ($status === 'completed') {
+                            OrderEmailService::sendOrderCompletedEmail($order, $delivered ?? []);
+                        }
+                    } catch (Throwable $e) {
+                        error_log('[CheckoutController] Customer email notification failed: ' . $e->getMessage());
+                    }
 
                     if (APP_DEBUG) @file_put_contents($logFile, "SUCCESS: Order $orderId set to $status\n", FILE_APPEND);
                     $debug['result'] = $status;
@@ -620,6 +637,17 @@ class CheckoutController extends Controller {
         try {
             TelegramService::notifyOrderCompleted($order);
         } catch (Throwable $ignored) {}
+
+        // Notify customer via Email
+        try {
+            if ($status === 'processing') {
+                OrderEmailService::sendOrderProcessingEmail($order);
+            } elseif ($status === 'completed') {
+                OrderEmailService::sendOrderCompletedEmail($order, $delivered ?? []);
+            }
+        } catch (Throwable $e) {
+            error_log('[CheckoutController] Demo customer email notification failed: ' . $e->getMessage());
+        }
 
         header('Location: ' . url('index.php?action=success&id=' . $orderId));
         exit;

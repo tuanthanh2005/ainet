@@ -1816,30 +1816,40 @@ class HomeController extends Controller {
             exit;
         }
 
-        $orderId = $_POST['order_id'] ?? '';
-        $productId = $_POST['product_id'] ?? '';
+        $orderId = trim($_POST['order_id'] ?? '');
+        $productId = trim($_POST['product_id'] ?? '');
         $rating = (int) ($_POST['rating'] ?? 5);
         $content = trim($_POST['content'] ?? '');
         $userId = $_SESSION['user']['id'];
 
+        $redirectTo = $_POST['redirect_to'] ?? '';
+        $fallbackUrl = !empty($redirectTo) ? $redirectTo : ($_SERVER['HTTP_REFERER'] ?? url('index.php?action=orderHistory'));
+
         if (!$orderId || !$productId || $rating < 1 || $rating > 5) {
             $_SESSION['flash_error'] = 'Thông tin đánh giá không hợp lệ.';
-            header('Location: ' . url('index.php?action=orderHistory'));
+            header("Location: $fallbackUrl");
             exit;
         }
 
-        // Verify order belongs to user and is completed
+        // Verify order belongs to user and is completed or processing
         $order = Order::getById($orderId);
-        if (!$order || $order['customer_email'] !== $_SESSION['user']['email'] || $order['status'] !== 'completed') {
+        $userEmail = $_SESSION['user']['email'] ?? '';
+        $isOwner = ($order && (
+            (!empty($order['customer_email']) && strtolower($order['customer_email']) === strtolower($userEmail)) ||
+            (!empty($order['user_id']) && (int)$order['user_id'] === (int)$userId) ||
+            (!empty($_SESSION['user']['role']) && $_SESSION['user']['role'] === 'admin')
+        ));
+
+        if (!$order || !$isOwner || !in_array($order['status'] ?? '', ['completed', 'processing'], true)) {
             $_SESSION['flash_error'] = 'Bạn không thể đánh giá đơn hàng này.';
-            header('Location: ' . url('index.php?action=orderHistory'));
+            header("Location: $fallbackUrl");
             exit;
         }
 
         // Check if already reviewed
         if (Review::hasReviewed($orderId, $productId)) {
             $_SESSION['flash_error'] = 'Bạn đã đánh giá sản phẩm này trong đơn hàng này rồi.';
-            header('Location: ' . url('index.php?action=orderHistory'));
+            header("Location: $fallbackUrl");
             exit;
         }
 
@@ -1850,8 +1860,7 @@ class HomeController extends Controller {
         }
 
         // Redirect back to referring page (order history or payment success)
-        $referer = $_SERVER['HTTP_REFERER'] ?? url('index.php?action=orderHistory');
-        header("Location: $referer");
+        header("Location: $fallbackUrl");
         exit;
     }
 

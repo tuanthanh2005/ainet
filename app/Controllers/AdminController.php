@@ -936,7 +936,20 @@ class AdminController extends Controller {
             $this->jsonError('Dữ liệu không hợp lệ.');
         }
 
+        $oldOrder = Order::getById($id);
         if (Order::updateStatus($id, $status)) {
+            try {
+                $order = Order::getById($id);
+                if ($order) {
+                    if ($status === 'completed' && ($oldOrder['status'] ?? '') !== 'completed') {
+                        OrderEmailService::sendOrderCompletedEmail($order);
+                    } elseif ($status === 'processing' && ($oldOrder['status'] ?? '') !== 'processing') {
+                        OrderEmailService::sendOrderProcessingEmail($order);
+                    }
+                }
+            } catch (Throwable $e) {
+                error_log('Failed to send order status email: ' . $e->getMessage());
+            }
             $this->jsonSuccess();
         } else {
             $this->jsonError('Không thể cập nhật trạng thái.');
@@ -1069,6 +1082,16 @@ class AdminController extends Controller {
                     'warning' => 'Đã lưu thông tin bàn giao nhưng gửi Email thất bại: ' . $errors
                 ]);
                 return;
+            }
+        } else {
+            // Tự động gửi email bàn giao chuẩn tới khách hàng nếu admin không bật gửi email thủ công
+            try {
+                $order = Order::getById($id);
+                if ($order) {
+                    OrderEmailService::sendOrderCompletedEmail($order, $items);
+                }
+            } catch (Throwable $e) {
+                error_log('Failed to send auto deliver email: ' . $e->getMessage());
             }
         }
 
