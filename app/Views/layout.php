@@ -380,21 +380,21 @@ $footerHotProducts = Cache::remember('footer_seo_prods', 300, function() {
                     <ul class="list-unstyled small lh-lg mb-0" itemscope itemtype="https://schema.org/SiteNavigationElement">
                         <?php if (!empty($footerCategories)): ?>
                             <?php foreach ($footerCategories as $cat): ?>
-                                <li class="mb-2" itemprop="name">
+                                <li class="mb-2" itemprop="name" style="min-width: 0;">
                                     <a href="<?php echo Url::category($cat['slug']); ?>" class="footer-link" itemprop="url" title="<?php echo htmlspecialchars($cat['name']); ?>">
-                                        <i class="fa-solid fa-chevron-right me-1.5 text-secondary" style="font-size: 0.65rem;"></i>
-                                        <?php echo htmlspecialchars($cat['name']); ?>
+                                        <i class="fa-solid fa-chevron-right me-2 text-secondary flex-shrink-0" style="font-size: 0.65rem;"></i>
+                                        <span class="text-truncate"><?php echo htmlspecialchars($cat['name']); ?></span>
                                     </a>
                                 </li>
                             <?php endforeach; ?>
                         <?php else: ?>
-                            <li class="mb-2"><a href="<?php echo Url::category('chatgpt'); ?>" class="footer-link"><i class="fa-solid fa-chevron-right me-1.5 text-secondary" style="font-size: 0.65rem;"></i>Tài khoản ChatGPT Plus</a></li>
-                            <li class="mb-2"><a href="<?php echo Url::category('youtube'); ?>" class="footer-link"><i class="fa-solid fa-chevron-right me-1.5 text-secondary" style="font-size: 0.65rem;"></i>YouTube Premium</a></li>
-                            <li class="mb-2"><a href="<?php echo Url::category('github'); ?>" class="footer-link"><i class="fa-solid fa-chevron-right me-1.5 text-secondary" style="font-size: 0.65rem;"></i>GitHub Copilot Pro</a></li>
+                            <li class="mb-2"><a href="<?php echo Url::category('chatgpt'); ?>" class="footer-link"><i class="fa-solid fa-chevron-right me-2 text-secondary flex-shrink-0" style="font-size: 0.65rem;"></i><span class="text-truncate">Tài khoản ChatGPT Plus</span></a></li>
+                            <li class="mb-2"><a href="<?php echo Url::category('youtube'); ?>" class="footer-link"><i class="fa-solid fa-chevron-right me-2 text-secondary flex-shrink-0" style="font-size: 0.65rem;"></i><span class="text-truncate">YouTube Premium</span></a></li>
+                            <li class="mb-2"><a href="<?php echo Url::category('github'); ?>" class="footer-link"><i class="fa-solid fa-chevron-right me-2 text-secondary flex-shrink-0" style="font-size: 0.65rem;"></i><span class="text-truncate">GitHub Copilot Pro</span></a></li>
                         <?php endif; ?>
                         <li class="mt-2.5 pt-2 border-top border-secondary border-opacity-25">
                             <a href="<?php echo Url::products(); ?>" class="footer-link text-primary fw-semibold">
-                                <i class="fa-solid fa-grid-2 me-1.5"></i>Xem tất cả sản phẩm &rarr;
+                                <i class="fa-solid fa-grid-2 me-2 flex-shrink-0"></i><span>Xem tất cả sản phẩm &rarr;</span>
                             </a>
                         </li>
                     </ul>
@@ -406,18 +406,18 @@ $footerHotProducts = Cache::remember('footer_seo_prods', 300, function() {
                     <ul class="list-unstyled small lh-lg mb-0" itemscope itemtype="https://schema.org/SiteNavigationElement">
                         <?php if (!empty($footerHotProducts)): ?>
                             <?php foreach ($footerHotProducts as $hp): ?>
-                                <li class="mb-2 text-truncate" itemprop="name">
+                                <li class="mb-2" itemprop="name" style="min-width: 0;">
                                     <a href="<?php echo Url::product($hp); ?>" class="footer-link" itemprop="url" title="Mua <?php echo htmlspecialchars($hp['title']); ?> giá rẻ chính hãng">
-                                        <i class="fa-solid fa-fire text-danger me-1.5" style="font-size: 0.75rem;"></i>
-                                        <?php echo htmlspecialchars($hp['title']); ?>
+                                        <i class="fa-solid fa-fire text-danger me-2 flex-shrink-0" style="font-size: 0.75rem;"></i>
+                                        <span class="text-truncate"><?php echo htmlspecialchars($hp['title']); ?></span>
                                     </a>
                                 </li>
                             <?php endforeach; ?>
                         <?php else: ?>
-                            <li class="mb-2"><a href="<?php echo Url::products(); ?>" class="footer-link">ChatGPT Plus Chính Chủ</a></li>
-                            <li class="mb-2"><a href="<?php echo Url::products(); ?>" class="footer-link">YouTube Premium 1 Năm</a></li>
-                            <li class="mb-2"><a href="<?php echo Url::products(); ?>" class="footer-link">Canva Pro Bản Quyền</a></li>
-                            <li class="mb-2"><a href="<?php echo Url::products(); ?>" class="footer-link">Netflix Premium 4K UHD</a></li>
+                            <li class="mb-2"><a href="<?php echo Url::products(); ?>" class="footer-link"><i class="fa-solid fa-fire text-danger me-2 flex-shrink-0" style="font-size: 0.75rem;"></i><span class="text-truncate">ChatGPT Plus Chính Chủ</span></a></li>
+                            <li class="mb-2"><a href="<?php echo Url::products(); ?>" class="footer-link"><i class="fa-solid fa-fire text-danger me-2 flex-shrink-0" style="font-size: 0.75rem;"></i><span class="text-truncate">YouTube Premium 1 Năm</span></a></li>
+                            <li class="mb-2"><a href="<?php echo Url::products(); ?>" class="footer-link"><i class="fa-solid fa-fire text-danger me-2 flex-shrink-0" style="font-size: 0.75rem;"></i><span class="text-truncate">Canva Pro Bản Quyền</span></a></li>
+                            <li class="mb-2"><a href="<?php echo Url::products(); ?>" class="footer-link"><i class="fa-solid fa-fire text-danger me-2 flex-shrink-0" style="font-size: 0.75rem;"></i><span class="text-truncate">Netflix Premium 4K UHD</span></a></li>
                         <?php endif; ?>
                     </ul>
                 </div>
@@ -438,10 +438,10 @@ $footerHotProducts = Cache::remember('footer_seo_prods', 300, function() {
                         <div class="text-uppercase text-secondary fw-bold mb-2" style="font-size: 0.72rem; letter-spacing: 0.5px;">Google Crawl & Index:</div>
                         <div class="d-flex flex-column gap-1">
                             <a href="<?php echo Url::sitemap(); ?>" class="footer-link text-warning fw-semibold" target="_blank" rel="noopener" title="Sơ đồ website Google XML Sitemap">
-                                <i class="fa-solid fa-sitemap me-1.5"></i>Sitemap XML
+                                <i class="fa-solid fa-sitemap me-2 flex-shrink-0"></i>Sitemap XML
                             </a>
                             <a href="<?php echo Url::robots(); ?>" class="footer-link text-secondary" target="_blank" rel="noopener" title="Tệp điều hướng robots.txt">
-                                <i class="fa-solid fa-robot me-1.5"></i>Robots.txt
+                                <i class="fa-solid fa-robot me-2 flex-shrink-0"></i>Robots.txt
                             </a>
                         </div>
                     </div>
