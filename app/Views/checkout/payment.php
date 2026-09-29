@@ -111,15 +111,18 @@ if ($isSuccess && !empty($_SESSION['user']['id'])) {
                                         <i class="fa-regular fa-copy me-1"></i>Sao chép
                                     </button>
                                 </div>
-                                <div class="d-flex flex-wrap gap-2">
-                                    <a href="https://zalo.me/0772698113" target="_blank" class="btn btn-primary btn-sm" style="background:#0068ff; border-color:#0068ff;">
-                                        <i class="fa-solid fa-comment-dots me-1"></i>Zalo Admin: 0772698113 (Ưu tiên)
+                                <div class="success-contact-actions">
+                                    <a href="https://zalo.me/0772698113" target="_blank" rel="noopener noreferrer" class="btn success-contact-btn success-contact-btn--zalo">
+                                        <i class="fa-solid fa-comment-dots"></i>
+                                        <span>Zalo Admin: 0772698113 <small>(Ưu tiên)</small></span>
                                     </a>
-                                    <a href="https://t.me/specademy" target="_blank" class="btn btn-outline-secondary btn-sm">
-                                        <i class="fa-brands fa-telegram me-1"></i>Telegram Admin
+                                    <a href="https://t.me/specademy" target="_blank" rel="noopener noreferrer" class="btn success-contact-btn success-contact-btn--telegram">
+                                        <i class="fa-brands fa-telegram"></i>
+                                        <span>Telegram Admin</span>
                                     </a>
-                                    <a href="<?= url('index.php?action=orderHistory') ?>" class="btn btn-outline-dark btn-sm">
-                                        <i class="fa-solid fa-clock-rotate-left me-1"></i>Xem trong lịch sử
+                                    <a href="<?= url('index.php?action=orderHistory') ?>" class="btn success-contact-btn success-contact-btn--history">
+                                        <i class="fa-solid fa-clock-rotate-left"></i>
+                                        <span>Xem trong lịch sử</span>
                                     </a>
                                 </div>
                             </div>
@@ -374,6 +377,43 @@ if ($isSuccess && !empty($_SESSION['user']['id'])) {
 .stepper-item.completed .step-counter { background: #198754; color: #fff; }
 .stepper-line { position: absolute; top: 20px; left: 10%; width: 80%; height: 4px; background: #e9ecef; z-index: 1; border-radius: 2px; }
 .success-icon-bg { width: 100px; height: 100px; background: #198754; color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 50px; box-shadow: 0 15px 30px rgba(25,135,84,0.3); }
+.success-contact-actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.625rem;
+}
+.success-contact-btn {
+    min-height: 48px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.65rem 0.75rem;
+    border: 1px solid transparent;
+    border-radius: 0.75rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    line-height: 1.2;
+    text-decoration: none;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+}
+.success-contact-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0.4rem 0.9rem rgba(33, 37, 41, 0.13);
+}
+.success-contact-btn i { font-size: 1.05rem; }
+.success-contact-btn--zalo {
+    grid-column: 1 / -1;
+    color: #fff;
+    background: #0068ff;
+    border-color: #0068ff;
+}
+.success-contact-btn--zalo:hover { color: #fff; background: #0059d9; border-color: #0059d9; }
+.success-contact-btn--zalo small { font-size: 0.75rem; font-weight: 500; opacity: 0.9; }
+.success-contact-btn--telegram { color: #2675a9; background: #f4faff; border-color: #b9ddef; }
+.success-contact-btn--telegram:hover { color: #1f638f; background: #e7f5fd; border-color: #9acde8; }
+.success-contact-btn--history { color: #343a40; background: #fff; border-color: #ced4da; }
+.success-contact-btn--history:hover { color: #111; background: #f8f9fa; border-color: #adb5bd; }
 .qr-box {
     display: block !important;
     width: min(320px, 100%);
@@ -416,6 +456,8 @@ if ($isSuccess && !empty($_SESSION['user']['id'])) {
     .step-name { font-size: 0.65rem !important; }
     .stepper-line { top: 16px; }
     .card { padding: 20px !important; }
+    .success-contact-actions { grid-template-columns: 1fr; }
+    .success-contact-btn--zalo { grid-column: auto; }
 }
 </style>
 
