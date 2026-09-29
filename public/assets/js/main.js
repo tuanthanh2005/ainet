@@ -265,7 +265,13 @@ function openLoginPrompt(message) {
     AppNotify.info(text, 'Yêu cầu đăng nhập');
 
     const loginModalEl = document.getElementById('loginModal');
-    if (!loginModalEl || typeof bootstrap === 'undefined') return;
+    if (!loginModalEl || typeof bootstrap === 'undefined') {
+        const loginUrl = window.APP_LOGIN_URL || '/login';
+        setTimeout(() => {
+            window.location.href = loginUrl;
+        }, 600);
+        return;
+    }
 
     const openModalEl = document.querySelector('.modal.show');
     if (openModalEl && openModalEl !== loginModalEl) {

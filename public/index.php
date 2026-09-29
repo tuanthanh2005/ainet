@@ -86,6 +86,7 @@ require_once APP_ROOT . '/app/Core/TelegramService.php';
 require_once APP_ROOT . '/app/Core/GoogleAuth.php';
 require_once APP_ROOT . '/app/Core/SmtpMailer.php';
 require_once APP_ROOT . '/app/Core/SecurityLogger.php';
+require_once APP_ROOT . '/app/Core/Captcha.php';
 
 // Bắt buộc login khi hết 5 phút sử dụng vãng lai
 SecurityLogger::checkGuestSession();
@@ -102,6 +103,7 @@ require_once APP_ROOT . '/app/Models/Order.php';
 require_once APP_ROOT . '/app/Models/Stock.php';
 require_once APP_ROOT . '/app/Models/ContactMessage.php';
 require_once APP_ROOT . '/app/Models/ChatMessage.php';
+require_once APP_ROOT . '/app/Models/PasswordReset.php';
 
 // Load Controllers
 require_once APP_ROOT . '/app/Controllers/HomeController.php';
@@ -188,6 +190,22 @@ if ($rawUrl !== '' && empty($_GET['action'])) {
         case 'gioi-thieu': $_GET['action'] = 'about'; break;
         case 'lien-he':    $_GET['action'] = 'contact'; break;
         case 'gio-hang':   $_GET['action'] = 'cart'; break;
+        case 'dang-nhap':
+        case 'login':
+            $_GET['action'] = 'login';
+            break;
+        case 'dang-ky':
+        case 'register':
+            $_GET['action'] = 'register';
+            break;
+        case 'quen-mat-khau':
+        case 'forgot-password':
+            $_GET['action'] = 'forgot_password';
+            break;
+        case 'dat-lai-mat-khau':
+        case 'reset-password':
+            $_GET['action'] = 'reset_password';
+            break;
         case 'sitemap.xml':
             $_GET['action'] = 'sitemap';
             break;
@@ -251,7 +269,7 @@ function redirect_to_public_canonical_if_needed(string $action): void {
     }
 
     // Do NOT run canonical SEO redirection on admin, user account, or internal actions
-    $exemptPrefixes = ['admin', 'profile', 'orderHistory', 'login', 'logout', 'register', 'auth', 'sepay', 'checkout', 'webhook', 'stock', 'api'];
+    $exemptPrefixes = ['admin', 'profile', 'orderHistory', 'login', 'logout', 'register', 'auth', 'sepay', 'checkout', 'webhook', 'stock', 'api', 'captcha', 'forgot', 'reset'];
     foreach ($exemptPrefixes as $prefix) {
         if (stripos($action, $prefix) === 0) {
             return;
@@ -344,7 +362,7 @@ if ($isPost && !in_array($action, $csrfExempt, true)) {
 // Bắt buộc login khi sử dụng quá 5 phút vãng lai (áp dụng cho POST và AJAX, bỏ qua bot tìm kiếm)
 if (!Auth::check() && !empty($_SESSION['guest_expired']) && !Seo::isBot()) {
     $guestAllowedActions = [
-        'login', 'register', 'googleLogin', 'googleCallback',
+        'login', 'register', 'captcha', 'googleLogin', 'googleCallback',
         'forgot_password', 'reset_password', 'logout',
         'sepayWebhook', 'robots', 'sitemap'
     ];
@@ -361,7 +379,7 @@ if (!Auth::check() && !empty($_SESSION['guest_expired']) && !Seo::isBot()) {
                 ]);
             } else {
                 $_SESSION['flash_error'] = 'Thời gian trải nghiệm vãng lai (5 phút) đã hết. Vui lòng đăng nhập hoặc tạo tài khoản để tiếp tục!';
-                header('Location: ' . url());
+                header('Location: ' . url('index.php?action=login'));
             }
             exit;
         }

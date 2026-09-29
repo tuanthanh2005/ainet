@@ -28,6 +28,15 @@ class Url {
     public static function about(): string   { return url('gioi-thieu'); }
     public static function contact(): string { return url('lien-he'); }
     public static function cart(): string    { return url('gio-hang'); }
+    public static function login(): string   { return url('dang-nhap'); }
+    public static function register(): string { return url('dang-ky'); }
+    public static function forgotPassword(): string { return url('quen-mat-khau'); }
+    public static function resetPassword(string $token = '', string $email = ''): string {
+        $params = [];
+        if ($token !== '') $params['token'] = $token;
+        if ($email !== '') $params['email'] = $email;
+        return self::withQuery(url('dat-lai-mat-khau'), $params);
+    }
     public static function home(): string    { return url(); }
     public static function products(): string { return url('san-pham'); }
     public static function blogs(): string    { return url('tap-chi'); }

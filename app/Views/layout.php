@@ -70,20 +70,25 @@ $isGuestExpired = !$isBot && !Auth::check() && (!empty($_SESSION['guest_expired'
     <script>
         window.APP_USER_LOGGED_IN = <?php echo $currentUser ? 'true' : 'false'; ?>;
         window.isGuestExpired = <?php echo $isGuestExpired ? 'true' : 'false'; ?>;
+        window.APP_LOGIN_URL = '<?php echo Url::login(); ?>';
+        window.APP_REGISTER_URL = '<?php echo Url::register(); ?>';
         window.isSwitchingAuthModal = false;
 
         window.switchModal = function(fromModal, toModal) {
-            const fromEl = typeof fromModal === 'string' ? document.querySelector(fromModal) : fromModal;
+            if (toModal === '#loginModal' || toModal === 'loginModal') {
+                window.location.href = window.APP_LOGIN_URL;
+                return;
+            }
+            if (toModal === '#registerModal' || toModal === 'registerModal') {
+                window.location.href = window.APP_REGISTER_URL;
+                return;
+            }
             const toEl = typeof toModal === 'string' ? document.querySelector(toModal) : toModal;
-
             if (!toEl || typeof bootstrap === 'undefined') return;
 
+            const fromEl = typeof fromModal === 'string' ? document.querySelector(fromModal) : fromModal;
             window.isSwitchingAuthModal = true;
-            const isLocked = !!(window.isGuestExpired && !window.APP_USER_LOGGED_IN);
-            const toInstance = bootstrap.Modal.getOrCreateInstance(toEl, {
-                backdrop: isLocked ? 'static' : true,
-                keyboard: !isLocked
-            });
+            const toInstance = bootstrap.Modal.getOrCreateInstance(toEl);
 
             if (fromEl && fromEl.classList.contains('show')) {
                 const fromInstance = bootstrap.Modal.getInstance(fromEl) || bootstrap.Modal.getOrCreateInstance(fromEl);
@@ -191,8 +196,8 @@ $isGuestExpired = !$isBot && !Auth::check() && (!empty($_SESSION['guest_expired'
                                 </ul>
                             </div>
                         <?php else: ?>
-                            <button type="button" class="header-link btn btn-link p-0 border-0 shadow-none text-secondary" style="text-decoration:none;" data-bs-toggle="modal" data-bs-target="#loginModal">Đăng nhập</button>
-                            <button type="button" class="header-link fw-bold text-dark btn btn-link p-0 border-0 shadow-none" style="text-decoration:none;" data-bs-toggle="modal" data-bs-target="#registerModal">Đăng ký</button>
+                            <a href="<?php echo Url::login(); ?>" class="header-link text-secondary text-decoration-none" style="padding: 6px 12px;">Đăng nhập</a>
+                            <a href="<?php echo Url::register(); ?>" class="header-link fw-bold text-dark text-decoration-none" style="padding: 6px 12px;">Đăng ký</a>
                         <?php endif; ?>
                     </div>
 
@@ -238,11 +243,10 @@ $isGuestExpired = !$isBot && !Auth::check() && (!empty($_SESSION['guest_expired'
                             </ul>
                         </div>
                     <?php else: ?>
-                        <button class="header-icon-btn bg-dark text-white fw-bold d-md-none" type="button"
-                            data-bs-toggle="modal" data-bs-target="#loginModal"
-                            style="border: 2px solid #fff; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
-                            S
-                        </button>
+                        <a href="<?php echo Url::login(); ?>" class="header-icon-btn bg-dark text-white fw-bold d-md-none text-decoration-none d-flex align-items-center justify-content-center"
+                            style="border: 2px solid #fff; box-shadow: 0 2px 5px rgba(0,0,0,0.1);" title="Đăng nhập">
+                            <i class="fa-regular fa-user" style="font-size: 0.95rem;"></i>
+                        </a>
                     <?php endif; ?>
                 </div>
             </div>
@@ -263,6 +267,25 @@ $isGuestExpired = !$isBot && !Auth::check() && (!empty($_SESSION['guest_expired'
         $flashSuccessJs = $flashSuccess ? json_encode(htmlspecialchars($flashSuccess, ENT_QUOTES, 'UTF-8')) : 'null';
         $flashErrorJs   = $flashError   ? json_encode(htmlspecialchars($flashError,   ENT_QUOTES, 'UTF-8')) : 'null';
         ?>
+
+        <?php if ($isGuestExpired && empty($currentUser) && !in_array($_GET['action'] ?? '', ['login', 'register', 'forgot_password', 'reset_password'])): ?>
+        <div class="alert border-0 rounded-4 p-3 shadow-sm mb-4 d-flex align-items-center justify-content-between flex-wrap gap-3" 
+             style="background: linear-gradient(135deg, #fef3c7 0%, #fffbeb 100%) !important; border: 1px solid #fde68a !important;">
+            <div class="d-flex align-items-center gap-3">
+                <div class="rounded-circle bg-warning bg-opacity-25 p-2 text-warning d-flex align-items-center justify-content-center flex-shrink-0" style="width: 44px; height: 44px;">
+                    <i class="fa-solid fa-clock-rotate-left fs-5"></i>
+                </div>
+                <div>
+                    <strong class="d-block text-dark">Thời gian trải nghiệm vãng lai 5 phút đã hết</strong>
+                    <span class="small text-muted">Vui lòng đăng nhập hoặc tạo tài khoản mới để tiếp tục mua sắm và sử dụng đầy đủ tính năng!</span>
+                </div>
+            </div>
+            <div class="d-flex align-items-center gap-2">
+                <a href="<?php echo Url::login(); ?>" class="btn btn-outline-dark btn-sm px-3 py-2 rounded-3 fw-bold">Đăng nhập</a>
+                <a href="<?php echo Url::register(); ?>" class="btn btn-buy btn-sm px-3 py-2 rounded-3 fw-bold">Tạo tài khoản</a>
+            </div>
+        </div>
+        <?php endif; ?>
         
         <?php
         // Navigation Tab Component
@@ -319,150 +342,6 @@ $isGuestExpired = !$isBot && !Auth::check() && (!empty($_SESSION['guest_expired'
     </footer>
 
     <!-- Modals -->
-    <div class="modal fade <?php echo $isGuestExpired ? 'forced-lockout' : ''; ?>" id="loginModal"
-         <?php if ($isGuestExpired): ?>data-bs-backdrop="static" data-bs-keyboard="false"<?php endif; ?>
-         tabindex="-1" aria-hidden="true" style="z-index: 1060;">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content p-3 border-0 shadow-lg rounded-4">
-                <div class="modal-header border-0 pb-0">
-                    <h4 class="modal-title fw-bold">Đăng nhập</h4>
-                    <button type="button" class="btn-close shadow-none <?php echo $isGuestExpired ? 'd-none' : ''; ?>" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <!-- Expired notice banner (shown only when expired) -->
-                    <div id="loginExpiredNotice" class="alert alert-warning border-0 rounded-3 mb-3 <?php echo $isGuestExpired ? '' : 'd-none'; ?> text-start small">
-                        <div class="d-flex align-items-start gap-2">
-                            <i class="fa-solid fa-clock-rotate-left text-warning fs-5 mt-1 flex-shrink-0"></i>
-                            <div>
-                                <strong class="d-block text-dark">Hết 5 phút trải nghiệm vãng lai</strong>
-                                <span>Thời gian dùng thử 5 phút đã kết thúc. Vui lòng đăng nhập hoặc tạo tài khoản để tiếp tục trải nghiệm!</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Alert message for login error -->
-                    <div id="loginModalAlert" class="<?php echo !empty($loginError) ? '' : 'd-none'; ?> mb-3">
-                        <div class="alert alert-danger py-2.5 px-3 rounded-3 small fw-medium d-flex align-items-center mb-0">
-                            <i class="fa-solid fa-circle-exclamation me-2 fs-6 flex-shrink-0"></i>
-                            <span id="loginModalAlertText"><?php echo htmlspecialchars($loginError ?? ''); ?></span>
-                        </div>
-                    </div>
-
-                    <?php if (GoogleAuth::isConfigured()): ?>
-                    <a href="<?php echo url('index.php?action=googleLogin'); ?>" class="btn w-100 py-2 mb-3 fw-semibold d-flex align-items-center justify-content-center gap-2"
-                        style="border: 2px solid #e2e8f0; background: #fff; color: #1e293b; border-radius: 12px; transition: all 0.2s;"
-                        onmouseover="this.style.background='#f8fafc'; this.style.borderColor='#6366f1';"
-                        onmouseout="this.style.background='#fff'; this.style.borderColor='#e2e8f0';">
-                        <svg width="20" height="20" viewBox="0 0 48 48">
-                            <path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9 3.2l6.7-6.7C35.6 2.5 30.1 0 24 0 14.8 0 6.9 5.4 3 13.3l7.8 6C12.6 13.3 17.9 9.5 24 9.5z"/>
-                            <path fill="#4285F4" d="M46.5 24.5c0-1.6-.1-3.1-.4-4.5H24v8.5h12.7c-.6 3-2.3 5.5-4.8 7.2l7.5 5.8c4.4-4 7.1-10 7.1-17z"/>
-                            <path fill="#FBBC05" d="M10.8 28.7A14.5 14.5 0 0 1 9.5 24c0-1.6.3-3.2.8-4.7l-7.8-6A24 24 0 0 0 0 24c0 3.9.9 7.5 2.5 10.7l8.3-6z"/>
-                            <path fill="#34A853" d="M24 48c6.1 0 11.2-2 15-5.5l-7.5-5.8c-2 1.4-4.6 2.3-7.5 2.3-6.1 0-11.4-3.8-13.2-9.3l-8.3 6C6.9 42.6 14.8 48 24 48z"/>
-                        </svg>
-                        Tiếp tục với Google
-                    </a>
-                    <div class="d-flex align-items-center gap-2 mb-3">
-                        <hr class="flex-grow-1 m-0">
-                        <span class="text-muted small px-1">hoặc</span>
-                        <hr class="flex-grow-1 m-0">
-                    </div>
-                    <?php endif; ?>
-                    <form id="loginModalForm" method="POST" action="<?php echo url('index.php?action=login'); ?>">
-                        <?php echo Csrf::field(); ?>
-                        <div class="mb-4">
-                            <label class="form-label small fw-bold">Email</label>
-                            <input type="email" name="email" id="loginModalEmail" class="form-control bg-light border-0"
-                                placeholder="hello@example.com" value="<?php echo htmlspecialchars($oldLoginEmail ?? ''); ?>" required>
-                        </div>
-                        <div class="mb-4">
-                            <label class="form-label small fw-bold">Mật khẩu</label>
-                            <input type="password" name="password" id="loginModalPassword" class="form-control bg-light border-0"
-                                placeholder="••••••••" required>
-                        </div>
-                        <div class="d-flex justify-content-between mb-4 small fw-medium">
-                            <div class="form-check">
-                                <input type="checkbox" class="form-check-input" id="rememberMe">
-                                <label class="form-check-label text-muted" for="rememberMe">Ghi nhớ</label>
-                            </div>
-                            <a href="#" class="text-dark text-decoration-none border-bottom border-dark">Quên mật
-                                khẩu?</a>
-                        </div>
-                        <button type="submit" id="loginModalSubmitBtn" class="btn btn-buy w-100 py-3 rounded-3 fw-bold">
-                            <span class="btn-text">Đăng Nhập</span>
-                        </button>
-                    </form>
-                </div>
-                <div class="modal-footer border-0 justify-content-center pt-0 pb-4">
-                    <span class="small text-muted">Chưa có tài khoản? <a href="#"
-                            class="text-dark fw-bold text-decoration-none ms-1" onclick="switchModal('#loginModal', '#registerModal'); return false;">Đăng ký ngay</a></span>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="modal fade <?php echo $isGuestExpired ? 'forced-lockout' : ''; ?>" id="registerModal"
-         <?php if ($isGuestExpired): ?>data-bs-backdrop="static" data-bs-keyboard="false"<?php endif; ?>
-         tabindex="-1" aria-hidden="true" style="z-index: 1060;">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content p-3 border-0 shadow-lg rounded-4">
-                <div class="modal-header border-0 pb-0">
-                    <h4 class="modal-title fw-bold">Tạo tài khoản</h4>
-                    <button type="button" class="btn-close shadow-none <?php echo $isGuestExpired ? 'd-none' : ''; ?>" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <!-- Expired notice banner (shown only when expired) -->
-                    <div id="registerExpiredNotice" class="alert alert-warning border-0 rounded-3 mb-3 <?php echo $isGuestExpired ? '' : 'd-none'; ?> text-start small">
-                        <div class="d-flex align-items-start gap-2">
-                            <i class="fa-solid fa-clock-rotate-left text-warning fs-5 mt-1 flex-shrink-0"></i>
-                            <div>
-                                <strong class="d-block text-dark">Hết 5 phút trải nghiệm vãng lai</strong>
-                                <span>Vui lòng đăng ký tài khoản (hoặc chuyển sang Đăng nhập) để tiếp tục sử dụng website.</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Alert message for register error -->
-                    <div id="registerModalAlert" class="<?php echo !empty($registerError) ? '' : 'd-none'; ?> mb-3">
-                        <div class="alert alert-danger py-2.5 px-3 rounded-3 small fw-medium d-flex align-items-center mb-0">
-                            <i class="fa-solid fa-circle-exclamation me-2 fs-6 flex-shrink-0"></i>
-                            <span id="registerModalAlertText"><?php echo htmlspecialchars($registerError ?? ''); ?></span>
-                        </div>
-                    </div>
-
-                    <form id="registerModalForm" method="POST" action="<?php echo url('index.php?action=register'); ?>">
-                        <?php echo Csrf::field(); ?>
-                        <!-- Honeypot Field (Antispam Trap for Bots) -->
-                        <div style="display:none !important; opacity:0; position:absolute; left:-9999px;" aria-hidden="true">
-                            <input type="text" name="website_url_check" tabindex="-1" autocomplete="off" value="">
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label small fw-bold">Họ tên</label>
-                            <input type="text" name="name" id="registerModalName" class="form-control bg-light border-0"
-                                placeholder="Tên của bạn" value="<?php echo htmlspecialchars($oldRegisterName ?? ''); ?>" required>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label small fw-bold">Email</label>
-                            <input type="email" name="email" id="registerModalEmail" class="form-control bg-light border-0"
-                                placeholder="hello@example.com" value="<?php echo htmlspecialchars($oldRegisterEmail ?? ''); ?>" required>
-                        </div>
-                        <div class="mb-4">
-                            <label class="form-label small fw-bold">Mật khẩu</label>
-                            <input type="password" name="password" id="registerModalPassword" class="form-control bg-light border-0"
-                                placeholder="••••••••" minlength="6" required>
-                        </div>
-                        <button type="submit" id="registerModalSubmitBtn" class="btn btn-buy w-100 py-3 rounded-3 fw-bold">
-                            <span class="btn-text">Tạo Tài Khoản</span>
-                        </button>
-                    </form>
-                </div>
-                <div class="modal-footer border-0 justify-content-center pt-0 pb-4">
-                    <span class="small text-muted">Đã có tài khoản? <a href="#"
-                            class="text-dark fw-bold text-decoration-none ms-1" onclick="switchModal('#registerModal', '#loginModal'); return false;">Đăng nhập</a></span>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <!-- Legal Modals -->
     <div class="modal fade" id="termsModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
@@ -594,14 +473,12 @@ $isGuestExpired = !$isBot && !Auth::check() && (!empty($_SESSION['guest_expired'
     <!-- Floating Chat Bubble Component -->
     <?php require_once APP_ROOT . '/app/Views/partials/chat_bubble.php'; ?>
 
-    <!-- 5-Minute Guest Forced Login Lockout Handler -->
+    <!-- 5-Minute Guest Timeout Handler -->
     <?php if (!Auth::check() && empty($isBot)): ?>
     <script>
     (function() {
         if (window.APP_USER_LOGGED_IN) {
-            try {
-                localStorage.removeItem('ainet_guest_started_at');
-            } catch(e) {}
+            try { localStorage.removeItem('ainet_guest_started_at'); } catch(e) {}
             return;
         }
 
@@ -626,269 +503,22 @@ $isGuestExpired = !$isBot && !Auth::check() && (!empty($_SESSION['guest_expired'
             localStorage.setItem(STORAGE_KEY, guestStartedAt.toString());
         } catch(e) {}
 
-        let isExpired = <?php echo $isGuestExpired ? 'true' : 'false'; ?>;
-        const hasLoginError = <?php echo !empty($loginError) ? 'true' : 'false'; ?>;
-        const hasRegisterError = <?php echo !empty($registerError) ? 'true' : 'false'; ?>;
+        const currentAction = '<?php echo addslashes($_GET['action'] ?? ''); ?>';
+        const isAuthPage = ['login', 'register', 'forgot_password', 'reset_password'].includes(currentAction);
 
-        function getElapsed() {
-            return Math.floor(Date.now() / 1000) - guestStartedAt;
-        }
-
-        function checkExpiredStatus() {
-            if (isExpired) return true;
-            if (getElapsed() >= GUEST_LIMIT_SECONDS) {
-                isExpired = true;
-                window.isGuestExpired = true;
-                return true;
-            }
-            return false;
-        }
-
-        function enforceLockout(preferredModalId) {
-            if (window.APP_USER_LOGGED_IN) return;
-            isExpired = true;
-            window.isGuestExpired = true;
-            document.body.classList.add('guest-expired-lockout');
-
-            const loginModalEl = document.getElementById('loginModal');
-            const regModalEl = document.getElementById('registerModal');
-            const loginNotice = document.getElementById('loginExpiredNotice');
-            const regNotice = document.getElementById('registerExpiredNotice');
-
-            if (loginNotice) loginNotice.classList.remove('d-none');
-            if (regNotice) regNotice.classList.remove('d-none');
-
-            [loginModalEl, regModalEl].forEach(el => {
-                if (el) {
-                    el.classList.add('forced-lockout');
-                    el.setAttribute('data-bs-backdrop', 'static');
-                    el.setAttribute('data-bs-keyboard', 'false');
-                    const closeBtn = el.querySelector('.btn-close');
-                    if (closeBtn) closeBtn.style.display = 'none';
-                }
-            });
-
-            // Close any non-auth modals that might be open
-            document.querySelectorAll('.modal.show').forEach(m => {
-                if (m.id !== 'loginModal' && m.id !== 'registerModal') {
-                    if (typeof bootstrap !== 'undefined') {
-                        const inst = bootstrap.Modal.getInstance(m);
-                        if (inst) inst.hide();
-                    }
-                }
-            });
-
-            const targetId = preferredModalId || (hasRegisterError ? '#registerModal' : '#loginModal');
-            const targetEl = document.querySelector(targetId) || loginModalEl;
-
-            if (targetEl && typeof bootstrap !== 'undefined') {
-                const otherEl = targetEl.id === 'loginModal' ? regModalEl : loginModalEl;
-                const isOtherOpen = otherEl && otherEl.classList.contains('show');
-                const isTargetOpen = targetEl.classList.contains('show');
-
-                if (!isTargetOpen && !isOtherOpen) {
-                    const inst = bootstrap.Modal.getOrCreateInstance(targetEl, {
-                        backdrop: 'static',
-                        keyboard: false
-                    });
-                    inst.show();
-                }
+        function checkGuestTimeout() {
+            if (window.APP_USER_LOGGED_IN || isAuthPage) return;
+            const elapsed = Math.floor(Date.now() / 1000) - guestStartedAt;
+            if (elapsed >= GUEST_LIMIT_SECONDS) {
+                window.location.href = '<?php echo Url::login(); ?>';
             }
         }
 
-        // Timer interval check every 1s
-        const timerInterval = setInterval(() => {
-            if (window.APP_USER_LOGGED_IN) {
-                clearInterval(timerInterval);
-                return;
-            }
-            if (checkExpiredStatus()) {
-                enforceLockout();
-            }
-        }, 1000);
-
+        setInterval(checkGuestTimeout, 2000);
         document.addEventListener('visibilitychange', () => {
-            if (!document.hidden && checkExpiredStatus()) {
-                enforceLockout();
-            }
+            if (!document.hidden) checkGuestTimeout();
         });
-
-        // Anti-bypass click & key capture when locked
-        document.addEventListener('click', function(e) {
-            if (isExpired && !window.APP_USER_LOGGED_IN) {
-                if (!e.target.closest('#loginModal') && !e.target.closest('#registerModal') && !e.target.closest('.modal-content')) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    enforceLockout();
-                }
-            }
-        }, true);
-
-        // Guard against closing modal when expired
-        ['loginModal', 'registerModal'].forEach(id => {
-            const el = document.getElementById(id);
-            if (el) {
-                el.addEventListener('hidden.bs.modal', () => {
-                    if (!window.APP_USER_LOGGED_IN && isExpired && !window.isSwitchingAuthModal) {
-                        setTimeout(() => {
-                            enforceLockout('#' + id);
-                        }, 100);
-                    }
-                });
-            }
-        });
-
-        // Setup AJAX handler for Login Form
-        const loginForm = document.getElementById('loginModalForm');
-        if (loginForm) {
-            loginForm.addEventListener('submit', async function(e) {
-                e.preventDefault();
-                const submitBtn = document.getElementById('loginModalSubmitBtn');
-                const alertBox = document.getElementById('loginModalAlert');
-                const alertText = document.getElementById('loginModalAlertText');
-                const passwordInput = document.getElementById('loginModalPassword');
-
-                if (alertBox) alertBox.classList.add('d-none');
-                if (submitBtn) {
-                    submitBtn.disabled = true;
-                    submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-2"></i>Đang đăng nhập...';
-                }
-
-                try {
-                    const formData = new FormData(loginForm);
-                    const response = await fetch(loginForm.action, {
-                        method: 'POST',
-                        headers: {
-                            'X-Requested-With': 'XMLHttpRequest',
-                            'Accept': 'application/json'
-                        },
-                        body: formData
-                    });
-
-                    const data = await response.json();
-
-                    if (data.success) {
-                        try { localStorage.removeItem(STORAGE_KEY); } catch(e) {}
-                        if (submitBtn) {
-                            submitBtn.innerHTML = '<i class="fa-solid fa-check me-2"></i>Đăng nhập thành công!';
-                        }
-                        window.location.href = data.redirect || window.location.href;
-                    } else {
-                        if (alertBox && alertText) {
-                            alertText.textContent = data.message || 'Email hoặc mật khẩu không đúng.';
-                            alertBox.classList.remove('d-none');
-                        }
-                        if (passwordInput) {
-                            passwordInput.value = '';
-                            passwordInput.focus();
-                        }
-                        const modalContent = loginForm.closest('.modal-content');
-                        if (modalContent) {
-                            modalContent.classList.remove('shake-animation');
-                            void modalContent.offsetWidth;
-                            modalContent.classList.add('shake-animation');
-                        }
-                        if (checkExpiredStatus()) {
-                            enforceLockout('#loginModal');
-                        }
-                        if (submitBtn) {
-                            submitBtn.disabled = false;
-                            submitBtn.innerHTML = '<span class="btn-text">Đăng Nhập</span>';
-                        }
-                    }
-                } catch(err) {
-                    // Fallback to native form submission
-                    loginForm.submit();
-                }
-            });
-        }
-
-        // Setup AJAX handler for Register Form
-        const registerForm = document.getElementById('registerModalForm');
-        if (registerForm) {
-            registerForm.addEventListener('submit', async function(e) {
-                e.preventDefault();
-                const submitBtn = document.getElementById('registerModalSubmitBtn');
-                const alertBox = document.getElementById('registerModalAlert');
-                const alertText = document.getElementById('registerModalAlertText');
-                const passwordInput = document.getElementById('registerModalPassword');
-
-                if (alertBox) alertBox.classList.add('d-none');
-                if (submitBtn) {
-                    submitBtn.disabled = true;
-                    submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-2"></i>Đang tạo tài khoản...';
-                }
-
-                try {
-                    const formData = new FormData(registerForm);
-                    const response = await fetch(registerForm.action, {
-                        method: 'POST',
-                        headers: {
-                            'X-Requested-With': 'XMLHttpRequest',
-                            'Accept': 'application/json'
-                        },
-                        body: formData
-                    });
-
-                    const data = await response.json();
-
-                    if (data.success) {
-                        try { localStorage.removeItem(STORAGE_KEY); } catch(e) {}
-                        if (submitBtn) {
-                            submitBtn.innerHTML = '<i class="fa-solid fa-check me-2"></i>Đăng ký thành công!';
-                        }
-                        window.location.href = data.redirect || window.location.href;
-                    } else {
-                        if (alertBox && alertText) {
-                            alertText.textContent = data.message || 'Đăng ký không thành công. Vui lòng thử lại.';
-                            alertBox.classList.remove('d-none');
-                        }
-                        if (passwordInput) {
-                            passwordInput.value = '';
-                            passwordInput.focus();
-                        }
-                        const modalContent = registerForm.closest('.modal-content');
-                        if (modalContent) {
-                            modalContent.classList.remove('shake-animation');
-                            void modalContent.offsetWidth;
-                            modalContent.classList.add('shake-animation');
-                        }
-                        if (checkExpiredStatus()) {
-                            enforceLockout('#registerModal');
-                        }
-                        if (submitBtn) {
-                            submitBtn.disabled = false;
-                            submitBtn.innerHTML = '<span class="btn-text">Tạo Tài Khoản</span>';
-                        }
-                    }
-                } catch(err) {
-                    registerForm.submit();
-                }
-            });
-        }
-
-        // Init on DOM ready
-        function initOnReady() {
-            if (checkExpiredStatus()) {
-                enforceLockout(hasRegisterError ? '#registerModal' : '#loginModal');
-            } else if (hasLoginError) {
-                const loginEl = document.getElementById('loginModal');
-                if (loginEl && typeof bootstrap !== 'undefined') {
-                    bootstrap.Modal.getOrCreateInstance(loginEl).show();
-                }
-            } else if (hasRegisterError) {
-                const regEl = document.getElementById('registerModal');
-                if (regEl && typeof bootstrap !== 'undefined') {
-                    bootstrap.Modal.getOrCreateInstance(regEl).show();
-                }
-            }
-        }
-
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', initOnReady);
-        } else {
-            initOnReady();
-        }
+        checkGuestTimeout();
     })();
     </script>
     <?php endif; ?>

@@ -498,10 +498,25 @@ class HomeController extends Controller {
         ]);
     }
 
+    /**
+     * Render captcha image endpoint
+     */
+    public function captcha() {
+        Captcha::render();
+    }
+
     public function register() {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-            header('Location: ' . url());
-            exit;
+            if (Auth::check()) {
+                header('Location: ' . Url::home());
+                exit;
+            }
+            $this->view('layout', [
+                'view' => 'auth/register',
+                'settings' => $this->settings,
+                'pageTitle' => 'Đăng ký tài khoản - ' . SITENAME,
+            ]);
+            return;
         }
 
         $isAjax = !empty($_SERVER['HTTP_X_REQUESTED_WITH']) || (strpos($_SERVER['HTTP_ACCEPT'] ?? '', 'application/json') !== false);
@@ -516,7 +531,7 @@ class HomeController extends Controller {
                 exit;
             }
             $_SESSION['flash_error'] = $msg;
-            header('Location: ' . url());
+            header('Location: ' . Url::register());
             exit;
         }
 
@@ -528,12 +543,12 @@ class HomeController extends Controller {
                 echo json_encode(['success' => false, 'message' => 'Phát hiện hành vi không hợp lệ.']);
                 exit;
             }
-            header('Location: ' . url());
+            header('Location: ' . Url::register());
             exit;
         }
 
         // 3. Rate limiting check
-        if (!Auth::checkRegisterRateLimit(3, 600)) {
+        if (!Auth::checkRegisterRateLimit(5, 600)) {
             $msg = 'Bạn đã thử đăng ký quá nhiều lần. Vui lòng thử lại sau 10 phút.';
             if ($isAjax) {
                 http_response_code(429);
@@ -543,7 +558,7 @@ class HomeController extends Controller {
             }
             $_SESSION['flash_error'] = $msg;
             $_SESSION['register_error'] = $msg;
-            header('Location: ' . ($_SERVER['HTTP_REFERER'] ?? url()));
+            header('Location: ' . Url::register());
             exit;
         }
 
@@ -552,8 +567,27 @@ class HomeController extends Controller {
         $name = trim($_POST['name'] ?? '');
         $email = strtolower(trim($_POST['email'] ?? ''));
         $password = $_POST['password'] ?? '';
+        $passwordConfirm = $_POST['password_confirmation'] ?? '';
+        $captcha = trim($_POST['captcha'] ?? '');
 
-        // 4. Basic input validation
+        // 4. Captcha verification
+        if (!Captcha::verify($captcha)) {
+            $msg = 'Mã bảo vệ (Captcha) không chính xác hoặc đã hết hạn. Vui lòng thử lại.';
+            if ($isAjax) {
+                http_response_code(422);
+                header('Content-Type: application/json');
+                echo json_encode(['success' => false, 'field' => 'captcha', 'message' => $msg]);
+                exit;
+            }
+            $_SESSION['flash_error'] = $msg;
+            $_SESSION['register_error'] = $msg;
+            $_SESSION['old_register_name'] = $name;
+            $_SESSION['old_register_email'] = $email;
+            header('Location: ' . Url::register());
+            exit;
+        }
+
+        // 5. Basic input validation
         if ($name === '' || !filter_var($email, FILTER_VALIDATE_EMAIL) || strlen($password) < 6) {
             $msg = 'Vui lòng nhập đúng họ tên, email hợp lệ và mật khẩu tối thiểu 6 ký tự.';
             if ($isAjax) {
@@ -566,11 +600,28 @@ class HomeController extends Controller {
             $_SESSION['register_error'] = $msg;
             $_SESSION['old_register_name'] = $name;
             $_SESSION['old_register_email'] = $email;
-            header('Location: ' . ($_SERVER['HTTP_REFERER'] ?? url()));
+            header('Location: ' . Url::register());
             exit;
         }
 
-        // 5. Block synthetic / pentest / temporary disposable email domains
+        // 6. Confirm password validation
+        if ($password !== $passwordConfirm) {
+            $msg = 'Mật khẩu xác nhận không khớp. Vui lòng kiểm tra lại.';
+            if ($isAjax) {
+                http_response_code(422);
+                header('Content-Type: application/json');
+                echo json_encode(['success' => false, 'field' => 'password_confirmation', 'message' => $msg]);
+                exit;
+            }
+            $_SESSION['flash_error'] = $msg;
+            $_SESSION['register_error'] = $msg;
+            $_SESSION['old_register_name'] = $name;
+            $_SESSION['old_register_email'] = $email;
+            header('Location: ' . Url::register());
+            exit;
+        }
+
+        // 7. Block synthetic / pentest / temporary disposable email domains
         $suspiciousDomains = ['lab-synth.dev', 'synthetic-lab.invalid', 'tempmail', 'dispostable', 'mailinator', '.invalid'];
         foreach ($suspiciousDomains as $domain) {
             if (strpos($email, $domain) !== false || strpos($name, 'pentest') !== false || strpos($email, 'pentest') !== false) {
@@ -585,7 +636,7 @@ class HomeController extends Controller {
                 $_SESSION['register_error'] = $msg;
                 $_SESSION['old_register_name'] = $name;
                 $_SESSION['old_register_email'] = $email;
-                header('Location: ' . ($_SERVER['HTTP_REFERER'] ?? url()));
+                header('Location: ' . Url::register());
                 exit;
             }
         }
@@ -602,7 +653,7 @@ class HomeController extends Controller {
             $_SESSION['register_error'] = $msg;
             $_SESSION['old_register_name'] = $name;
             $_SESSION['old_register_email'] = $email;
-            header('Location: ' . ($_SERVER['HTTP_REFERER'] ?? url()));
+            header('Location: ' . Url::register());
             exit;
         }
 
@@ -615,8 +666,8 @@ class HomeController extends Controller {
             TelegramService::notifyNewUser($user, 'Đăng ký tài khoản');
         }
 
-        $_SESSION['flash_success'] = 'Đăng ký thành công.';
-        $redirect = url();
+        $_SESSION['flash_success'] = 'Đăng ký tài khoản thành công.';
+        $redirect = Url::home();
         if ($isAjax) {
             header('Content-Type: application/json');
             echo json_encode(['success' => true, 'redirect' => $redirect]);
@@ -628,8 +679,16 @@ class HomeController extends Controller {
 
     public function login() {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-            header('Location: ' . url());
-            exit;
+            if (Auth::check()) {
+                header('Location: ' . Url::home());
+                exit;
+            }
+            $this->view('layout', [
+                'view' => 'auth/login',
+                'settings' => $this->settings,
+                'pageTitle' => 'Đăng nhập tài khoản - ' . SITENAME,
+            ]);
+            return;
         }
 
         $isAjax = !empty($_SERVER['HTTP_X_REQUESTED_WITH']) || (strpos($_SERVER['HTTP_ACCEPT'] ?? '', 'application/json') !== false);
@@ -644,7 +703,7 @@ class HomeController extends Controller {
             }
             $_SESSION['flash_error'] = $msg;
             $_SESSION['login_error'] = $msg;
-            header('Location: ' . ($_SERVER['HTTP_REFERER'] ?? url()));
+            header('Location: ' . Url::login());
             exit;
         }
 
@@ -664,7 +723,7 @@ class HomeController extends Controller {
             $_SESSION['flash_error'] = $msg;
             $_SESSION['login_error'] = $msg;
             $_SESSION['old_login_email'] = $email;
-            header('Location: ' . ($_SERVER['HTTP_REFERER'] ?? url()));
+            header('Location: ' . Url::login());
             exit;
         }
 
@@ -680,14 +739,14 @@ class HomeController extends Controller {
             $_SESSION['flash_error'] = $msg;
             $_SESSION['login_error'] = $msg;
             $_SESSION['old_login_email'] = $email;
-            header('Location: ' . ($_SERVER['HTTP_REFERER'] ?? url()));
+            header('Location: ' . Url::login());
             exit;
         }
 
         Auth::login($user);
         $_SESSION['flash_success'] = 'Đăng nhập thành công.';
 
-        $redirect = (($user['role'] ?? 'user') === 'admin') ? url('index.php?action=adminDashboard') : url();
+        $redirect = (($user['role'] ?? 'user') === 'admin') ? url('index.php?action=adminDashboard') : Url::home();
 
         if ($isAjax) {
             header('Content-Type: application/json');
@@ -697,6 +756,206 @@ class HomeController extends Controller {
 
         header('Location: ' . $redirect);
         exit;
+    }
+
+    /**
+     * Forgot Password - Step 1: Request reset link via Email
+     */
+    public function forgot_password() {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            if (Auth::check()) {
+                header('Location: ' . Url::home());
+                exit;
+            }
+            $this->view('layout', [
+                'view' => 'auth/forgot-password',
+                'settings' => $this->settings,
+                'pageTitle' => 'Quên mật khẩu - ' . SITENAME,
+            ]);
+            return;
+        }
+
+        if (!Csrf::validate()) {
+            $_SESSION['forgot_error'] = 'Yêu cầu không hợp lệ hoặc phiên đã hết hạn. Vui lòng thử lại.';
+            header('Location: ' . Url::forgotPassword());
+            exit;
+        }
+
+        $email = strtolower(trim($_POST['email'] ?? ''));
+        $captcha = trim($_POST['captcha'] ?? '');
+
+        if (!Captcha::verify($captcha)) {
+            $_SESSION['forgot_error'] = 'Mã bảo vệ (Captcha) không chính xác hoặc đã hết hạn. Vui lòng nhập lại.';
+            $_SESSION['old_forgot_email'] = $email;
+            header('Location: ' . Url::forgotPassword());
+            exit;
+        }
+
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            $_SESSION['forgot_error'] = 'Vui lòng nhập địa chỉ email hợp lệ.';
+            $_SESSION['old_forgot_email'] = $email;
+            header('Location: ' . Url::forgotPassword());
+            exit;
+        }
+
+        $user = User::findByEmail($email);
+        if ($user && ($user['status'] ?? 'active') === 'active') {
+            $token = PasswordReset::createToken($email);
+            $resetUrl = Url::resetPassword($token, $email);
+            $this->sendPasswordResetEmail($user, $resetUrl);
+        }
+
+        // Generic friendly message to prevent email enumeration
+        $_SESSION['forgot_success'] = 'Chúng tôi đã gửi hướng dẫn đặt lại mật khẩu đến ' . htmlspecialchars($email) . '. Vui lòng kiểm tra hộp thư đến.';
+        header('Location: ' . Url::forgotPassword());
+        exit;
+    }
+
+    /**
+     * Reset Password - Step 2: Validate token and update new password
+     */
+    public function reset_password() {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            if (Auth::check()) {
+                header('Location: ' . Url::home());
+                exit;
+            }
+            $token = trim($_GET['token'] ?? '');
+            $email = strtolower(trim($_GET['email'] ?? ''));
+            $isValidToken = false;
+
+            if ($token !== '' && $email !== '') {
+                $isValidToken = (PasswordReset::findValid($email, $token) !== null);
+            }
+
+            $this->view('layout', [
+                'view' => 'auth/reset-password',
+                'settings' => $this->settings,
+                'token' => $token,
+                'email' => $email,
+                'isValidToken' => $isValidToken,
+                'pageTitle' => 'Đặt lại mật khẩu - ' . SITENAME,
+            ]);
+            return;
+        }
+
+        if (!Csrf::validate()) {
+            $_SESSION['flash_error'] = 'Phiên làm việc đã hết hạn. Vui lòng thử lại.';
+            header('Location: ' . Url::forgotPassword());
+            exit;
+        }
+
+        $token = trim($_POST['token'] ?? '');
+        $email = strtolower(trim($_POST['email'] ?? ''));
+        $password = $_POST['password'] ?? '';
+        $passwordConfirm = $_POST['password_confirmation'] ?? '';
+
+        $resetRecord = PasswordReset::findValid($email, $token);
+        if (!$resetRecord) {
+            $_SESSION['reset_error'] = 'Liên kết đặt lại mật khẩu không hợp lệ hoặc đã hết hạn (chỉ có hiệu lực trong 30 phút).';
+            header('Location: ' . Url::resetPassword($token, $email));
+            exit;
+        }
+
+        if (strlen($password) < 6) {
+            $_SESSION['reset_error'] = 'Mật khẩu mới phải có tối thiểu 6 ký tự.';
+            header('Location: ' . Url::resetPassword($token, $email));
+            exit;
+        }
+
+        if ($password !== $passwordConfirm) {
+            $_SESSION['reset_error'] = 'Mật khẩu xác nhận không khớp. Vui lòng nhập lại.';
+            header('Location: ' . Url::resetPassword($token, $email));
+            exit;
+        }
+
+        $user = User::findByEmail($email);
+        if (!$user) {
+            $_SESSION['reset_error'] = 'Không tìm thấy tài khoản người dùng tương ứng.';
+            header('Location: ' . Url::forgotPassword());
+            exit;
+        }
+
+        User::updatePassword($user['id'], $password);
+        PasswordReset::deleteByEmail($email);
+
+        $_SESSION['flash_success'] = 'Mật khẩu đã được cập nhật thành công! Vui lòng đăng nhập với mật khẩu mới.';
+        header('Location: ' . Url::login());
+        exit;
+    }
+
+    /**
+     * Send password reset email via SMTP
+     */
+    private function sendPasswordResetEmail(array $user, string $resetUrl): bool {
+        $settings = $this->settings;
+        $host = trim($settings['smtp_host'] ?? '');
+        $port = (int)($settings['smtp_port'] ?? 587);
+        $secure = trim($settings['smtp_secure'] ?? 'tls');
+        $userSmtp = trim($settings['smtp_user'] ?? '');
+        $pass = trim($settings['smtp_pass'] ?? '');
+        $fromName = trim($settings['smtp_from_name'] ?? SITENAME);
+        $fromEmail = trim($settings['smtp_from_email'] ?? $userSmtp);
+
+        if (empty($host) || empty($userSmtp) || empty($pass)) {
+            error_log('SMTP not fully configured for password reset email');
+            return false;
+        }
+
+        $subject = '[' . SITENAME . '] Đặt lại mật khẩu tài khoản của bạn';
+        $userName = htmlspecialchars($user['name'] ?? 'Quý khách');
+        $siteName = htmlspecialchars(SITENAME);
+
+        $bodyHtml = "
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset='utf-8'>
+            <style>
+                body { font-family: 'Segoe UI', Arial, sans-serif; background-color: #f8fafc; color: #1e293b; margin: 0; padding: 20px; }
+                .card { max-width: 580px; margin: 0 auto; background: #ffffff; border-radius: 16px; overflow: hidden; border: 1px solid #e2e8f0; }
+                .card-header { background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%); padding: 30px 24px; text-align: center; color: #ffffff; }
+                .card-header h1 { margin: 0; font-size: 22px; font-weight: 700; }
+                .card-body { padding: 32px 28px; line-height: 1.6; }
+                .greeting { font-size: 16px; font-weight: 600; margin-bottom: 16px; color: #0f172a; }
+                .btn-reset { display: inline-block; background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%); color: #ffffff !important; padding: 14px 28px; text-decoration: none; border-radius: 10px; font-weight: bold; margin: 20px 0; font-size: 15px; }
+                .link-box { background: #f1f5f9; padding: 12px; border-radius: 8px; word-break: break-all; font-size: 12px; color: #64748b; margin-top: 15px; }
+                .notice { font-size: 13px; color: #64748b; margin-top: 24px; padding-top: 20px; border-top: 1px solid #e2e8f0; }
+                .card-footer { background: #f8fafc; padding: 20px; text-align: center; font-size: 12px; color: #94a3b8; }
+            </style>
+        </head>
+        <body>
+            <div class='card'>
+                <div class='card-header'>
+                    <h1>{$siteName}</h1>
+                </div>
+                <div class='card-body'>
+                    <div class='greeting'>Xin chào {$userName},</div>
+                    <p>Chúng tôi nhận được yêu cầu đặt lại mật khẩu cho tài khoản <strong>" . htmlspecialchars($user['email']) . "</strong> trên hệ thống {$siteName}.</p>
+                    <p>Vui lòng bấm vào nút bên dưới để tiến hành tạo mật khẩu mới:</p>
+                    <div style='text-align: center;'>
+                        <a href='{$resetUrl}' class='btn-reset' target='_blank'>Đặt lại mật khẩu</a>
+                    </div>
+                    <p style='font-size: 13px; color: #64748b;'>Hoặc bạn có thể sao chép liên kết sau và dán vào thanh địa chỉ của trình duyệt:</p>
+                    <div class='link-box'>{$resetUrl}</div>
+                    <div class='notice'>
+                        <p><strong>Lưu ý quan trọng:</strong></p>
+                        <ul>
+                            <li>Liên kết này chỉ có hiệu lực trong vòng <strong>30 phút</strong>.</li>
+                            <li>Nếu bạn không yêu cầu đặt lại mật khẩu, vui lòng bỏ qua email này. Mật khẩu hiện tại của bạn vẫn được giữ nguyên và bảo mật.</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class='card-footer'>
+                    &copy; " . date('Y') . " {$siteName}. Thư này được tạo tự động, vui lòng không phản hồi.
+                </div>
+            </div>
+        </body>
+        </html>";
+
+        require_once APP_ROOT . '/app/Core/SmtpMailer.php';
+        $mailer = new SmtpMailer($host, $port, $secure, $userSmtp, $pass);
+        return $mailer->send($fromEmail, $fromName, $user['email'], $subject, $bodyHtml);
     }
 
     public function logout() {
