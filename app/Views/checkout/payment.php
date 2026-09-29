@@ -247,7 +247,7 @@ if ($isSuccess && !empty($_SESSION['user']['id'])) {
         <?php else: ?>
             <!-- STEP 2: PENDING PAYMENT (QR & COUNTDOWN) -->
             <div class="row justify-content-center animate__animated animate__fadeIn">
-                <div class="col-md-7 col-lg-6">
+                <div class="col-lg-10 col-xl-9">
                     <div class="card border-0 shadow-lg rounded-4 overflow-hidden bg-white">
                         <div id="payment-header-banner" class="p-4 text-center border-bottom <?= $isExpired ? 'bg-danger bg-opacity-10 border-danger border-opacity-25' : 'bg-warning bg-opacity-10 border-warning border-opacity-25' ?>">
                             <h5 id="payment-header-title" class="fw-bold text-dark mb-1"><?= $isExpired ? 'Đơn hàng đã hết hạn' : 'Đang chờ thanh toán...' ?></h5>
@@ -274,8 +274,10 @@ if ($isSuccess && !empty($_SESSION['user']['id'])) {
                                     <i class="fa-solid fa-clock me-2 text-primary"></i> Đơn hàng hết hạn sau: <span id="countdown" class="fw-bold">05:00</span>
                                 </div>
 
+                                <div class="payment-details-layout">
                                 <!-- QR Code SePay -->
-                                <div class="qr-box p-3 bg-white rounded-4 border shadow-sm mb-4 position-relative overflow-hidden">
+                                <div class="payment-qr-column">
+                                <div class="qr-box p-3 bg-white rounded-4 border shadow-sm position-relative overflow-hidden">
                                     <?php
                                     $bankId = trim((string) ($settings['bank_id'] ?? ''));
                                     $accountNo = trim((string) ($settings['bank_account'] ?? ''));
@@ -302,8 +304,9 @@ if ($isSuccess && !empty($_SESSION['user']['id'])) {
                                     <!-- Laser scanning visual effect -->
                                     <div class="scanning-line"></div>
                                 </div>
+                                </div>
 
-                                <div class="bank-info-card text-start bg-light p-3 p-md-4 rounded-4 mb-4">
+                                <div class="bank-info-card payment-bank-column text-start bg-light p-3 p-md-4 rounded-4 mb-0">
                                     <h6 class="fw-bold text-dark mb-3 border-bottom pb-2" style="font-size: 0.9rem;">Thông tin chuyển khoản ngân hàng</h6>
                                     <div class="row g-2 g-md-3">
                                         <div class="col-6">
@@ -333,6 +336,7 @@ if ($isSuccess && !empty($_SESSION['user']['id'])) {
                                             </div>
                                         </div>
                                     </div>
+                                </div>
                                 </div>
 
                                 <!-- Manual Check Button (just reloads page, which redirects if completed) -->
@@ -414,6 +418,16 @@ if ($isSuccess && !empty($_SESSION['user']['id'])) {
 .success-contact-btn--telegram:hover { color: #1f638f; background: #e7f5fd; border-color: #9acde8; }
 .success-contact-btn--history { color: #343a40; background: #fff; border-color: #ced4da; }
 .success-contact-btn--history:hover { color: #111; background: #f8f9fa; border-color: #adb5bd; }
+.payment-details-layout {
+    display: grid;
+    grid-template-columns: minmax(250px, 0.9fr) minmax(320px, 1.1fr);
+    align-items: center;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+.payment-qr-column { display: flex; justify-content: center; }
+.payment-qr-column .qr-box { margin: 0; }
+.payment-bank-column { width: 100%; }
 .qr-box {
     display: block !important;
     width: min(320px, 100%);
@@ -448,6 +462,11 @@ if ($isSuccess && !empty($_SESSION['user']['id'])) {
     100% { top: 0%; }
 }
 .smaller { font-size: 0.75rem; }
+
+@media (max-width: 991.98px) {
+    .payment-details-layout { grid-template-columns: 1fr; gap: 1rem; }
+    .payment-qr-column .qr-box { margin-left: auto; margin-right: auto; }
+}
 
 /* Mobile Optimization */
 @media (max-width: 768px) {
