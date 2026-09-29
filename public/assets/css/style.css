@@ -1013,6 +1013,9 @@ body::before {
 }
 
 .header-nav-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
     padding: 6px 14px;
     border-radius: 50px;
     color: var(--dark-gray);
@@ -1020,6 +1023,11 @@ body::before {
     font-size: 0.9rem;
     transition: all 0.2s var(--smooth-curve);
     white-space: nowrap;
+}
+
+.header-nav-btn i {
+    font-size: 0.82rem;
+    opacity: 0.8;
 }
 
 .header-nav-btn:hover {
@@ -2878,7 +2886,6 @@ body::before {
         margin: 0 1px !important;
     }
 }
-
 
 
 

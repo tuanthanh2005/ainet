@@ -143,15 +143,15 @@ $footerHotProducts = Cache::remember('footer_seo_prods', 300, function() {
                     ?>
                     <div class="header-nav-wrapper">
                         <a href="<?php echo Url::home(); ?>"
-                           class="header-nav-btn text-decoration-none <?php echo ($currentAction === 'index' && $activeTab === 'home') ? 'active' : ''; ?>">Trang Chủ</a>
+                           class="header-nav-btn text-decoration-none <?php echo ($currentAction === 'index' && $activeTab === 'home') ? 'active' : ''; ?>"><i class="fa-solid fa-house"></i><span>Trang Chủ</span></a>
                         <a href="<?php echo Url::products(); ?>"
-                           class="header-nav-btn text-decoration-none <?php echo ($currentAction === 'index' && $activeTab === 'products') ? 'active' : ''; ?>">Sản Phẩm</a>
+                           class="header-nav-btn text-decoration-none <?php echo ($currentAction === 'index' && $activeTab === 'products') ? 'active' : ''; ?>"><i class="fa-solid fa-bag-shopping"></i><span>Sản Phẩm</span></a>
                         <a href="<?php echo Url::blogs(); ?>"
-                           class="header-nav-btn text-decoration-none <?php echo ($currentAction === 'index' && $activeTab === 'blog') ? 'active' : ''; ?>">Tạp Chí</a>
+                           class="header-nav-btn text-decoration-none <?php echo ($currentAction === 'index' && $activeTab === 'blog') ? 'active' : ''; ?>"><i class="fa-regular fa-newspaper"></i><span>Tạp Chí</span></a>
                         <a href="<?php echo Url::about(); ?>"
-                           class="header-nav-btn text-decoration-none <?php echo $currentAction === 'about' ? 'active' : ''; ?>">Giới Thiệu</a>
+                           class="header-nav-btn text-decoration-none <?php echo $currentAction === 'about' ? 'active' : ''; ?>"><i class="fa-solid fa-circle-info"></i><span>Giới Thiệu</span></a>
                         <a href="<?php echo Url::contact(); ?>"
-                           class="header-nav-btn text-decoration-none <?php echo $currentAction === 'contact' ? 'active' : ''; ?>">Liên Hệ</a>
+                           class="header-nav-btn text-decoration-none <?php echo $currentAction === 'contact' ? 'active' : ''; ?>"><i class="fa-solid fa-headset"></i><span>Liên Hệ</span></a>
                     </div>
                 </div>
 
