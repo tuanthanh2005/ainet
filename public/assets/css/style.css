@@ -2836,6 +2836,49 @@ body::before {
     border-color: rgba(99, 102, 241, 0.3);
 }
 
+/* Rating Stars Global Component */
+.rating-stars {
+    display: inline-flex !important;
+    flex-direction: row-reverse !important;
+    align-items: center !important;
+    gap: 2px !important;
+    flex-wrap: nowrap !important;
+}
+.rating-stars input[type="radio"],
+.rating-stars input {
+    display: none !important;
+    visibility: hidden !important;
+    position: absolute !important;
+    opacity: 0 !important;
+    width: 0 !important;
+    height: 0 !important;
+    pointer-events: none !important;
+}
+.rating-stars label {
+    color: #e2e8f0 !important;
+    transition: color 0.2s, transform 0.15s;
+    font-size: 1.6rem !important;
+    margin: 0 2px !important;
+    padding: 0 !important;
+    cursor: pointer !important;
+    line-height: 1 !important;
+    display: inline-block !important;
+}
+.rating-stars input:checked ~ label,
+.rating-stars label:hover,
+.rating-stars label:hover ~ label {
+    color: #ffc107 !important;
+}
+.rating-stars label:active {
+    transform: scale(1.2);
+}
+@media (max-width: 576px) {
+    .rating-stars label {
+        font-size: 1.35rem !important;
+        margin: 0 1px !important;
+    }
+}
+
 
 
 

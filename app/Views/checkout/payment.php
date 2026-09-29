@@ -134,14 +134,57 @@ if ($isSuccess && !empty($_SESSION['user']['id'])) {
                                         </div>
                                     </div>
 
+                                    <style>
+                                    .rating-stars { 
+                                        display: inline-flex !important; 
+                                        flex-direction: row-reverse !important; 
+                                        align-items: center !important;
+                                        gap: 2px !important;
+                                        flex-wrap: nowrap !important;
+                                    }
+                                    .rating-stars input[type="radio"],
+                                    .rating-stars input { 
+                                        display: none !important; 
+                                        visibility: hidden !important;
+                                        position: absolute !important;
+                                        opacity: 0 !important;
+                                        width: 0 !important;
+                                        height: 0 !important;
+                                        pointer-events: none !important;
+                                    }
+                                    .rating-stars label { 
+                                        color: #e2e8f0 !important; 
+                                        transition: color 0.2s, transform 0.15s; 
+                                        font-size: 1.6rem !important;
+                                        margin: 0 2px !important;
+                                        padding: 0 !important;
+                                        cursor: pointer !important;
+                                        line-height: 1 !important;
+                                        display: inline-block !important;
+                                    }
+                                    .rating-stars input:checked ~ label, 
+                                    .rating-stars label:hover, 
+                                    .rating-stars label:hover ~ label { 
+                                        color: #ffc107 !important; 
+                                    }
+                                    .rating-stars label:active {
+                                        transform: scale(1.2);
+                                    }
+                                    @media (max-width: 576px) {
+                                        .rating-stars label {
+                                            font-size: 1.35rem !important;
+                                            margin: 0 1px !important;
+                                        }
+                                    }
+                                    </style>
                                     <div class="d-flex align-items-center justify-content-between p-2 px-3 rounded-3 bg-white border mb-3 flex-wrap gap-2">
                                         <span class="small fw-bold text-dark">Đánh giá sao:</span>
                                         <div class="rating-stars" dir="rtl">
-                                            <input type="radio" id="inline_star5" name="rating" value="5" checked><label for="inline_star5" class="fs-2 text-warning mx-1" style="cursor:pointer;" title="5 sao - Rất hài lòng"><i class="fa-solid fa-star"></i></label>
-                                            <input type="radio" id="inline_star4" name="rating" value="4"><label for="inline_star4" class="fs-2 text-warning mx-1" style="cursor:pointer;" title="4 sao - Hài lòng"><i class="fa-solid fa-star"></i></label>
-                                            <input type="radio" id="inline_star3" name="rating" value="3"><label for="inline_star3" class="fs-2 text-warning mx-1" style="cursor:pointer;" title="3 sao - Bình thường"><i class="fa-solid fa-star"></i></label>
-                                            <input type="radio" id="inline_star2" name="rating" value="2"><label for="inline_star2" class="fs-2 text-warning mx-1" style="cursor:pointer;" title="2 sao - Chưa hài lòng"><i class="fa-solid fa-star"></i></label>
-                                            <input type="radio" id="inline_star1" name="rating" value="1"><label for="inline_star1" class="fs-2 text-warning mx-1" style="cursor:pointer;" title="1 sao - Rất tệ"><i class="fa-solid fa-star"></i></label>
+                                            <input type="radio" id="inline_star5" name="rating" value="5" checked><label for="inline_star5" title="5 sao - Rất hài lòng"><i class="fa-solid fa-star"></i></label>
+                                            <input type="radio" id="inline_star4" name="rating" value="4"><label for="inline_star4" title="4 sao - Hài lòng"><i class="fa-solid fa-star"></i></label>
+                                            <input type="radio" id="inline_star3" name="rating" value="3"><label for="inline_star3" title="3 sao - Bình thường"><i class="fa-solid fa-star"></i></label>
+                                            <input type="radio" id="inline_star2" name="rating" value="2"><label for="inline_star2" title="2 sao - Chưa hài lòng"><i class="fa-solid fa-star"></i></label>
+                                            <input type="radio" id="inline_star1" name="rating" value="1"><label for="inline_star1" title="1 sao - Rất tệ"><i class="fa-solid fa-star"></i></label>
                                         </div>
                                     </div>
 
