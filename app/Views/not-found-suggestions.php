@@ -2,9 +2,9 @@
 $contactMethods = json_decode($settings['contact_methods'] ?? '[]', true);
 if (empty($contactMethods)) {
     $contactMethods = [
-        ['icon' => 'fa-solid fa-envelope', 'text' => 'tetuongmmovn@gmail.com'],
+        ['icon' => 'fa-solid fa-phone', 'text' => 'Zalo: 0772698113 (Ưu tiên)'],
         ['icon' => 'fa-brands fa-telegram', 'text' => '@specademy'],
-        ['icon' => 'fa-solid fa-phone', 'text' => 'Zalo: 0772698113']
+        ['icon' => 'fa-solid fa-envelope', 'text' => 'tetuongmmovn@gmail.com']
     ];
 }
 ?>

@@ -59,8 +59,8 @@ if (is_array($contactMethods)) {
                     <?= htmlspecialchars($contactDesc) ?> Kết nối trực tiếp với đội ngũ hỗ trợ qua các kênh phản hồi tức thì dưới đây. Chúng tôi tiếp nhận và giải quyết bảo hành, đổi mới tài khoản hoặc hướng dẫn sử dụng nhanh chóng mà không cần chờ đợi.
                 </p>
                 <div class="d-flex flex-wrap align-items-center gap-3">
-                    <a href="<?= htmlspecialchars($zaloLink) ?>" target="_blank" rel="noopener noreferrer" class="btn btn-primary rounded-pill px-4 py-2.5 fw-semibold d-inline-flex align-items-center gap-2 shadow-sm">
-                        <i class="fa-solid fa-comment-dots"></i> Nhắn tin Zalo Admin
+                    <a href="<?= htmlspecialchars($zaloLink) ?>" target="_blank" rel="noopener noreferrer" class="btn btn-primary rounded-pill px-4 py-2.5 fw-semibold d-inline-flex align-items-center gap-2 shadow-sm" style="background:#0068ff; border-color:#0068ff;">
+                        <i class="fa-solid fa-comment-dots"></i> Nhắn tin Zalo Admin (Ưu tiên)
                     </a>
                     <a href="<?= htmlspecialchars($telegramLink) ?>" target="_blank" rel="noopener noreferrer" class="btn btn-outline-dark rounded-pill px-4 py-2.5 fw-semibold d-inline-flex align-items-center gap-2">
                         <i class="fa-brands fa-telegram text-info"></i> Kênh Telegram
@@ -129,7 +129,7 @@ if (is_array($contactMethods)) {
                             Phản hồi ~3 phút
                         </span>
                     </div>
-                    <h5 class="fw-bold text-dark mb-1">Zalo Admin</h5>
+                    <h5 class="fw-bold text-dark mb-1">Zalo Admin <span class="badge bg-primary text-white rounded-pill ms-1" style="font-size: 0.68rem;">Ưu tiên</span></h5>
                     <p class="text-muted small mb-3">Kênh hỗ trợ nhanh nhất để giải quyết bảo hành, đổi mật khẩu và cấp tài khoản.</p>
                     <div class="bg-light p-2.5 rounded-3 mb-4 border d-flex align-items-center justify-content-between">
                         <span class="fw-bold text-dark font-monospace" id="zaloVal"><?= htmlspecialchars($zaloDisplay) ?></span>
@@ -220,7 +220,7 @@ if (is_array($contactMethods)) {
                         </span>
                     </div>
                     <h5 class="fw-bold text-dark mb-1">Hòm Thư Điện Tử</h5>
-                    <p class="text-muted small mb-3">Gửi yêu cầu báo giá doanh nghiệp, hợp đồng dịch vụ, bảo mật hoặc đóng góp ý kiến.</p>
+                    <p class="text-muted small mb-3">Cần hỗ trợ đơn hàng gấp, vui lòng nhắn <strong>Zalo 0772698113 (ưu tiên)</strong>. Email dành cho hợp tác & hóa đơn doanh nghiệp.</p>
                     <div class="bg-light p-2.5 rounded-3 mb-4 border d-flex align-items-center justify-content-between overflow-hidden">
                         <span class="fw-bold text-dark font-monospace text-truncate me-2 small" id="mailVal" title="<?= htmlspecialchars($systemEmail) ?>"><?= htmlspecialchars($systemEmail) ?></span>
                         <button type="button" class="btn btn-sm btn-link text-muted p-0 text-decoration-none flex-shrink-0" onclick="copyText('mailVal')" title="Sao chép Email">
@@ -265,7 +265,7 @@ if (is_array($contactMethods)) {
                     </div>
                     <h5 class="fw-bold text-dark mb-2">Gửi yêu cầu & ảnh lỗi</h5>
                     <p class="text-muted small mb-0 lh-base">
-                        Chụp ảnh màn hình thông báo lỗi (nếu có) trên thiết bị và nhắn tin cho Admin qua Zalo hoặc Telegram để được nhận diện lỗi tức thì.
+                        Chụp ảnh màn hình thông báo lỗi (nếu có) trên thiết bị và nhắn tin cho Admin qua <strong>Zalo 0772698113 (ưu tiên)</strong> hoặc Telegram để được nhận diện lỗi tức thì.
                     </p>
                 </div>
             </div>

@@ -102,7 +102,7 @@ if ($isSuccess && !empty($_SESSION['user']['id'])) {
                                     </div>
                                     <div>
                                         <h6 class="fw-bold mb-1 text-dark"><?= ($order['status'] ?? '') === 'processing' ? 'Đơn hàng đang xử lý' : 'Giao hàng thủ công' ?></h6>
-                                        <p class="text-muted small mb-0"><?= ($order['status'] ?? '') === 'processing' ? 'Cảm ơn bạn! Đơn hàng đã được thanh toán thành công và đang được Admin xử lý (5 - 15 phút). Bạn hãy sao chép mã đơn hàng bên dưới và liên hệ Admin qua Telegram để được giao hàng nhanh nhất.' : 'Hệ thống hiện tại hết gói sẵn có trong kho. Bạn hãy sao chép mã đơn dưới đây gửi cho Admin qua Telegram hoặc Zalo để nhận tài khoản/key lập tức.' ?></p>
+                                        <p class="text-muted small mb-0"><?= ($order['status'] ?? '') === 'processing' ? 'Cảm ơn bạn! Đơn hàng đã được thanh toán thành công và đang được Admin xử lý (5 - 15 phút). Bạn hãy sao chép mã đơn hàng bên dưới và liên hệ Admin qua Zalo 0772698113 (ưu tiên) để được bàn giao nhanh nhất.' : 'Hệ thống hiện tại hết gói sẵn có trong kho. Bạn hãy sao chép mã đơn dưới đây gửi cho Admin qua Zalo 0772698113 (ưu tiên) hoặc Telegram để nhận tài khoản/key lập tức.' ?></p>
                                     </div>
                                 </div>
                                 <div class="bg-white border rounded-3 p-2 px-3 d-flex align-items-center gap-2 mb-3">
@@ -112,7 +112,10 @@ if ($isSuccess && !empty($_SESSION['user']['id'])) {
                                     </button>
                                 </div>
                                 <div class="d-flex flex-wrap gap-2">
-                                    <a href="https://t.me/specademy" target="_blank" class="btn btn-outline-primary btn-sm">
+                                    <a href="https://zalo.me/0772698113" target="_blank" class="btn btn-primary btn-sm" style="background:#0068ff; border-color:#0068ff;">
+                                        <i class="fa-solid fa-comment-dots me-1"></i>Zalo Admin: 0772698113 (Ưu tiên)
+                                    </a>
+                                    <a href="https://t.me/specademy" target="_blank" class="btn btn-outline-secondary btn-sm">
                                         <i class="fa-brands fa-telegram me-1"></i>Telegram Admin
                                     </a>
                                     <a href="<?= url('index.php?action=orderHistory') ?>" class="btn btn-outline-dark btn-sm">
@@ -148,7 +151,7 @@ if ($isSuccess && !empty($_SESSION['user']['id'])) {
                                         <i class="fa-solid fa-circle-info me-2"></i>
                                         Còn <strong><?= $missing ?></strong> sản phẩm chưa giao do hết kho. Hãy copy mã đơn
                                         <code class="px-2 py-1 bg-white border rounded">#<?= htmlspecialchars($order['id']) ?></code>
-                                        và gửi cho admin để được giao bổ sung.
+                                        và gửi cho Admin qua <a href="https://zalo.me/0772698113" target="_blank" class="fw-bold text-primary text-decoration-none">Zalo 0772698113 (ưu tiên)</a> để được giao bổ sung nhanh nhất.
                                     </div>
                                 <?php endif; ?>
                             </div>
@@ -222,9 +225,14 @@ if ($isSuccess && !empty($_SESSION['user']['id'])) {
                                 <i class="fa-solid fa-shield-halved fs-1 text-primary mb-3"></i>
                                 <h5 class="fw-bold mb-2">Hỗ trợ & Bảo hành</h5>
                                 <p class="text-muted small mb-4">Mọi đơn hàng tại <?= defined('SITENAME') ? SITENAME : 'AI CỦA TÔI' ?> đều được cam kết bảo hành và hỗ trợ kỹ thuật tận tâm.</p>
-                                <a href="https://t.me/specademy" target="_blank" class="btn btn-primary rounded-3 px-4">
-                                    <i class="fa-brands fa-telegram me-1"></i> Nhắn tin Telegram Admin
-                                </a>
+                                <div class="d-flex flex-column gap-2 justify-content-center align-items-center">
+                                    <a href="https://zalo.me/0772698113" target="_blank" class="btn btn-primary rounded-3 px-4 shadow-sm" style="background:#0068ff; border-color:#0068ff;">
+                                        <i class="fa-solid fa-comment-dots me-1"></i> Nhắn Zalo: 0772698113 (Ưu tiên)
+                                    </a>
+                                    <a href="https://t.me/specademy" target="_blank" class="btn btn-outline-dark rounded-3 px-4 btn-sm">
+                                        <i class="fa-brands fa-telegram me-1"></i> Telegram: @specademy
+                                    </a>
+                                </div>
                             </div>
                         <?php endif; ?>
                     </div>

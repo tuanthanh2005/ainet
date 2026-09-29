@@ -60,6 +60,8 @@ class OrderEmailService {
         $quantity = (int)($order['quantity'] ?? 1);
         $amount = number_format((float)($order['amount'] ?? 0), 0, ',', '.') . 'đ';
         $orderHistoryUrl = url('index.php?action=orderHistory');
+        $zaloPhone = '0772698113';
+        $zaloUrl = 'https://zalo.me/0772698113';
         $telegramUrl = 'https://t.me/specademy';
         $siteName = defined('SITENAME') ? SITENAME : 'AI CỦA TÔI';
         $subject = "[{$siteName}] Đơn hàng #{$order['id']} đang được xử lý";
@@ -132,17 +134,18 @@ class OrderEmailService {
                     </div>
 
                     <p style='font-size: 14px; color: #475569;'>
-                        Nếu cần hỗ trợ gấp hoặc kích hoạt ngay, bạn có thể sao chép mã đơn <strong>#{$orderId}</strong> và nhắn tin trực tiếp cho Admin qua Telegram.
+                        Nếu cần hỗ trợ gấp hoặc kích hoạt ngay, bạn có thể sao chép mã đơn <strong>#{$orderId}</strong> và nhắn tin cho Admin qua <strong>Zalo {$zaloPhone} (ưu tiên)</strong> hoặc Telegram.
                     </p>
 
                     <div class='btn-group'>
+                        <a href='{$zaloUrl}' class='btn' style='background: #0068ff; color: #ffffff !important;' target='_blank'>💬 Zalo Admin: {$zaloPhone} (Ưu tiên)</a>
                         <a href='{$orderHistoryUrl}' class='btn btn-primary' target='_blank'>Xem trong Lịch sử đơn hàng</a>
-                        <a href='{$telegramUrl}' class='btn btn-secondary' target='_blank'>Liên hệ Telegram Admin</a>
+                        <a href='{$telegramUrl}' class='btn btn-secondary' target='_blank'>Telegram Admin</a>
                     </div>
                 </div>
                 <div class='email-footer'>
                     &copy; " . date('Y') . " {$siteName}. Mọi quyền được bảo lưu.<br>
-                    Thư này được gửi tự động từ hệ thống {$siteName}. Vui lòng không trả lời thư này.
+                    Hỗ trợ Zalo: <a href='{$zaloUrl}' style='color: #0068ff; font-weight: bold;'>{$zaloPhone}</a> (Ưu tiên) | Telegram: <a href='{$telegramUrl}' style='color: #2563eb;'>@specademy</a> | Website: <a href='" . url() . "' style='color: #2563eb;'>" . SITENAME . "</a>
                 </div>
             </div>
         </body>
@@ -200,6 +203,8 @@ class OrderEmailService {
         $amount = number_format((float)($order['amount'] ?? 0), 0, ',', '.') . 'đ';
         $successUrl = url('index.php?action=success&id=' . urlencode($order['id']));
         $orderHistoryUrl = url('index.php?action=orderHistory');
+        $zaloPhone = '0772698113';
+        $zaloUrl = 'https://zalo.me/0772698113';
         $telegramUrl = 'https://t.me/specademy';
         $siteName = defined('SITENAME') ? SITENAME : 'AI CỦA TÔI';
         $subject = "[{$siteName}] Bàn giao đơn hàng #{$order['id']} - Hoàn tất thành công";
@@ -308,7 +313,7 @@ class OrderEmailService {
                 </div>
                 <div class='email-footer'>
                     &copy; " . date('Y') . " {$siteName}. Cảm ơn bạn đã đồng hành cùng chúng tôi!<br>
-                    Hỗ trợ Telegram: <a href='{$telegramUrl}' style='color: #2563eb;'>@specademy</a> | Website: <a href='" . url() . "' style='color: #2563eb;'>" . SITENAME . "</a>
+                    Hỗ trợ Zalo: <a href='{$zaloUrl}' style='color: #0068ff; font-weight: bold;'>{$zaloPhone}</a> (Ưu tiên) | Telegram: <a href='{$telegramUrl}' style='color: #2563eb;'>@specademy</a> | Website: <a href='" . url() . "' style='color: #2563eb;'>" . SITENAME . "</a>
                 </div>
             </div>
         </body>

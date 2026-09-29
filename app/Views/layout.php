@@ -361,7 +361,7 @@ $footerHotProducts = Cache::remember('footer_seo_prods', 300, function() {
                     <div class="small text-secondary lh-lg mb-3">
                         <div class="d-flex align-items-center gap-2 mb-1.5">
                             <i class="fa-solid fa-phone-volume text-warning" style="width: 16px;"></i>
-                            <span>Hotline/Zalo: <a href="https://zalo.me/<?php echo htmlspecialchars($settings['zalo'] ?? '0772698113'); ?>" class="text-white text-decoration-none fw-semibold" target="_blank" rel="noopener"><?php echo htmlspecialchars($settings['zalo'] ?? '0772698113'); ?></a></span>
+                            <span>Hotline/Zalo: <a href="https://zalo.me/<?php echo htmlspecialchars($settings['zalo'] ?? '0772698113'); ?>" class="text-white text-decoration-none fw-semibold" target="_blank" rel="noopener"><?php echo htmlspecialchars($settings['zalo'] ?? '0772698113'); ?></a> <span class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill" style="font-size: 0.65rem;">Ưu tiên</span></span>
                         </div>
                         <div class="d-flex align-items-center gap-2 mb-1.5">
                             <i class="fa-brands fa-telegram text-info" style="width: 16px;"></i>

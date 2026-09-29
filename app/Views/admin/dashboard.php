@@ -1990,7 +1990,7 @@
                                     <div class="col-md-12">
                                         <label class="form-label fw-semibold">Nội dung Email mặc định</label>
                                         <textarea class="form-control" id="st_smtp_default_body" rows="6" 
-                                            placeholder="Chào bạn, đây là thông tin tài khoản / key cho đơn hàng #{order_id} của bạn:&#10;&#10;{delivered_accounts}&#10;&#10;Cảm ơn bạn đã mua hàng!"><?php echo htmlspecialchars($settings['smtp_default_body'] ?? "Chào bạn,\n\nĐây là thông tin tài khoản / key kích hoạt cho đơn hàng #{order_id} ({product_name}) của bạn:\n\n{delivered_accounts}\n\nCảm ơn bạn đã tin dùng dịch vụ của chúng tôi!\nNếu có bất kỳ câu hỏi nào, vui lòng liên hệ hỗ trợ.\nTrân trọng,\nBan quản trị."); ?></textarea>
+                                            placeholder="Chào bạn, đây là thông tin tài khoản / key cho đơn hàng #{order_id} của bạn:&#10;&#10;{delivered_accounts}&#10;&#10;Cảm ơn bạn đã mua hàng!"><?php echo htmlspecialchars($settings['smtp_default_body'] ?? "Chào bạn,\n\nĐây là thông tin tài khoản / key kích hoạt cho đơn hàng #{order_id} ({product_name}) của bạn:\n\n{delivered_accounts}\n\nCảm ơn bạn đã tin dùng dịch vụ của chúng tôi!\nNếu có bất kỳ câu hỏi nào, vui lòng liên hệ Zalo 0772698113 (ưu tiên) hoặc Telegram @specademy để được hỗ trợ nhanh nhất.\nTrân trọng,\nBan quản trị."); ?></textarea>
                                         <small class="text-muted d-block mt-1">Sử dụng các biến sau để tự động điền: <code>#{order_id}</code> (Mã đơn), <code>{product_name}</code> (Tên sản phẩm), <code>{delivered_accounts}</code> (Tài khoản bàn giao nhập ở trên).</small>
                                     </div>
                                 </div>
@@ -5095,9 +5095,9 @@
                 return '<table><thead><tr><th>Gói dịch vụ</th><th>Thời hạn</th><th>Hình thức</th><th>Phù hợp với</th></tr></thead><tbody><tr><td>Gói 1</td><td>1 tháng</td><td>Tự động</td><td>Cá nhân</td></tr></tbody></table><p><br></p>';
             }
             if (type === 'cta') {
-                return '<h2>Mua hàng tự động 24/7 tại AI CỦA TÔI</h2><p>Chọn gói phù hợp, thanh toán QR và nhận sản phẩm tự động sau khi giao dịch thành công. Cần hỗ trợ nhanh, liên hệ Zalo 0569012134 hoặc Telegram @specademy.</p>';
+                return '<h2>Mua hàng tự động 24/7 tại AI CỦA TÔI</h2><p>Chọn gói phù hợp, thanh toán QR và nhận sản phẩm tự động sau khi giao dịch thành công. Cần hỗ trợ nhanh, liên hệ Zalo 0772698113 (ưu tiên) hoặc Telegram @specademy.</p>';
             }
-            return '<h1>Tên sản phẩm chuẩn SEO</h1><p>Sapo ngắn giới thiệu lợi ích chính và từ khóa sản phẩm.</p><h2>Vì sao nên mua tại AI CỦA TÔI?</h2><ul><li>Giao hàng tự động 24/7 sau thanh toán.</li><li>Bảo hành 1 đổi 1 trong thời gian sử dụng.</li><li>Hỗ trợ nhanh qua Zalo 0569012134 hoặc Telegram @specademy.</li></ul><h2>Tính năng và lợi ích nổi bật</h2><ul><li></li><li></li><li></li></ul><h2>Bảng giá và tùy chọn gói</h2>' + productDetailTemplate('table') + '<h2>Chính sách bảo hành</h2><ul><li>Bảo hành 1 đổi 1 nếu lỗi kỹ thuật.</li><li>Hỗ trợ trong suốt thời gian sử dụng.</li></ul><h2>Hướng dẫn mua hàng</h2><ol><li>Chọn gói trên aicuatoi.net.</li><li>Thanh toán bằng QR ngân hàng.</li><li>Hệ thống xác nhận và giao hàng tự động.</li></ol>';
+            return '<h1>Tên sản phẩm chuẩn SEO</h1><p>Sapo ngắn giới thiệu lợi ích chính và từ khóa sản phẩm.</p><h2>Vì sao nên mua tại AI CỦA TÔI?</h2><ul><li>Giao hàng tự động 24/7 sau thanh toán.</li><li>Bảo hành 1 đổi 1 trong thời gian sử dụng.</li><li>Hỗ trợ nhanh qua Zalo 0772698113 (ưu tiên) hoặc Telegram @specademy.</li></ul><h2>Tính năng và lợi ích nổi bật</h2><ul><li></li><li></li><li></li></ul><h2>Bảng giá và tùy chọn gói</h2>' + productDetailTemplate('table') + '<h2>Chính sách bảo hành</h2><ul><li>Bảo hành 1 đổi 1 nếu lỗi kỹ thuật.</li><li>Hỗ trợ trong suốt thời gian sử dụng.</li></ul><h2>Hướng dẫn mua hàng</h2><ol><li>Chọn gói trên aicuatoi.net.</li><li>Thanh toán bằng QR ngân hàng.</li><li>Hệ thống xác nhận và giao hàng tự động.</li></ol>';
         }
 
         document.querySelectorAll('.product-detail-toolbar button').forEach(btn => {
@@ -6815,7 +6815,7 @@
             
             // Generate subject & body using templates from settings
             let subjectTpl = (APP_STATE.settings && APP_STATE.settings['smtp_default_subject']) || 'Bàn giao tài khoản / Key dịch vụ đơn hàng #{order_id}';
-            let bodyTpl = (APP_STATE.settings && APP_STATE.settings['smtp_default_body']) || "Chào bạn,\n\nĐây là thông tin tài khoản / key kích hoạt cho đơn hàng #{order_id} ({product_name}) của bạn:\n\n{delivered_accounts}\n\nCảm ơn bạn đã tin dùng dịch vụ của chúng tôi!\nNếu có bất kỳ câu hỏi nào, vui lòng liên hệ hỗ trợ.\nTrân trọng,\nBan quản trị.";
+            let bodyTpl = (APP_STATE.settings && APP_STATE.settings['smtp_default_body']) || "Chào bạn,\n\nĐây là thông tin tài khoản / key kích hoạt cho đơn hàng #{order_id} ({product_name}) của bạn:\n\n{delivered_accounts}\n\nCảm ơn bạn đã tin dùng dịch vụ của chúng tôi!\nNếu có bất kỳ câu hỏi nào, vui lòng liên hệ Zalo 0772698113 (ưu tiên) hoặc Telegram @specademy để được hỗ trợ nhanh nhất.\nTrân trọng,\nBan quản trị.";
             
             subjectTpl = subjectTpl.replace(/#{order_id}/g, orderId).replace(/{product_name}/g, productName);
             document.getElementById('md_email_subject').value = subjectTpl;

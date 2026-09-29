@@ -189,20 +189,20 @@ $systemEmail = !empty($settings['system_email']) ? $settings['system_email'] : '
                     <p class="text-muted small mb-4">Để đảm bảo quyền lợi và tránh đối tượng giả mạo, quý khách vui lòng chỉ liên hệ qua các kênh đã được xác thực:</p>
                     <div class="row g-3">
                         <div class="col-sm-6">
-                            <div class="p-3 border rounded-3 bg-light">
-                                <div class="small text-muted mb-1"><i class="fa-solid fa-phone text-primary me-2"></i>Hotline / Zalo Admin:</div>
+                            <div class="p-3 border rounded-3 bg-light shadow-sm" style="border-left: 4px solid #0068ff !important;">
+                                <div class="small text-muted mb-1"><i class="fa-solid fa-phone text-primary me-2"></i>Hotline / Zalo Admin <span class="badge bg-primary text-white rounded-pill ms-1" style="font-size: 0.65rem;">Ưu tiên</span>:</div>
                                 <div class="fw-bold fs-6 text-dark"><?= htmlspecialchars($zaloNumber) ?></div>
-                                <a href="https://zalo.me/<?= htmlspecialchars($zaloNumber) ?>" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-outline-primary mt-2 rounded-pill px-3">
-                                    Mở chat Zalo
+                                <a href="https://zalo.me/<?= htmlspecialchars($zaloNumber) ?>" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-primary mt-2 rounded-pill px-3" style="background:#0068ff; border-color:#0068ff;">
+                                    <i class="fa-solid fa-comment-dots me-1"></i> Mở chat Zalo (Nhanh nhất)
                                 </a>
                             </div>
                         </div>
                         <div class="col-sm-6">
                             <div class="p-3 border rounded-3 bg-light">
-                                <div class="small text-muted mb-1"><i class="fa-regular fa-envelope text-danger me-2"></i>Email hệ thống:</div>
+                                <div class="small text-muted mb-1"><i class="fa-regular fa-envelope text-secondary me-2"></i>Email hệ thống:</div>
                                 <div class="fw-bold fs-6 text-dark text-truncate" title="<?= htmlspecialchars($systemEmail) ?>"><?= htmlspecialchars($systemEmail) ?></div>
-                                <a href="mailto:<?= htmlspecialchars($systemEmail) ?>" class="btn btn-sm btn-outline-danger mt-2 rounded-pill px-3">
-                                    Gửi email
+                                <a href="mailto:<?= htmlspecialchars($systemEmail) ?>" class="btn btn-sm btn-outline-secondary mt-2 rounded-pill px-3">
+                                    Gửi email hợp tác
                                 </a>
                             </div>
                         </div>

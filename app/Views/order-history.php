@@ -195,7 +195,7 @@
                                                 </div>
                                                 <div>
                                                     <h6 class="fw-bold mb-1">Đơn hàng đang xử lý</h6>
-                                                    <p class="text-muted small mb-0">Đơn hàng của bạn đã thanh toán thành công và đang được Admin xử lý. Quá trình xử lý thường mất 5 - 15 phút. Bạn hãy copy mã đơn hàng bên dưới để liên hệ Admin qua Telegram hoặc Zalo nhận tài khoản nhanh nhất.</p>
+                                                    <p class="text-muted small mb-0">Đơn hàng của bạn đã thanh toán thành công và đang được Admin xử lý. Quá trình xử lý thường mất 5 - 15 phút. Bạn hãy copy mã đơn hàng bên dưới để liên hệ Admin qua Zalo 0772698113 (ưu tiên) hoặc Telegram nhận tài khoản nhanh nhất.</p>
                                                 </div>
                                             </div>
                                             <div class="oh-code-box">
@@ -206,7 +206,10 @@
                                                 </button>
                                             </div>
                                             <div class="d-flex flex-wrap gap-2 mt-3">
-                                                <a href="https://t.me/specademy" target="_blank" class="btn btn-sm btn-outline-primary">
+                                                <a href="https://zalo.me/0772698113" target="_blank" class="btn btn-sm btn-primary" style="background:#0068ff; border-color:#0068ff;">
+                                                    <i class="fa-solid fa-comment-dots me-1"></i>Zalo: 0772698113 (Ưu tiên)
+                                                </a>
+                                                <a href="https://t.me/specademy" target="_blank" class="btn btn-sm btn-outline-secondary">
                                                     <i class="fa-brands fa-telegram me-1"></i>Liên hệ Telegram
                                                 </a>
                                             </div>
@@ -219,7 +222,7 @@
                                                 </div>
                                                 <div>
                                                     <h6 class="fw-bold mb-1">Đơn của bạn</h6>
-                                                    <p class="text-muted small mb-0">Đơn của bạn đã thanh toán thành công. Hãy <strong>Coppy</strong> bên dưới và gửi cho admin để được giao thủ công nhanh nhất.</p>
+                                                    <p class="text-muted small mb-0">Đơn của bạn đã thanh toán thành công. Hãy <strong>Copy</strong> mã bên dưới và gửi cho Admin qua Zalo 0772698113 (ưu tiên) để được giao thủ công nhanh nhất.</p>
                                                 </div>
                                             </div>
                                             <div class="oh-code-box">
@@ -230,7 +233,10 @@
                                                 </button>
                                             </div>
                                             <div class="d-flex flex-wrap gap-2 mt-3">
-                                                <a href="https://t.me/specademy" target="_blank" class="btn btn-sm btn-outline-primary">
+                                                <a href="https://zalo.me/0772698113" target="_blank" class="btn btn-sm btn-primary" style="background:#0068ff; border-color:#0068ff;">
+                                                    <i class="fa-solid fa-comment-dots me-1"></i>Zalo: 0772698113 (Ưu tiên)
+                                                </a>
+                                                <a href="https://t.me/specademy" target="_blank" class="btn btn-sm btn-outline-secondary">
                                                     <i class="fa-brands fa-telegram me-1"></i>Liên hệ Telegram
                                                 </a>
                                             </div>
@@ -277,7 +283,7 @@
                                                         onclick="copyOrderText(this, '#<?= htmlspecialchars($order['id']) ?>')">
                                                     <i class="fa-regular fa-copy me-1"></i>Copy
                                                 </button>
-                                                <span>và gửi cho admin để được giao bổ sung.</span>
+                                                <span>và gửi cho Admin qua <a href="https://zalo.me/0772698113" target="_blank" class="fw-bold text-primary text-decoration-none">Zalo 0772698113 (ưu tiên)</a> để được giao bổ sung.</span>
                                             </div>
                                         <?php endif; ?>
                                     <?php endif; ?>

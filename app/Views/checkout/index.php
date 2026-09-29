@@ -56,12 +56,12 @@ $variantIdx = isset($_GET['variant_idx']) ? (int)$_GET['variant_idx'] : 0;
                             </div>
                             <div class="mb-3">
                                 <label class="form-label small fw-bold d-flex align-items-center justify-content-between flex-wrap gap-1">
-                                    <span>Zalo hoặc Telegram nhận tài khoản <span class="text-danger">*</span></span>
+                                    <span>Zalo (ưu tiên) hoặc Telegram nhận tài khoản <span class="text-danger">*</span></span>
                                     <span class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill small" style="font-size: 0.7rem;">Admin liên hệ gửi thủ công</span>
                                 </label>
                                 <div class="input-group">
                                     <span class="input-group-text bg-light border-0 text-muted"><i class="fa-solid fa-paper-plane text-primary"></i></span>
-                                    <input type="text" class="form-control bg-light border-0 py-2" id="c_contact_social" name="contact_social" placeholder="Nhập SĐT Zalo hoặc @username Telegram..." required>
+                                    <input type="text" class="form-control bg-light border-0 py-2" id="c_contact_social" name="contact_social" placeholder="Nhập SĐT Zalo (ưu tiên) hoặc @username Telegram..." required>
                                 </div>
                                 <div class="form-text small text-muted mt-1">
                                     <i class="fa-solid fa-circle-info text-primary me-1"></i> Bắt buộc nhập để admin liên hệ gửi tài khoản thủ công và bảo hành cho bạn.
