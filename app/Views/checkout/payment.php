@@ -53,7 +53,7 @@ if ($isSuccess && !empty($_SESSION['user']['id'])) {
     }
 }
 </style>
-<div class="bg-light min-vh-100 py-5">
+<div class="payment-page bg-light min-vh-100 py-5">
     <div class="container">
         <div class="mb-4 text-center">
             <h2 class="fw-bold mb-1 text-dark"><?= $isSuccess ? 'Thanh toán hoàn tất' : 'Thanh toán đơn hàng' ?></h2>
@@ -477,6 +477,13 @@ if ($isSuccess && !empty($_SESSION['user']['id'])) {
     .card { padding: 20px !important; }
     .success-contact-actions { grid-template-columns: 1fr; }
     .success-contact-btn--zalo { grid-column: auto; }
+    .payment-page .payment-details-layout,
+    .payment-page .payment-qr-column,
+    .payment-page .payment-bank-column { width: 100%; min-width: 0; }
+    .payment-page .payment-qr-column .qr-box { width: min(300px, 100%); }
+    .payment-page .bank-info-card { padding: 1rem !important; }
+    /* The floating chat buttons otherwise cover the account and memo fields. */
+    body:has(.payment-page #payment-active-container:not(.d-none)) .fab-wrapper { display: none !important; }
 }
 </style>
 
