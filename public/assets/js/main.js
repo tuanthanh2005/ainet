@@ -284,15 +284,16 @@ function openLoginPrompt(message) {
 window.openLoginPrompt = openLoginPrompt;
 
 function setupAuthRequiredActions() {
-    // Nếu đã đăng nhập hoặc KHÁCH VẪN TRONG 5 PHÚT TRẢI NGHIỆM -> cho phép thao tác tự do
-    if (window.APP_USER_LOGGED_IN || !window.isGuestExpired) {
+    // Nếu đã đăng nhập thì cho phép mua bình thường
+    if (window.APP_USER_LOGGED_IN) {
         return;
     }
 
+    // Chưa đăng nhập -> Bắt buộc đăng nhập khi bấm Mua ngay
     document.querySelectorAll('a[data-auth-required="true"]').forEach(anchor => {
         anchor.addEventListener('click', function(event) {
             event.preventDefault();
-            openLoginPrompt('Thời gian trải nghiệm vãng lai (5 phút) đã hết. Vui lòng đăng nhập để tiếp tục mua hàng.');
+            openLoginPrompt('Bạn cần đăng nhập tài khoản để mua sản phẩm.');
         });
     });
 
@@ -301,7 +302,7 @@ function setupAuthRequiredActions() {
             const actionType = form.querySelector('[name="action_type"]');
             if (actionType && actionType.value === 'buy') {
                 event.preventDefault();
-                openLoginPrompt('Thời gian trải nghiệm vãng lai (5 phút) đã hết. Vui lòng đăng nhập để tiếp tục.');
+                openLoginPrompt('Bạn cần đăng nhập tài khoản để mua ngay.');
             }
         });
     });

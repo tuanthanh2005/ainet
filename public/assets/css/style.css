@@ -2728,6 +2728,101 @@ body::before {
     border-color: #6366f1;
 }
 
+/* ================= SEO MEGA FOOTER ================= */
+.vibrant-footer {
+    background: #090d16;
+    color: #94a3b8;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.footer-trust-strip {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    padding-bottom: 2rem;
+    margin-bottom: 2.5rem;
+}
+
+.footer-trust-box {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.footer-trust-icon {
+    width: 42px;
+    height: 42px;
+    border-radius: 10px;
+    background: rgba(99, 102, 241, 0.12);
+    border: 1px solid rgba(99, 102, 241, 0.25);
+    color: #818cf8;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.15rem;
+    flex-shrink: 0;
+}
+
+.footer-heading {
+    color: #ffffff;
+    font-size: 0.88rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    margin-bottom: 1.25rem;
+    position: relative;
+    padding-bottom: 0.5rem;
+}
+
+.footer-heading::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 24px;
+    height: 2px;
+    background: var(--vip-gradient, linear-gradient(135deg, #6366f1 0%, #a855f7 100%));
+    border-radius: 2px;
+}
+
+.footer-link {
+    color: #94a3b8;
+    text-decoration: none;
+    font-size: 0.88rem;
+    display: inline-flex;
+    align-items: center;
+    transition: all 0.2s ease;
+}
+
+.footer-link:hover {
+    color: #ffffff;
+    transform: translateX(3px);
+}
+
+.footer-tag-cloud {
+    padding-top: 1.5rem;
+    margin-top: 1.5rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+    font-size: 0.8rem;
+}
+
+.footer-tag-link {
+    color: #64748b;
+    text-decoration: none;
+    display: inline-block;
+    padding: 3px 8px;
+    margin: 2px 3px;
+    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    transition: all 0.2s;
+}
+
+.footer-tag-link:hover {
+    color: #a5b4fc;
+    background: rgba(99, 102, 241, 0.15);
+    border-color: rgba(99, 102, 241, 0.3);
+}
+
+
 
 
 

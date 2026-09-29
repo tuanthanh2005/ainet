@@ -47,6 +47,25 @@ $isAuthPage = in_array($currentAction, ['login', 'register', 'forgot_password', 
 $isBot = Seo::isBot();
 $isGuestSessionExpired = !$isBot && !Auth::check() && (!empty($_SESSION['guest_expired']) || ((time() - (int)($_SESSION['guest_started_at'] ?? time())) >= 300));
 $isGuestExpired = !$isAuthPage && $isGuestSessionExpired;
+
+// Dữ liệu footer tối ưu SEO và liên kết nội bộ cho Googlebot
+$footerCategories = Cache::remember('footer_seo_cats', 300, function() {
+    try {
+        return Category::getAll();
+    } catch (Throwable $e) {
+        return [];
+    }
+});
+
+$footerHotProducts = Cache::remember('footer_seo_prods', 300, function() {
+    try {
+        $all = Product::getAll();
+        $active = array_filter($all, fn($p) => ($p['status'] ?? 'active') === 'active');
+        return array_slice($active, 0, 6);
+    } catch (Throwable $e) {
+        return [];
+    }
+});
 ?>
 <body>
     <script>
@@ -282,46 +301,207 @@ $isGuestExpired = !$isAuthPage && $isGuestSessionExpired;
         ?>
     </main>
 
-    <footer class="vibrant-footer py-5 mt-5">
+    <!-- ================= SEO OPTIMIZED MEGA FOOTER ================= -->
+    <footer class="vibrant-footer py-5 mt-5" role="contentinfo" itemscope itemtype="https://schema.org/WPFooter">
         <div class="container">
-            <div class="row gy-5">
-                <div class="col-12 col-md-4">
-                    <h5 class="text-white fw-bold mb-4" style="letter-spacing: -0.5px;">AI CỦA TÔI.</h5>
-                    <p class="small text-light lh-lg pe-lg-4"><?php echo htmlspecialchars($settings['footerDesc'] ?? 'Hệ thống phân phối giải pháp phần mềm, tài khoản dịch vụ số nhanh chóng và uy tín.'); ?>
-                    </p>
-
-                </div>
-                <div class="col-6 col-md-4">
-                    <h6 class="text-white fw-bold mb-4 text-uppercase" style="letter-spacing: 1px; font-size: 0.85rem;">
-                        Thông tin</h6>
-                    <ul class="list-unstyled small lh-lg">
-                        <li class="mb-2"><a href="<?php echo Url::about(); ?>" class="footer-link">Giới
-                                thiệu</a></li>
-                        <li class="mb-2"><a href="<?php echo Url::contact(); ?>"
-                                class="footer-link">Liên hệ</a></li>
-                        <li class="mb-2"><a href="#" class="footer-link" data-bs-toggle="modal" data-bs-target="#termsModal">Điều khoản dịch vụ</a></li>
-                        <li class="mb-2"><a href="#" class="footer-link" data-bs-toggle="modal" data-bs-target="#privacyModal">Chính sách bảo mật</a></li>
-                    </ul>
-                </div>
-                <div class="col-6 col-md-4">
-                    <h6 class="text-white fw-bold mb-4 text-uppercase" style="letter-spacing: 1px; font-size: 0.85rem;">
-                        Thanh toán</h6>
-                    <p class="small text-light mb-3">Hỗ trợ giao dịch bảo mật 24/7</p>
-                    <div class="d-flex flex-wrap gap-2">
-                        <span class="badge border border-secondary text-light py-2 px-3 fw-normal rounded-pill">Bank
-                            Transfer</span>
-                        <span class="badge border border-secondary text-light py-2 px-3 fw-normal rounded-pill">Ví Điện
-                            Tử</span>
+            <!-- 1. Dải cam kết uy tín & E-E-A-T cho Google và Người dùng -->
+            <div class="footer-trust-strip">
+                <div class="row g-4">
+                    <div class="col-6 col-lg-3">
+                        <div class="footer-trust-box">
+                            <div class="footer-trust-icon"><i class="fa-solid fa-bolt"></i></div>
+                            <div>
+                                <strong class="d-block text-white small">Kích Hoạt Tự Động 24/7</strong>
+                                <span class="text-secondary" style="font-size: 0.78rem;">Giao tài khoản qua hệ thống 30s</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-lg-3">
+                        <div class="footer-trust-box">
+                            <div class="footer-trust-icon"><i class="fa-solid fa-shield-halved"></i></div>
+                            <div>
+                                <strong class="d-block text-white small">Bảo Hành 1 Đổi 1</strong>
+                                <span class="text-secondary" style="font-size: 0.78rem;">Uy tín trọn thời hạn gói dịch vụ</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-lg-3">
+                        <div class="footer-trust-box">
+                            <div class="footer-trust-icon"><i class="fa-solid fa-tags"></i></div>
+                            <div>
+                                <strong class="d-block text-white small">Tiết Kiệm Tới 70%</strong>
+                                <span class="text-secondary" style="font-size: 0.78rem;">Giá rẻ nhất thị trường bản quyền</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-lg-3">
+                        <div class="footer-trust-box">
+                            <div class="footer-trust-icon"><i class="fa-solid fa-headset"></i></div>
+                            <div>
+                                <strong class="d-block text-white small">Hỗ Trợ Kỹ Thuật 24/7</strong>
+                                <span class="text-secondary" style="font-size: 0.78rem;">Zalo & Telegram trực liên tục</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
-            <hr class="border-light mt-5 mb-4" style="opacity: 0.2;">
-            <div class="d-flex justify-content-between align-items-center small text-light">
-                <span>&copy; <?php echo htmlspecialchars($settings['copyright'] ?? (date('Y') . ' AI CỦA TÔI')); ?>. Bản quyền được bảo hộ.</span>
-                <span>Thiết kế bởi MMO VN</span>
+
+            <!-- 2. Hệ thống Internal Links Silo (4 Cột chính) -->
+            <div class="row gy-4 gx-lg-5">
+                <!-- Cột 1: Thông tin doanh nghiệp & E-E-A-T -->
+                <div class="col-12 col-md-6 col-lg-4">
+                    <h5 class="text-white fw-bold mb-3 d-flex align-items-center gap-2" style="letter-spacing: -0.5px;">
+                        <span style="background: var(--vip-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">AI CỦA TÔI</span>
+                        <span class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill small" style="font-size: 0.65rem;">Official</span>
+                    </h5>
+                    <p class="small text-secondary lh-lg mb-3">
+                        <?php echo htmlspecialchars($settings['footerDesc'] ?? 'Hệ sinh thái phân phối tài khoản trí tuệ nhân tạo (ChatGPT Plus, Claude Pro, Midjourney), công cụ lập trình và giải trí bản quyền số 1 Việt Nam.'); ?>
+                    </p>
+
+                    <div class="small text-secondary lh-lg mb-3">
+                        <div class="d-flex align-items-center gap-2 mb-1.5">
+                            <i class="fa-solid fa-phone-volume text-warning" style="width: 16px;"></i>
+                            <span>Hotline/Zalo: <a href="https://zalo.me/<?php echo htmlspecialchars($settings['zalo'] ?? '0772698113'); ?>" class="text-white text-decoration-none fw-semibold" target="_blank" rel="noopener"><?php echo htmlspecialchars($settings['zalo'] ?? '0772698113'); ?></a></span>
+                        </div>
+                        <div class="d-flex align-items-center gap-2 mb-1.5">
+                            <i class="fa-brands fa-telegram text-info" style="width: 16px;"></i>
+                            <span>Telegram: <a href="<?php echo htmlspecialchars($settings['socialLink'] ?? 'https://t.me/aicuatoi'); ?>" class="text-white text-decoration-none fw-semibold" target="_blank" rel="noopener">Hỗ trợ kỹ thuật 24/7</a></span>
+                        </div>
+                        <div class="d-flex align-items-center gap-2 mb-1.5">
+                            <i class="fa-solid fa-clock text-success" style="width: 16px;"></i>
+                            <span>Giờ làm việc: 08:00 - 23:30 (Cả Thứ 7, CN & Lễ)</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Cột 2: Danh mục sản phẩm (Category Silo Links cho Googlebot) -->
+                <div class="col-6 col-md-6 col-lg-3">
+                    <h6 class="footer-heading">Danh mục dịch vụ</h6>
+                    <ul class="list-unstyled small lh-lg mb-0" itemscope itemtype="https://schema.org/SiteNavigationElement">
+                        <?php if (!empty($footerCategories)): ?>
+                            <?php foreach ($footerCategories as $cat): ?>
+                                <li class="mb-2" itemprop="name">
+                                    <a href="<?php echo Url::category($cat['slug']); ?>" class="footer-link" itemprop="url" title="<?php echo htmlspecialchars($cat['name']); ?>">
+                                        <i class="fa-solid fa-chevron-right me-1.5 text-secondary" style="font-size: 0.65rem;"></i>
+                                        <?php echo htmlspecialchars($cat['name']); ?>
+                                    </a>
+                                </li>
+                            <?php endforeach; ?>
+                        <?php else: ?>
+                            <li class="mb-2"><a href="<?php echo Url::category('chatgpt'); ?>" class="footer-link"><i class="fa-solid fa-chevron-right me-1.5 text-secondary" style="font-size: 0.65rem;"></i>Tài khoản ChatGPT Plus</a></li>
+                            <li class="mb-2"><a href="<?php echo Url::category('youtube'); ?>" class="footer-link"><i class="fa-solid fa-chevron-right me-1.5 text-secondary" style="font-size: 0.65rem;"></i>YouTube Premium</a></li>
+                            <li class="mb-2"><a href="<?php echo Url::category('github'); ?>" class="footer-link"><i class="fa-solid fa-chevron-right me-1.5 text-secondary" style="font-size: 0.65rem;"></i>GitHub Copilot Pro</a></li>
+                        <?php endif; ?>
+                        <li class="mt-2.5 pt-2 border-top border-secondary border-opacity-25">
+                            <a href="<?php echo Url::products(); ?>" class="footer-link text-primary fw-semibold">
+                                <i class="fa-solid fa-grid-2 me-1.5"></i>Xem tất cả sản phẩm &rarr;
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Cột 3: Sản phẩm bán chạy nhất (Direct Money Links) -->
+                <div class="col-6 col-md-6 col-lg-3">
+                    <h6 class="footer-heading">Gói dịch vụ nổi bật</h6>
+                    <ul class="list-unstyled small lh-lg mb-0" itemscope itemtype="https://schema.org/SiteNavigationElement">
+                        <?php if (!empty($footerHotProducts)): ?>
+                            <?php foreach ($footerHotProducts as $hp): ?>
+                                <li class="mb-2 text-truncate" itemprop="name">
+                                    <a href="<?php echo Url::product($hp); ?>" class="footer-link" itemprop="url" title="Mua <?php echo htmlspecialchars($hp['title']); ?> giá rẻ chính hãng">
+                                        <i class="fa-solid fa-fire text-danger me-1.5" style="font-size: 0.75rem;"></i>
+                                        <?php echo htmlspecialchars($hp['title']); ?>
+                                    </a>
+                                </li>
+                            <?php endforeach; ?>
+                        <?php else: ?>
+                            <li class="mb-2"><a href="<?php echo Url::products(); ?>" class="footer-link">ChatGPT Plus Chính Chủ</a></li>
+                            <li class="mb-2"><a href="<?php echo Url::products(); ?>" class="footer-link">YouTube Premium 1 Năm</a></li>
+                            <li class="mb-2"><a href="<?php echo Url::products(); ?>" class="footer-link">Canva Pro Bản Quyền</a></li>
+                            <li class="mb-2"><a href="<?php echo Url::products(); ?>" class="footer-link">Netflix Premium 4K UHD</a></li>
+                        <?php endif; ?>
+                    </ul>
+                </div>
+
+                <!-- Cột 4: Hỗ trợ & SEO Indexing (Sitemap XML + Robots.txt) -->
+                <div class="col-12 col-md-6 col-lg-2">
+                    <h6 class="footer-heading">Thông tin & Hỗ trợ</h6>
+                    <ul class="list-unstyled small lh-lg mb-3">
+                        <li class="mb-2"><a href="<?php echo Url::about(); ?>" class="footer-link" title="Giới thiệu về AI CỦA TÔI">Giới thiệu</a></li>
+                        <li class="mb-2"><a href="<?php echo Url::blogs(); ?>" class="footer-link" title="Tạp chí tin tức và thủ thuật AI">Tạp chí AI</a></li>
+                        <li class="mb-2"><a href="<?php echo Url::contact(); ?>" class="footer-link" title="Thông tin liên hệ & Hỗ trợ kỹ thuật">Liên hệ hỗ trợ</a></li>
+                        <li class="mb-2"><a href="#" class="footer-link" data-bs-toggle="modal" data-bs-target="#termsModal">Điều khoản dịch vụ</a></li>
+                        <li class="mb-2"><a href="#" class="footer-link" data-bs-toggle="modal" data-bs-target="#privacyModal">Chính sách bảo mật</a></li>
+                    </ul>
+
+                    <!-- Google Indexing Tools for Fast Crawling -->
+                    <div class="pt-2 border-top border-secondary border-opacity-25">
+                        <div class="text-uppercase text-secondary fw-bold mb-2" style="font-size: 0.72rem; letter-spacing: 0.5px;">Google Crawl & Index:</div>
+                        <div class="d-flex flex-column gap-1">
+                            <a href="<?php echo Url::sitemap(); ?>" class="footer-link text-warning fw-semibold" target="_blank" rel="noopener" title="Sơ đồ website Google XML Sitemap">
+                                <i class="fa-solid fa-sitemap me-1.5"></i>Sitemap XML
+                            </a>
+                            <a href="<?php echo Url::robots(); ?>" class="footer-link text-secondary" target="_blank" rel="noopener" title="Tệp điều hướng robots.txt">
+                                <i class="fa-solid fa-robot me-1.5"></i>Robots.txt
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3. Dải từ khóa tìm kiếm SEO phổ biến (SEO Tag Cloud for Google Indexing) -->
+            <div class="footer-tag-cloud">
+                <div class="d-flex align-items-center flex-wrap gap-1">
+                    <span class="text-white small fw-bold me-2"><i class="fa-solid fa-magnifying-glass me-1 text-primary"></i>Từ khóa tìm kiếm:</span>
+                    <a href="<?php echo Url::search('chatgpt'); ?>" class="footer-tag-link" title="Mua ChatGPT Plus giá rẻ">Mua ChatGPT Plus</a>
+                    <a href="<?php echo Url::search('claude'); ?>" class="footer-tag-link" title="Tài khoản Claude Pro 3.5">Claude Pro</a>
+                    <a href="<?php echo Url::search('canva'); ?>" class="footer-tag-link" title="Nâng cấp Canva Pro chính chủ">Canva Pro vĩnh viễn</a>
+                    <a href="<?php echo Url::search('youtube'); ?>" class="footer-tag-link" title="Mua YouTube Premium giá rẻ">YouTube Premium 1 năm</a>
+                    <a href="<?php echo Url::search('netflix'); ?>" class="footer-tag-link" title="Tài khoản Netflix 4K UHD">Netflix Premium 4K</a>
+                    <a href="<?php echo Url::search('github'); ?>" class="footer-tag-link" title="Tài khoản GitHub Copilot Pro">GitHub Copilot</a>
+                    <a href="<?php echo Url::search('midjourney'); ?>" class="footer-tag-link" title="Mua tài khoản Midjourney bản quyền">Midjourney AI</a>
+                    <a href="<?php echo Url::search('cursor'); ?>" class="footer-tag-link" title="Tài khoản Cursor AI Pro">Cursor Pro</a>
+                    <a href="<?php echo Url::search('duolingo'); ?>" class="footer-tag-link" title="Duolingo Super học ngoại ngữ">Duolingo Super</a>
+                    <a href="<?php echo Url::search('office'); ?>" class="footer-tag-link" title="Bản quyền Office 365 chính hãng">Office 365 bản quyền</a>
+                </div>
+            </div>
+
+            <!-- 4. Thanh toán & Bản quyền -->
+            <hr class="border-secondary border-opacity-25 mt-4 mb-3">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 small text-secondary">
+                <div>
+                    <span>&copy; <?php echo htmlspecialchars($settings['copyright'] ?? (date('Y') . ' AI CỦA TÔI')); ?>. Bản quyền được bảo hộ.</span>
+                    <span class="ms-2 d-none d-md-inline text-secondary opacity-75">| Nền tảng tài khoản số chính hãng hàng đầu Việt Nam.</span>
+                </div>
+                <div class="d-flex align-items-center gap-2">
+                    <span class="badge bg-secondary bg-opacity-25 text-light fw-normal py-1.5 px-2.5 rounded-pill"><i class="fa-solid fa-qrcode me-1 text-success"></i>VietQR 24/7</span>
+                    <span class="badge bg-secondary bg-opacity-25 text-light fw-normal py-1.5 px-2.5 rounded-pill"><i class="fa-solid fa-building-columns me-1 text-info"></i>SePay Bank</span>
+                    <span class="badge bg-secondary bg-opacity-25 text-light fw-normal py-1.5 px-2.5 rounded-pill"><i class="fa-solid fa-shield-halved me-1 text-warning"></i>Bảo Mật SSL</span>
+                </div>
             </div>
         </div>
     </footer>
+
+    <!-- Schema.org Organization Structured Data for Googlebot Discovery -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "OnlineStore",
+        "name": "<?php echo htmlspecialchars(SITENAME); ?>",
+        "url": "<?php echo rtrim(URLROOT, '/'); ?>",
+        "logo": "<?php echo rtrim(URLROOT, '/') . '/assets/images/logo.png'; ?>",
+        "description": "<?php echo htmlspecialchars($settings['footerDesc'] ?? 'Hệ thống cung cấp giải pháp phần mềm, tài khoản trí tuệ nhân tạo AI và giải trí bản quyền số 1 Việt Nam.'); ?>",
+        "telephone": "<?php echo htmlspecialchars($settings['zalo'] ?? '0772698113'); ?>",
+        "priceRange": "$$",
+        "paymentAccepted": "Bank Transfer, VietQR, MoMo",
+        "currenciesAccepted": "VND",
+        "contactPoint": {
+            "@type": "ContactPoint",
+            "telephone": "<?php echo htmlspecialchars($settings['zalo'] ?? '0772698113'); ?>",
+            "contactType": "customer service",
+            "availableLanguage": ["Vietnamese", "English"]
+        }
+    }
+    </script>
 
     <!-- Modals -->
     <!-- Legal Modals -->

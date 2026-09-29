@@ -7,12 +7,9 @@ class CheckoutController extends Controller {
             return;
         }
 
-        // Bắt buộc login CHỈ KHI khách vãng lai đã sử dụng quá 5 phút
-        // Trong 5 phút, khách vãng lai được tự do thao tác mua hàng và thanh toán
-        $isBot = Seo::isBot();
-        $isGuestExpired = !$isBot && !Auth::check() && (!empty($_SESSION['guest_expired']) || ((time() - (int)($_SESSION['guest_started_at'] ?? time())) >= 300));
-        if ($isGuestExpired) {
-            $_SESSION['flash_error'] = 'Thời gian trải nghiệm vãng lai (5 phút) đã hết. Vui lòng đăng nhập hoặc tạo tài khoản để thanh toán!';
+        // BẮT BUỘC ĐĂNG NHẬP ĐỂ MUA HÀNG VÀ THANH TOÁN
+        if (!Auth::check()) {
+            $_SESSION['flash_error'] = 'Bạn cần đăng nhập tài khoản để mua hàng và thanh toán!';
             header('Location: ' . Url::login());
             exit;
         }

@@ -48,7 +48,7 @@ $variantIdx = isset($_GET['variant_idx']) ? (int)$_GET['variant_idx'] : 0;
                             </div>
                             <div class="mb-3">
                                 <label class="form-label small fw-bold">Email <span class="text-danger">*</span></label>
-                                <input type="email" class="form-control bg-light border-0 py-2" id="c_email" name="email" value="<?= htmlspecialchars($currentUser['email'] ?? '') ?>" <?= !empty($currentUser['email']) ? 'readonly' : '' ?> placeholder="email_cua_ban@example.com" required>
+                                <input type="email" class="form-control bg-light border-0 py-2" id="c_email" name="email" value="<?= htmlspecialchars($currentUser['email'] ?? '') ?>" readonly required>
                             </div>
                             <div class="mb-3">
                                 <label class="form-label small fw-bold">Số điện thoại <span class="text-danger">*</span></label>

@@ -43,6 +43,8 @@ class Url {
     public static function search(string $keyword): string {
         return url('tim-kiem/' . rawurlencode($keyword));
     }
+    public static function sitemap(): string { return url('sitemap.xml'); }
+    public static function robots(): string  { return url('robots.txt'); }
 
     public static function withQuery(string $base, array $params): string {
         $params = array_filter($params, function ($value) {
