@@ -143,15 +143,15 @@ $footerHotProducts = Cache::remember('footer_seo_prods', 300, function() {
                     ?>
                     <div class="header-nav-wrapper">
                         <a href="<?php echo Url::home(); ?>"
-                           class="header-nav-btn text-decoration-none <?php echo ($currentAction === 'index' && $activeTab === 'home') ? 'active' : ''; ?>"><i class="fa-solid fa-house"></i><span>Trang Chủ</span></a>
+                           class="header-nav-btn text-decoration-none <?php echo ($currentAction === 'index' && $activeTab === 'home') ? 'active' : ''; ?>" aria-label="Trang Chủ" title="Trang Chủ"><i class="fa-solid fa-house"></i><span>Trang Chủ</span></a>
                         <a href="<?php echo Url::products(); ?>"
-                           class="header-nav-btn text-decoration-none <?php echo ($currentAction === 'index' && $activeTab === 'products') ? 'active' : ''; ?>"><i class="fa-solid fa-bag-shopping"></i><span>Sản Phẩm</span></a>
+                           class="header-nav-btn text-decoration-none <?php echo ($currentAction === 'index' && $activeTab === 'products') ? 'active' : ''; ?>" aria-label="Sản Phẩm" title="Sản Phẩm"><i class="fa-solid fa-bag-shopping"></i><span>Sản Phẩm</span></a>
                         <a href="<?php echo Url::blogs(); ?>"
-                           class="header-nav-btn text-decoration-none <?php echo ($currentAction === 'index' && $activeTab === 'blog') ? 'active' : ''; ?>"><i class="fa-regular fa-newspaper"></i><span>Tạp Chí</span></a>
+                           class="header-nav-btn text-decoration-none <?php echo ($currentAction === 'index' && $activeTab === 'blog') ? 'active' : ''; ?>" aria-label="Tạp Chí" title="Tạp Chí"><i class="fa-regular fa-newspaper"></i><span>Tạp Chí</span></a>
                         <a href="<?php echo Url::about(); ?>"
-                           class="header-nav-btn text-decoration-none <?php echo $currentAction === 'about' ? 'active' : ''; ?>"><i class="fa-solid fa-circle-info"></i><span>Giới Thiệu</span></a>
+                           class="header-nav-btn text-decoration-none <?php echo $currentAction === 'about' ? 'active' : ''; ?>" aria-label="Giới Thiệu" title="Giới Thiệu"><i class="fa-solid fa-circle-info"></i><span>Giới Thiệu</span></a>
                         <a href="<?php echo Url::contact(); ?>"
-                           class="header-nav-btn text-decoration-none <?php echo $currentAction === 'contact' ? 'active' : ''; ?>"><i class="fa-solid fa-headset"></i><span>Liên Hệ</span></a>
+                           class="header-nav-btn text-decoration-none <?php echo $currentAction === 'contact' ? 'active' : ''; ?>" aria-label="Liên Hệ" title="Liên Hệ"><i class="fa-solid fa-headset"></i><span>Liên Hệ</span></a>
                     </div>
                 </div>
 

@@ -1040,6 +1040,20 @@ body::before {
     background-color: rgba(99, 102, 241, 0.12);
 }
 
+/* At browser zoom levels the available desktop width is smaller. Keep the
+   navigation usable instead of letting it run underneath the search field. */
+@media (max-width: 1600px) and (min-width: 992px) {
+    .header-nav-wrapper { gap: 4px; }
+    .header-nav-btn {
+        width: 38px;
+        height: 38px;
+        justify-content: center;
+        padding: 0;
+    }
+    .header-nav-btn span { display: none; }
+    .header-nav-btn i { font-size: 0.95rem; opacity: 1; }
+}
+
 .logo-dropdown .dropdown-toggle::after {
     display: none !important;
 }
@@ -2886,7 +2900,6 @@ body::before {
         margin: 0 1px !important;
     }
 }
-
 
 
 
