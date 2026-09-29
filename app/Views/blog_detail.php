@@ -134,9 +134,9 @@ $blogDesc  = $hasBlog ? (($blog['content'] ?? '') ?: ($blog['description'] ?? ''
                 <div class="blog-featured-image-wrapper mb-5 text-center">
                     <img src="<?= htmlspecialchars(image_url($blogImage)) ?>"
                          alt="<?= htmlspecialchars($blogTitle) ?>"
-                         class="img-fluid rounded-4 shadow-sm w-100"
+                         class="blog-featured-image img-fluid rounded-4 shadow-sm w-100"
                          loading="eager" fetchpriority="high" decoding="async"
-                         style="object-fit: cover; max-height: 520px; width: 100%;">
+                         style="width: 100%; height: auto;">
                 </div>
             <?php endif; ?>
 
@@ -311,6 +311,12 @@ $blogDesc  = $hasBlog ? (($blog['content'] ?? '') ?: ($blog['description'] ?? ''
     margin: 1.5rem auto;
     display: block;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+}
+.blog-featured-image {
+    display: block;
+    max-width: 100%;
+    height: auto !important;
+    object-fit: contain;
 }
 .product-card:hover {
     transform: translateY(-4px);
