@@ -3,12 +3,17 @@
 class CheckoutController extends Controller {
     
     public function __construct() {
-        if (($_GET['action'] ?? '') === 'sepayWebhook') {
+        if (!empty($_GET['action']) && in_array($_GET['action'], ['sepayWebhook'], true)) {
             return;
         }
 
-        if (!Auth::check()) {
-            header('Location: ' . url());
+        // Bắt buộc login CHỈ KHI khách vãng lai đã sử dụng quá 5 phút
+        // Trong 5 phút, khách vãng lai được tự do thao tác mua hàng và thanh toán
+        $isBot = Seo::isBot();
+        $isGuestExpired = !$isBot && !Auth::check() && (!empty($_SESSION['guest_expired']) || ((time() - (int)($_SESSION['guest_started_at'] ?? time())) >= 300));
+        if ($isGuestExpired) {
+            $_SESSION['flash_error'] = 'Thời gian trải nghiệm vãng lai (5 phút) đã hết. Vui lòng đăng nhập hoặc tạo tài khoản để thanh toán!';
+            header('Location: ' . Url::login());
             exit;
         }
     }
@@ -35,7 +40,7 @@ class CheckoutController extends Controller {
             'product' => $product,
             'variant' => $variant,
             'settings' => Setting::getAll(),
-            'currentUser' => $_SESSION['user']
+            'currentUser' => $_SESSION['user'] ?? null
         ]);
     }
 

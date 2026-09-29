@@ -74,6 +74,19 @@ unset($_SESSION['login_error'], $_SESSION['old_login_email']);
                             </div>
                         </div>
 
+                        <!-- Expired notice banner (shown only when guest session actually expired) -->
+                        <?php if (!empty($isGuestSessionExpired)): ?>
+                        <div class="alert alert-warning border-0 rounded-3 mb-3 text-start small py-2 px-3">
+                            <div class="d-flex align-items-start gap-2">
+                                <i class="fa-solid fa-clock-rotate-left text-warning fs-5 mt-1 flex-shrink-0"></i>
+                                <div>
+                                    <strong class="d-block text-dark">Hết 5 phút trải nghiệm vãng lai</strong>
+                                    <span>Vui lòng đăng nhập hoặc tạo tài khoản mới để tiếp tục mua sắm và sử dụng dịch vụ.</span>
+                                </div>
+                            </div>
+                        </div>
+                        <?php endif; ?>
+
                         <!-- Alert error -->
                         <?php if (!empty($loginError)): ?>
                         <div class="alert alert-danger py-2 px-3 rounded-3 small fw-medium d-flex align-items-center mb-3">

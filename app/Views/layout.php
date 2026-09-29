@@ -45,7 +45,8 @@ unset($_SESSION['register_error'], $_SESSION['old_register_name'], $_SESSION['ol
 $currentAction = $_GET['action'] ?? '';
 $isAuthPage = in_array($currentAction, ['login', 'register', 'forgot_password', 'reset_password']);
 $isBot = Seo::isBot();
-$isGuestExpired = !$isAuthPage && !$isBot && !Auth::check() && (!empty($_SESSION['guest_expired']) || ((time() - (int)($_SESSION['guest_started_at'] ?? time())) >= 300));
+$isGuestSessionExpired = !$isBot && !Auth::check() && (!empty($_SESSION['guest_expired']) || ((time() - (int)($_SESSION['guest_started_at'] ?? time())) >= 300));
+$isGuestExpired = !$isAuthPage && $isGuestSessionExpired;
 ?>
 <body>
     <script>

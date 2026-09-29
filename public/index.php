@@ -135,6 +135,11 @@ if (!empty($_SESSION['user']['id']) && (time() - (int) ($_SESSION['user_checked_
     }
 }
 
+// Theo dõi thời gian trải nghiệm 5 phút cho khách vãng lai
+if (!Auth::check() && !Seo::isBot()) {
+    SecurityLogger::checkGuestExpired();
+}
+
 // Routing
 // Derive raw URL path from query string (Apache rewrite) or REQUEST_URI (PHP built-in server)
 $rawUrl = $_GET['url'] ?? '';
