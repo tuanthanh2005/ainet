@@ -25,27 +25,6 @@
 
     <!-- Link to separated CSS -->
     <link rel="stylesheet" href="<?php echo asset('css/style.css'); ?>">
-    <style>
-        body.guest-expired-lockout {
-            overflow: hidden !important;
-        }
-        body.guest-expired-lockout > *:not(.modal):not(.modal-backdrop):not(#app-toast-container) {
-            filter: blur(4px) grayscale(15%);
-            pointer-events: none !important;
-            user-select: none !important;
-        }
-        .modal.forced-lockout .btn-close {
-            display: none !important;
-        }
-        @keyframes modalShakeAnim {
-            0%, 100% { transform: translateX(0); }
-            20%, 60% { transform: translateX(-8px); }
-            40%, 80% { transform: translateX(8px); }
-        }
-        .shake-animation {
-            animation: modalShakeAnim 0.35s ease-in-out;
-        }
-    </style>
 </head>
 
 <?php
@@ -63,10 +42,12 @@ $oldRegisterName = $_SESSION['old_register_name'] ?? '';
 $oldRegisterEmail = $_SESSION['old_register_email'] ?? '';
 unset($_SESSION['register_error'], $_SESSION['old_register_name'], $_SESSION['old_register_email']);
 
+$currentAction = $_GET['action'] ?? '';
+$isAuthPage = in_array($currentAction, ['login', 'register', 'forgot_password', 'reset_password']);
 $isBot = Seo::isBot();
-$isGuestExpired = !$isBot && !Auth::check() && (!empty($_SESSION['guest_expired']) || ((time() - (int)($_SESSION['guest_started_at'] ?? time())) >= 300));
+$isGuestExpired = !$isAuthPage && !$isBot && !Auth::check() && (!empty($_SESSION['guest_expired']) || ((time() - (int)($_SESSION['guest_started_at'] ?? time())) >= 300));
 ?>
-<body class="<?php echo $isGuestExpired ? 'guest-expired-lockout' : ''; ?>">
+<body>
     <script>
         window.APP_USER_LOGGED_IN = <?php echo $currentUser ? 'true' : 'false'; ?>;
         window.isGuestExpired = <?php echo $isGuestExpired ? 'true' : 'false'; ?>;
