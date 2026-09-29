@@ -276,7 +276,7 @@ if ($isSuccess && !empty($_SESSION['user']['id'])) {
 
                                 <div class="payment-details-layout">
                                 <!-- QR Code SePay -->
-                                <div class="payment-qr-column">
+                                <div class="payment-qr-column" id="payment-qr-anchor">
                                 <div class="qr-box p-3 bg-white rounded-4 border shadow-sm position-relative overflow-hidden">
                                     <?php
                                     $bankId = trim((string) ($settings['bank_id'] ?? ''));
@@ -489,6 +489,16 @@ function copyText(text) {
 }
 
 <?php if (!$isSuccess): ?>
+// Open the payment page with the QR code already in view.
+window.addEventListener('load', () => {
+    const qrAnchor = document.getElementById('payment-qr-anchor');
+    if (!qrAnchor || document.getElementById('payment-active-container')?.classList.contains('d-none')) return;
+
+    const headerHeight = document.querySelector('.vibrant-header')?.offsetHeight || 0;
+    const targetTop = qrAnchor.getBoundingClientRect().top + window.scrollY - headerHeight - 42;
+    window.scrollTo({ top: Math.max(0, targetTop), behavior: 'auto' });
+});
+
 <?php
 $db = Database::getInstance();
 $elapsed = 0;
