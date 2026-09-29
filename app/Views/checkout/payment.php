@@ -10,6 +10,49 @@ if ($isSuccess && !empty($_SESSION['user']['id'])) {
     $hasReviewed = Review::hasReviewed($order['id'], $order['product_id']);
 }
 ?>
+<style>
+.rating-stars { 
+    display: inline-flex !important; 
+    flex-direction: row-reverse !important; 
+    align-items: center !important;
+    gap: 2px !important;
+    flex-wrap: nowrap !important;
+}
+.rating-stars input[type="radio"],
+.rating-stars input { 
+    display: none !important; 
+    visibility: hidden !important;
+    position: absolute !important;
+    opacity: 0 !important;
+    width: 0 !important;
+    height: 0 !important;
+    pointer-events: none !important;
+}
+.rating-stars label { 
+    color: #e2e8f0 !important; 
+    transition: color 0.2s, transform 0.15s; 
+    font-size: 1.6rem !important;
+    margin: 0 2px !important;
+    padding: 0 !important;
+    cursor: pointer !important;
+    line-height: 1 !important;
+    display: inline-block !important;
+}
+.rating-stars input:checked ~ label, 
+.rating-stars label:hover, 
+.rating-stars label:hover ~ label { 
+    color: #ffc107 !important; 
+}
+.rating-stars label:active {
+    transform: scale(1.2);
+}
+@media (max-width: 576px) {
+    .rating-stars label {
+        font-size: 1.35rem !important;
+        margin: 0 1px !important;
+    }
+}
+</style>
 <div class="bg-light min-vh-100 py-5">
     <div class="container">
         <div class="mb-4 text-center">
@@ -39,30 +82,31 @@ if ($isSuccess && !empty($_SESSION['user']['id'])) {
         </div>
 
         <?php if ($isSuccess): ?>
-            <!-- STEP 3: SUCCESS & DELIVERED ITEMS -->
-            <div class="row justify-content-center animate__animated animate__zoomIn">
-                <div class="col-md-8 col-lg-6 text-center">
-                    <div class="card border-0 shadow-sm rounded-4 p-4 p-md-5 bg-white text-center">
-                        <div class="success-icon-bg mx-auto mb-4 animate__animated animate__bounceIn">
+            <!-- STEP 3: SUCCESS (2-COLUMN HORIZONTAL LAYOUT) -->
+            <div class="row justify-content-center g-4 animate__animated animate__zoomIn">
+                <!-- CỘT TRÁI: THÔNG TIN ĐƠN HÀNG & TRẠNG THÁI -->
+                <div class="col-12 col-lg-6">
+                    <div class="card border-0 shadow-sm rounded-4 p-4 p-md-4 bg-white h-100 d-flex flex-column text-center">
+                        <div class="success-icon-bg mx-auto mb-3 animate__animated animate__bounceIn">
                             <i class="fa-solid fa-check"></i>
                         </div>
-                        <h2 class="fw-bold text-dark mb-3">Thanh toán thành công!</h2>
-                        <p class="text-muted fs-6 mb-4">Giao dịch của bạn đã được xác nhận. Chi tiết sản phẩm đã mua:</p>
+                        <h3 class="fw-bold text-dark mb-2">Thanh toán thành công!</h3>
+                        <p class="text-muted small mb-3">Giao dịch của bạn đã được xác nhận. Chi tiết đơn hàng:</p>
 
                         <?php if ($got === 0): ?>
                             <!-- Out of stock - manual deliver / processing -->
-                            <div class="card border-0 rounded-4 p-4 text-start bg-light" style="<?= ($order['status'] ?? '') === 'processing' ? 'border-left:4px solid #0d6efd !important;' : 'border-left:4px solid #ffc107 !important;' ?>">
+                            <div class="card border-0 rounded-4 p-3 p-md-4 text-start bg-light mb-3" style="<?= ($order['status'] ?? '') === 'processing' ? 'border-left:4px solid #0d6efd !important;' : 'border-left:4px solid #ffc107 !important;' ?>">
                                 <div class="d-flex align-items-start gap-3 mb-3">
-                                    <div class="rounded-circle <?= ($order['status'] ?? '') === 'processing' ? 'bg-primary bg-opacity-25 text-primary' : 'bg-warning bg-opacity-25 text-warning' ?> d-flex align-items-center justify-content-center flex-shrink-0" style="width:48px;height:48px;">
-                                        <i class="fa-solid <?= ($order['status'] ?? '') === 'processing' ? 'fa-hourglass-half' : 'fa-circle-exclamation' ?> fs-4"></i>
+                                    <div class="rounded-circle <?= ($order['status'] ?? '') === 'processing' ? 'bg-primary bg-opacity-25 text-primary' : 'bg-warning bg-opacity-25 text-warning' ?> d-flex align-items-center justify-content-center flex-shrink-0" style="width:44px;height:44px;">
+                                        <i class="fa-solid <?= ($order['status'] ?? '') === 'processing' ? 'fa-hourglass-half' : 'fa-circle-exclamation' ?> fs-5"></i>
                                     </div>
                                     <div>
                                         <h6 class="fw-bold mb-1 text-dark"><?= ($order['status'] ?? '') === 'processing' ? 'Đơn hàng đang xử lý' : 'Giao hàng thủ công' ?></h6>
-                                        <p class="text-muted small mb-0"><?= ($order['status'] ?? '') === 'processing' ? 'Cảm ơn bạn! Đơn hàng đã được thanh toán thành công và đang được Admin xử lý. Quá trình xử lý thường mất 5 - 15 phút. Bạn hãy sao chép mã đơn hàng bên dưới và liên hệ Admin qua Telegram để được giao hàng nhanh nhất.' : 'Hệ thống hiện tại hết gói sẵn có trong kho. Bạn hãy sao chép mã đơn dưới đây gửi cho Admin qua Telegram hoặc Zalo để nhận tài khoản/key lập tức.' ?></p>
+                                        <p class="text-muted small mb-0"><?= ($order['status'] ?? '') === 'processing' ? 'Cảm ơn bạn! Đơn hàng đã được thanh toán thành công và đang được Admin xử lý (5 - 15 phút). Bạn hãy sao chép mã đơn hàng bên dưới và liên hệ Admin qua Telegram để được giao hàng nhanh nhất.' : 'Hệ thống hiện tại hết gói sẵn có trong kho. Bạn hãy sao chép mã đơn dưới đây gửi cho Admin qua Telegram hoặc Zalo để nhận tài khoản/key lập tức.' ?></p>
                                     </div>
                                 </div>
-                                <div class="bg-white border rounded-3 p-3 d-flex align-items-center gap-2 mb-3">
-                                    <code class="flex-grow-1 fs-5 fw-bold text-dark" id="success-order-code">#<?= htmlspecialchars($order['id']) ?></code>
+                                <div class="bg-white border rounded-3 p-2 px-3 d-flex align-items-center gap-2 mb-3">
+                                    <code class="flex-grow-1 fs-6 fw-bold text-dark" id="success-order-code">#<?= htmlspecialchars($order['id']) ?></code>
                                     <button class="btn btn-dark btn-sm px-3" type="button" onclick="copyText('#<?= htmlspecialchars($order['id']) ?>')">
                                         <i class="fa-regular fa-copy me-1"></i>Sao chép
                                     </button>
@@ -78,7 +122,7 @@ if ($isSuccess && !empty($_SESSION['user']['id'])) {
                             </div>
                         <?php else: ?>
                             <!-- Delivered items list -->
-                            <div class="card border-0 rounded-4 p-4 text-start bg-light">
+                            <div class="card border-0 rounded-4 p-3 p-md-4 text-start bg-light mb-3">
                                 <div class="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
                                     <h6 class="fw-bold text-success mb-0">
                                         <i class="fa-solid fa-box-open me-2"></i><?= $missing > 0 ? "Đã giao $got/$qty sản phẩm" : "Sản phẩm đã giao ($got)" ?>
@@ -110,103 +154,79 @@ if ($isSuccess && !empty($_SESSION['user']['id'])) {
                             </div>
                         <?php endif; ?>
 
-                        <!-- ĐÁNH GIÁ TRỰC TIẾP TẠI TRANG THÀNH CÔNG -->
-                        <?php if ($hasReviewed): ?>
-                            <div class="alert alert-success border-0 rounded-4 p-3 d-flex align-items-center justify-content-center gap-2 mt-4 shadow-sm">
-                                <i class="fa-solid fa-circle-check fs-5 text-success"></i>
-                                <span class="fw-semibold">Cảm ơn bạn đã gửi đánh giá cho đơn hàng này!</span>
-                            </div>
-                        <?php elseif (!empty($_SESSION['user']['id'])): ?>
-                            <div class="card border-0 rounded-4 p-4 mt-4 text-start shadow-sm bg-light border">
-                                <form action="<?= url('index.php?action=submitReview') ?>" method="POST">
-                                    <?php echo Csrf::field(); ?>
-                                    <input type="hidden" name="order_id" value="<?= htmlspecialchars($order['id']) ?>">
-                                    <input type="hidden" name="product_id" value="<?= htmlspecialchars($order['product_id']) ?>">
-                                    <input type="hidden" name="redirect_to" value="<?= url('index.php?action=success&id=' . urlencode($order['id'])) ?>">
-
-                                    <div class="d-flex align-items-center gap-3 mb-3">
-                                        <div class="rounded-circle bg-warning bg-opacity-25 text-warning d-flex align-items-center justify-content-center flex-shrink-0" style="width:40px;height:40px;">
-                                            <i class="fa-solid fa-star fs-5"></i>
-                                        </div>
-                                        <div>
-                                            <h6 class="fw-bold mb-0 text-dark">Đánh giá sản phẩm</h6>
-                                            <small class="text-muted">Bạn cảm thấy sản phẩm <strong><?= htmlspecialchars($order['product_name']) ?></strong> thế nào?</small>
-                                        </div>
-                                    </div>
-
-                                    <style>
-                                    .rating-stars { 
-                                        display: inline-flex !important; 
-                                        flex-direction: row-reverse !important; 
-                                        align-items: center !important;
-                                        gap: 2px !important;
-                                        flex-wrap: nowrap !important;
-                                    }
-                                    .rating-stars input[type="radio"],
-                                    .rating-stars input { 
-                                        display: none !important; 
-                                        visibility: hidden !important;
-                                        position: absolute !important;
-                                        opacity: 0 !important;
-                                        width: 0 !important;
-                                        height: 0 !important;
-                                        pointer-events: none !important;
-                                    }
-                                    .rating-stars label { 
-                                        color: #e2e8f0 !important; 
-                                        transition: color 0.2s, transform 0.15s; 
-                                        font-size: 1.6rem !important;
-                                        margin: 0 2px !important;
-                                        padding: 0 !important;
-                                        cursor: pointer !important;
-                                        line-height: 1 !important;
-                                        display: inline-block !important;
-                                    }
-                                    .rating-stars input:checked ~ label, 
-                                    .rating-stars label:hover, 
-                                    .rating-stars label:hover ~ label { 
-                                        color: #ffc107 !important; 
-                                    }
-                                    .rating-stars label:active {
-                                        transform: scale(1.2);
-                                    }
-                                    @media (max-width: 576px) {
-                                        .rating-stars label {
-                                            font-size: 1.35rem !important;
-                                            margin: 0 1px !important;
-                                        }
-                                    }
-                                    </style>
-                                    <div class="d-flex align-items-center justify-content-between p-2 px-3 rounded-3 bg-white border mb-3 flex-wrap gap-2">
-                                        <span class="small fw-bold text-dark">Đánh giá sao:</span>
-                                        <div class="rating-stars" dir="rtl">
-                                            <input type="radio" id="inline_star5" name="rating" value="5" checked><label for="inline_star5" title="5 sao - Rất hài lòng"><i class="fa-solid fa-star"></i></label>
-                                            <input type="radio" id="inline_star4" name="rating" value="4"><label for="inline_star4" title="4 sao - Hài lòng"><i class="fa-solid fa-star"></i></label>
-                                            <input type="radio" id="inline_star3" name="rating" value="3"><label for="inline_star3" title="3 sao - Bình thường"><i class="fa-solid fa-star"></i></label>
-                                            <input type="radio" id="inline_star2" name="rating" value="2"><label for="inline_star2" title="2 sao - Chưa hài lòng"><i class="fa-solid fa-star"></i></label>
-                                            <input type="radio" id="inline_star1" name="rating" value="1"><label for="inline_star1" title="1 sao - Rất tệ"><i class="fa-solid fa-star"></i></label>
-                                        </div>
-                                    </div>
-
-                                    <div class="mb-3">
-                                        <textarea name="content" class="form-control rounded-3" rows="2" placeholder="Chia sẻ thêm cảm nhận của bạn (không bắt buộc)..."></textarea>
-                                    </div>
-
-                                    <button type="submit" class="btn btn-warning w-100 py-2 rounded-3 fw-bold shadow-sm">
-                                        <i class="fa-solid fa-paper-plane me-2"></i> Gửi đánh giá ngay
-                                    </button>
-                                </form>
-                            </div>
-                        <?php endif; ?>
-
-                        <div class="d-flex gap-3 justify-content-center mt-4 flex-wrap">
-                            <a href="<?= url('index.php?action=orderHistory') ?>" class="btn btn-black px-4 py-3 rounded-4 fw-bold shadow">
-                                <i class="fa-solid fa-clock-rotate-left me-2"></i> LỊCH SỬ ĐƠN HÀNG
+                        <!-- 2 nút điều hướng -->
+                        <div class="d-flex gap-2 justify-content-center mt-auto pt-3 flex-wrap">
+                            <a href="<?= url('index.php?action=orderHistory') ?>" class="btn btn-black px-4 py-2 rounded-3 fw-bold shadow-sm">
+                                <i class="fa-solid fa-clock-rotate-left me-1"></i> Lịch sử đơn hàng
                             </a>
-                            <a href="<?= url() ?>" class="btn btn-outline-dark px-4 py-3 rounded-4 fw-bold">
-                                <i class="fa-solid fa-house me-2"></i> VỀ TRANG CHỦ
+                            <a href="<?= url() ?>" class="btn btn-outline-dark px-4 py-2 rounded-3 fw-bold">
+                                <i class="fa-solid fa-house me-1"></i> Về trang chủ
                             </a>
                         </div>
+                    </div>
+                </div>
+
+                <!-- CỘT PHẢI: KHUNG ĐÁNH GIÁ SẢN PHẨM HOẶC THÔNG BÁO CẢM ƠN -->
+                <div class="col-12 col-lg-6">
+                    <div class="card border-0 shadow-sm rounded-4 p-4 p-md-4 bg-white h-100 d-flex flex-column text-start">
+                        <?php if ($hasReviewed): ?>
+                            <div class="my-auto py-5 text-center">
+                                <div class="rounded-circle bg-success bg-opacity-10 text-success d-flex align-items-center justify-content-center mx-auto mb-3" style="width:72px;height:72px;">
+                                    <i class="fa-solid fa-circle-check fs-1"></i>
+                                </div>
+                                <h5 class="fw-bold text-success mb-2">Cảm ơn bạn đã gửi đánh giá!</h5>
+                                <p class="text-muted small mb-4">Đánh giá của bạn đã được ghi nhận và giúp cộng đồng lựa chọn sản phẩm AI phù hợp nhất.</p>
+                                <a href="<?= url('index.php?action=orderHistory') ?>" class="btn btn-sm btn-outline-success rounded-pill px-4 fw-semibold">
+                                    <i class="fa-solid fa-clock-rotate-left me-1"></i> Quản lý đơn hàng
+                                </a>
+                            </div>
+                        <?php elseif (!empty($_SESSION['user']['id'])): ?>
+                            <form action="<?= url('index.php?action=submitReview') ?>" method="POST" class="d-flex flex-column h-100">
+                                <?php echo Csrf::field(); ?>
+                                <input type="hidden" name="order_id" value="<?= htmlspecialchars($order['id']) ?>">
+                                <input type="hidden" name="product_id" value="<?= htmlspecialchars($order['product_id']) ?>">
+                                <input type="hidden" name="redirect_to" value="<?= url('index.php?action=success&id=' . urlencode($order['id'])) ?>">
+
+                                <div class="d-flex align-items-center gap-3 mb-3">
+                                    <div class="rounded-circle bg-warning bg-opacity-25 text-warning d-flex align-items-center justify-content-center flex-shrink-0" style="width:44px;height:44px;">
+                                        <i class="fa-solid fa-star fs-5"></i>
+                                    </div>
+                                    <div>
+                                        <h5 class="fw-bold mb-0 text-dark">Đánh giá sản phẩm</h5>
+                                        <small class="text-muted">Bạn cảm thấy <strong><?= htmlspecialchars($order['product_name']) ?></strong> thế nào?</small>
+                                    </div>
+                                </div>
+
+                                <div class="d-flex align-items-center justify-content-between p-2 px-3 rounded-3 bg-light border mb-3 flex-wrap gap-2">
+                                    <span class="small fw-bold text-dark">Đánh giá sao:</span>
+                                    <div class="rating-stars" dir="rtl">
+                                        <input type="radio" id="inline_star5" name="rating" value="5" checked><label for="inline_star5" title="5 sao - Rất hài lòng"><i class="fa-solid fa-star"></i></label>
+                                        <input type="radio" id="inline_star4" name="rating" value="4"><label for="inline_star4" title="4 sao - Hài lòng"><i class="fa-solid fa-star"></i></label>
+                                        <input type="radio" id="inline_star3" name="rating" value="3"><label for="inline_star3" title="3 sao - Bình thường"><i class="fa-solid fa-star"></i></label>
+                                        <input type="radio" id="inline_star2" name="rating" value="2"><label for="inline_star2" title="2 sao - Chưa hài lòng"><i class="fa-solid fa-star"></i></label>
+                                        <input type="radio" id="inline_star1" name="rating" value="1"><label for="inline_star1" title="1 sao - Rất tệ"><i class="fa-solid fa-star"></i></label>
+                                    </div>
+                                </div>
+
+                                <div class="mb-3 flex-grow-1 d-flex flex-column">
+                                    <label class="form-label small fw-bold text-muted mb-1">Nhận xét trải nghiệm:</label>
+                                    <textarea name="content" class="form-control rounded-3 flex-grow-1" style="min-height: 110px;" placeholder="Chia sẻ thêm cảm nhận của bạn về tốc độ bàn giao, chất lượng dịch vụ... (không bắt buộc)"></textarea>
+                                </div>
+
+                                <button type="submit" class="btn btn-warning w-100 py-3 rounded-3 fw-bold shadow-sm mt-auto">
+                                    <i class="fa-solid fa-paper-plane me-2"></i> Gửi đánh giá ngay
+                                </button>
+                            </form>
+                        <?php else: ?>
+                            <div class="my-auto py-5 text-center">
+                                <i class="fa-solid fa-shield-halved fs-1 text-primary mb-3"></i>
+                                <h5 class="fw-bold mb-2">Hỗ trợ & Bảo hành</h5>
+                                <p class="text-muted small mb-4">Mọi đơn hàng tại <?= defined('SITENAME') ? SITENAME : 'AI CỦA TÔI' ?> đều được cam kết bảo hành và hỗ trợ kỹ thuật tận tâm.</p>
+                                <a href="https://t.me/specademy" target="_blank" class="btn btn-primary rounded-3 px-4">
+                                    <i class="fa-brands fa-telegram me-1"></i> Nhắn tin Telegram Admin
+                                </a>
+                            </div>
+                        <?php endif; ?>
                     </div>
                 </div>
             </div>
