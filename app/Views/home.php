@@ -756,6 +756,30 @@
         $blogPageUrl = function($p) {
             return Url::withQuery(Url::blogs(), ['page' => $p > 1 ? $p : null]);
         };
+        $blogCurrentPage = (int) ($blogPage ?? 1);
+        $blogTotalPages = (int) ($totalBlogPages ?? 1);
+        $blogPaginationPages = [];
+
+        if ($blogTotalPages <= 5) {
+            $blogPaginationPages = range(1, $blogTotalPages);
+        } else {
+            $windowStart = max(2, $blogCurrentPage - 1);
+            $windowEnd = min($blogTotalPages - 1, $blogCurrentPage + 1);
+
+            if ($blogCurrentPage <= 2) {
+                $windowStart = 2;
+                $windowEnd = 3;
+            } elseif ($blogCurrentPage >= $blogTotalPages - 1) {
+                $windowStart = $blogTotalPages - 2;
+                $windowEnd = $blogTotalPages - 1;
+            }
+
+            $blogPaginationPages[] = 1;
+            if ($windowStart > 2) $blogPaginationPages[] = null;
+            foreach (range($windowStart, $windowEnd) as $pageNumber) $blogPaginationPages[] = $pageNumber;
+            if ($windowEnd < $blogTotalPages - 1) $blogPaginationPages[] = null;
+            $blogPaginationPages[] = $blogTotalPages;
+        }
         ?>
         <div class="d-flex justify-content-center mt-5 mb-4">
             <nav aria-label="Blog pagination">
@@ -769,14 +793,20 @@
                         </li>
                     <?php endif; ?>
 
-                    <?php for ($i = 1; $i <= ($totalBlogPages ?? 1); $i++): ?>
-                        <li class="page-item <?= $i === ($blogPage ?? 1) ? 'active' : '' ?>">
-                            <a class="page-link border-0 rounded-circle d-flex align-items-center justify-content-center <?= $i === ($blogPage ?? 1) ? 'bg-dark text-white fw-bold shadow-sm' : 'text-dark' ?>" 
-                               style="width:38px;height:38px;" href="<?= $blogPageUrl($i) ?>">
-                                <?= $i ?>
-                            </a>
-                        </li>
-                    <?php endfor; ?>
+                    <?php foreach ($blogPaginationPages as $pageNumber): ?>
+                        <?php if ($pageNumber === null): ?>
+                            <li class="page-item disabled" aria-hidden="true">
+                                <span class="page-link border-0 bg-transparent text-muted d-flex align-items-center justify-content-center px-1" style="width:24px;height:38px;">…</span>
+                            </li>
+                        <?php else: ?>
+                            <li class="page-item <?= $pageNumber === $blogCurrentPage ? 'active' : '' ?>">
+                                <a class="page-link border-0 rounded-circle d-flex align-items-center justify-content-center <?= $pageNumber === $blogCurrentPage ? 'bg-dark text-white fw-bold shadow-sm' : 'text-dark' ?>"
+                                   style="width:38px;height:38px;" href="<?= $blogPageUrl($pageNumber) ?>">
+                                    <?= $pageNumber ?>
+                                </a>
+                            </li>
+                        <?php endif; ?>
+                    <?php endforeach; ?>
 
                     <?php if (($blogPage ?? 1) < ($totalBlogPages ?? 1)): ?>
                         <li class="page-item">
