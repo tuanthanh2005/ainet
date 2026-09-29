@@ -851,8 +851,8 @@
                 </div>
                 <div class="d-flex align-items-center gap-1 gap-md-2">
                     <button class="btn btn-light border-0 shadow-sm" title="Thông báo"><i class="fa-regular fa-bell"></i></button>
-                    <a href="index.php?action=logout" class="btn btn-light border shadow-sm" title="Đăng xuất">
-                        <i class="fa-solid fa-right-from-bracket"></i>
+                    <a href="<?php echo url(); ?>" target="_blank" class="btn btn-light border shadow-sm" title="Xem Website">
+                        <i class="fa-solid fa-arrow-up-right-from-square"></i>
                         <span class="d-none d-sm-inline ms-1 ms-md-2">Xem Website</span>
                     </a>
                 </div>
