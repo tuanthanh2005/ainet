@@ -173,4 +173,8 @@ class SecurityLogger {
 
         return false;
     }
+
+    public static function checkGuestExpired(): bool {
+        return self::checkGuestSession();
+    }
 }
