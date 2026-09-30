@@ -1040,20 +1040,16 @@ body::before {
     background-color: rgba(99, 102, 241, 0.12);
 }
 
-/* At browser zoom levels the available desktop width is smaller. Preserve
-   readable menu labels and make the search field compact instead. */
+/* Keep menu labels and icons visible when browser zoom reduces the usable width. */
 @media (max-width: 1600px) and (min-width: 992px) {
     .header-nav-wrapper { gap: 4px; }
     .header-nav-btn {
-        padding: 6px 7px;
-        gap: 0;
+        padding: 6px 10px;
+        gap: 5px;
         font-size: 0.86rem;
     }
     .header-nav-btn span { display: inline; }
-    .header-nav-btn i { display: none; }
-    .search-form { max-width: 205px; margin-left: auto; }
-    .search-form .form-control { padding-left: 12px; }
-    .search-form .btn { flex: 0 0 48px; padding-left: 0 !important; padding-right: 0 !important; }
+    .header-nav-btn i { display: inline-block; font-size: 0.78rem; }
 }
 
 .logo-dropdown .dropdown-toggle::after {
@@ -2902,5 +2898,4 @@ body::before {
         margin: 0 1px !important;
     }
 }
-
 

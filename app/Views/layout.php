@@ -133,7 +133,7 @@ $footerHotProducts = Cache::remember('footer_seo_prods', 300, function() {
                 </div>
 
                 <!-- Thanh điều hướng (Chỉ hiện Desktop) -->
-                <div class="col-lg-5 d-none d-lg-block">
+                <div class="col-lg-7 d-none d-lg-block">
                     <?php
                     $currentAction = $_GET['action'] ?? 'index';
                     $activeTab = $tab ?? ($_GET['tab'] ?? 'home');
@@ -153,16 +153,6 @@ $footerHotProducts = Cache::remember('footer_seo_prods', 300, function() {
                         <a href="<?php echo Url::contact(); ?>"
                            class="header-nav-btn text-decoration-none <?php echo $currentAction === 'contact' ? 'active' : ''; ?>" aria-label="Liên Hệ" title="Liên Hệ"><i class="fa-solid fa-headset"></i><span>Liên Hệ</span></a>
                     </div>
-                </div>
-
-                <!-- Thanh tìm kiếm (Ẩn trên Mobile, chỉ hiện Desktop) -->
-                <div class="col-12 col-lg-2 order-3 order-lg-2 d-none d-lg-block position-relative">
-                    <form class="d-flex search-form" action="<?php echo Url::products(); ?>" method="GET" role="search">
-                        <input class="form-control" type="search" name="q" value="<?php echo htmlspecialchars($searchQuery ?? ($_GET['q'] ?? '')); ?>"
-                            placeholder="Tìm kiếm..."
-                            aria-label="Search">
-                        <button class="btn px-3" type="submit"><i class="fa-solid fa-magnifying-glass"></i></button>
-                    </form>
                 </div>
 
                 <!-- Cụm nút bấm phải -->
