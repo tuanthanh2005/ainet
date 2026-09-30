@@ -68,6 +68,22 @@ class Product {
         });
     }
 
+    public static function getTopSelling(int $limit = 4): array {
+        return Cache::remember('products.top_selling_' . $limit, 60, function () use ($limit) {
+            $products = self::getAll();
+            $active = array_filter($products, fn($p) => ($p['status'] ?? 'active') === 'active');
+            usort($active, function($a, $b) {
+                $soldA = (int) ($a['sold_count'] ?? 0);
+                $soldB = (int) ($b['sold_count'] ?? 0);
+                if ($soldA === $soldB) {
+                    return strtotime($b['created_at'] ?? 'now') <=> strtotime($a['created_at'] ?? 'now');
+                }
+                return $soldB <=> $soldA;
+            });
+            return array_slice($active, 0, $limit);
+        });
+    }
+
     public static function getById($id) {
         $db = Database::getInstance();
         $stmt = $db->prepare("SELECT *, category_name AS category FROM products WHERE id = ?");

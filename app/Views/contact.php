@@ -6,6 +6,7 @@ $rawZalo = trim($settings['zalo'] ?? '0772698113');
 $cleanZaloPhone = preg_replace('/[^0-9]/', '', $rawZalo);
 $zaloLink = (strpos($rawZalo, 'http') === 0) ? $rawZalo : ('https://zalo.me/' . ($cleanZaloPhone ?: '0772698113'));
 $zaloDisplay = !empty($rawZalo) ? $rawZalo : '0772698113';
+$zaloGroupLink = !empty($settings['zalo_group']) ? $settings['zalo_group'] : 'https://zalo.me/g/ifaku0ggmtg4xhxi7k0u';
 
 $systemEmail = trim($settings['system_email'] ?? 'tetuongmmovn@gmail.com');
 if (empty($systemEmail)) {
@@ -61,6 +62,9 @@ if (is_array($contactMethods)) {
                 <div class="d-flex flex-wrap align-items-center gap-3">
                     <a href="<?= htmlspecialchars($zaloLink) ?>" target="_blank" rel="noopener noreferrer" class="btn btn-primary rounded-pill px-4 py-2.5 fw-semibold d-inline-flex align-items-center gap-2 shadow-sm" style="background:#0068ff; border-color:#0068ff;">
                         <i class="fa-solid fa-comment-dots"></i> Nhắn tin Zalo Admin (Ưu tiên)
+                    </a>
+                    <a href="<?= htmlspecialchars($zaloGroupLink) ?>" target="_blank" rel="noopener noreferrer" class="btn btn-outline-primary rounded-pill px-4 py-2.5 fw-semibold d-inline-flex align-items-center gap-2">
+                        <i class="fa-solid fa-users"></i> Tham Gia Nhóm Zalo
                     </a>
                     <a href="<?= htmlspecialchars($telegramLink) ?>" target="_blank" rel="noopener noreferrer" class="btn btn-outline-dark rounded-pill px-4 py-2.5 fw-semibold d-inline-flex align-items-center gap-2">
                         <i class="fa-brands fa-telegram text-info"></i> Kênh Telegram

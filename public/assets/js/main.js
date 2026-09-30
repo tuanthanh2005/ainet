@@ -372,7 +372,210 @@ function closePurchasePopup() {
     }
 }
 
+// Global Spotlight Search & Top Selling Products
+function initSpotlightSearch() {
+    const searchModal = document.getElementById('searchModal');
+    const searchInput = document.getElementById('spotlightSearchInput');
+    const clearBtn = document.getElementById('spotlightClearBtn');
+    const topSection = document.getElementById('spotlightTopSellingSection');
+    const resultsSection = document.getElementById('spotlightSearchResultsSection');
+    const resultsList = document.getElementById('spotlightResultsList');
+    const noResults = document.getElementById('spotlightNoResults');
+    const queryDisplay = document.getElementById('spotlightQueryDisplay');
+    const resultCount = document.getElementById('spotlightResultCount');
+    const tagChips = document.querySelectorAll('.search-tag-chip');
+
+    if (!searchModal || !searchInput) return;
+
+    let searchIndexData = null;
+    let isLoadingIndex = false;
+    let debounceTimer = null;
+
+    function removeAccents(str) {
+        if (!str) return '';
+        return str.normalize('NFD')
+                  .replace(/[\u0300-\u036f]/g, '')
+                  .replace(/đ/g, 'd')
+                  .replace(/Đ/g, 'D')
+                  .toLowerCase();
+    }
+
+    function escapeHtml(str) {
+        if (!str) return '';
+        const d = document.createElement('div');
+        d.textContent = str;
+        return d.innerHTML;
+    }
+
+    function fetchIndex() {
+        if (searchIndexData || isLoadingIndex) return;
+        isLoadingIndex = true;
+        fetch('/index.php?action=searchIndex')
+            .then(res => res.json())
+            .then(data => {
+                searchIndexData = Array.isArray(data) ? data : [];
+            })
+            .catch(() => {
+                searchIndexData = [];
+            })
+            .finally(() => {
+                isLoadingIndex = false;
+            });
+    }
+
+    // Auto-focus when modal opens
+    searchModal.addEventListener('shown.bs.modal', () => {
+        searchInput.focus();
+        fetchIndex();
+    });
+
+    // Reset when modal hides
+    searchModal.addEventListener('hidden.bs.modal', () => {
+        searchInput.value = '';
+        if (clearBtn) clearBtn.classList.add('d-none');
+        if (topSection) topSection.classList.remove('d-none');
+        if (resultsSection) resultsSection.classList.add('d-none');
+    });
+
+    // Clear button click
+    if (clearBtn) {
+        clearBtn.addEventListener('click', () => {
+            searchInput.value = '';
+            clearBtn.classList.add('d-none');
+            if (topSection) topSection.classList.remove('d-none');
+            if (resultsSection) resultsSection.classList.add('d-none');
+            searchInput.focus();
+        });
+    }
+
+    // Quick tag chips click
+    tagChips.forEach(chip => {
+        chip.addEventListener('click', () => {
+            const kw = chip.getAttribute('data-keyword') || chip.innerText.trim();
+            searchInput.value = kw;
+            performSearch(kw);
+            searchInput.focus();
+        });
+    });
+
+    // Live search on typing
+    searchInput.addEventListener('input', (e) => {
+        const val = e.target.value.trim();
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(() => {
+            performSearch(val);
+        }, 150);
+    });
+
+    function performSearch(query) {
+        if (!query || query.length < 2) {
+            if (clearBtn) clearBtn.classList.add('d-none');
+            if (topSection) topSection.classList.remove('d-none');
+            if (resultsSection) resultsSection.classList.add('d-none');
+            return;
+        }
+
+        if (clearBtn) clearBtn.classList.remove('d-none');
+        if (topSection) topSection.classList.add('d-none');
+        if (resultsSection) resultsSection.classList.remove('d-none');
+        if (queryDisplay) queryDisplay.textContent = query;
+
+        if (!searchIndexData) {
+            fetchIndex();
+            // Temporary loading state
+            if (resultsList) resultsList.innerHTML = '<div class="text-center py-4 text-muted"><i class="fa-solid fa-spinner fa-spin me-2"></i>Đang tìm kiếm...</div>';
+            setTimeout(() => performSearch(query), 300);
+            return;
+        }
+
+        const normalizedQuery = removeAccents(query);
+        const words = normalizedQuery.split(/\s+/).filter(Boolean);
+
+        const matched = searchIndexData.filter(item => {
+            const itemText = removeAccents((item.title || '') + ' ' + (item.cat || '') + ' ' + (item.desc || ''));
+            return words.every(w => itemText.includes(w));
+        });
+
+        if (resultCount) {
+            resultCount.textContent = `${matched.length} kết quả`;
+        }
+
+        if (matched.length === 0) {
+            if (resultsList) resultsList.innerHTML = '';
+            if (noResults) noResults.classList.remove('d-none');
+            return;
+        }
+
+        if (noResults) noResults.classList.add('d-none');
+        if (!resultsList) return;
+
+        // Render matched items
+        resultsList.innerHTML = matched.slice(0, 10).map(item => {
+            const img = item.image ? escapeHtml(item.image) : '/assets/images/placeholder.png';
+            const title = escapeHtml(item.title || '');
+            const cat = escapeHtml(item.cat || 'Sản phẩm');
+            const price = Number(item.price || 0) > 0 
+                ? Number(item.price).toLocaleString('vi-VN') + 'đ' 
+                : 'Liên hệ';
+            const url = escapeHtml(item.url || '#');
+
+            // Simple highlight for title
+            let highlightedTitle = title;
+            try {
+                const regex = new RegExp(`(${words.join('|')})`, 'gi');
+                highlightedTitle = title.replace(regex, '<mark>$1</mark>');
+            } catch (e) {}
+
+            return `
+                <a href="${url}" class="spotlight-live-item">
+                    <img src="${img}" alt="${title}" class="rounded-3 object-fit-cover flex-shrink-0" style="width: 48px; height: 48px; background:#f3f4f6;" loading="lazy">
+                    <div class="flex-grow-1 min-w-0">
+                        <div class="fw-bold text-dark text-truncate small mb-0.5">${highlightedTitle}</div>
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="badge bg-light text-secondary border rounded-pill px-2 py-0.5" style="font-size: 0.68rem;">${cat}</span>
+                            <span class="fw-bold text-primary small">${price}</span>
+                        </div>
+                    </div>
+                    <div class="text-muted flex-shrink-0">
+                        <i class="fa-solid fa-arrow-up-right-from-square small"></i>
+                    </div>
+                </a>
+            `;
+        }).join('');
+    }
+
+    // Keyboard Shortcuts: Ctrl+K or Cmd+K or "/"
+    document.addEventListener('keydown', (e) => {
+        // Ctrl+K or Cmd+K
+        if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+            e.preventDefault();
+            const modalInstance = bootstrap.Modal.getOrCreateInstance(searchModal);
+            modalInstance.show();
+            return;
+        }
+
+        // "/" shortcut when not in input
+        if (e.key === '/' && !['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName)) {
+            e.preventDefault();
+            const modalInstance = bootstrap.Modal.getOrCreateInstance(searchModal);
+            modalInstance.show();
+        }
+    });
+}
+
+window.handleSpotlightSubmit = function(event) {
+    const input = document.getElementById('spotlightSearchInput');
+    if (!input || !input.value.trim()) {
+        if (event) event.preventDefault();
+        return false;
+    }
+    return true;
+};
+
 document.addEventListener('DOMContentLoaded', () => {
     // Initialize the visual popup notification
     initRecentPurchasePopup();
+    // Initialize Spotlight Quick Search
+    initSpotlightSearch();
 });
+

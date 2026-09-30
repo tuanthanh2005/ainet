@@ -66,6 +66,17 @@ $footerHotProducts = Cache::remember('footer_seo_prods', 300, function() {
         return [];
     }
 });
+
+// Top 4 sản phẩm bán chạy nhất cho Search Modal
+$topSellingProducts = Cache::remember('search_top_selling_4', 120, function() {
+    try {
+        return Product::getTopSelling(4);
+    } catch (Throwable $e) {
+        return [];
+    }
+});
+
+$zaloGroupLink = !empty($settings['zalo_group']) ? $settings['zalo_group'] : 'https://zalo.me/g/ifaku0ggmtg4xhxi7k0u';
 ?>
 <body>
     <script>
@@ -111,11 +122,13 @@ $footerHotProducts = Cache::remember('footer_seo_prods', 300, function() {
     <div class="mini-banner">
         <div class="marquee-wrapper">
             <span class="marquee-item"><i class="fa-solid fa-fire text-danger me-1"></i> <strong>HỆ THỐNG TÀI KHOẢN PREMIUM TỰ ĐỘNG 24/7:</strong> Cung cấp ChatGPT Plus, API, YouTube Premium, Github Copilot, Canva Pro, Netflix... chính hãng giá tốt nhất thị trường!</span>
+            <span class="marquee-item"><i class="fa-solid fa-users text-primary me-1"></i> <strong>NHÓM ZALO:</strong> Tham gia cộng đồng khách hàng để nhận quà tặng & hỗ trợ nhanh: <a href="<?php echo htmlspecialchars($zaloGroupLink); ?>" target="_blank" rel="noopener noreferrer" class="text-white text-decoration-underline fw-bold">Bấm vào đây để tham gia</a></span>
             <span class="marquee-item"><i class="fa-solid fa-triangle-exclamation text-warning me-1"></i> <strong>CẢNH BÁO:</strong> Hiện nay có rất nhiều đối tượng giả mạo Shop trên mạng xã hội. Quý khách vui lòng chỉ giao dịch qua các cổng liên hệ trên website! ZALO Admin: <?php echo htmlspecialchars(!empty($settings['zalo']) ? $settings['zalo'] : '0772698113'); ?></span>
             <span class="marquee-item"><i class="fa-solid fa-bolt text-warning me-1"></i> <strong>KHUYẾN MÃI:</strong> Giảm giá cực sâu cho khách hàng mua số lượng lớn hoặc khách sỉ. Liên hệ Zalo/Telegram để nhận ưu đãi!</span>
             <span class="marquee-item"><i class="fa-solid fa-clock text-info me-1"></i> <strong>HỖ TRỢ KHÁCH HÀNG:</strong> Phục vụ liên tục từ 08:00 đến 23:30 hàng ngày (kể cả Thứ 7 và Chủ Nhật).</span>
             <!-- Duplicate for infinite seamless scroll -->
             <span class="marquee-item"><i class="fa-solid fa-fire text-danger me-1"></i> <strong>HỆ THỐNG TÀI KHOẢN PREMIUM TỰ ĐỘNG 24/7:</strong> Cung cấp ChatGPT Plus, API, YouTube Premium, Github Copilot, Canva Pro, Netflix... chính hãng giá tốt nhất thị trường!</span>
+            <span class="marquee-item"><i class="fa-solid fa-users text-primary me-1"></i> <strong>NHÓM ZALO:</strong> Tham gia cộng đồng khách hàng để nhận quà tặng & hỗ trợ nhanh: <a href="<?php echo htmlspecialchars($zaloGroupLink); ?>" target="_blank" rel="noopener noreferrer" class="text-white text-decoration-underline fw-bold">Bấm vào đây để tham gia</a></span>
             <span class="marquee-item"><i class="fa-solid fa-triangle-exclamation text-warning me-1"></i> <strong>CẢNH BÁO:</strong> Hiện nay có rất nhiều đối tượng giả mạo Shop trên mạng xã hội. Quý khách vui lòng chỉ giao dịch qua các cổng liên hệ trên website! ZALO Admin: <?php echo htmlspecialchars(!empty($settings['zalo']) ? $settings['zalo'] : '0772698113'); ?></span>
             <span class="marquee-item"><i class="fa-solid fa-bolt text-warning me-1"></i> <strong>KHUYẾN MÃI:</strong> Giảm giá cực sâu cho khách hàng mua số lượng lớn hoặc khách sỉ. Liên hệ Zalo/Telegram để nhận ưu đãi!</span>
             <span class="marquee-item"><i class="fa-solid fa-clock text-info me-1"></i> <strong>HỖ TRỢ KHÁCH HÀNG:</strong> Phục vụ liên tục từ 08:00 đến 23:30 hàng ngày (kể cả Thứ 7 và Chủ Nhật).</span>
@@ -133,7 +146,7 @@ $footerHotProducts = Cache::remember('footer_seo_prods', 300, function() {
                 </div>
 
                 <!-- Thanh điều hướng (Chỉ hiện Desktop) -->
-                <div class="col-lg-7 d-none d-lg-block">
+                <div class="col-lg-8 d-none d-lg-block">
                     <?php
                     $currentAction = $_GET['action'] ?? 'index';
                     $activeTab = $tab ?? ($_GET['tab'] ?? 'home');
@@ -152,53 +165,41 @@ $footerHotProducts = Cache::remember('footer_seo_prods', 300, function() {
                            class="header-nav-btn text-decoration-none <?php echo $currentAction === 'about' ? 'active' : ''; ?>" aria-label="Giới Thiệu" title="Giới Thiệu"><i class="fa-solid fa-circle-info"></i><span>Giới Thiệu</span></a>
                         <a href="<?php echo Url::contact(); ?>"
                            class="header-nav-btn text-decoration-none <?php echo $currentAction === 'contact' ? 'active' : ''; ?>" aria-label="Liên Hệ" title="Liên Hệ"><i class="fa-solid fa-headset"></i><span>Liên Hệ</span></a>
+                        <a href="<?php echo htmlspecialchars($zaloGroupLink); ?>"
+                           target="_blank" rel="noopener noreferrer"
+                           class="header-nav-btn header-nav-zalo text-decoration-none" aria-label="Nhóm Zalo" title="Tham gia Nhóm Zalo hỗ trợ & săn ưu đãi">
+                            <i class="fa-solid fa-users text-primary"></i>
+                            <span>Nhóm Zalo</span>
+                            <span class="badge bg-danger text-white rounded-pill ms-1" style="font-size: 0.6rem; padding: 2px 5px;">Mới</span>
+                        </a>
+                        <button type="button" 
+                           class="header-nav-btn header-nav-voucher text-decoration-none border-0 bg-transparent disabled"
+                           aria-disabled="true"
+                           onclick="if(window.AppNotify) AppNotify.info('Tính năng Nhận Voucher đang được hoàn thiện và sẽ sớm ra mắt!', 'Đang phát triển');"
+                           title="Tính năng Nhận Voucher đang phát triển (Soon)">
+                            <i class="fa-solid fa-ticket text-warning"></i>
+                            <span>Nhận Voucher</span>
+                            <span class="badge bg-secondary bg-opacity-75 text-white rounded-pill ms-1" style="font-size: 0.58rem; padding: 2px 5px; letter-spacing: 0.3px;">Soon</span>
+                        </button>
                     </div>
                 </div>
 
                 <!-- Cụm nút bấm phải -->
-                <div class="col-6 col-lg-3 order-2 order-lg-3 d-flex justify-content-end align-items-center gap-2">
-                    <div class="d-none d-md-flex me-3 align-items-center gap-3">
-                        <?php if ($currentUser): ?>
-                            <?php if (($currentUser['role'] ?? '') === 'admin'): ?>
-                                <a href="<?php echo url('index.php?action=adminDashboard'); ?>"
-                                    class="btn btn-dark btn-sm fw-bold rounded-pill px-3">
-                                    <i class="fa-solid fa-shield-halved me-1"></i>Admin
-                                </a>
-                            <?php endif; ?>
-                            <div class="dropdown account-dropdown">
-                                <button class="account-toggle btn btn-light border rounded-pill d-flex align-items-center gap-1 px-2 py-1 shadow-sm" type="button" data-bs-toggle="dropdown" aria-expanded="false" title="<?php echo htmlspecialchars($currentUser['name']); ?>">
-                                    <span class="account-avatar rounded-circle text-white d-inline-flex align-items-center justify-content-center fw-bold" style="width: 32px; height: 32px; font-size: 0.85rem; background: var(--vip-gradient) !important;"><?php echo htmlspecialchars(strtoupper(mb_substr($currentUser['name'], 0, 1))); ?></span>
-                                    <i class="fa-solid fa-chevron-down account-chevron ms-1 text-muted" style="font-size: 0.7rem;"></i>
-                                </button>
-                                <ul class="dropdown-menu dropdown-menu-end account-menu shadow-sm border-0" style="border-radius: 14px; box-shadow: 0 10px 30px rgba(0,0,0,0.1) !important;">
-                                    <li class="px-3 py-2 bg-light rounded-top">
-                                        <div class="fw-bold text-dark text-truncate" style="max-width: 200px;"><?php echo htmlspecialchars($currentUser['name']); ?></div>
-                                        <small class="text-muted text-truncate d-block" style="max-width: 200px;"><?php echo htmlspecialchars($currentUser['email'] ?? ''); ?></small>
-                                    </li>
-                                    <li><hr class="dropdown-divider my-1"></li>
-                                    <?php if (($currentUser['role'] ?? '') === 'admin'): ?>
-                                        <li><a class="dropdown-item fw-bold py-2" href="<?php echo url('index.php?action=adminDashboard'); ?>"><i class="fa-solid fa-shield-halved me-2 text-primary"></i>Trang quản trị</a></li>
-                                        <li><hr class="dropdown-divider my-1"></li>
-                                    <?php endif; ?>
-                                    <li><a class="dropdown-item py-2" href="<?php echo url('index.php?action=profile'); ?>"><i class="fa-regular fa-user me-2"></i>Profile</a></li>
-                                    <li><a class="dropdown-item py-2" href="<?php echo url('index.php?action=orderHistory'); ?>"><i class="fa-solid fa-clock-rotate-left me-2"></i>Lịch sử đơn hàng</a></li>
-                                    <li><hr class="dropdown-divider my-1"></li>
-                                    <li><a class="dropdown-item text-danger py-2" href="<?php echo url('index.php?action=logout'); ?>"><i class="fa-solid fa-right-from-bracket me-2"></i>Đăng xuất</a></li>
-                                </ul>
-                            </div>
-                        <?php else: ?>
-                            <a href="<?php echo Url::login(); ?>" class="header-link text-secondary text-decoration-none" style="padding: 6px 12px;">Đăng nhập</a>
-                            <a href="<?php echo Url::register(); ?>" class="header-link fw-bold text-dark text-decoration-none" style="padding: 6px 12px;">Đăng ký</a>
-                        <?php endif; ?>
-                    </div>
+                <div class="col-6 col-lg-2 order-2 order-lg-3 d-flex justify-content-end align-items-center gap-2">
+                    <?php if ($currentUser && ($currentUser['role'] ?? '') === 'admin'): ?>
+                        <a href="<?php echo url('index.php?action=adminDashboard'); ?>"
+                            class="btn btn-dark btn-sm fw-bold rounded-pill px-2.5 py-1 d-none d-sm-inline-flex align-items-center gap-1" style="font-size: 0.8rem;">
+                            <i class="fa-solid fa-shield-halved"></i><span>Admin</span>
+                        </a>
+                    <?php endif; ?>
 
-                    <!-- Nút Search (Chỉ Mobile) -->
-                    <button class="header-icon-btn d-lg-none" type="button" data-bs-toggle="collapse" data-bs-target="#mobileSearchCollapse" aria-expanded="false" aria-controls="mobileSearchCollapse" title="Tìm kiếm">
+                    <!-- Nút Kính lúp Tìm kiếm (Desktop & Mobile) -->
+                    <button class="header-icon-btn header-search-trigger" type="button" data-bs-toggle="modal" data-bs-target="#searchModal" aria-label="Tìm kiếm sản phẩm" title="Tìm kiếm (Ctrl+K)">
                         <i class="fa-solid fa-magnifying-glass"></i>
                     </button>
 
                     <!-- Nút Giỏ hàng (Tròn) -->
-                    <a href="<?php echo Url::cart(); ?>" class="header-icon-btn position-relative text-decoration-none" title="Giỏ hàng">
+                    <a href="<?php echo Url::cart(); ?>" class="header-icon-btn position-relative text-decoration-none" title="Giỏ hàng" aria-label="Giỏ hàng">
                         <i class="fa-solid fa-cart-shopping"></i>
                         <span id="cart-count" class="position-absolute badge rounded-pill bg-dark border border-light"
                             style="top: 0px; right: -2px; font-size: 0.65rem; padding: 0.25em 0.4em;">
@@ -206,38 +207,54 @@ $footerHotProducts = Cache::remember('footer_seo_prods', 300, function() {
                         </span>
                     </a>
 
-                    <!-- Nút Avatar (Chỉ Mobile) -->
+                    <!-- Nút Tài khoản dạng Icon (Đăng nhập / Đăng ký hoặc Avatar khi đã đăng nhập) -->
                     <?php if ($currentUser): ?>
-                        <div class="dropdown d-md-none">
-                            <button class="header-icon-btn bg-dark text-white fw-bold" type="button"
-                                data-bs-toggle="dropdown" aria-expanded="false"
-                                style="border: 2px solid #fff; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
-                                <?php echo htmlspecialchars(strtoupper(substr($currentUser['name'], 0, 1))); ?>
+                        <div class="dropdown account-dropdown">
+                            <button class="header-icon-btn p-0 text-white fw-bold d-inline-flex align-items-center justify-content-center"
+                                    type="button" data-bs-toggle="dropdown" aria-expanded="false" 
+                                    title="<?php echo htmlspecialchars($currentUser['name']); ?>"
+                                    style="background: var(--vip-gradient) !important; border: 2px solid #fff; box-shadow: 0 2px 8px rgba(99, 102, 241, 0.25);">
+                                <?php echo htmlspecialchars(strtoupper(mb_substr($currentUser['name'], 0, 1))); ?>
                             </button>
-                            <ul class="dropdown-menu dropdown-menu-end account-menu shadow-sm">
-                                <?php if (($currentUser['role'] ?? '') === 'admin'): ?>
-                                    <li><a class="dropdown-item fw-bold"
-                                            href="<?php echo url('index.php?action=adminDashboard'); ?>"><i
-                                                class="fa-solid fa-shield-halved"></i>Trang quản trị</a></li>
-                                    <li><hr class="dropdown-divider"></li>
-                                <?php endif; ?>
-                                <li><a class="dropdown-item" href="<?php echo url('index.php?action=profile'); ?>"><i
-                                            class="fa-regular fa-user"></i>Profile</a></li>
-                                <li><a class="dropdown-item" href="<?php echo url('index.php?action=orderHistory'); ?>"><i
-                                            class="fa-solid fa-clock-rotate-left"></i>Lịch sử đơn hàng</a></li>
-                                <li>
-                                    <hr class="dropdown-divider">
+                            <ul class="dropdown-menu dropdown-menu-end account-menu shadow-sm border-0 p-2" style="border-radius: 14px; min-width: 210px; box-shadow: 0 10px 30px rgba(0,0,0,0.1) !important;">
+                                <li class="px-3 py-2 bg-light rounded-top mb-1">
+                                    <div class="fw-bold text-dark text-truncate"><?php echo htmlspecialchars($currentUser['name']); ?></div>
+                                    <small class="text-muted text-truncate d-block"><?php echo htmlspecialchars($currentUser['email'] ?? ''); ?></small>
                                 </li>
-                                <li><a class="dropdown-item text-danger"
-                                        href="<?php echo url('index.php?action=logout'); ?>"><i
-                                            class="fa-solid fa-right-from-bracket"></i>Đăng xuất</a></li>
+                                <?php if (($currentUser['role'] ?? '') === 'admin'): ?>
+                                    <li><a class="dropdown-item fw-bold py-2 rounded-2" href="<?php echo url('index.php?action=adminDashboard'); ?>"><i class="fa-solid fa-shield-halved me-2 text-primary"></i>Trang quản trị</a></li>
+                                    <li><hr class="dropdown-divider my-1"></li>
+                                <?php endif; ?>
+                                <li><a class="dropdown-item py-2 rounded-2" href="<?php echo url('index.php?action=profile'); ?>"><i class="fa-regular fa-user me-2"></i>Profile cá nhân</a></li>
+                                <li><a class="dropdown-item py-2 rounded-2" href="<?php echo url('index.php?action=orderHistory'); ?>"><i class="fa-solid fa-clock-rotate-left me-2"></i>Lịch sử đơn hàng</a></li>
+                                <li><hr class="dropdown-divider my-1"></li>
+                                <li><a class="dropdown-item text-danger py-2 rounded-2" href="<?php echo url('index.php?action=logout'); ?>"><i class="fa-solid fa-right-from-bracket me-2"></i>Đăng xuất</a></li>
                             </ul>
                         </div>
                     <?php else: ?>
-                        <a href="<?php echo Url::login(); ?>" class="header-icon-btn bg-dark text-white fw-bold d-md-none text-decoration-none d-flex align-items-center justify-content-center"
-                            style="border: 2px solid #fff; box-shadow: 0 2px 5px rgba(0,0,0,0.1);" title="Đăng nhập">
-                            <i class="fa-regular fa-user" style="font-size: 0.95rem;"></i>
-                        </a>
+                        <div class="dropdown account-dropdown">
+                            <button class="header-icon-btn" type="button" data-bs-toggle="dropdown" aria-expanded="false" title="Đăng nhập / Đăng ký" aria-label="Tài khoản">
+                                <i class="fa-regular fa-user"></i>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 p-2" style="border-radius: 14px; min-width: 190px; box-shadow: 0 10px 30px rgba(0,0,0,0.1) !important;">
+                                <li class="px-3 py-2 bg-light rounded-top mb-1">
+                                    <span class="fw-bold text-dark small d-block">Tài khoản</span>
+                                    <small class="text-muted" style="font-size: 0.75rem;">Đăng nhập để xem đơn hàng</small>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item py-2 fw-semibold rounded-2 d-flex align-items-center gap-2" href="<?php echo Url::login(); ?>">
+                                        <i class="fa-solid fa-right-to-bracket text-primary" style="width: 16px;"></i>
+                                        <span>Đăng nhập</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item py-2 fw-semibold rounded-2 d-flex align-items-center gap-2" href="<?php echo Url::register(); ?>">
+                                        <i class="fa-solid fa-user-plus text-success" style="width: 16px;"></i>
+                                        <span>Đăng ký</span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
                     <?php endif; ?>
                 </div>
             </div>
@@ -360,6 +377,10 @@ $footerHotProducts = Cache::remember('footer_seo_prods', 300, function() {
                         <div class="d-flex align-items-center gap-2 mb-1.5">
                             <i class="fa-solid fa-clock text-success" style="width: 16px;"></i>
                             <span>Giờ làm việc: 08:00 - 23:30 (Cả Thứ 7, CN & Lễ)</span>
+                        </div>
+                        <div class="d-flex align-items-center gap-2 mb-1.5">
+                            <i class="fa-solid fa-users text-primary" style="width: 16px;"></i>
+                            <span>Nhóm Zalo: <a href="<?php echo htmlspecialchars($zaloGroupLink); ?>" class="text-white text-decoration-none fw-semibold" target="_blank" rel="noopener">Cộng đồng khách hàng</a> <span class="badge bg-danger-subtle text-danger border border-danger-subtle rounded-pill" style="font-size: 0.65rem;">Ưu đãi</span></span>
                         </div>
                     </div>
                 </div>
@@ -494,6 +515,146 @@ $footerHotProducts = Cache::remember('footer_seo_prods', 300, function() {
     </script>
 
     <!-- Modals -->
+    <!-- ================= QUICK SEARCH & TOP SELLING MODAL ================= -->
+    <div class="modal fade search-spotlight-modal" id="searchModal" tabindex="-1" aria-labelledby="searchModalTitle" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content border-0 shadow-lg" style="border-radius: 20px; overflow: hidden; background: #ffffff;">
+                <!-- Search input header -->
+                <div class="modal-header border-bottom border-light p-3 p-md-4 bg-white position-relative">
+                    <form id="spotlightSearchForm" class="w-100 m-0" action="<?php echo Url::products(); ?>" method="GET" role="search" onsubmit="return handleSpotlightSubmit(event)">
+                        <div class="spotlight-search-box d-flex align-items-center px-3 py-2 rounded-4 border bg-light bg-opacity-50">
+                            <i class="fa-solid fa-magnifying-glass text-primary fs-5 me-2 flex-shrink-0"></i>
+                            <input type="text" inputmode="search" id="spotlightSearchInput" name="q" 
+                                   class="form-control border-0 bg-transparent shadow-none p-0 fs-6 text-dark" 
+                                   placeholder="Tìm kiếm tài khoản AI, ChatGPT, YouTube, Canva..." 
+                                   autocomplete="off" aria-label="Tìm kiếm sản phẩm">
+                            <button type="button" id="spotlightClearBtn" class="btn btn-sm btn-link text-muted p-0 text-decoration-none d-none me-2" aria-label="Xóa" title="Xóa từ khóa">
+                                <i class="fa-solid fa-xmark fs-6"></i>
+                            </button>
+                            <span class="badge bg-light text-muted border rounded-2 px-1.5 py-1 d-none d-md-inline-block font-monospace" style="font-size: 0.7rem;">ESC</span>
+                        </div>
+                    </form>
+                    <button type="button" class="btn-close ms-2 shadow-none flex-shrink-0" data-bs-dismiss="modal" aria-label="Đóng"></button>
+                </div>
+
+                <!-- Hot tags suggestion chips -->
+                <div class="search-tags-bar px-3 px-md-4 py-2 border-bottom bg-light bg-opacity-50 d-flex align-items-center gap-1.5 flex-wrap" style="font-size: 0.8rem;">
+                    <span class="text-muted fw-semibold me-1"><i class="fa-solid fa-bolt text-warning me-1"></i>Từ khóa hot:</span>
+                    <button type="button" class="search-tag-chip btn btn-xs btn-white border rounded-pill px-2.5 py-1 text-dark" data-keyword="chatgpt">ChatGPT Plus</button>
+                    <button type="button" class="search-tag-chip btn btn-xs btn-white border rounded-pill px-2.5 py-1 text-dark" data-keyword="claude">Claude Pro</button>
+                    <button type="button" class="search-tag-chip btn btn-xs btn-white border rounded-pill px-2.5 py-1 text-dark" data-keyword="youtube">YouTube Premium</button>
+                    <button type="button" class="search-tag-chip btn btn-xs btn-white border rounded-pill px-2.5 py-1 text-dark" data-keyword="canva">Canva Pro</button>
+                    <button type="button" class="search-tag-chip btn btn-xs btn-white border rounded-pill px-2.5 py-1 text-dark" data-keyword="netflix">Netflix 4K</button>
+                    <button type="button" class="search-tag-chip btn btn-xs btn-white border rounded-pill px-2.5 py-1 text-dark" data-keyword="github">GitHub Copilot</button>
+                </div>
+
+                <!-- Modal body -->
+                <div class="modal-body p-3 p-md-4" style="max-height: 60vh; overflow-y: auto;">
+                    <!-- 1. Gợi ý 4 sản phẩm bán nhiều nhất (Default State) -->
+                    <div id="spotlightTopSellingSection">
+                        <div class="d-flex align-items-center justify-content-between mb-3">
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="d-inline-flex align-items-center justify-content-center rounded-circle bg-danger bg-opacity-10 text-danger" style="width: 28px; height: 28px;">
+                                    <i class="fa-solid fa-fire" style="font-size: 0.9rem;"></i>
+                                </span>
+                                <h6 class="fw-bold mb-0 text-dark">Gợi ý sản phẩm bán chạy nhất</h6>
+                            </div>
+                            <span class="badge bg-danger-subtle text-danger border border-danger-subtle rounded-pill px-2.5 py-1 small fw-semibold">
+                                <i class="fa-solid fa-crown me-1"></i>Top 4 mua nhiều
+                            </span>
+                        </div>
+
+                        <div class="row g-3">
+                            <?php if (!empty($topSellingProducts)): ?>
+                                <?php foreach ($topSellingProducts as $tp): ?>
+                                    <?php
+                                    $tpPrice = (float) ($tp['price'] ?? 0);
+                                    $tpOrig = (float) ($tp['original_price'] ?? 0);
+                                    $tpHasDiscount = $tpOrig > $tpPrice && $tpPrice > 0;
+                                    $tpRating = (float) ($tp['rating'] ?? 5);
+                                    $tpSold = (int) ($tp['sold_count'] ?? 0);
+                                    $tpUrl = Url::product($tp);
+                                    $tpImg = !empty($tp['image']) ? $tp['image'] : image_url('assets/images/placeholder.png');
+                                    ?>
+                                    <div class="col-12 col-md-6">
+                                        <a href="<?php echo htmlspecialchars($tpUrl); ?>" class="spotlight-product-card text-decoration-none d-flex align-items-center gap-3 p-2.5 rounded-3 border bg-white h-100">
+                                            <div class="spotlight-product-thumb rounded-3 overflow-hidden flex-shrink-0 position-relative" style="width: 64px; height: 64px; background: #f3f4f6;">
+                                                <img src="<?php echo htmlspecialchars($tpImg); ?>" alt="<?php echo htmlspecialchars($tp['title']); ?>" class="w-100 h-100 object-fit-cover" loading="lazy">
+                                                <?php if ($tpHasDiscount): ?>
+                                                    <span class="badge bg-danger position-absolute top-0 start-0 m-1 px-1 py-0.5" style="font-size: 0.6rem;">-<?php echo round((1 - $tpPrice / $tpOrig) * 100); ?>%</span>
+                                                <?php endif; ?>
+                                            </div>
+                                            <div class="spotlight-product-info flex-grow-1 min-w-0">
+                                                <div class="fw-bold text-dark text-truncate small mb-1" title="<?php echo htmlspecialchars($tp['title']); ?>">
+                                                    <?php echo htmlspecialchars($tp['title']); ?>
+                                                </div>
+                                                <div class="d-flex align-items-center gap-2 mb-1" style="font-size: 0.72rem;">
+                                                    <span class="text-warning"><i class="fa-solid fa-star me-0.5"></i><?php echo number_format($tpRating, 1); ?></span>
+                                                    <span class="text-muted opacity-50">•</span>
+                                                    <span class="text-muted"><i class="fa-solid fa-cart-shopping me-1 text-danger"></i>Đã bán <strong><?php echo number_format($tpSold, 0, ',', '.'); ?></strong></span>
+                                                </div>
+                                                <div class="d-flex align-items-baseline gap-1.5">
+                                                    <span class="fw-bold text-primary" style="font-size: 0.88rem;"><?php echo number_format($tpPrice, 0, ',', '.'); ?>đ</span>
+                                                    <?php if ($tpHasDiscount): ?>
+                                                        <span class="text-muted text-decoration-line-through" style="font-size: 0.72rem;"><?php echo number_format($tpOrig, 0, ',', '.'); ?>đ</span>
+                                                    <?php endif; ?>
+                                                </div>
+                                            </div>
+                                            <div class="spotlight-product-arrow text-muted ps-1 flex-shrink-0">
+                                                <i class="fa-solid fa-chevron-right small"></i>
+                                            </div>
+                                        </a>
+                                    </div>
+                                <?php endforeach; ?>
+                            <?php else: ?>
+                                <div class="col-12 text-center py-4 text-muted small">
+                                    Đang tải danh sách sản phẩm...
+                                </div>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+
+                    <!-- 2. Kết quả tìm kiếm trực tiếp (Live Search Results) -->
+                    <div id="spotlightSearchResultsSection" class="d-none">
+                        <div class="d-flex align-items-center justify-content-between mb-3">
+                            <h6 class="fw-bold mb-0 text-dark d-flex align-items-center gap-2">
+                                <i class="fa-solid fa-magnifying-glass text-primary"></i>
+                                <span>Kết quả tìm kiếm cho "<span id="spotlightQueryDisplay" class="text-primary"></span>"</span>
+                            </h6>
+                            <span id="spotlightResultCount" class="badge bg-light text-muted border rounded-pill px-2.5 py-1 small">0 kết quả</span>
+                        </div>
+                        <div id="spotlightResultsList" class="d-flex flex-column gap-2">
+                            <!-- Items injected via JS -->
+                        </div>
+                        <div id="spotlightNoResults" class="text-center py-5 d-none">
+                            <div class="rounded-circle bg-light d-inline-flex align-items-center justify-content-center p-3 mb-3 text-muted">
+                                <i class="fa-solid fa-face-frown fs-2"></i>
+                            </div>
+                            <h6 class="fw-bold text-dark mb-1">Không tìm thấy sản phẩm phù hợp</h6>
+                            <p class="text-muted small mb-3">Hãy thử tìm từ khoá khác hoặc tham gia Nhóm Zalo để yêu cầu sản phẩm mới.</p>
+                            <a href="<?php echo htmlspecialchars($zaloGroupLink); ?>" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-outline-primary rounded-pill px-3">
+                                <i class="fa-solid fa-users me-1"></i>Hỏi trong Nhóm Zalo
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Modal footer -->
+                <div class="modal-footer border-top bg-light bg-opacity-75 p-3 d-flex align-items-center justify-content-between flex-wrap gap-2">
+                    <a href="<?php echo htmlspecialchars($zaloGroupLink); ?>" target="_blank" rel="noopener noreferrer" class="text-decoration-none d-flex align-items-center gap-2 small text-dark fw-semibold py-1">
+                        <span class="rounded-circle bg-primary text-white d-inline-flex align-items-center justify-content-center" style="width: 24px; height: 24px; font-size: 0.72rem;">
+                            <i class="fa-solid fa-users"></i>
+                        </span>
+                        <span>Tham gia <strong class="text-primary">Nhóm Zalo</strong> săn deal & nhận hỗ trợ nhanh &rarr;</span>
+                    </a>
+                    <a href="<?php echo Url::products(); ?>" class="btn btn-buy btn-sm px-3 rounded-pill fw-semibold">
+                        Xem tất cả sản phẩm <i class="fa-solid fa-arrow-right ms-1"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Legal Modals -->
     <div class="modal fade" id="termsModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
@@ -554,6 +715,12 @@ $footerHotProducts = Cache::remember('footer_seo_prods', 300, function() {
            aria-label="Hỗ trợ Zalo">
             <span class="zalo-text">Zalo</span>
             <span class="fab-tooltip">Hỗ trợ Zalo</span>
+        </a>
+        <a href="<?php echo htmlspecialchars($zaloGroupLink); ?>" target="_blank" rel="noopener noreferrer" 
+           class="fab-btn fab-zalo-group" 
+           aria-label="Nhóm Zalo Cộng Đồng">
+            <i class="fa-solid fa-users"></i>
+            <span class="fab-tooltip">Nhóm Zalo Ưu Đãi</span>
         </a>
         <a href="https://t.me/specademy" target="_blank" rel="noopener noreferrer" 
            class="fab-btn fab-telegram" 
