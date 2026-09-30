@@ -1007,9 +1007,9 @@ body::before {
 /* ================= HEADER NAVIGATION ================= */
 .header-nav-wrapper {
     display: flex;
-    gap: 8px;
+    gap: 12px;
     align-items: center;
-    justify-content: center;
+    justify-content: space-between;
 }
 
 .header-nav-btn {
@@ -1038,18 +1038,6 @@ body::before {
 .header-nav-btn.active {
     color: var(--vip-primary);
     background-color: rgba(99, 102, 241, 0.12);
-}
-
-/* Keep menu labels and icons visible when browser zoom reduces the usable width. */
-@media (max-width: 1600px) and (min-width: 992px) {
-    .header-nav-wrapper { gap: 4px; }
-    .header-nav-btn {
-        padding: 6px 10px;
-        gap: 5px;
-        font-size: 0.86rem;
-    }
-    .header-nav-btn span { display: inline; }
-    .header-nav-btn i { display: inline-block; font-size: 0.78rem; }
 }
 
 .logo-dropdown .dropdown-toggle::after {
@@ -2898,4 +2886,3 @@ body::before {
         margin: 0 1px !important;
     }
 }
-
