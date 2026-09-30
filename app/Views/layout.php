@@ -793,6 +793,9 @@ $zaloGroupLink = !empty($settings['zalo_group']) ? $settings['zalo_group'] : 'ht
     <!-- Floating Chat Bubble Component -->
     <?php require_once APP_ROOT . '/app/Views/partials/chat_bubble.php'; ?>
 
+    <!-- Recent Purchase Notification Toast Component -->
+    <?php require_once APP_ROOT . '/app/Views/partials/recent_purchase_popup.php'; ?>
+
     <!-- 5-Minute Guest Timeout Handler -->
     <?php if (!Auth::check() && empty($isBot)): ?>
     <script>

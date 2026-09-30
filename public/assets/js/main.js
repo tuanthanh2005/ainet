@@ -308,68 +308,134 @@ function setupAuthRequiredActions() {
     });
 }
 
-// Homepage: purchase popup notification cycle (visual only)
+// Homepage & Public Shop: Recent Purchase Social Proof Notification Toast
+let purchasePopupTimer = null;
+let purchasePopupHideTimer = null;
+let isPopupHovered = false;
+
 function initRecentPurchasePopup() {
     const popup = document.getElementById('recent-purchase-popup');
     if (!popup) return;
 
-    if (typeof fakeOrders === 'undefined' || fakeOrders.length === 0) {
+    const orders = window.recentOrdersData || window.fakeOrders || [];
+    if (!Array.isArray(orders) || orders.length === 0) {
         popup.style.display = 'none';
         return;
     }
 
-    let orderIndex = 0;
-    let hideTimeout = null;
+    // Check if dismissed recently (within last 90 seconds)
+    try {
+        const dismissedUntil = parseInt(sessionStorage.getItem('ainet_popup_dismissed_until') || '0', 10);
+        if (Date.now() < dismissedUntil) {
+            return;
+        }
+    } catch (e) {}
 
-    function showNextOrder() {
-        if (orderIndex >= fakeOrders.length) orderIndex = 0;
-        const order = fakeOrders[orderIndex];
+    // If there is a fresh real order (< 15 mins), prioritize showing it first
+    const freshIdx = orders.findIndex(o => o.is_fresh);
+    let orderIndex = freshIdx !== -1 ? freshIdx : Math.floor(Math.random() * orders.length);
 
-        const avatarBg = document.getElementById('popup-avatar-bg');
+    const realisticTimePool = [5, 8, 11, 14, 17, 19, 23, 27, 34, 42, 51];
+
+    function showOrder() {
+        // If dismissed, abort
+        try {
+            const dismissedUntil = parseInt(sessionStorage.getItem('ainet_popup_dismissed_until') || '0', 10);
+            if (Date.now() < dismissedUntil) {
+                return;
+            }
+        } catch (e) {}
+
+        if (orderIndex >= orders.length) orderIndex = 0;
+        const order = orders[orderIndex];
+
         const avatarTxt = document.getElementById('popup-avatar-text');
         const custName = document.getElementById('popup-customer-name');
         const prodName = document.getElementById('popup-product-name');
-        const prodPrice = document.getElementById('popup-product-price');
         const timeEl = document.getElementById('popup-time');
-        const locEl = document.getElementById('popup-location');
 
-        if (avatarBg) avatarBg.style.backgroundColor = order.bg;
-        if (avatarTxt) avatarTxt.innerText = order.initial;
-        if (custName) custName.innerText = order.name;
-        if (prodName) prodName.innerText = order.product;
-        if (prodPrice) prodPrice.innerText = order.price;
-        if (timeEl) timeEl.innerText = order.time;
-        if (locEl) locEl.innerText = order.location;
-
-        popup.classList.add('show');
-        const progressBar = document.getElementById('purchase-progress-bar');
-        if (progressBar) {
-            progressBar.style.width = '0%';
-            setTimeout(() => {
-                progressBar.style.transition = 'width 5s linear';
-                progressBar.style.width = '100%';
-            }, 10);
+        if (avatarTxt) avatarTxt.innerText = order.initial || 'L';
+        if (custName) custName.innerText = order.name || 'L*';
+        if (prodName) {
+            prodName.innerText = order.product || 'Tài khoản bản quyền';
+            if (order.url && order.url !== '#') {
+                prodName.href = order.url;
+            } else {
+                prodName.href = '/san-pham';
+            }
+        }
+        
+        // If fresh real order, show its actual elapsed time. Otherwise randomize realistic time >= 5m
+        if (timeEl) {
+            if (order.is_fresh && order.time) {
+                timeEl.innerText = order.time;
+            } else {
+                const randomMins = realisticTimePool[Math.floor(Math.random() * realisticTimePool.length)];
+                timeEl.innerText = (order.time && order.time.includes('phút')) ? order.time : (randomMins + ' phút trước');
+            }
         }
 
-        hideTimeout = setTimeout(() => {
-            popup.classList.remove('show');
-            if (progressBar) {
-                progressBar.style.transition = 'none';
-                progressBar.style.width = '0%';
+        popup.classList.add('show');
+
+        // Auto hide after 4.5 seconds (unless hovered)
+        clearTimeout(purchasePopupHideTimer);
+        purchasePopupHideTimer = setTimeout(() => {
+            if (!isPopupHovered) {
+                hideOrder();
             }
-            orderIndex++;
-            setTimeout(showNextOrder, 5000);
-        }, 5000);
+        }, 4500);
     }
 
-    setTimeout(showNextOrder, 3000);
+    function hideOrder() {
+        popup.classList.remove('show');
+        orderIndex = (orderIndex + 1) % orders.length;
+
+        // Schedule next popup after a realistic delay (12 - 18 seconds)
+        const nextDelay = 12000 + Math.floor(Math.random() * 6000);
+        clearTimeout(purchasePopupTimer);
+        purchasePopupTimer = setTimeout(showOrder, nextDelay);
+    }
+
+    // Hover pause behavior
+    popup.addEventListener('mouseenter', () => {
+        isPopupHovered = true;
+        clearTimeout(purchasePopupHideTimer);
+    });
+
+    popup.addEventListener('mouseleave', () => {
+        isPopupHovered = false;
+        if (popup.classList.contains('show')) {
+            clearTimeout(purchasePopupHideTimer);
+            purchasePopupHideTimer = setTimeout(hideOrder, 2500);
+        }
+    });
+
+    // Start first popup 4.5s after page load
+    clearTimeout(purchasePopupTimer);
+    purchasePopupTimer = setTimeout(showOrder, 4500);
 }
 
-function closePurchasePopup() {
+function closePurchasePopup(event) {
+    if (event) {
+        event.stopPropagation();
+        event.preventDefault();
+    }
     const popup = document.getElementById('recent-purchase-popup');
     if (popup) {
         popup.classList.remove('show');
     }
+    clearTimeout(purchasePopupTimer);
+    clearTimeout(purchasePopupHideTimer);
+
+    // Pause for 90 seconds on user close
+    try {
+        sessionStorage.setItem('ainet_popup_dismissed_until', (Date.now() + 90000).toString());
+    } catch (e) {}
+
+    // Resume after 90 seconds
+    purchasePopupTimer = setTimeout(() => {
+        initRecentPurchasePopup();
+    }, 90000);
 }
 
 // Global Spotlight Search & Top Selling Products
