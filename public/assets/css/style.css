@@ -1024,6 +1024,8 @@ body::before {
     gap: 6px;
     align-items: center;
     justify-content: center;
+    flex-wrap: nowrap;
+    max-width: 100%;
 }
 
 .header-nav-btn {
@@ -1037,6 +1039,7 @@ body::before {
     font-size: 0.88rem;
     transition: all 0.2s var(--smooth-curve);
     white-space: nowrap;
+    flex-shrink: 0;
 }
 
 .header-nav-btn i {
@@ -1081,6 +1084,55 @@ body::before {
     background: rgba(245, 158, 11, 0.1);
     border-color: rgba(245, 158, 11, 0.6) !important;
     opacity: 0.95;
+}
+
+/* ================= CO GIÃN MƯỢT MÀ THEO ĐỘ RỘNG MÀN HÌNH (THU VÔ TỪ TỪ) ================= */
+@media (max-width: 1366px) {
+    .header-nav-wrapper {
+        gap: 4px;
+    }
+    .header-nav-btn {
+        padding: 5px 9px;
+        font-size: 0.84rem;
+        gap: 5px;
+    }
+}
+
+@media (max-width: 1220px) {
+    .header-nav-wrapper {
+        gap: 3px;
+    }
+    .header-nav-btn {
+        padding: 5px 8px;
+        font-size: 0.82rem;
+        gap: 4px;
+    }
+    /* Thu gọn chữ Nhận Voucher, chỉ giữ icon vé và huy hiệu Soon */
+    .voucher-nav-label {
+        display: none !important;
+    }
+    .header-nav-voucher {
+        padding: 5px 10px;
+    }
+}
+
+@media (max-width: 1100px) {
+    .header-nav-wrapper {
+        gap: 2px;
+    }
+    .header-nav-btn {
+        padding: 4px 7px;
+        font-size: 0.8rem;
+    }
+    /* Rút gọn Nhóm Zalo thành Zalo */
+    .zalo-nav-label {
+        display: none !important;
+    }
+    .header-nav-zalo::after {
+        content: 'Zalo';
+        font-size: 0.8rem;
+        font-weight: 600;
+    }
 }
 
 .logo-dropdown .dropdown-toggle::after {

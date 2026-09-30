@@ -135,18 +135,19 @@ $zaloGroupLink = !empty($settings['zalo_group']) ? $settings['zalo_group'] : 'ht
         </div>
     </div>
 
-    <header class="vibrant-header sticky-top py-3 shadow-sm">
-        <div class="container">
-            <div class="row align-items-center">
-                <div class="col-6 col-lg-2">
+    <header class="vibrant-header sticky-top py-2.5 py-lg-3 shadow-sm">
+        <div class="container-fluid px-3 px-xl-4" style="max-width: 1440px;">
+            <div class="d-flex align-items-center justify-content-between gap-2 gap-xl-3">
+                <!-- 1. Logo (Cố định, không bị co hoặc đè) -->
+                <div class="header-logo-wrap flex-shrink-0">
                     <a href="<?php echo url(); ?>" class="text-decoration-none text-dark fs-4 fw-bold logo-premium"
                         style="letter-spacing: -1px; white-space: nowrap;">
                         <i class="fa-solid fa-circle-nodes me-1"></i>AI<span class="text-muted fw-light">CỦA TÔI</span>
                     </a>
                 </div>
 
-                <!-- Thanh điều hướng (Chỉ hiện Desktop) -->
-                <div class="col-lg-8 d-none d-lg-block">
+                <!-- 2. Thanh điều hướng (Chỉ hiện Desktop) -->
+                <div class="header-nav-center flex-grow-1 d-none d-lg-flex justify-content-center px-1 overflow-hidden">
                     <?php
                     $currentAction = $_GET['action'] ?? 'index';
                     $activeTab = $tab ?? ($_GET['tab'] ?? 'home');
@@ -169,7 +170,7 @@ $zaloGroupLink = !empty($settings['zalo_group']) ? $settings['zalo_group'] : 'ht
                            target="_blank" rel="noopener noreferrer"
                            class="header-nav-btn header-nav-zalo text-decoration-none" aria-label="Nhóm Zalo" title="Tham gia Nhóm Zalo hỗ trợ & săn ưu đãi">
                             <i class="fa-solid fa-users text-primary"></i>
-                            <span>Nhóm Zalo</span>
+                            <span class="zalo-nav-label">Nhóm Zalo</span>
                             <span class="badge bg-danger text-white rounded-pill ms-1" style="font-size: 0.6rem; padding: 2px 5px;">Mới</span>
                         </a>
                         <button type="button" 
@@ -178,14 +179,14 @@ $zaloGroupLink = !empty($settings['zalo_group']) ? $settings['zalo_group'] : 'ht
                            onclick="if(window.AppNotify) AppNotify.info('Tính năng Nhận Voucher đang được hoàn thiện và sẽ sớm ra mắt!', 'Đang phát triển');"
                            title="Tính năng Nhận Voucher đang phát triển (Soon)">
                             <i class="fa-solid fa-ticket text-warning"></i>
-                            <span>Nhận Voucher</span>
+                            <span class="voucher-nav-label">Nhận Voucher</span>
                             <span class="badge bg-secondary bg-opacity-75 text-white rounded-pill ms-1" style="font-size: 0.58rem; padding: 2px 5px; letter-spacing: 0.3px;">Soon</span>
                         </button>
                     </div>
                 </div>
 
-                <!-- Cụm nút bấm phải -->
-                <div class="col-6 col-lg-2 order-2 order-lg-3 d-flex justify-content-end align-items-center gap-2">
+                <!-- 3. Cụm nút bấm phải (Cố định, không bị co hoặc đè) -->
+                <div class="header-actions-wrap flex-shrink-0 d-flex justify-content-end align-items-center gap-2">
                     <?php if ($currentUser && ($currentUser['role'] ?? '') === 'admin'): ?>
                         <a href="<?php echo url('index.php?action=adminDashboard'); ?>"
                             class="btn btn-dark btn-sm fw-bold rounded-pill px-2.5 py-1 d-none d-sm-inline-flex align-items-center gap-1" style="font-size: 0.8rem;">
