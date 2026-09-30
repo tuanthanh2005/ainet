@@ -308,7 +308,7 @@ function setupAuthRequiredActions() {
     });
 }
 
-// Homepage & Public Shop: Recent Purchase Social Proof Notification Toast
+// Homepage & Public Shop: Real Recent Purchase Notification Toast (Bottom-Left)
 let purchasePopupTimer = null;
 let purchasePopupHideTimer = null;
 let isPopupHovered = false;
@@ -317,28 +317,27 @@ function initRecentPurchasePopup() {
     const popup = document.getElementById('recent-purchase-popup');
     if (!popup) return;
 
-    const orders = window.recentOrdersData || window.fakeOrders || [];
+    const orders = window.recentOrdersData || [];
     if (!Array.isArray(orders) || orders.length === 0) {
         popup.style.display = 'none';
         return;
     }
 
-    // Check if dismissed recently (within last 90 seconds)
+    // Check if dismissed recently (within last 1 minute)
     try {
         const dismissedUntil = parseInt(sessionStorage.getItem('ainet_popup_dismissed_until') || '0', 10);
         if (Date.now() < dismissedUntil) {
+            const remaining = dismissedUntil - Date.now();
+            clearTimeout(purchasePopupTimer);
+            purchasePopupTimer = setTimeout(initRecentPurchasePopup, Math.max(1000, remaining));
             return;
         }
     } catch (e) {}
 
-    // If there is a fresh real order (< 15 mins), prioritize showing it first
-    const freshIdx = orders.findIndex(o => o.is_fresh);
-    let orderIndex = freshIdx !== -1 ? freshIdx : Math.floor(Math.random() * orders.length);
-
-    const realisticTimePool = [5, 8, 11, 14, 17, 19, 23, 27, 34, 42, 51];
+    let orderIndex = 0;
 
     function showOrder() {
-        // If dismissed, abort
+        // If dismissed within 1 minute, abort
         try {
             const dismissedUntil = parseInt(sessionStorage.getItem('ainet_popup_dismissed_until') || '0', 10);
             if (Date.now() < dismissedUntil) {
@@ -354,8 +353,8 @@ function initRecentPurchasePopup() {
         const prodName = document.getElementById('popup-product-name');
         const timeEl = document.getElementById('popup-time');
 
-        if (avatarTxt) avatarTxt.innerText = order.initial || 'L';
-        if (custName) custName.innerText = order.name || 'L*';
+        if (avatarTxt) avatarTxt.innerText = order.initial || 'K';
+        if (custName) custName.innerText = order.name || 'Khách hàng';
         if (prodName) {
             prodName.innerText = order.product || 'Tài khoản bản quyền';
             if (order.url && order.url !== '#') {
@@ -365,35 +364,29 @@ function initRecentPurchasePopup() {
             }
         }
         
-        // If fresh real order, show its actual elapsed time. Otherwise randomize realistic time >= 5m
+        // 100% Real relative purchase time from order created_at
         if (timeEl) {
-            if (order.is_fresh && order.time) {
-                timeEl.innerText = order.time;
-            } else {
-                const randomMins = realisticTimePool[Math.floor(Math.random() * realisticTimePool.length)];
-                timeEl.innerText = (order.time && order.time.includes('phút')) ? order.time : (randomMins + ' phút trước');
-            }
+            timeEl.innerText = order.time || 'vừa xong';
         }
 
         popup.classList.add('show');
 
-        // Auto hide after 4.5 seconds (unless hovered)
+        // Auto hide after 4 seconds (unless hovered)
         clearTimeout(purchasePopupHideTimer);
         purchasePopupHideTimer = setTimeout(() => {
             if (!isPopupHovered) {
                 hideOrder();
             }
-        }, 4500);
+        }, 4000);
     }
 
     function hideOrder() {
         popup.classList.remove('show');
         orderIndex = (orderIndex + 1) % orders.length;
 
-        // Schedule next popup after a realistic delay (12 - 18 seconds)
-        const nextDelay = 12000 + Math.floor(Math.random() * 6000);
+        // 5s show lên 1 lần (5 seconds delay between popups)
         clearTimeout(purchasePopupTimer);
-        purchasePopupTimer = setTimeout(showOrder, nextDelay);
+        purchasePopupTimer = setTimeout(showOrder, 5000);
     }
 
     // Hover pause behavior
@@ -406,13 +399,13 @@ function initRecentPurchasePopup() {
         isPopupHovered = false;
         if (popup.classList.contains('show')) {
             clearTimeout(purchasePopupHideTimer);
-            purchasePopupHideTimer = setTimeout(hideOrder, 2500);
+            purchasePopupHideTimer = setTimeout(hideOrder, 2000);
         }
     });
 
-    // Start first popup 4.5s after page load
+    // Start first popup 2.5s after page load
     clearTimeout(purchasePopupTimer);
-    purchasePopupTimer = setTimeout(showOrder, 4500);
+    purchasePopupTimer = setTimeout(showOrder, 2500);
 }
 
 function closePurchasePopup(event) {
@@ -427,15 +420,15 @@ function closePurchasePopup(event) {
     clearTimeout(purchasePopupTimer);
     clearTimeout(purchasePopupHideTimer);
 
-    // Pause for 90 seconds on user close
+    // Pause for 1 minute (60s) on user close
     try {
-        sessionStorage.setItem('ainet_popup_dismissed_until', (Date.now() + 90000).toString());
+        sessionStorage.setItem('ainet_popup_dismissed_until', (Date.now() + 60000).toString());
     } catch (e) {}
 
-    // Resume after 90 seconds
+    // Resume exactly after 1 minute (60000ms)
     purchasePopupTimer = setTimeout(() => {
         initRecentPurchasePopup();
-    }, 90000);
+    }, 60000);
 }
 
 // Global Spotlight Search & Top Selling Products

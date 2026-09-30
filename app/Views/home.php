@@ -821,6 +821,3 @@
         </div>
     <?php endif; ?>
 </div>
-<script>
-    const fakeOrders = <?php echo json_encode($recentOrders); ?>;
-</script>
