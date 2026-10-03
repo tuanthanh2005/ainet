@@ -1819,11 +1819,25 @@ class HomeController extends Controller {
         $orderId = trim($_POST['order_id'] ?? '');
         $productId = trim($_POST['product_id'] ?? '');
         $rating = (int) ($_POST['rating'] ?? 5);
-        $content = trim($_POST['content'] ?? '');
+        $content = mb_substr(trim($_POST['content'] ?? ''), 0, 2000);
         $userId = $_SESSION['user']['id'];
 
-        $redirectTo = $_POST['redirect_to'] ?? '';
-        $fallbackUrl = !empty($redirectTo) ? $redirectTo : ($_SERVER['HTTP_REFERER'] ?? url('index.php?action=orderHistory'));
+        // Ngăn chặn lỗ hổng Open Redirect: chỉ cho phép URL nội bộ cùng domain
+        $rawRedirect = trim((string) ($_POST['redirect_to'] ?? ''));
+        $fallbackUrl = url('index.php?action=orderHistory');
+        if ($rawRedirect !== '') {
+            $parsedHost = parse_url($rawRedirect, PHP_URL_HOST);
+            $appHost = parse_url(URLROOT, PHP_URL_HOST);
+            if (($parsedHost === null || strcasecmp($parsedHost, (string)$appHost) === 0) && !str_starts_with($rawRedirect, '//')) {
+                $fallbackUrl = $rawRedirect;
+            }
+        } elseif (!empty($_SERVER['HTTP_REFERER'])) {
+            $refHost = parse_url($_SERVER['HTTP_REFERER'], PHP_URL_HOST);
+            $appHost = parse_url(URLROOT, PHP_URL_HOST);
+            if (($refHost === null || strcasecmp($refHost, (string)$appHost) === 0) && !str_starts_with($_SERVER['HTTP_REFERER'], '//')) {
+                $fallbackUrl = $_SERVER['HTTP_REFERER'];
+            }
+        }
 
         if (!$orderId || !$productId || $rating < 1 || $rating > 5) {
             $_SESSION['flash_error'] = 'Thông tin đánh giá không hợp lệ.';
@@ -1873,7 +1887,7 @@ class HomeController extends Controller {
         }
 
         $reviewId = (int) ($_POST['review_id'] ?? 0);
-        $content = trim($_POST['content'] ?? '');
+        $content = mb_substr(trim($_POST['content'] ?? ''), 0, 2000);
         $currentUser = $_SESSION['user'] ?? null;
 
         if (!$reviewId || $content === '') {

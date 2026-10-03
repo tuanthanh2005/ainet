@@ -44,10 +44,18 @@ class CheckoutController extends Controller {
     // Hàm tạo đơn hàng và hiển thị trang thanh toán
     public function checkout() {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $productId = $_POST['product_id'] ?? '';
+            $productId = trim((string) ($_POST['product_id'] ?? ''));
             $variantIdx = (int) ($_POST['variant_idx'] ?? 0);
-            $quantity = max(1, (int) ($_POST['quantity'] ?? 1));
-            $email = $_POST['email'] ?? '';
+            $quantity = min(100, max(1, (int) ($_POST['quantity'] ?? 1)));
+
+            // Bắt buộc sử dụng email của tài khoản đang đăng nhập để tránh việc giả mạo customer_email bằng Postman
+            $sessionEmail = trim((string) ($_SESSION['user']['email'] ?? ''));
+            $email = filter_var($sessionEmail, FILTER_VALIDATE_EMAIL) ? $sessionEmail : trim((string) ($_POST['email'] ?? ''));
+            if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                $_SESSION['flash_error'] = 'Địa chỉ email người dùng không hợp lệ.';
+                header('Location: ' . url());
+                exit;
+            }
 
             $product = Product::getById($productId);
             if (!$product) die("Sản phẩm không tồn tại.");
@@ -61,8 +69,8 @@ class CheckoutController extends Controller {
                 exit;
             }
 
-            $phone = trim($_POST['phone'] ?? '');
-            $contactSocial = trim($_POST['contact_social'] ?? '');
+            $phone = mb_substr(trim((string) ($_POST['phone'] ?? '')), 0, 50);
+            $contactSocial = mb_substr(trim((string) ($_POST['contact_social'] ?? '')), 0, 100);
 
             if ($contactSocial === '') {
                 $_SESSION['flash_error'] = 'Vui lòng nhập Zalo hoặc Telegram để admin liên hệ gửi thủ công.';
@@ -71,9 +79,14 @@ class CheckoutController extends Controller {
             }
 
             $amount = (float)($variant['price'] ?? 0) * $quantity;
-            $variantName = $variant['name'] ?? 'Mặc định';
+            $variantName = mb_substr((string) ($variant['name'] ?? 'Mặc định'), 0, 100);
             
             $orderId = 'AC' . date('ymd') . strtoupper(substr(uniqid(), -4));
+
+            $note = !empty($_POST['note']) ? mb_substr(trim((string) $_POST['note']), 0, 1000) : null;
+            $upgradeEmail = !empty($_POST['upgrade_email']) ? mb_substr(trim((string) $_POST['upgrade_email']), 0, 190) : null;
+            $upgradePass = !empty($_POST['upgrade_pass']) ? mb_substr(trim((string) $_POST['upgrade_pass']), 0, 255) : null;
+            $upgradeLink = !empty($_POST['upgrade_link']) ? mb_substr(trim((string) $_POST['upgrade_link']), 0, 500) : null;
             
             $orderData = [
                 'id' => $orderId,
@@ -86,10 +99,10 @@ class CheckoutController extends Controller {
                 'customer_email' => $email,
                 'phone' => $phone,
                 'contact_social' => $contactSocial,
-                'note' => $_POST['note'] ?? '',
-                'upgrade_email' => $_POST['upgrade_email'] ?? null,
-                'upgrade_pass' => $_POST['upgrade_pass'] ?? null,
-                'upgrade_link' => $_POST['upgrade_link'] ?? null
+                'note' => $note,
+                'upgrade_email' => $upgradeEmail,
+                'upgrade_pass' => $upgradePass,
+                'upgrade_link' => $upgradeLink
             ];
             
             if (Order::create($orderData)) {
@@ -450,7 +463,7 @@ class CheckoutController extends Controller {
         $legacyToken = trim((string) ($settings['sepay_token'] ?? ''));
 
         if ($apiKey === '' && $legacyToken === '') {
-            return true;
+            return false;
         }
 
         $headers = function_exists('getallheaders') ? getallheaders() : [];
